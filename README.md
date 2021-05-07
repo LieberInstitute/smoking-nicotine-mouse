@@ -1,2 +1,5 @@
 # smokingMouse_Indirects
-Smoking mouse project 
+
+# Internal
+
+JHPCE path: `/dcl01/lieber/ajaffe/lab/smokingMouse_Indirects`
