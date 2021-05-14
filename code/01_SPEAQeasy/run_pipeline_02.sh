@@ -21,7 +21,8 @@ nextflow SPEAQeasy/main.nf \
     -w "${base_dir}/processed-data/01_SPEAQeasy/work" \
     --input "${base_dir}/processed-data/01_SPEAQeasy" \
     --output "${base_dir}/processed-data/01_SPEAQeasy/pipeline_output" \
-    -profile jhpce
+    -profile jhpce \
+    -resume
 
 #  Produces a report for each sample tracing the pipeline steps
 #  performed (can be helpful for debugging).
