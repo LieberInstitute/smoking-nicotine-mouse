@@ -6,7 +6,11 @@
 ### libraries
 library(SummarizedExperiment)
 library(here)
-library("sessioninfo")
+library(sessioninfo)
+library(recount)
+library(jaffelab)
+library(ggplot2)
+
 
 ## Load objects
 load(here("processed-data","01_SPEAQeasy", "pipeline_output", "count_objects",
@@ -59,6 +63,74 @@ colData(rse_gene) <- merge(colData(rse_gene), pheno, by="SAMPLE_ID")
 colData(rse_exon) <- merge(colData(rse_exon), pheno, by="SAMPLE_ID")
 colData(rse_jx) <- merge(colData(rse_jx), pheno, by="SAMPLE_ID")
 colData(rse_tx) <- merge(colData(rse_tx), pheno, by="SAMPLE_ID")
+
+#set length to 100 Jx
+rowData(rse_jx)$Length <- 100
+
+#Build a matrix with the expression values in RPKM format 
+exprs <- list(
+  "Gene" = recount::getRPKM(rse_gene, length_var="Length"),
+  "Exon" = recount::getRPKM(rse_exon, length_var="Length"),
+  "Jx" = recount::getRPKM(rse_jx, length_var= "Length"),
+  "Tx" = assays(rse_tx)$tpm 
+)
+
+
+
+## Identify potential cutoffs
+seed <- 20191217
+seeds <- seed + 0:3
+names(seeds) <- names(exprs)
+cutoffs <- sapply(names(exprs), function(type) {
+  message(type)
+  pdf(paste0('suggested_expr_cutoffs_', tolower(type), '.pdf'), width = 12)
+  cuts <- jaffelab::expression_cutoff(exprs[[type]], seed = seeds[type])
+  message(paste(cuts, collapse = ' '))
+  cut <- max(cuts)
+  dev.off()
+  return(cut)
+})
+
+# Gene
+# 2021-06-02 16:53:04 the suggested expression cutoff is 0.16
+# 0.18 0.14
+# Exon
+# 2021-06-02 16:53:27 the suggested expression cutoff is 0.2
+# 0.23 0.17
+# Jx
+# 2021-06-02 16:53:54 the suggested expression cutoff is 0.16
+# 0.14 0.17
+# Tx
+# 2021-06-02 16:53:59 the suggested expression cutoff is 0.23
+# 0.25 0.22
+
+cutoffs
+# Gene Exon   Jx   Tx 
+# 0.18 0.23 0.17 0.25 
+
+
+### Filter RSEs
+means <- lapply(exprs, rowMeans)
+
+rowRanges(rse_gene)$meanExprs <- means[['Gene']]
+rowRanges(rse_gene)$passExprsCut <- means[['Gene']] > cutoffs['Gene']
+rse_gene <- rse_gene[rowRanges(rse_gene)$passExprsCut]
+save(rse_gene, file = 'rse_gene.Rdata')
+
+rowRanges(rse_exon)$meanExprs <- means[['Exon']]
+rowRanges(rse_exon)$passExprsCut <- means[['Exon']] > cutoffs['Exon']
+rse_exon <- rse_exon[rowRanges(rse_exon)$passExprsCut]
+save(rse_exon, file = 'rse_exon.Rdata')
+
+rowRanges(rse_jx)$meanExprs <- means[['Jx']]
+rowRanges(rse_jx)$passExprsCut <- means[['Jx']] > cutoffs['Jx'] 
+save(rse_jx, file = 'rse_jx.Rdata')
+
+rowRanges(rse_tx)$meanExprs <- means[['Tx']]
+rowRanges(rse_tx)$passExprsCut <- means[['Tx']] > cutoffs['Tx']
+rse_tx <- rse_tx[rowRanges(rse_tx)$passExprsCut]
+save(rse_tx, file = 'rse_tx.Rdata')
+
 
 ## Reproducibility information
 print('Reproducibility information:')
