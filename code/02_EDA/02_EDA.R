@@ -288,7 +288,6 @@ dev.off()
 
 
 # Explore gene expression variability: model for each gene
-## is this also performed for exons, jx and tx?
 
 ## Diagnostic plots for quality control
 mito= subsets=list(Mito=grep("Mt_", rowData(rse_gene)$gene_type))
@@ -303,8 +302,6 @@ ggplot(data =coldata, aes(x=sum, y=detected, color= Tissue.x))+
 ggplot(data =coldata, aes(x=sum, y=subsets_Mito_percent, color= Tissue.x)) + 
   geom_point() 
 
-### Highest expressed genes
-
 ### Explanatory Variables
 rse_gene <- logNormCounts(rse_gene)
 vars <- getVarianceExplained(rse_gene, 
@@ -316,6 +313,7 @@ dev.off()
 
 
 ## Applying variancePartition 
+## UNFINISHED code taken from http://bioconductor.org/packages/release/bioc/vignettes/variancePartition/inst/doc/variancePartition.pdf
 
 ### identify genes that pass expression cutoff
 geneCounts <- assays(rse_gene)$counts
@@ -328,30 +326,20 @@ gExpr <- calcNormFactors(gExpr)
 design <- model.matrix(~ Tissue.x + Age.x, data=coldata)
 ### Estimate precision weights for each gene and sample
 vobjGenes <- voom(gExpr, design)
-#form <- ~ (1|Individual) + (1|Tissue) + (1|Batch) + Age
-### Variance partition
-varPart <- fitExtractVarPartModel(vobjGenes, form, coldata)
+
 
 
 
 # Explore covariates
+## UNFINISHED code taken from https://github.com/LieberInstitute/brainseq_phase2/blob/master/expr_cutoff/explore_metrics.R
+
 pdf(here("plots", "02_EDA", "explore_metrics.pdf"))
-# for(var in c('totalAssignedGene', 'mitoRate', 'overallMapRate', #RIN does not exist
-#              'ERCCsumLogErr', 'rRNA_rate')) {
-#   boxplot(mean(colData(rse_gene)[, var]) ~ colData(rse_gene)$Tissue.x, 
-#           ylab = paste('mean', var), xlab = 'Tissue', col = 'light blue', 
-#           #main = paste('p-value:', signif(t.test(mean(colData(rse_gene)[, var]) ~ colData(rse_gene)$Tissue.x)$p.value, 3))
-#           )
-# }
 
-ggplot(data =coldata, aes(x=mean(colData(rse_gene)$mitoRate), 
-                          y=mean(colData(rse_gene)$rRNA_rate), color= Tissue.x)) + geom_point() 
-ggplot(data =coldata, aes(x=mean(colData(rse_gene)$mitoRate), y=mean(colData(rse_gene)$ERCCsumLogErr), color= Tissue.x)) + 
+ggplot(data =coldata, aes(x=colData(rse_gene)$mitoRate, y=colData(rse_gene)$rRNA_rate, color= Tissue.x)) + 
   geom_point() 
-ggplot(data =coldata, aes(x=mean(colData(rse_gene)$rRNA_rate), y=mean(colData(rse_gene)$ERCCsumLogErr), color= Tissue.x)) + 
+ggplot(data =coldata, aes(x=colData(rse_gene)$mitoRate, y=colData(rse_gene)$ERCCsumLogErr, color= Tissue.x)) + 
   geom_point() 
-
-# boxplot(mean(colData(rse_gene)$mitoRate) ~ factor(mean(colData(rse_gene)$ERCCsumLogErr) > -200) * colData(rse_gene)$Tissue.x, col = 'light blue', ylab = 'mean mitoRate', xlab = 'mean ERCCsumLogErr > -200 by region')
-# boxplot(mean(colData(rse_gene)$rRNA_rate) ~ factor(mean(colData(rse_gene)$ERCCsumLogErr) > -200) * colData(rse_gene)$Tissue.x, col = 'light blue', ylab = 'mean rRNA_rate', xlab = 'mean ERCCsumLogErr > -200 by region')
+ggplot(data =coldata, aes(x=colData(rse_gene)$rRNA_rate, y=colData(rse_gene)$ERCCsumLogErr, color= Tissue.x)) + 
+  geom_point() 
 
 dev.off()
