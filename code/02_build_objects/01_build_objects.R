@@ -92,19 +92,22 @@ norm_counts <- list(
 length(which(filterByExpr(norm_counts[["Gene"]])))
 # 8876
 gene_norm_counts<-norm_counts[["Gene"]][which(filterByExpr(norm_counts[["Gene"]])),]
-save(gene_norm_counts, file = 'norm_gene.Rdata')
+rse_gene_norm<-rse_gene[rownames(gene_norm_counts)]
+save(rse_gene_norm, file = 'processed-data/02_build_objects/rse_gene_norm.Rdata')
 
 length(which(filterByExpr(norm_counts[["Exon"]])))
 # 10538
 exon_norm_counts<-norm_counts[["Exon"]][which(filterByExpr(norm_counts[["Exon"]])),]
-save(exon_norm_counts, file = 'norm_exon.Rdata')
+rse_exon_norm<-rse_exon[rownames(exon_norm_counts)]
+save(rse_exon_norm, file = 'processed-data/02_build_objects/rse_exon_norm.Rdata')
 
 length(which(filterByExpr(norm_counts[["Jx"]])))
 # 11535
 jx_norm_counts<-norm_counts[["Jx"]][which(filterByExpr(norm_counts[["Jx"]])),]
-save(jx_norm_counts, file = 'norm_jx.Rdata')
+rse_jx_norm<-rse_jx[rownames(jx_norm_counts)]
+save(rse_jx_norm, file = 'processed-data/02_build_objects/rse_jx_norm.Rdata')
 
-## Filter Transcipts
+## Filter TPM
 ## Identify potential cutoffs
 seed <- 20191217
 expression_cutoff(norm_counts[["Tx"]], seed = seed, k=2)
@@ -115,7 +118,9 @@ cutoff<-0.6
 length(which(rowMeans(norm_counts[["Tx"]]) > cutoff))
 # 32514
 tx_norm_counts<-norm_counts[["Tx"]][rowMeans(norm_counts[["Tx"]]) > cutoff,]
-save(tx_norm_counts, file = 'norm_tx.Rdata')
+rse_tx_norm<-rse_tx[rownames(tx_norm_counts)]
+save(rse_tx_norm, file = 'processed-data/02_build_objects/rse_tx_norm.Rdata')
+
 
 
 ## Reproducibility information
