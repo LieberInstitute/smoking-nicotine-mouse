@@ -11,10 +11,10 @@ library(sessioninfo)
 
 # 1. Data load, exploration and preparation
 ## Load objects
-load("Data/rse_exon_smoking_mouse_n208.Rdata")
-load("Data/rse_gene_smoking_mouse_n208.Rdata")
-load("Data/rse_jx_smoking_mouse_n208.Rdata")
-load("Data/rse_tx_smoking_mouse_n208.Rdata")
+load("rse_exon_smoking_mouse_n208.Rdata")
+load("rse_gene_smoking_mouse_n208.Rdata")
+load("rse_jx_smoking_mouse_n208.Rdata")
+load("rse_tx_smoking_mouse_n208.Rdata")
 
 ## Samples' info
 pheno<-read.table(here("raw-data","Maternal_Smoking_pheno.txt"))
