@@ -10,6 +10,8 @@ rse_dir = here("processed-data/01_SPEAQeasy/pipeline_output/count_objects")
 man = read.table(man_path)
 fq_r1 = man[,1]
 
+#   For the first read of each sample, grab the first sequence header, which
+#   contains information about the flowcell for each sample
 headers = sapply(
     fq_r1,
     function(x) {
@@ -17,11 +19,14 @@ headers = sapply(
     }
 )
 
+#   Grab only the flowcell, discarding other information
 flowcells = ss(headers, ':', 3)
 
+#   There are 6 unique flowcells used in the experiment
 print('Unique flowcell IDs used in this experiment:')
 print(unique(flowcells))
 
+#   Load RSE objects and add flowcell as a column to the colData
 rse_gene_path = here(rse_dir, "rse_gene_smoking_mouse_n208.Rdata")
 rse_exon_path = here(rse_dir, "rse_exon_smoking_mouse_n208.Rdata")
 rse_jx_path = here(rse_dir, "rse_jx_smoking_mouse_n208.Rdata")
