@@ -401,3 +401,175 @@ for (pheno_var1 in c("Age", "Tissue", "plate","Expt", "Sex", "Group", "Pregnancy
           samples_pheno_afterQC(pheno_var1, pheno_var2)}
       }
 } 
+
+
+
+
+
+# 3. Explore sample effects
+# 3.1 Dimensionality Reduction (PCA)
+### 3.1.1 Explore Samples' expression variation
+
+## Generate PCA data
+PCA<-function(tissue, type, age){
+  if (is.null(age)) {
+    RSE<-eval(parse_expr(paste("rse", type, tissue, "qc", sep="_"))) }
+  else {
+    RSE<-eval(parse_expr(paste("rse", type, tissue, age, "qc", sep="_")))}
+  pca<-prcomp(t(assay(RSE)))
+  # % of the variance explained by each PC
+  pca_vars<- getPcaVars(pca)
+  pca_vars_labs<- paste0(
+      "PC", seq(along = pca_vars), ": ",
+      pca_vars, "% Var Expl")
+  
+  ## Join PCs and samples' info 
+  pca_data<-cbind(pca$x,colData(RSE))
+  ## Add samples' phenotypes
+  pca_data<-as.data.frame(pca_data)
+  return(list(pca_data, pca_vars_labs))
+}
+
+
+## PCx vs PCy Plots 
+PCx_vs_PCy <- function (PCx, PCy, pheno_var, tissue, type, age) {
+  pca_data<-PCA(tissue, type, age)[[1]]
+  pca_vars<-PCA(tissue, type, age)[[2]]
+  if (is.null(age)){
+    title=paste("PCA of", type, "data, colored by", pheno_var, "in", tissue)
+  }
+  else {
+    title=paste("PCA of", type, "data, colored by", pheno_var, "in", age, "and", tissue)
+  }
+  plot=ggplot(data=pca_data, 
+       aes(x=eval(parse_expr(PCx)),y=eval(parse_expr(PCy)),
+           color=eval(parse_expr(pheno_var))) )+ 
+       theme(legend.position="right", plot.title = element_text (hjust = 0.5, size = 10), 
+            plot.margin=unit (c (1,1.5,1,1), 'cm')) +
+       geom_point() + 
+       ggtitle(title) +
+       labs(x= pca_vars[strtoi(gsub("PC","", PCx))], y = pca_vars[strtoi(gsub("PC","", PCy))],  
+            color=pheno_var)
+  return(plot)
+}
+
+## Plots 
+plot_PCAs<-function(type, tissue, age){
+  ## Plot for type and tissue
+  if (is.null(age)){
+      for (PCs in list(c("PC1", "PC2"), c("PC1", "PC3"), c("PC2", "PC3"))){
+      plots<-list()
+      i=1
+        for (pheno_var in c("Age", "plate","Expt", "Sex", "Group", "Pregnancy", "medium", "flowcell")){
+           p<-PCx_vs_PCy(PCs[1], PCs[2], pheno_var, tissue, type, age)
+           plots[[i]]=p
+           i=i+1
+        }
+      plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]], plots[[6]], plots[[7]], plots[[8]],
+                nrow = 2)
+      ## Save plots
+      ggsave(paste("plots/03_EDA/03_PCA_MDS/",PCs[1],"_vs_",PCs[2],"_", type, "_", tissue ,".pdf", sep=""), 
+             width = 65, height = 25, units = "cm")
+    }
+  }
+  ## Plot for type and age
+  else {
+      plots<-list()
+      i=1
+      for (pheno_var in c("Age", "plate","Expt", "Sex", "Group", "Pregnancy", "medium", "flowcell")){
+         p<-PCx_vs_PCy("PC1", "PC2", pheno_var, tissue, type, age)
+         plots[[i]]=p
+         i=i+1
+      }
+      plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]], plots[[6]], plots[[7]], plots[[8]],
+                nrow = 2)
+      ## Save plots
+      ggsave(paste("plots/03_EDA/03_PCA_MDS/PC1_vs_PC2_", type, "_", tissue ,"_", age, ".pdf", sep=""), 
+             width = 65, height = 25, units = "cm")
+    }
+}
+
+## Plot for type and tissue
+plot_PCAs("gene", "brain", NULL)
+plot_PCAs("exon", "brain", NULL)
+plot_PCAs("tx", "brain", NULL)
+plot_PCAs("jx", "brain", NULL)
+plot_PCAs("gene", "blood", NULL)
+
+
+## Rare samples in brain plots
+pca_data_gene_brain[which.min(pca_data_gene_brain$PC2), "SAMPLE_ID"]
+# "Sample_P12_fc2_022019"
+pca_data_exon_brain[which.max(pca_data_exon_brain$PC2), "SAMPLE_ID"]
+# "Sample_P2_fe2_022019"
+pca_data_tx_brain[which.min(pca_data_tx_brain$PC2), "SAMPLE_ID"]
+# "Sample_P2_fe2_022019"
+pca_data_jx_brain[which.max(pca_data_jx_brain$PC1), "SAMPLE_ID"]
+# "Sample_P2_fe2_022019"
+
+
+## Explore Sample_P12_fc2_022019 info:
+colData(rse_gene_brain_qc)[which(rse_gene_brain_qc$SAMPLE_ID=="Sample_P12_fc2_022019"),
+                          c("mitoRate", "rRNA_rate", "totalAssignedGene", "overallMapRate", 
+                            "ERCCsumLogErr", "sum", "Age", "Sex")]
+#    mitoRate rRNA_rate totalAssignedGene overallMapRate ERCCsumLogErr       sum         Age         Sex
+#   <numeric> <numeric>         <numeric>      <numeric>     <numeric> <numeric> <character> <character>
+#   0.0349937 0.0342992          0.764755         0.9609      -68.3041    869084         Pup           M
+
+## This sample has the max rRNA rate of all brain samples and min overall mapping rate 
+colData(rse_gene_brain)[which.max(rse_gene_brain$rRNA_rate),"SAMPLE_ID"]
+# "Sample_P12_fc2_022019"
+colData(rse_gene_brain_qc)[which.min(rse_gene_brain_qc$overallMapRate),"SAMPLE_ID"]
+# "Sample_P12_fc2_022019"
+
+
+## Explore Sample_P2_fe2_022019 info:
+colData(rse_gene_brain_qc)[which(rse_gene_brain_qc$SAMPLE_ID=="Sample_P2_fe2_022019"),
+                          c("mitoRate", "rRNA_rate", "totalAssignedGene", "overallMapRate", 
+                            "ERCCsumLogErr", "sum", "Age", "Sex")]
+#    mitoRate  rRNA_rate totalAssignedGene overallMapRate ERCCsumLogErr       sum         Age         Sex
+#   <numeric>  <numeric>         <numeric>      <numeric>     <numeric> <numeric> <character> <character>
+#   0.0304307 0.00612927          0.734151         0.9787      -50.9228   1002923         Pup           M
+
+## This sample has the max number of total read counts in pups
+colData(rse_gene_brain_pups_qc)[which.max(rse_gene_brain_pups_qc$sum),"SAMPLE_ID"]
+# "Sample_P2_fe2_022019"
+
+
+
+## Remove those pup samples
+for (sample in c("Sample_P12_fc2_022019","Sample_P2_fe2_022019" )){
+  
+  rse_gene_brain_qc<-rse_gene_brain_qc[,-which(rse_gene_brain_qc$SAMPLE_ID==sample)]
+  rse_gene_brain_pups_qc<-rse_gene_brain_pups_qc[,-which(rse_gene_brain_pups_qc$SAMPLE_ID==sample)]
+  rse_exon_brain_qc<-rse_exon_brain_qc[,-which(rse_exon_brain_qc$SAMPLE_ID==sample)]
+  rse_exon_brain_pups_qc<-rse_exon_brain_pups_qc[,-which(rse_exon_brain_pups_qc$SAMPLE_ID==sample)]
+  rse_tx_brain_qc<-rse_tx_brain_qc[,-which(rse_tx_brain_qc$SAMPLE_ID==sample)]
+  rse_tx_brain_pups_qc<-rse_tx_brain_pups_qc[,-which(rse_tx_brain_pups_qc$SAMPLE_ID==sample)]
+  rse_jx_brain_qc<-rse_jx_brain_qc[,-which(rse_jx_brain_qc$SAMPLE_ID==sample)]
+  rse_jx_brain_pups_qc<-rse_jx_brain_pups_qc[,-which(rse_jx_brain_pups_qc$SAMPLE_ID==sample)]
+}
+
+## Plot samples of brain again without those samples
+plot_PCAs("gene", "brain", NULL)
+plot_PCAs("exon", "brain", NULL)
+plot_PCAs("tx", "brain", NULL)
+plot_PCAs("jx", "brain", NULL)
+
+## Plot samples separated by age (without those samples)
+plot_PCAs("gene", "brain", "adults")
+plot_PCAs("gene", "brain", "pups")
+plot_PCAs("exon", "brain", "adults")
+plot_PCAs("exon", "brain", "pups")
+plot_PCAs("tx", "brain", "adults")
+plot_PCAs("tx", "brain", "pups")
+plot_PCAs("jx", "brain", "adults")
+plot_PCAs("jx", "brain", "pups")
+
+
+
+### 3.1.2 Explore samples' gene expression variation across phenotypes by Group
+
+
+
+
