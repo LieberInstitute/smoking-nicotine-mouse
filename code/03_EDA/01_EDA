@@ -1,1 +1,68 @@
+# Exploratory Data Analysis
 
+## Load libraries and data 
+library(SummarizedExperiment)
+library(recount)
+library(edgeR)
+library(jaffelab)
+library(here)
+library(ggplot2)
+library(rlang)
+library(scater)
+library(cowplot)
+library(variancePartition)
+library(gridExtra)
+library(sessioninfo)
+
+load(here("processed-data/02_build_objects/rse_gene_brain.Rdata"))
+load(here("processed-data/02_build_objects/rse_gene_blood.Rdata"))
+load(here("processed-data/02_build_objects/rse_exon_brain.Rdata"))
+load(here("processed-data/02_build_objects/rse_tx_brain.Rdata"))
+load(here("processed-data/02_build_objects/rse_jx_brain.Rdata"))
+
+## 1. Study design 
+## Number of samples of each pair of phenotypes
+samples_pheno <- function(pheno_var1, pheno_var2){
+    ## Pheno variables levels
+    levels_var1<-sort(unique(pheno[,pheno_var1]))
+    levels_var2<-sort(unique(pheno[,pheno_var2]))
+    for (level1 in levels_var1){
+        for (level2 in levels_var2){
+            print(paste("Number of samples of (", pheno_var1, ") ", level1, " and (", pheno_var2, ") ", level2, ": ", 
+                        length(which(pheno[,pheno_var1]==level1 & pheno[,pheno_var2]==level2)), sep=""))
+        }
+    }
+}
+
+## All pairs of phenotypes
+vars1<-vector()
+`%nin%` = Negate(`%in%`)
+for (pheno_var1 in c("Age", "Tissue", "plate", "medium","Expt", "Sex", "Group", "Pregnancy")){
+    for (pheno_var2 in c("Age", "Tissue", "plate", "medium","Expt", "Sex", "Group", "Pregnancy")){
+        if (pheno_var1!=pheno_var2 & pheno_var2 %nin% vars1){
+            vars1<-append(vars1, pheno_var1)
+            samples_pheno(pheno_var1, pheno_var2)}
+    }
+} 
+
+three_pheno <- function(pheno_var1, pheno_var2, pheno_var3){
+  ## Pheno variables levels
+    levels_var1<-sort(unique(pheno[,pheno_var1]))
+    levels_var2<-sort(unique(pheno[,pheno_var2]))
+    levels_var3<-sort(unique(pheno[,pheno_var3]))
+    for (level1 in levels_var1){
+      for (level2 in levels_var2){
+        for (level3 in levels_var3){
+          print(paste("Number of samples of (", pheno_var1, ") ", level1, ", (", pheno_var2, ") ", level2, 
+                " and (", pheno_var3, ") ", level3, ": ", length(which(pheno[,pheno_var1]==level1 &
+                pheno[,pheno_var2]==level2 & pheno[,pheno_var3]==level3)), sep=""))
+        }
+      }
+    }
+}
+
+## Number of samples 
+three_pheno("Pregnancy", "Age", "Tissue")
+three_pheno("Pregnancy", "Age", "Group")
+three_pheno("Tissue", "Expt", "Group")
+three_pheno("Pregnancy", "Expt", "Group")
