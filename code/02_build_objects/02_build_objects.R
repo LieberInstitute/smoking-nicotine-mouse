@@ -87,10 +87,11 @@ length(which(assay(rse_jx)==0))*100/(dim(rse_jx)[1]*dim(rse_jx)[2])
 # 82.34045
 
 ## Transform read counts to CPM
-assays(rse_gene, withDimnames=FALSE)$norm_counts <- edgeR::cpm(calcNormFactors(rse_gene, method = "TMM"))
-assays(rse_exon, withDimnames=FALSE)$norm_counts<- edgeR::cpm(calcNormFactors(rse_exon, method = "TMM"))
+## With log2(CPM + 0.5) they are closer to a Norm distribution
+assays(rse_gene, withDimnames=FALSE)$norm_counts <- edgeR::cpm(calcNormFactors(rse_gene, method = "TMM"), log = TRUE, prior.count = 0.5)
+assays(rse_exon, withDimnames=FALSE)$norm_counts<- edgeR::cpm(calcNormFactors(rse_exon, method = "TMM"), log = TRUE, prior.count = 0.5)
 ## TMMwsp method for >80% of zeros
-assays(rse_jx, withDimnames=FALSE)$norm_counts<- edgeR::cpm(calcNormFactors(rse_jx, method = "TMMwsp"))
+assays(rse_jx, withDimnames=FALSE)$norm_counts<- edgeR::cpm(calcNormFactors(rse_jx, method = "TMMwsp"), log = TRUE, prior.count = 0.5)
 ## Scale TPM (Transcripts per million)
 assays(rse_tx)$norm_tpm<-log2(assays(rse_tx)$tpm + 0.5)
 
