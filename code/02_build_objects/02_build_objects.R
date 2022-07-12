@@ -76,6 +76,7 @@ colData(rse_tx)<-merge(colData(rse_tx), pheno, by="SAMPLE_ID")
 
 
 
+
 ## 1.2 Data transformation
 ## Data normalization
 
@@ -106,6 +107,7 @@ assays(rse_tx)$norm_tpm<-log2(assays(rse_tx)$tpm + 0.5)
 
 
 
+
 ## Compute QC metrics for posterior QCA at gene level
 ## Mt and ribosomal genes 
 subsets=list(Mito=which(seqnames(rse_gene)=="chrM"), 
@@ -115,26 +117,28 @@ rse_gene <-addPerCellQC(rse_gene, subsets)
 
 
 
+
 ## 1.3 Data filtering 
-## Retain genes, exons and jx with k CPM in at least n samples
-rse_gene_norm<-rse_gene[which(filterByExpr(assays(rse_gene)$norm_counts)),]
-assay(rse_gene_norm)<-assays(rse_gene_norm)$norm_counts
-dim(rse_gene_norm)
-# 8876  208
-save(rse_gene_norm, file = 'processed-data/02_build_objects/rse_gene_norm.Rdata')
+## Feature filtering based on counts
 
-rse_exon_norm<-rse_exon[which(filterByExpr(assays(rse_exon)$norm_counts)),]
-assay(rse_exon_norm)<-assays(rse_exon_norm)$norm_counts
-dim(rse_exon_norm)
-# 10538   208
-save(rse_exon_norm, file = 'processed-data/02_build_objects/rse_exon_norm.Rdata')
+## Add design matrix to account for group differences
+group <- factor(paste(rse_gene$Tissue, rse_gene$Age, rse_gene$Expt, rse_gene$Group, sep="."))
+design <- model.matrix(~0 + group) 
 
-rse_jx_norm<-rse_jx[which(filterByExpr(assays(rse_jx)$norm_counts)),]
-assay(rse_jx_norm)<-assays(rse_jx_norm)$norm_counts
-dim(rse_jx_norm)
-# 11535   208
-save(rse_jx_norm, file = 'processed-data/02_build_objects/rse_jx_norm.Rdata')
+## Filter genes with k CPM in at least n samples
+genes_kept<-rse_gene[which(filterByExpr(assay(rse_gene), design=design)),]
+dim(genes_kept)
+# 20891 208 
 
+## Filter exons
+exons_kept<-rse_exon[which(filterByExpr(assay(rse_exon), design=design)),]
+dim(exons_kept)
+# 298076    208
+
+## Filter junctions
+jx_kept<-rse_jx[which(filterByExpr(assay(rse_jx), design=design)),]
+dim(jx_kept)
+# 191553   208
 
 ## Filter TPM
 ## Identify potential cutoffs
@@ -145,12 +149,9 @@ expression_cutoff(assays(rse_tx)$tpm, seed = seed, k=2)
 #                 0.29                 0.27 
 cutoff<-0.28
 ## Transcripts that pass cutoff 
-## Save filtered and scaled data
-rse_tx_norm<-rse_tx[rowMeans(assays(rse_tx)$tpm) > cutoff,]
-assay(rse_tx_norm)<-assays(rse_tx_norm)$norm_tpm
-dim(rse_tx_norm)
+tx_kept<-rse_tx[rowMeans(assays(rse_tx)$tpm) > cutoff,]
+dim(tx_kept)
 # 58693   208
-save(rse_tx_norm, file = 'processed-data/02_build_objects/rse_tx_norm.Rdata')
 
 
 
