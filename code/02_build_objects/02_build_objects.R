@@ -10,6 +10,7 @@ library(edgeR)
 library(jaffelab)
 library(here)
 library(WGCNA)
+library(scater)
 library(sessioninfo)
 
 
@@ -90,26 +91,27 @@ length(which(assay(rse_jx)==0))*100/(dim(rse_jx)[1]*dim(rse_jx)[2])
 ## With log2(CPM + 0.5) they are closer to a Norm distribution
 ## Genes
 assays(rse_gene, withDimnames=FALSE)$norm_counts <- edgeR::cpm(calcNormFactors(rse_gene, method = "TMM"), log = TRUE, prior.count = 0.5)
-## RSE with norm counts as main assay
-rse_gene_norm<-rse_gene
-assay(rse_gene_norm)<-assays(rse_gene_norm)$norm_counts
 
 ## Exons
 assays(rse_exon, withDimnames=FALSE)$norm_counts<- edgeR::cpm(calcNormFactors(rse_exon, method = "TMM"), log = TRUE, prior.count = 0.5)
-rse_exon_norm<-rse_exon
-assay(rse_exon_norm)<-assays(rse_exon_norm)$norm_counts
 
 ## Junctions
 ## TMMwsp method for >80% of zeros
 assays(rse_jx, withDimnames=FALSE)$norm_counts<- edgeR::cpm(calcNormFactors(rse_jx, method = "TMMwsp"), log = TRUE, prior.count = 0.5)
-rse_jx_norm<-rse_jx
-assay(rse_jx_norm)<-assays(rse_jx_norm)$norm_counts
 
 ## Transcripts
-## Scale TPM (Transcripts per million)
+## Scale TPM (Transcripts per million) to log2(TPM + 0.5)
 assays(rse_tx)$norm_tpm<-log2(assays(rse_tx)$tpm + 0.5)
-rse_tx_norm<-rse_tx
-assay(rse_tx_norm)<-assays(rse_tx_norm)$norm_counts
+
+
+
+
+## Compute QC metrics for posterior QCA at gene level
+## Mt and ribosomal genes 
+subsets=list(Mito=which(seqnames(rse_gene)=="chrM"), 
+             Ribo=grep("rRNA",rowData(rse_gene)$gene_type))
+## Add general qc-stats based on counts
+rse_gene <-addPerCellQC(rse_gene, subsets)
 
 
 
