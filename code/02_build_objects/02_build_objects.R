@@ -154,6 +154,26 @@ dim(tx_kept)
 # 58693   208
 
 
+## Filtered and normalized data
+## Genes
+rse_gene_norm<-genes_kept
+## RSE with norm counts as main assay
+assay(rse_gene_norm)<-assays(rse_gene_norm)$norm_counts
+save(rse_gene_norm, file = 'processed-data/02_build_objects/rse_gene_norm.Rdata')
+## Exons
+rse_exon_norm<-exons_kept
+assay(rse_exon_norm)<-assays(rse_exon_norm)$norm_counts
+save(rse_exon_norm, file = 'processed-data/02_build_objects/rse_exon_norm.Rdata')
+## Junctions
+rse_jx_norm<-jx_kept
+assay(rse_jx_norm)<-assays(rse_jx_norm)$norm_counts
+save(rse_jx_norm, file = 'processed-data/02_build_objects/rse_jx_norm.Rdata')
+## Transcripts
+rse_tx_norm<-tx_kept
+assay(rse_tx_norm)<-assays(rse_tx_norm)$norm_tpm
+save(rse_tx_norm, file = 'processed-data/02_build_objects/rse_tx_norm.Rdata')
+
+
 
 ## 1.4 Data separation
 ## Brain data
