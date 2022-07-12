@@ -91,18 +91,18 @@ length(which(assay(rse_jx)==0))*100/(dim(rse_jx)[1]*dim(rse_jx)[2])
 ## Transform read counts to CPM
 ## With log2(CPM + 0.5) they are closer to a Norm distribution
 ## Genes
-assays(rse_gene, withDimnames=FALSE)$norm_counts <- edgeR::cpm(calcNormFactors(rse_gene, method = "TMM"), log = TRUE, prior.count = 0.5)
+assays(rse_gene, withDimnames=FALSE)$logcounts <- edgeR::cpm(calcNormFactors(rse_gene, method = "TMM"), log = TRUE, prior.count = 0.5)
 
 ## Exons
-assays(rse_exon, withDimnames=FALSE)$norm_counts<- edgeR::cpm(calcNormFactors(rse_exon, method = "TMM"), log = TRUE, prior.count = 0.5)
+assays(rse_exon, withDimnames=FALSE)$logcounts<- edgeR::cpm(calcNormFactors(rse_exon, method = "TMM"), log = TRUE, prior.count = 0.5)
 
 ## Junctions
 ## TMMwsp method for >80% of zeros
-assays(rse_jx, withDimnames=FALSE)$norm_counts<- edgeR::cpm(calcNormFactors(rse_jx, method = "TMMwsp"), log = TRUE, prior.count = 0.5)
+assays(rse_jx, withDimnames=FALSE)$logcounts<- edgeR::cpm(calcNormFactors(rse_jx, method = "TMMwsp"), log = TRUE, prior.count = 0.5)
 
 ## Transcripts
 ## Scale TPM (Transcripts per million) to log2(TPM + 0.5)
-assays(rse_tx)$norm_tpm<-log2(assays(rse_tx)$tpm + 0.5)
+assays(rse_tx)$logcounts<-log2(assays(rse_tx)$tpm + 0.5)
 
 
 
