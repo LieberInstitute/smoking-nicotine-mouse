@@ -165,22 +165,12 @@ dim(rse_tx_filt)
 ## 1.4 Data separation
 ## Brain data
 ## Genes
-rse_gene_brain<-rse_gene_norm[,(rse_gene_norm$Tissue=="Brain")]
+rse_gene_brain<-rse_gene_filt[,(rse_gene_filt$Tissue=="Brain")]
 save(rse_gene_brain, file = 'processed-data/02_build_objects/rse_gene_brain.Rdata')
-## Exons
-rse_exon_brain<-rse_exon_norm[,(rse_exon_norm$Tissue=="Brain")]
-save(rse_exon_brain, file = 'processed-data/02_build_objects/rse_exon_brain.Rdata')
-## Jxn
-rse_jx_brain<-rse_jx_norm[,(rse_jx_norm$Tissue=="Brain")]
-save(rse_jx_brain, file = 'processed-data/02_build_objects/rse_jx_brain.Rdata')
-## Tx
-rse_tx_brain<-rse_tx_norm[,(rse_tx_norm$Tissue=="Brain")]
-save(rse_tx_brain, file = 'processed-data/02_build_objects/rse_tx_brain.Rdata')
-
 
 ## Blood data
 ## Genes
-rse_gene_blood<-rse_gene_norm[,(rse_gene_norm$Tissue=="Blood")]
+rse_gene_blood<-rse_gene_filt[,(rse_gene_filt$Tissue=="Blood")]
 save(rse_gene_blood, file = 'processed-data/02_build_objects/rse_gene_blood.Rdata')
 
 
@@ -189,13 +179,13 @@ save(rse_gene_blood, file = 'processed-data/02_build_objects/rse_gene_blood.Rdat
 rse_gene_brain_adults<-rse_gene_brain[,(rse_gene_brain$Age=="Adult")]
 save(rse_gene_brain_adults, file = 'processed-data/02_build_objects/rse_gene_brain_adults.Rdata')
 ## Exons
-rse_exon_brain_adults<-rse_exon_brain[,(rse_exon_brain$Age=="Adult")]
+rse_exon_brain_adults<-rse_exon_filt[,(rse_exon_filt$Tissue=="Brain" & rse_exon_filt$Age=="Adult")]
 save(rse_exon_brain_adults, file = 'processed-data/02_build_objects/rse_exon_brain_adults.Rdata')
 ## Jxn
-rse_jx_brain_adults<-rse_jx_brain[,(rse_jx_brain$Age=="Adult")]
+rse_jx_brain_adults<-rse_jx_filt[,(rse_jx_filt$Tissue=="Brain" & rse_jx_filt$Age=="Adult")]
 save(rse_jx_brain_adults, file = 'processed-data/02_build_objects/rse_jx_brain_adults.Rdata')
 ## Tx
-rse_tx_brain_adults<-rse_tx_brain[,(rse_tx_brain$Age=="Adult")]
+rse_tx_brain_adults<-rse_tx_filt[,(rse_tx_filt$Tissue=="Brain" & rse_tx_filt$Age=="Adult")]
 save(rse_tx_brain_adults, file = 'processed-data/02_build_objects/rse_tx_brain_adults.Rdata')
 
 
@@ -204,16 +194,14 @@ save(rse_tx_brain_adults, file = 'processed-data/02_build_objects/rse_tx_brain_a
 rse_gene_brain_pups<-rse_gene_brain[,(rse_gene_brain$Age=="Pup")]
 save(rse_gene_brain_pups, file = 'processed-data/02_build_objects/rse_gene_brain_pups.Rdata')
 ## Exons
-rse_exon_brain_pups<-rse_exon_brain[,(rse_exon_brain$Age=="Pup")]
+rse_exon_brain_pups<-rse_exon_filt[,(rse_exon_filt$Tissue=="Brain" & rse_exon_filt$Age=="Pup")]
 save(rse_exon_brain_pups, file = 'processed-data/02_build_objects/rse_exon_brain_pups.Rdata')
 ## Jxn
-rse_jx_brain_pups<-rse_jx_brain[,(rse_jx_brain$Age=="Pup")]
+rse_jx_brain_pups<-rse_jx_filt[,(rse_jx_filt$Tissue=="Brain" & rse_jx_filt$Age=="Pup")]
 save(rse_jx_brain_pups, file = 'processed-data/02_build_objects/rse_jx_brain_pups.Rdata')
 ## Tx
-rse_tx_brain_pups<-rse_tx_brain[,(rse_tx_brain$Age=="Pup")]
+rse_tx_brain_pups<-rse_tx_filt[,(rse_tx_filt$Tissue=="Brain" & rse_tx_filt$Age=="Pup")]
 save(rse_tx_brain_pups, file = 'processed-data/02_build_objects/rse_tx_brain_pups.Rdata')
-
-
 
 
 
