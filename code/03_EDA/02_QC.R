@@ -76,3 +76,82 @@ table(rse_gene_brain$trimmed)
 table(rse_gene_blood$trimmed)
 # FALSE 
 #   24 
+
+
+
+
+## 1.3 Plot quality metrics
+## Detected/mt/ribo genes VS total counts per sample 
+## Samples separated by phenotypes
+sum_vs_qc<- function (pheno_var, qc_stats, qc_stats_lab, tissue, age){
+    if (is.null(age)){
+      RSE<-eval(parse_expr(paste("rse_gene_", tissue, sep="")))
+      }
+    else {
+      RSE<-eval(parse_expr(paste("rse_gene", tissue, age, sep="_")))
+      }
+    plot=ggplot(data=as.data.frame(colData(RSE)), 
+           aes(x=sum, y=eval(parse_expr(qc_stats)), color=eval(parse_expr(pheno_var))))+ 
+        geom_point() +
+        theme(text = element_text(size = 10)) +
+        theme(legend.position="right", plot.margin=unit (c (1.5,2,1,2), 'cm')) +
+        labs(x="Total read counts", y=qc_stats_lab, color=pheno_var)
+    return(plot)
+}
+
+## All plots for a qc variable
+plot_sum_vs_qc<- function(tissue, age){
+  for (qc_stats in c("detected","subsets_Mito_percent", "subsets_Ribo_percent")){
+    if (qc_stats=="detected")
+       {qc_stats_lab="Detected number of genes"
+       qc_var="Detected"}
+    if (qc_stats=="subsets_Mito_percent")
+       {qc_stats_lab="% of mt genes' counts of the total counts"
+        qc_var="mtCounts"}
+    if (qc_stats=="subsets_Ribo_percent")
+       {qc_stats_lab="% of ribosomal genes' counts of the total counts"
+        qc_var="riboCounts"}
+    plots<-list()
+    i=1
+      for (pheno_var in c("Age", "plate","Expt", "Sex", "Group", "medium", "Pregnancy", "flowcell")){
+         p<-sum_vs_qc(pheno_var, qc_stats, qc_stats_lab, tissue, age)
+         plots[[i]]=p
+         i=i+1
+      }
+  
+    plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]], plots[[6]], 
+              plots[[7]], plots[[8]], nrow = 2)
+    ## Save plots
+    if (is.null(age)){fileName=paste("plots/03_EDA/02_QC/totalCounts_vs_",qc_var,"_",tissue,".pdf", sep="")}
+    else {fileName=paste("plots/03_EDA/02_QC/totalCounts_vs_",qc_var,"_",tissue,"_", age,".pdf", sep="")}
+    ggsave(fileName, width = 65, height = 25, units = "cm")
+  }
+}
+
+## Plots
+plot_sum_vs_qc("brain", NULL)
+plot_sum_vs_qc("blood", NULL)
+plot_sum_vs_qc("brain", "adults")
+plot_sum_vs_qc("brain", "pups")
+
+## Brain
+## Correlation between number of genes and total read counts
+cor(rse_gene_brain$sum, rse_gene_brain$detected)
+# 0.7358813
+
+
+## Blood
+## Correlation between number of genes and total read counts
+cor(rse_gene_blood$sum, rse_gene_blood$detected)
+# -0.1830506
+
+
+## Adult brain 
+## Correlation between number of genes and total read counts
+cor(rse_gene_brain_adults$sum, rse_gene_brain_adults$detected)
+# 0.6474778
+
+## Pup brain
+## Correlation between number of genes and total read counts
+cor(rse_gene_brain_pups$sum, rse_gene_brain_pups$detected)
+# 0.7703833
