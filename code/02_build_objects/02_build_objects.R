@@ -121,24 +121,28 @@ rse_gene <-addPerCellQC(rse_gene, subsets)
 ## 1.3 Data filtering 
 ## Feature filtering based on counts
 
-## Add design matrix to account for group differences
-group <- factor(paste(rse_gene$Tissue, rse_gene$Age, rse_gene$Expt, rse_gene$Group, sep="."))
-design <- model.matrix(~0 + group) 
-
 ## Filter genes with k CPM in at least n samples
-genes_kept<-rse_gene[which(filterByExpr(assay(rse_gene), design=design)),]
-dim(genes_kept)
-# 20891 208 
+## Add design matrix to account for group differences
+rse_gene_filt<-rse_gene[which(filterByExpr(assay(rse_gene), 
+                design=with(colData(rse_gene), model.matrix(~ Tissue + Age + Expt + Group)))),]
+save(rse_gene_filt, file = 'processed-data/02_build_objects/rse_gene_filt.Rdata')
+dim(rse_gene_filt)
+# 19974   208
 
 ## Filter exons
-exons_kept<-rse_exon[which(filterByExpr(assay(rse_exon), design=design)),]
-dim(exons_kept)
-# 298076    208
+rse_exon_filt<-rse_exon[which(filterByExpr(assay(rse_exon), 
+                design=with(colData(rse_exon), model.matrix(~ Tissue + Age + Expt + Group)))),]
+save(rse_exon_filt, file = 'processed-data/02_build_objects/rse_exon_filt.Rdata')
+dim(rse_exon_filt)
+# 290800 208 
 
 ## Filter junctions
-jx_kept<-rse_jx[which(filterByExpr(assay(rse_jx), design=design)),]
-dim(jx_kept)
-# 191553   208
+rse_jx_filt<-rse_jx[which(filterByExpr(assay(rse_jx), 
+                design=with(colData(rse_jx), model.matrix(~ Tissue + Age + Expt + Group)))),]
+save(rse_jx_filt, file = 'processed-data/02_build_objects/rse_jx_filt.Rdata')
+dim(rse_jx_filt)
+# 176670 208 
+
 
 ## Filter TPM
 ## Identify potential cutoffs
@@ -149,29 +153,12 @@ expression_cutoff(assays(rse_tx)$tpm, seed = seed, k=2)
 #                 0.29                 0.27 
 cutoff<-0.28
 ## Transcripts that pass cutoff 
-tx_kept<-rse_tx[rowMeans(assays(rse_tx)$tpm) > cutoff,]
-dim(tx_kept)
+rse_tx_filt<-rse_tx[rowMeans(assays(rse_tx)$tpm) > cutoff,]
+save(rse_tx_filt, file = 'processed-data/02_build_objects/rse_tx_filt.Rdata')
+dim(rse_tx_filt)
 # 58693   208
 
 
-## Filtered and normalized data
-## Genes
-rse_gene_norm<-genes_kept
-## RSE with norm counts as main assay
-assay(rse_gene_norm)<-assays(rse_gene_norm)$norm_counts
-save(rse_gene_norm, file = 'processed-data/02_build_objects/rse_gene_norm.Rdata')
-## Exons
-rse_exon_norm<-exons_kept
-assay(rse_exon_norm)<-assays(rse_exon_norm)$norm_counts
-save(rse_exon_norm, file = 'processed-data/02_build_objects/rse_exon_norm.Rdata')
-## Junctions
-rse_jx_norm<-jx_kept
-assay(rse_jx_norm)<-assays(rse_jx_norm)$norm_counts
-save(rse_jx_norm, file = 'processed-data/02_build_objects/rse_jx_norm.Rdata')
-## Transcripts
-rse_tx_norm<-tx_kept
-assay(rse_tx_norm)<-assays(rse_tx_norm)$norm_tpm
-save(rse_tx_norm, file = 'processed-data/02_build_objects/rse_tx_norm.Rdata')
 
 
 
