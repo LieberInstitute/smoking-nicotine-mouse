@@ -18,6 +18,7 @@ load(here("processed-data/02_build_objects/rse_gene_brain_adults.Rdata"))
 load(here("processed-data/02_build_objects/rse_gene_brain_pups.Rdata"))
 
 
+
 ## 1.2 Relationships between QC variables and mouse phenotypes
 ## Boxplots 
 create_boxplots <- function(pheno_var, qc_var, tissue, age) {
@@ -76,6 +77,7 @@ table(rse_gene_brain$trimmed)
 table(rse_gene_blood$trimmed)
 # FALSE 
 #   24 
+
 
 
 
@@ -139,12 +141,10 @@ plot_sum_vs_qc("brain", "pups")
 cor(rse_gene_brain$sum, rse_gene_brain$detected)
 # 0.7358813
 
-
 ## Blood
 ## Correlation between number of genes and total read counts
 cor(rse_gene_blood$sum, rse_gene_blood$detected)
 # -0.1830506
-
 
 ## Adult brain 
 ## Correlation between number of genes and total read counts
@@ -155,7 +155,6 @@ cor(rse_gene_brain_adults$sum, rse_gene_brain_adults$detected)
 ## Correlation between number of genes and total read counts
 cor(rse_gene_brain_pups$sum, rse_gene_brain_pups$detected)
 # 0.7703833
-
 
 
 
