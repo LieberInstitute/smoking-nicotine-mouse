@@ -199,7 +199,6 @@ rse_gene_brain_pups_qc<-quickPerCellQC(
 ## Number of samples retained
 dim(rse_gene_brain_pups_qc)[2]
 # 136
-
 ## Save data
 save(rse_gene_brain_pups_qc, file = 'processed-data/03_EDA/02_QC/rse_gene_brain_pups_qc.Rdata')
 
@@ -224,3 +223,30 @@ rse_gene_blood_qc<-quickPerCellQC(
 ## Number of samples retained
 dim(rse_gene_blood_qc)[2]
 # 24
+
+
+### 1.4.2 Plot QC metrics for samples retained and samples dropped
+## Generate column with samples retained/dropped
+qc_filt_col <- function(tissue, age){
+  if (is.null(age)){
+    RSE<-eval(parse_expr(paste("rse_gene_", tissue, sep="")))
+    RSE_qc<-eval(parse_expr(paste("rse_gene", tissue, "qc", sep="_")))
+  }
+  else {
+    RSE<-eval(parse_expr(paste("rse_gene", tissue, age, sep="_")))
+    RSE_qc<-eval(parse_expr(paste("rse_gene", tissue, age, "qc", sep="_")))
+  }
+  qc_filt<-vector()
+  for (sample in RSE$SAMPLE_ID){
+    if(sample %in% RSE_qc$SAMPLE_ID){
+      ## Samples retained
+      qc_filt<-append(qc_filt, "Yes")
+    }
+    ## Samples dropped
+    else {qc_filt<-append(qc_filt, "No")}
+  }
+  return(qc_filt)
+}
+
+## Add column for pup brain samples
+rse_gene_brain_pups$Retention<-qc_filt_col("brain", "pups")
