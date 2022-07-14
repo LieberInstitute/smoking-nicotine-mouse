@@ -155,3 +155,73 @@ cor(rse_gene_brain_adults$sum, rse_gene_brain_adults$detected)
 ## Correlation between number of genes and total read counts
 cor(rse_gene_brain_pups$sum, rse_gene_brain_pups$detected)
 # 0.7703833
+
+
+
+
+
+
+## 1.4 Sample filtering by QC 
+### 1.4.1 Detection-based and Mito/Ribo filtering 
+
+## Filter brain samples
+rse_gene_brain_qc<-quickPerCellQC(
+  rse_gene_brain,
+  ## Filter by detected number of genes and library size 
+  sum.field = "sum",
+  detected.field = "detected",
+  ## Filter by mito/ribo content
+  sub.fields = TRUE,
+)
+## Number of samples retained
+dim(rse_gene_brain_qc)[2]
+# 184
+
+
+## Filter adult brain samples
+rse_gene_brain_adults_qc<-quickPerCellQC(
+  rse_gene_brain_adults,
+  sum.field = "sum",
+  detected.field = "detected",
+  sub.fields = TRUE,
+)
+## Number of samples retained
+dim(rse_gene_brain_adults_qc)[2]
+# 47
+
+
+# Filter pup brain samples
+rse_gene_brain_pups_qc<-quickPerCellQC(
+  rse_gene_brain_pups,
+  sum.field = "sum",
+  detected.field = "detected",
+  sub.fields = TRUE,
+)
+## Number of samples retained
+dim(rse_gene_brain_pups_qc)[2]
+# 136
+
+## Save data
+save(rse_gene_brain_pups_qc, file = 'processed-data/03_EDA/02_QC/rse_gene_brain_pups_qc.Rdata')
+
+## Filter data of exons, tx and jx by QC
+rse_exon_brain_pups_qc<-rse_exon_brain_pups[,(rse_exon_brain_pups$SAMPLE_ID %in% rse_gene_brain_pups_qc$SAMPLE_ID)]
+save(rse_exon_brain_pups_qc, file = 'processed-data/03_EDA/02_QC/rse_exon_brain_pups_qc.Rdata')
+rse_tx_brain_pups_qc<-rse_tx_brain_pups[,(rse_tx_brain_pups$SAMPLE_ID %in% rse_gene_brain_pups_qc$SAMPLE_ID)]
+save(rse_tx_brain_pups_qc, file = 'processed-data/03_EDA/02_QC/rse_tx_brain_pups_qc.Rdata')
+rse_jx_brain_pups_qc<-rse_jx_brain_pups[,(rse_jx_brain_pups$SAMPLE_ID %in% rse_gene_brain_pups_qc$SAMPLE_ID)]
+save(rse_jx_brain_pups_qc, file = 'processed-data/03_EDA/02_QC/rse_jx_brain_pups_qc.Rdata')
+
+
+## Filter blood samples 
+rse_gene_blood_qc<-quickPerCellQC(
+  rse_gene_blood,
+  ## Filter by detected number of genes and library size 
+  sum.field = "sum",
+  detected.field = "detected",
+  ## Filter by mito/ribo content
+  sub.fields = TRUE,
+)
+## Number of samples retained
+dim(rse_gene_blood_qc)[2]
+# 24
