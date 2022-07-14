@@ -268,3 +268,8 @@ plot_grid(p1, p2, p3, nrow = 1)
 ## Save plots
 fileName=paste("plots/03_EDA/02_QC/samples_Retained_brain_pups.pdf", sep="")
 ggsave(fileName, width = 55, height = 15, units = "cm")
+
+
+## Removed sample information:
+colData(rse_gene_brain_pups)[which(rse_gene_brain_pups$Retention=="No"), 
+        c("SAMPLE_ID", "Sex", "Expt", "Group", "Pregnancy", "mitoRate", "rRNA_rate", "totalAssignedGene", "overallMapRate", "subsets_Mito_percent", "subsets_Ribo_percent")]
