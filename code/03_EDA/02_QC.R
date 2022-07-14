@@ -250,3 +250,21 @@ qc_filt_col <- function(tissue, age){
 
 ## Add column for pup brain samples
 rse_gene_brain_pups$Retention<-qc_filt_col("brain", "pups")
+
+## Generate plots
+qc_stats="detected"
+qc_stats_lab="Detected number of genes"
+p1<-sum_vs_qc("Retention", qc_stats, qc_stats_lab, "brain", "pups")
+
+qc_stats="subsets_Mito_percent"
+qc_stats_lab="% of mt genes' counts of the total counts"
+p2<-sum_vs_qc("Retention", qc_stats, qc_stats_lab, "brain", "pups")
+
+qc_stats="subsets_Ribo_percent"
+qc_stats_lab="% of ribosomal genes' counts of the total counts"
+p3<-sum_vs_qc("Retention", qc_stats, qc_stats_lab, "brain", "pups")
+
+plot_grid(p1, p2, p3, nrow = 1)
+## Save plots
+fileName=paste("plots/03_EDA/02_QC/samples_Retained_brain_pups.pdf", sep="")
+ggsave(fileName, width = 55, height = 15, units = "cm")
