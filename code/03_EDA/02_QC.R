@@ -1,4 +1,4 @@
-## Load libraries and data 
+## Load all libraries for EDA 
 library(SummarizedExperiment)
 library(recount)
 library(edgeR)
@@ -6,7 +6,11 @@ library(here)
 library(ggplot2)
 library(rlang)
 library(scater)
+library(jaffelab)
 library(cowplot)
+library(variancePartition)
+library(gridExtra)
+library(sessioninfo)
 
 
 ## 1. Quality Control anlaysis
@@ -108,10 +112,10 @@ plot_sum_vs_qc<- function(tissue, age){
        {qc_stats_lab="Detected number of genes"
        qc_var="Detected"}
     if (qc_stats=="subsets_Mito_percent")
-       {qc_stats_lab="% of mt genes' counts of the total counts"
+       {qc_stats_lab="Percentage of mt counts "
         qc_var="mtCounts"}
     if (qc_stats=="subsets_Ribo_percent")
-       {qc_stats_lab="% of ribosomal genes' counts of the total counts"
+       {qc_stats_lab="Percentage of ribosomal counts "
         qc_var="riboCounts"}
     plots<-list()
     i=1
