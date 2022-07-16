@@ -210,42 +210,57 @@ plot_mito_vs_ribo("brain", "pups")
 ## 1.4 Sample filtering by QC 
 ### 1.4.1 Detection-based and Mito/Ribo filtering 
 
-## Filter brain samples
-rse_gene_brain_qc<-quickPerCellQC(
-  rse_gene_brain,
-  ## Filter by detected number of genes and library size 
-  sum.field = "sum",
-  detected.field = "detected",
-  ## Filter by mito/ribo content
-  sub.fields = TRUE,
-)
+# Filter brain samples
+## Drop samples with lower library sizes and number of genes
+outliers_sum<-isOutlier(rse_gene_brain$sum, nmads = 3, type="lower")
+outliers_det<-isOutlier(rse_gene_brain$detected, nmads = 3, type="lower")
+## Drop samples with higher mt and ribo percentages
+outliers_mito<-isOutlier(rse_gene_brain$subsets_Mito_percent, nmads = 3, type="higher")
+outliers_ribo<-isOutlier(rse_gene_brain$subsets_Ribo_percent, nmads = 3, type="higher")
+not_outliers<-which(! (outliers_sum | outliers_det | outliers_mito | outliers_ribo))
+rse_gene_brain_qc<-rse_gene_brain[,not_outliers]
+
 ## Number of samples retained
 dim(rse_gene_brain_qc)[2]
-# 184
+# 135
+## Save data
+save(rse_gene_brain_qc, file = 'processed-data/03_EDA/02_QC/rse_gene_brain_qc.Rdata')
 
 
 ## Filter adult brain samples
-rse_gene_brain_adults_qc<-quickPerCellQC(
-  rse_gene_brain_adults,
-  sum.field = "sum",
-  detected.field = "detected",
-  sub.fields = TRUE,
-)
+outliers_sum<-isOutlier(rse_gene_brain_adults$sum, nmads = 3, type="lower")
+outliers_det<-isOutlier(rse_gene_brain_adults$detected, nmads = 3, type="lower")
+outliers_mito<-isOutlier(rse_gene_brain_adults$subsets_Mito_percent, nmads = 3, type="higher")
+outliers_ribo<-isOutlier(rse_gene_brain_adults$subsets_Ribo_percent, nmads = 3, type="higher")
+not_outliers<-which(! (outliers_sum | outliers_det | outliers_mito | outliers_ribo))
+rse_gene_brain_adults_qc<-rse_gene_brain_adults[,not_outliers]
+
 ## Number of samples retained
 dim(rse_gene_brain_adults_qc)[2]
-# 47
+# 42
+## Save data
+save(rse_gene_brain_adults_qc, file = 'processed-data/03_EDA/02_QC/rse_gene_brain_adults_qc.Rdata')
+
+## Filter data of exons, tx and jx by QC
+rse_exon_brain_adults_qc<-rse_exon_brain_adults[,(rse_exon_brain_adults$SAMPLE_ID %in% rse_gene_brain_adults_qc$SAMPLE_ID)]
+save(rse_exon_brain_adults_qc, file = 'processed-data/03_EDA/02_QC/rse_exon_brain_adults_qc.Rdata')
+rse_tx_brain_adults_qc<-rse_tx_brain_adults[,(rse_tx_brain_adults$SAMPLE_ID %in% rse_gene_brain_adults_qc$SAMPLE_ID)]
+save(rse_tx_brain_adults_qc, file = 'processed-data/03_EDA/02_QC/rse_tx_brain_adults_qc.Rdata')
+rse_jx_brain_adults_qc<-rse_jx_brain_adults[,(rse_jx_brain_adults$SAMPLE_ID %in% rse_gene_brain_adults_qc$SAMPLE_ID)]
+save(rse_jx_brain_adults_qc, file = 'processed-data/03_EDA/02_QC/rse_jx_brain_adults_qc.Rdata')
 
 
 # Filter pup brain samples
-rse_gene_brain_pups_qc<-quickPerCellQC(
-  rse_gene_brain_pups,
-  sum.field = "sum",
-  detected.field = "detected",
-  sub.fields = TRUE,
-)
+outliers_sum<-isOutlier(rse_gene_brain_pups$sum, nmads = 3, type="lower")
+outliers_det<-isOutlier(rse_gene_brain_pups$detected, nmads = 3, type="lower")
+outliers_mito<-isOutlier(rse_gene_brain_pups$subsets_Mito_percent, nmads = 3, type="higher")
+outliers_ribo<-isOutlier(rse_gene_brain_pups$subsets_Ribo_percent, nmads = 3, type="higher")
+not_outliers<-which(! (outliers_sum | outliers_det | outliers_mito | outliers_ribo))
+rse_gene_brain_pups_qc<-rse_gene_brain_pups[,not_outliers]
+
 ## Number of samples retained
 dim(rse_gene_brain_pups_qc)[2]
-# 136
+# 133
 ## Save data
 save(rse_gene_brain_pups_qc, file = 'processed-data/03_EDA/02_QC/rse_gene_brain_pups_qc.Rdata')
 
@@ -259,17 +274,19 @@ save(rse_jx_brain_pups_qc, file = 'processed-data/03_EDA/02_QC/rse_jx_brain_pups
 
 
 ## Filter blood samples 
-rse_gene_blood_qc<-quickPerCellQC(
-  rse_gene_blood,
-  ## Filter by detected number of genes and library size 
-  sum.field = "sum",
-  detected.field = "detected",
-  ## Filter by mito/ribo content
-  sub.fields = TRUE,
-)
+outliers_sum<-isOutlier(rse_gene_blood$sum, nmads = 3, type="lower")
+outliers_det<-isOutlier(rse_gene_blood$detected, nmads = 3, type="lower")
+outliers_mito<-isOutlier(rse_gene_blood$subsets_Mito_percent, nmads = 3, type="higher")
+outliers_ribo<-isOutlier(rse_gene_blood$subsets_Ribo_percent, nmads = 3, type="higher")
+not_outliers<-which(! (outliers_sum | outliers_det | outliers_mito | outliers_ribo))
+rse_gene_blood_qc<-rse_gene_blood[,not_outliers]
+
 ## Number of samples retained
 dim(rse_gene_blood_qc)[2]
-# 24
+# 23
+## Save data
+save(rse_gene_blood_qc, file = 'processed-data/03_EDA/02_QC/rse_gene_blood_qc.Rdata')
+
 
 
 ### 1.4.2 Plot QC metrics for samples retained and samples dropped
