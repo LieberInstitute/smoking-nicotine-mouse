@@ -355,3 +355,66 @@ plots_Retained("brain", NULL)
 plots_Retained("blood", NULL)
 plots_Retained("brain", "adults")
 plots_Retained("brain", "pups")
+
+
+
+## Boxplots of QC metrics after sample filtering 
+## Samples separated by Retention and phenotype
+QC_boxplots <- function (pheno_var1, pheno_var2, qc_var, tissue, age) {
+  if (is.null(age)){
+    ## Tissue data
+    RSE<-eval(parse_expr(paste("rse_gene_", tissue, sep="")))
+    }
+  else {
+    ## Tissue and Age data
+    RSE<-eval(parse_expr(paste("rse_gene", tissue, age, sep="_")))
+  }
+  ## Median of the QC var values
+  median<-median(eval(parse_expr(paste("RSE$", qc_var, sep=""))))
+  ## MAD of the QC var values
+  mad<-mad(eval(parse_expr(paste("RSE$", qc_var, sep=""))))
+  plot=ggplot(as.data.frame(colData(RSE)), 
+         aes(x="", y=eval(parse_expr(qc_var)))) + 
+         ## Hide outliers
+         geom_boxplot(outlier.color = "#FFFFFFFF") +
+         ## Samples separated by Retention and by phenotype
+         geom_jitter(aes(colour=eval(parse_expr(pheno_var1)),shape=eval(parse_expr(pheno_var2))), 
+                     position=position_jitter(0.2)) +
+         ## Median line
+         geom_hline(yintercept = median, size=0.5) +
+         ## Line of median + 3 MADs
+         geom_hline(yintercept = median+(3*mad), size=0.5, linetype=2) +
+         ## Line of median - 3 MADs
+         geom_hline(yintercept = median-(3*mad), size=0.5, linetype=2) +
+         theme_classic() +
+         theme(legend.position="right", plot.margin=unit (c (1,1.5,1,1), 'cm')) +
+         labs(x="", y = qc_var, color=pheno_var1, shape=pheno_var2)
+    return(plot)
+}
+
+
+plot_QC_boxplots<- function(tissue, age){
+  for (qc_var in c("sum", "detected", "subsets_Mito_percent", "subsets_Ribo_percent")){
+    plots<-list()
+    i=1
+      for (pheno_var in c("Age", "plate","Expt", "Sex", "Group", "medium", "Pregnancy", "flowcell")){
+         p<-QC_boxplots("Retention", pheno_var, qc_var, tissue, age)
+         plots[[i]]=p
+         i=i+1
+      }
+    plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]], plots[[6]], 
+              plots[[7]], plots[[8]], nrow = 2)
+    ## Save plots
+    if (is.null(age)) {fileName=paste("plots/03_EDA/02_QC/QC_boxplot_",qc_var,"_", 
+                                        tissue, ".pdf", sep="")}
+    else {fileName=paste("plots/03_EDA/02_QC/QC_boxplot_",qc_var,"_", tissue, "_", 
+                       age, ".pdf", sep="")}
+    ggsave(fileName, width = 55, height = 25, units = "cm")
+  }
+}
+
+## QC boxplots
+plot_QC_boxplots("brain", NULL)
+plot_QC_boxplots("blood", NULL)
+plot_QC_boxplots("brain", "adults")
+plot_QC_boxplots("brain", "pups")
