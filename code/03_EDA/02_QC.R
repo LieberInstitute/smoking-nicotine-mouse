@@ -86,8 +86,8 @@ table(rse_gene_blood$trimmed)
 
 
 
-## 1.3 Plot quality metrics
-## Detected/mt/ribo genes VS total counts per sample 
+## 1.3 Plot quality metrics per sample
+## Detected/mt/ribo genes VS total counts 
 ## Samples separated by phenotypes
 sum_vs_qc<- function (pheno_var, qc_stats, qc_stats_lab, tissue, age){
     if (is.null(age)){
@@ -159,6 +159,49 @@ cor(rse_gene_brain_adults$sum, rse_gene_brain_adults$detected)
 ## Correlation between number of genes and total read counts
 cor(rse_gene_brain_pups$sum, rse_gene_brain_pups$detected)
 # 0.7703833
+
+
+
+## Plot mito VS ribo percentages per sample 
+mito_vs_ribo<- function (pheno_var, tissue, age){
+    if (is.null(age)){
+      RSE<-eval(parse_expr(paste("rse_gene_", tissue, sep="")))
+      }
+    else {
+      RSE<-eval(parse_expr(paste("rse_gene", tissue, age, sep="_")))
+      }
+    plot=ggplot(data=as.data.frame(colData(RSE)), 
+           aes(x=subsets_Mito_percent, y=subsets_Ribo_percent, color=eval(parse_expr(pheno_var))))+ 
+        geom_point() +
+        theme(text = element_text(size = 10)) +
+        theme(legend.position="right", plot.margin=unit (c (1.5,2,1,2), 'cm')) +
+        labs(x="Percentage of mt counts", y="Percentage of ribosomal counts", color=pheno_var)
+    return(plot)
+}
+
+plot_mito_vs_ribo<- function(tissue, age){
+    plots<-list()
+    i=1
+      for (pheno_var in c("Age", "plate","Expt", "Sex", "Group", "medium", "Pregnancy", "flowcell")){
+         p<-mito_vs_ribo(pheno_var,tissue, age)
+         plots[[i]]=p
+         i=i+1
+      }
+  
+    plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]], plots[[6]], 
+              plots[[7]], plots[[8]], nrow = 2)
+    ## Save plots
+    if (is.null(age)){fileName=paste("plots/03_EDA/02_QC/Mito_vs_Ribo_",tissue,".pdf", sep="")}
+    else {fileName=paste("plots/03_EDA/02_QC/Mito_vs_Ribo_",tissue,"_", age,".pdf", sep="")}
+    ggsave(fileName, width = 65, height = 25, units = "cm")
+}
+
+## Plots
+plot_mito_vs_ribo("brain", NULL)
+plot_mito_vs_ribo("blood", NULL)
+plot_mito_vs_ribo("brain", "adults")
+plot_mito_vs_ribo("brain", "pups")
+
 
 
 
