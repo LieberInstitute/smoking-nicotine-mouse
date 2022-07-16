@@ -312,28 +312,46 @@ qc_filt_col <- function(tissue, age){
   return(qc_filt)
 }
 
-## Add column for pup brain samples
+## Add column to all RSE
+rse_gene_brain$Retention<-qc_filt_col("brain", NULL)
+rse_gene_blood$Retention<-qc_filt_col("blood", NULL)
+rse_gene_brain_adults$Retention<-qc_filt_col("brain", "adults")
 rse_gene_brain_pups$Retention<-qc_filt_col("brain", "pups")
 
-## Generate plots
-qc_stats="detected"
-qc_stats_lab="Detected number of genes"
-p1<-sum_vs_qc("Retention", qc_stats, qc_stats_lab, "brain", "pups")
+## Generate plots with samples separated by "Retention"
+plots_Retained <- function(tissue, age){
+  ## Plot total counts VS number of genes
+  qc_stats="detected"
+  qc_stats_lab="Detected number of genes"
+  p1<-sum_vs_qc("Retention", qc_stats, qc_stats_lab, tissue, age)
+  
+  ## Plot total counts VS mt percentage
+  qc_stats="subsets_Mito_percent"
+  qc_stats_lab="Percentage of mt counts"
+  p2<-sum_vs_qc("Retention", qc_stats, qc_stats_lab, tissue, age)
+  
+  ## Plot total counts VS ribo percentage
+  qc_stats="subsets_Ribo_percent"
+  qc_stats_lab="Percentage of ribosomal counts"
+  p3<-sum_vs_qc("Retention", qc_stats, qc_stats_lab, tissue, age)
+  
+  ## Plot mt VS ribosomal percentage
+  p4<-mito_vs_ribo("Retention", tissue, age)
+  
+  plot_grid(p1, p2, p3, p4, nrow = 2)
+  ## Save plots
+  if (is.null(age)){
+    fileName=paste("plots/03_EDA/02_QC/samples_Retained_", tissue,".pdf", sep="")
+  }
+  else {
+    fileName=paste("plots/03_EDA/02_QC/samples_Retained_", tissue,"_", age,".pdf", sep="")
+  }
+  ggsave(fileName, width = 35, height = 25, units = "cm")
+}
 
-qc_stats="subsets_Mito_percent"
-qc_stats_lab="% of mt genes' counts of the total counts"
-p2<-sum_vs_qc("Retention", qc_stats, qc_stats_lab, "brain", "pups")
 
-qc_stats="subsets_Ribo_percent"
-qc_stats_lab="% of ribosomal genes' counts of the total counts"
-p3<-sum_vs_qc("Retention", qc_stats, qc_stats_lab, "brain", "pups")
-
-plot_grid(p1, p2, p3, nrow = 1)
-## Save plots
-fileName=paste("plots/03_EDA/02_QC/samples_Retained_brain_pups.pdf", sep="")
-ggsave(fileName, width = 55, height = 15, units = "cm")
-
-
-## Removed sample information:
-colData(rse_gene_brain_pups)[which(rse_gene_brain_pups$Retention=="No"), 
-        c("SAMPLE_ID", "Sex", "Expt", "Group", "Pregnancy", "mitoRate", "rRNA_rate", "totalAssignedGene", "overallMapRate", "subsets_Mito_percent", "subsets_Ribo_percent")]
+## Plots
+plots_Retained("brain", NULL)
+plots_Retained("blood", NULL)
+plots_Retained("brain", "adults")
+plots_Retained("brain", "pups")
