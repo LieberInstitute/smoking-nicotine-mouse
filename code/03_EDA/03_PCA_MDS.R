@@ -201,7 +201,6 @@ for (sample in poorQC_samples){
 }
 
 ## PCA plots without those samples
-plo_PCAs("gene", "blood", NULL)
 plot_PCAs("gene", "brain", "adults")
 plot_PCAs("gene", "brain", "pups")
 plot_PCAs("exon", "brain", "adults")
