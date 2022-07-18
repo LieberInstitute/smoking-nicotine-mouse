@@ -96,3 +96,119 @@ plot_PCAs("tx", "brain", "adults")
 plot_PCAs("tx", "brain", "pups")
 plot_PCAs("jx", "brain", "adults")
 plot_PCAs("jx", "brain", "pups")
+
+
+
+
+## Rare samples in brain PCA plots
+## PC data
+pca_data_gene_brain_adults<-PCA("brain", "gene", "adults")[[1]]
+pca_data_exon_brain_adults<-PCA("brain", "exon", "adults")[[1]]
+pca_data_tx_brain_adults<-PCA("brain", "tx", "adults")[[1]]
+pca_data_jx_brain_adults<-PCA("brain", "jx", "adults")[[1]]
+pca_data_gene_brain_pups<-PCA("brain", "gene", "pups")[[1]]
+pca_data_exon_brain_pups<-PCA("brain", "exon", "pups")[[1]]
+pca_data_tx_brain_pups<-PCA("brain", "tx", "pups")[[1]]
+pca_data_jx_brain_pups<-PCA("brain", "jx", "pups")[[1]]
+
+## Rare samples in adult plots
+pca_data_gene_brain_adults[which.max(pca_data_gene_brain_adults$PC2), "SAMPLE_ID"]
+# "Sample_FE3P2"
+pca_data_gene_brain_adults[which.max(pca_data_gene_brain_adults$PC3), "SAMPLE_ID"]
+# "Sample_FE3P2"
+pca_data_exon_brain_adults[which.max(pca_data_exon_brain_adults$PC2), "SAMPLE_ID"]
+# "Sample_FE3P2"
+pca_data_exon_brain_adults[which.max(pca_data_exon_brain_adults$PC3), "SAMPLE_ID"]
+# "Sample_4067"
+pca_data_tx_brain_adults[which.max(pca_data_tx_brain_adults$PC2), "SAMPLE_ID"]
+# "Sample_FE3P2"
+pca_data_jx_brain_adults[which.min(pca_data_jx_brain_adults$PC3), "SAMPLE_ID"]
+# "Sample_FE3P2"
+
+## Rare samples in pup plots
+pca_data_gene_brain_pups[which.min(pca_data_gene_brain_pups$PC2), "SAMPLE_ID"]
+# "Sample_P2_fe2_022019"
+## Male samples in females at gene level 
+pca_data_gene_brain_pups[which(pca_data_gene_brain_pups$Sex=="M"& pca_data_gene_brain_pups$PC3>0),"SAMPLE_ID"]
+# "Sample_P1_fe3_021819" "Sample_P2_fe2_022019"
+pca_data_exon_brain_pups[which.min(pca_data_exon_brain_pups$PC1), "SAMPLE_ID"]
+# "Sample_P2_fe2_022019"
+pca_data_tx_brain_pups[which.min(pca_data_tx_brain_pups$PC1), "SAMPLE_ID"]
+# "Sample_P2_fe2_022019"
+pca_data_jx_brain_pups[which.max(pca_data_jx_brain_pups$PC1), "SAMPLE_ID"]
+# "Sample_P2_fe2_022019"
+
+## Explore Sample_FE3P2 info:
+colData(rse_gene_brain_adults_qc)[which(rse_gene_brain_adults_qc$SAMPLE_ID=="Sample_FE3P2"),
+                          c("mitoRate", "rRNA_rate", "totalAssignedGene", "overallMapRate", 
+                            "ERCCsumLogErr", "sum", "Sex")]
+## This sample has the max rRNA rate
+pca_data_gene_brain_adults[which.max(pca_data_gene_brain_adults$rRNA_rate), "SAMPLE_ID"]
+# "Sample_FE3P2"
+
+
+## Explore Sample_4067 info:
+colData(rse_gene_brain_adults_qc)[which(rse_gene_brain_adults_qc$SAMPLE_ID=="Sample_4067"),
+                          c("mitoRate", "rRNA_rate", "totalAssignedGene", "overallMapRate", 
+                            "ERCCsumLogErr", "sum", "Sex")]
+## This sample has the max mito rate, % of mt and ribo counts and min prop of reads assigned to genes
+pca_data_gene_brain_adults[which.max(pca_data_gene_brain_adults$mitoRate), "SAMPLE_ID"]
+# "Sample_4067"
+pca_data_gene_brain_adults[which.max(pca_data_gene_brain_adults$subsets_Mito_percent), "SAMPLE_ID"]
+# "Sample_4067"
+pca_data_gene_brain_adults[which.max(pca_data_gene_brain_adults$subsets_Ribo_percent), "SAMPLE_ID"]
+# "Sample_4067"
+pca_data_gene_brain_adults[which.min(pca_data_gene_brain_adults$totalAssignedGene), "SAMPLE_ID"]
+# "Sample_4067"
+
+
+
+## Explore Sample_P2_fe2_022019 info:
+colData(rse_gene_brain_pups_qc)[which(rse_gene_brain_pups_qc$SAMPLE_ID=="Sample_P2_fe2_022019"),
+                          c("mitoRate", "rRNA_rate", "totalAssignedGene", "overallMapRate", 
+                            "ERCCsumLogErr", "sum", "Sex")]
+## This sample has the min prop of reads assigned to genes 
+pca_data_gene_brain_pups[which.min(pca_data_gene_brain_pups$totalAssignedGene), "SAMPLE_ID"]
+# "Sample_P2_fe2_022019"
+
+
+
+## Explore Sample_P1_fe3_021819 info:
+colData(rse_gene_brain_pups_qc)[which(rse_gene_brain_pups_qc$SAMPLE_ID=="Sample_P1_fe3_021819"),
+                          c("mitoRate", "rRNA_rate", "totalAssignedGene", "overallMapRate", 
+                            "ERCCsumLogErr", "sum", "Sex")]
+## This sample has the max Error value
+pca_data_gene_brain_pups[which.max(abs(pca_data_gene_brain_pups$ERCCsumLogErr)), "SAMPLE_ID"]
+# "Sample_P1_fe3_021819"
+
+
+
+## Remove those samples
+poorQC_samples<-c("Sample_FE3P2", "Sample_4067")
+for (sample in poorQC_samples){
+  rse_gene_brain_adults_qc<-rse_gene_brain_adults_qc[,-which(rse_gene_brain_adults_qc$SAMPLE_ID==sample)]
+  rse_exon_brain_adults_qc<-rse_exon_brain_adults_qc[,-which(rse_exon_brain_adults_qc$SAMPLE_ID==sample)]
+  rse_tx_brain_adults_qc<-rse_tx_brain_adults_qc[,-which(rse_tx_brain_adults_qc$SAMPLE_ID==sample)]
+  rse_jx_brain_adults_qc<-rse_jx_brain_adults_qc[,-which(rse_jx_brain_adults_qc$SAMPLE_ID==sample)]
+}
+
+poorQC_samples<-c("Sample_P2_fe2_022019", "Sample_P1_fe3_021819")
+for (sample in poorQC_samples){
+  rse_gene_brain_pups_qc<-rse_gene_brain_pups_qc[,-which(rse_gene_brain_pups_qc$SAMPLE_ID==sample)]
+  rse_exon_brain_pups_qc<-rse_exon_brain_pups_qc[,-which(rse_exon_brain_pups_qc$SAMPLE_ID==sample)]
+  rse_tx_brain_pups_qc<-rse_tx_brain_pups_qc[,-which(rse_tx_brain_pups_qc$SAMPLE_ID==sample)]
+  rse_jx_brain_pups_qc<-rse_jx_brain_pups_qc[,-which(rse_jx_brain_pups_qc$SAMPLE_ID==sample)]
+}
+
+## PCA plots without those samples
+plo_PCAs("gene", "blood", NULL)
+plot_PCAs("gene", "brain", "adults")
+plot_PCAs("gene", "brain", "pups")
+plot_PCAs("exon", "brain", "adults")
+plot_PCAs("exon", "brain", "pups")
+plot_PCAs("tx", "brain", "adults")
+plot_PCAs("tx", "brain", "pups")
+plot_PCAs("jx", "brain", "adults")
+plot_PCAs("jx", "brain", "pups")
+
+
