@@ -211,3 +211,56 @@ plot_PCAs("jx", "brain", "adults")
 plot_PCAs("jx", "brain", "pups")
 
 
+
+
+### 1.1.2 Explore samples' gene expression variation across phenotypes by Group
+## PC boxplots 
+PC_boxplots <- function (PCx, pheno_var1, pheno_var2, tissue, type, age) {
+    pca_data<-PCA(tissue, type, age)[[1]]
+    pca_vars<-PCA(tissue, type, age)[[2]]
+    plot=ggplot(data=pca_data, 
+         aes(x=eval(parse_expr(pheno_var1)),y=eval(parse_expr(PCx)))) + 
+         ## Hide outliers
+         geom_boxplot(outlier.color = "#FFFFFFFF") +
+         ## PC dots colored by a group + noise
+         geom_jitter(aes(colour=eval(parse_expr(pheno_var2))),shape=16, 
+                     position=position_jitter(0.2)) +
+         theme_classic() +
+         theme(legend.position="right", plot.margin=unit (c (1,1.5,1,1), 'cm')) +
+         labs(x= pheno_var1, y = pca_vars[strtoi(gsub("PC","", PCx))],  
+              color=pheno_var2)
+    return(plot)
+}
+
+## Boxplots of PC1 data separated by Group and phenotypes
+plot_PC_boxplots<-function(PCx, type, tissue, age) {
+  i=1
+  plots<-list()
+  for (pheno_var1 in c("Age", "plate","Expt", "Sex", "Pregnancy", "flowcell")){
+      p<-PC_boxplots(PCx, pheno_var1, "Group", tissue, type, age)
+      plots[[i]]=p
+      i=i+1
+    }
+  plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]], 
+            plots[[6]], nrow = 2)
+  ## Save plot
+  if (is.null(age)){
+    ggsave(paste("plots/03_EDA/03_PCA_MDS/boxplot_",PCx,"_", type, "_", tissue, ".pdf", 
+         sep=""), width = 50, height = 35, units = "cm")
+  }
+  else {
+      ggsave(paste("plots/03_EDA/03_PCA_MDS/boxplot_",PCx,"_", type, "_", tissue, "_", 
+                   age, ".pdf", sep=""), width = 50, height = 35, units = "cm")
+  }
+
+}
+
+## Plots
+plot_PC_boxplots("PC1", "gene", "blood", NULL)
+plot_PC_boxplots("PC1", "gene", "brain", "adults")
+plot_PC_boxplots("PC1", "gene", "brain", "pups")
+plot_PC_boxplots("PC2", "gene", "brain", "pups")
+
+
+
+
