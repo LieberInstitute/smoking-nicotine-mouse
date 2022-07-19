@@ -138,6 +138,7 @@ pca_data_tx_brain_pups[which.min(pca_data_tx_brain_pups$PC1), "SAMPLE_ID"]
 pca_data_jx_brain_pups[which.max(pca_data_jx_brain_pups$PC1), "SAMPLE_ID"]
 # "Sample_P2_fe2_022019"
 
+
 ## Explore Sample_FE3P2 info:
 colData(rse_gene_brain_adults_qc)[which(rse_gene_brain_adults_qc$SAMPLE_ID=="Sample_FE3P2"),
                           c("mitoRate", "rRNA_rate", "totalAssignedGene", "overallMapRate", 
@@ -184,6 +185,7 @@ pca_data_gene_brain_pups[which.max(abs(pca_data_gene_brain_pups$ERCCsumLogErr)),
 
 
 ## Remove those samples
+## In adults
 poorQC_samples<-c("Sample_FE3P2", "Sample_4067")
 for (sample in poorQC_samples){
   rse_gene_brain_adults_qc<-rse_gene_brain_adults_qc[,-which(rse_gene_brain_adults_qc$SAMPLE_ID==sample)]
@@ -191,7 +193,14 @@ for (sample in poorQC_samples){
   rse_tx_brain_adults_qc<-rse_tx_brain_adults_qc[,-which(rse_tx_brain_adults_qc$SAMPLE_ID==sample)]
   rse_jx_brain_adults_qc<-rse_jx_brain_adults_qc[,-which(rse_jx_brain_adults_qc$SAMPLE_ID==sample)]
 }
+## Save RSE without those samples
+save(rse_gene_brain_adults_qc, file="processed-data/03_EDA/02_QC/rse_gene_brain_adults_qc.Rdata")
+save(rse_exon_brain_adults_qc, file="processed-data/03_EDA/02_QC/rse_exon_brain_adults_qc.Rdata")
+save(rse_tx_brain_adults_qc, file="processed-data/03_EDA/02_QC/rse_tx_brain_adults_qc.Rdata")
+save(rse_jx_brain_adults_qc, file="processed-data/03_EDA/02_QC/rse_jx_brain_adults_qc.Rdata")
 
+
+## In pups
 poorQC_samples<-c("Sample_P2_fe2_022019", "Sample_P1_fe3_021819")
 for (sample in poorQC_samples){
   rse_gene_brain_pups_qc<-rse_gene_brain_pups_qc[,-which(rse_gene_brain_pups_qc$SAMPLE_ID==sample)]
@@ -199,6 +208,12 @@ for (sample in poorQC_samples){
   rse_tx_brain_pups_qc<-rse_tx_brain_pups_qc[,-which(rse_tx_brain_pups_qc$SAMPLE_ID==sample)]
   rse_jx_brain_pups_qc<-rse_jx_brain_pups_qc[,-which(rse_jx_brain_pups_qc$SAMPLE_ID==sample)]
 }
+## Save RSE without those samples
+save(rse_gene_brain_pups_qc, file="processed-data/03_EDA/02_QC/rse_gene_brain_pups_qc.Rdata")
+save(rse_exon_brain_pups_qc, file="processed-data/03_EDA/02_QC/rse_exon_brain_pups_qc.Rdata")
+save(rse_tx_brain_pups_qc, file="processed-data/03_EDA/02_QC/rse_tx_brain_pups_qc.Rdata")
+save(rse_jx_brain_pups_qc, file="processed-data/03_EDA/02_QC/rse_jx_brain_pups_qc.Rdata")
+
 
 ## PCA plots without those samples
 plot_PCAs("gene", "brain", "adults")
