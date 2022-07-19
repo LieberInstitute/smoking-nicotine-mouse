@@ -232,7 +232,7 @@ PC_boxplots <- function (PCx, pheno_var1, pheno_var2, tissue, type, age) {
     return(plot)
 }
 
-## Boxplots of PC1 data separated by Group and phenotypes
+## Boxplots of PCx data separated by Group and phenotypes
 plot_PC_boxplots<-function(PCx, type, tissue, age) {
   i=1
   plots<-list()
