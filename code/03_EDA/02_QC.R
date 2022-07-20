@@ -95,7 +95,7 @@ table(rse_gene_blood$trimmed)
 ## 1.3 Plot quality metrics per sample
 ## Detected/mt/ribo genes VS total counts 
 ## Samples separated by phenotypes
-sum_vs_qc<- function (pheno_var, qc_stats, qc_stats_lab, tissue, age){
+sum_vs_qc<- function (pheno_var, qc_stats, qc_stats_lab, label, tissue, age){
     if (is.null(age)){
       RSE<-eval(parse_expr(paste("rse_gene_", tissue, sep="")))
       }
@@ -103,7 +103,8 @@ sum_vs_qc<- function (pheno_var, qc_stats, qc_stats_lab, tissue, age){
       RSE<-eval(parse_expr(paste("rse_gene", tissue, age, sep="_")))
       }
     plot=ggplot(data=as.data.frame(colData(RSE)), 
-           aes(x=sum, y=eval(parse_expr(qc_stats)), color=eval(parse_expr(pheno_var))))+ 
+           aes(x=sum, y=eval(parse_expr(qc_stats)), color=eval(parse_expr(pheno_var)),
+               label=label))+ 
         geom_point() +
         theme(text = element_text(size = 10)) +
         theme(legend.position="right", plot.margin=unit (c (1.5,2,1,2), 'cm')) +
@@ -126,7 +127,8 @@ plot_sum_vs_qc<- function(tissue, age){
     plots<-list()
     i=1
       for (pheno_var in c("Age", "plate","Expt", "Sex", "Group", "medium", "Pregnancy", "flowcell")){
-         p<-sum_vs_qc(pheno_var, qc_stats, qc_stats_lab, tissue, age)
+         ## Without labels for samples
+         p<-sum_vs_qc(pheno_var, qc_stats, qc_stats_lab, "", tissue, age)
          plots[[i]]=p
          i=i+1
       }
@@ -169,7 +171,7 @@ cor(rse_gene_brain_pups$sum, rse_gene_brain_pups$detected)
 
 
 ## Plot mito VS ribo percentages per sample 
-mito_vs_ribo<- function (pheno_var, tissue, age){
+mito_vs_ribo<- function (pheno_var, tissue, age, label){
     if (is.null(age)){
       RSE<-eval(parse_expr(paste("rse_gene_", tissue, sep="")))
       }
@@ -177,7 +179,8 @@ mito_vs_ribo<- function (pheno_var, tissue, age){
       RSE<-eval(parse_expr(paste("rse_gene", tissue, age, sep="_")))
       }
     plot=ggplot(data=as.data.frame(colData(RSE)), 
-           aes(x=subsets_Mito_percent, y=subsets_Ribo_percent, color=eval(parse_expr(pheno_var))))+ 
+           aes(x=subsets_Mito_percent, y=subsets_Ribo_percent, color=eval(parse_expr(pheno_var)),
+               label=label))+ 
         geom_point() +
         theme(text = element_text(size = 10)) +
         theme(legend.position="right", plot.margin=unit (c (1.5,2,1,2), 'cm')) +
@@ -189,7 +192,7 @@ plot_mito_vs_ribo<- function(tissue, age){
     plots<-list()
     i=1
       for (pheno_var in c("Age", "plate","Expt", "Sex", "Group", "medium", "Pregnancy", "flowcell")){
-         p<-mito_vs_ribo(pheno_var,tissue, age)
+         p<-mito_vs_ribo(pheno_var,tissue, age, "")
          plots[[i]]=p
          i=i+1
       }
