@@ -228,7 +228,60 @@ plot_PCAs("jx", "brain", "pups")
 
 
 
-### 1.1.2 Explore samples' gene expression variation across phenotypes by Group
+### 1.1.2 Explore nicotine and smoking samples' separation by Group
+## PCA plots for Group and Expt
+PCA_Expt_Group<- function(type, tissue, age){
+  
+  RSE<-eval(parse_expr(paste("rse", type, tissue, age, "qc", sep="_")))
+
+  ## PCA plots for smoking samples separated by Group
+  RSE_smoking<-RSE[,RSE$Expt=="Smoking"]
+  pca<-prcomp(t(assays(RSE_smoking)$logcounts))
+  # % of the variance explained by each PC
+  pca_vars<- getPcaVars(pca)
+  pca_vars_labs<- paste0(
+      "PC", seq(along = pca_vars), ": ",
+      pca_vars, "% Var Expl")
+  
+  ## Join PCs and samples' info 
+  pca_data<-cbind(pca$x,colData(RSE_smoking))
+  pca_data<-as.data.frame(pca_data)
+  ## Plot
+  p1<-PCx_vs_PCy("PC1", "PC2", pca_data, pca_vars_labs, "Group")
+  
+  
+  ## PCA plots for nicotine samples separated by Group
+  RSE_nicotine<-RSE[,RSE$Expt=="Nicotine"]
+  pca<-prcomp(t(assays(RSE_nicotine)$logcounts))
+  pca_vars<- getPcaVars(pca)
+  pca_vars_labs<- paste0(
+      "PC", seq(along = pca_vars), ": ",
+      pca_vars, "% Var Expl")
+  pca_data<-cbind(pca$x,colData(RSE_nicotine))
+  pca_data<-as.data.frame(pca_data)
+  ## Plot
+  p2<-PCx_vs_PCy("PC1", "PC2", pca_data, pca_vars_labs, "Group")
+  
+  plot_grid(p1,p2, nrow=1)
+  ggsave(paste("plots/03_EDA/03_PCA_MDS/Expt_samples_", type, "_", tissue, "_", age, ".pdf", sep=""), 
+           width = 30, height = 10, units = "cm")
+  return(NULL)
+}
+
+## Plots
+PCA_Expt_Group("gene", "brain", "adults")
+PCA_Expt_Group("gene", "brain", "pups")
+PCA_Expt_Group("exon", "brain", "adults")
+PCA_Expt_Group("exon", "brain", "pups")
+PCA_Expt_Group("tx", "brain", "adults")
+PCA_Expt_Group("tx", "brain", "pups")
+PCA_Expt_Group("jx", "brain", "adults")
+PCA_Expt_Group("jx", "brain", "pups")
+
+
+
+
+### 1.1.3 Explore samples' gene expression variation across phenotypes by Group
 ## PC boxplots 
 PC_boxplots <- function (PCx, pheno_var1, pheno_var2, tissue, type, age) {
     pca_data<-PCA(tissue, type, age)[[1]]
