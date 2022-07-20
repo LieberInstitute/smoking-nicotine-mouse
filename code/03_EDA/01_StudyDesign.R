@@ -1,4 +1,5 @@
 ## 1. Study design
+library(sessioninfo)
 
 ## 1.1 Load data
 load(here("processed-data/02_build_objects/pheno.tsv"))
