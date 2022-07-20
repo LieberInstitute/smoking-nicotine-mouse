@@ -418,3 +418,22 @@ plot_QC_boxplots("brain", NULL)
 plot_QC_boxplots("blood", NULL)
 plot_QC_boxplots("brain", "adults")
 plot_QC_boxplots("brain", "pups")
+
+
+
+
+## Reproducibility information
+print('Reproducibility information:')
+Sys.time()
+proc.time()
+options(width = 120)
+session_info()
+
+#  version  R version 4.2.0 (2022-07-16 ucrt)
+#  os       Windows 10 x64 (build 19044)
+#  system   x86_64, mingw32
+#  ui       RStudio
+#  language (EN)
+#  collate  Spanish_Mexico.utf8
+#  ctype    Spanish_Mexico.utf8
+#  tz       America/Mexico_City
