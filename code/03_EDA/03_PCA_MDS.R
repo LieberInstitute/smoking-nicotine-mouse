@@ -53,7 +53,7 @@ plot_PCAs<-function(type, tissue, age){
   pca_vars<-PCA(tissue, type, age)[[2]]
   ## Plot for type and tissue
   if (is.null(age)){
-    for (PCs in list(c("PC1", "PC2"), c("PC1", "PC3"))){
+    for (PCs in list(c("PC1", "PC2"), c("PC3", "PC4"), c("PC5", "PC6"))){
       plots<-list()
       i=1
         for (pheno_var in c("Age", "plate","Expt", "Sex", "Group", "Pregnancy", "medium", "flowcell")){
@@ -70,7 +70,7 @@ plot_PCAs<-function(type, tissue, age){
   }
   ## Plot for type and age
   else {
-    for (PCs in list(c("PC1", "PC2"), c("PC1", "PC3"))){
+    for (PCs in list(c("PC1", "PC2"), c("PC3", "PC4"), c("PC5", "PC6"))){
       plots<-list()
       i=1
       for (pheno_var in c("plate","Expt", "Sex", "Group", "Pregnancy", "flowcell")){
