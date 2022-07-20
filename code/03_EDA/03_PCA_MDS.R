@@ -398,3 +398,23 @@ plot_MDS("brain", "tx", "adults")
 plot_MDS("brain", "tx", "pups")
 plot_MDS("brain", "jx", "adults")
 plot_MDS("brain", "jx", "pups")
+
+
+
+
+
+
+
+## Reproducibility information
+options(width = 120)
+session_info()
+# version  R version 4.2.0 (2022-04-22 ucrt)
+# os       Windows 10 x64 (build 19044)
+# system   x86_64, mingw32
+# ui       RStudio
+# language (EN)
+# collate  Spanish_Mexico.utf8
+# ctype    Spanish_Mexico.utf8
+# tz       America/Mexico_City
+# date     2022-07-19
+
