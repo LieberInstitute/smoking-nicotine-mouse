@@ -49,3 +49,21 @@ three_pheno("Pregnancy", "Age", "Tissue")
 three_pheno("Pregnancy", "Age", "Group")
 three_pheno("Tissue", "Expt", "Group")
 three_pheno("Pregnancy", "Expt", "Group")
+
+
+
+# Reproducibility information
+print('Reproducibility information:')
+Sys.time()
+proc.time()
+options(width = 120)
+session_info()
+
+#  version  R version 4.2.0 (2022-04-22 ucrt)
+#  os       Windows 10 x64 (build 19044)
+#  system   x86_64, mingw32
+#  ui       RStudio
+#  language (EN)
+#  collate  Spanish_Mexico.utf8
+#  ctype    Spanish_Mexico.utf8
+#  tz       America/Mexico_City
