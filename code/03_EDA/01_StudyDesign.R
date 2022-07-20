@@ -53,7 +53,7 @@ three_pheno("Pregnancy", "Expt", "Group")
 
 
 
-# Reproducibility information
+## Reproducibility information
 print('Reproducibility information:')
 Sys.time()
 proc.time()
