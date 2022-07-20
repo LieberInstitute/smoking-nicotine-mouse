@@ -19,7 +19,13 @@ library(sessioninfo)
 load(here("processed-data/02_build_objects/rse_gene_brain.Rdata"))
 load(here("processed-data/02_build_objects/rse_gene_blood.Rdata"))
 load(here("processed-data/02_build_objects/rse_gene_brain_adults.Rdata"))
+load(here("processed-data/02_build_objects/rse_exon_brain_adults.Rdata"))
+load(here("processed-data/02_build_objects/rse_tx_brain_adults.Rdata"))
+load(here("processed-data/02_build_objects/rse_jx_brain_adults.Rdata"))
 load(here("processed-data/02_build_objects/rse_gene_brain_pups.Rdata"))
+load(here("processed-data/02_build_objects/rse_exon_brain_pups.Rdata"))
+load(here("processed-data/02_build_objects/rse_tx_brain_pups.Rdata"))
+load(here("processed-data/02_build_objects/rse_jx_brain_pups.Rdata"))
 
 
 
