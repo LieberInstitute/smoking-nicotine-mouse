@@ -213,8 +213,6 @@ mito_vs_ribo<- function (pheno_var, tissue, age, label){
         theme(text = element_text(size = 10)) +
         theme(legend.position="right", plot.margin=unit (c (1.5,2,1,2), 'cm')) +
         labs(x="Percentage of mt counts", y="Percentage of ribosomal counts", color=pheno_var)
-      
-      
     }
     return(plot)
 }
@@ -353,7 +351,6 @@ qc_filt_col <- function(tissue, age){
     else {
       qc_filt<-append(qc_filt, "No")
       names<-append(names, sample)
-      
       }
   }
   return(list(qc_filt, names))
@@ -402,7 +399,6 @@ plots_Retained <- function(tissue, age){
   }
   ggsave(fileName, width = 35, height = 25, units = "cm")
 }
-
 
 ## Plots
 plots_Retained("brain", NULL)
