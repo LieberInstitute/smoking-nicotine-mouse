@@ -117,6 +117,8 @@ sum_vs_qc<- function (pheno_var, qc_stats, qc_stats_lab, label, tissue, age){
              aes(x=sum, y=eval(parse_expr(qc_stats)), color=eval(parse_expr(pheno_var)),
                  label=eval(parse_expr(label))))+ 
           geom_point() +
+          ## Add samples' labels
+          geom_text_repel(color="black", size=2) +
           theme(text = element_text(size = 10)) +
           theme(legend.position="right", plot.margin=unit (c (1.5,2,1,2), 'cm')) +
           labs(x="Total read counts", y=qc_stats_lab, color=pheno_var)
@@ -204,6 +206,8 @@ mito_vs_ribo<- function (pheno_var, tissue, age, label){
              aes(x=subsets_Mito_percent, y=subsets_Ribo_percent, color=eval(parse_expr(pheno_var)),
                  label=eval(parse_expr(label))))+ 
           geom_point() +
+          ## Add samples' labels
+          geom_text_repel(color="black", size=2) +
           theme(text = element_text(size = 10)) +
           theme(legend.position="right", plot.margin=unit (c (1.5,2,1,2), 'cm')) +
           labs(x="Percentage of mt counts", y="Percentage of ribosomal counts", color=pheno_var)      
