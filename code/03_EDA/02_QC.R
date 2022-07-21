@@ -102,13 +102,24 @@ sum_vs_qc<- function (pheno_var, qc_stats, qc_stats_lab, label, tissue, age){
     else {
       RSE<-eval(parse_expr(paste("rse_gene", tissue, age, sep="_")))
       }
-    plot=ggplot(data=as.data.frame(colData(RSE)), 
-           aes(x=sum, y=eval(parse_expr(qc_stats)), color=eval(parse_expr(pheno_var)),
-               label=label))+ 
-        geom_point() +
-        theme(text = element_text(size = 10)) +
-        theme(legend.position="right", plot.margin=unit (c (1.5,2,1,2), 'cm')) +
-        labs(x="Total read counts", y=qc_stats_lab, color=pheno_var)
+    if (label==""){
+      plot=ggplot(data=as.data.frame(colData(RSE)), 
+             aes(x=sum, y=eval(parse_expr(qc_stats)), color=eval(parse_expr(pheno_var)),
+                 label=label))+ 
+          geom_point() +
+          theme(text = element_text(size = 10)) +
+          theme(legend.position="right", plot.margin=unit (c (1.5,2,1,2), 'cm')) +
+          labs(x="Total read counts", y=qc_stats_lab, color=pheno_var)
+      }
+    else {
+      plot=ggplot(data=as.data.frame(colData(RSE)), 
+             aes(x=sum, y=eval(parse_expr(qc_stats)), color=eval(parse_expr(pheno_var)),
+                 label=eval(parse_expr(label))))+ 
+          geom_point() +
+          theme(text = element_text(size = 10)) +
+          theme(legend.position="right", plot.margin=unit (c (1.5,2,1,2), 'cm')) +
+          labs(x="Total read counts", y=qc_stats_lab, color=pheno_var)
+      }
     return(plot)
 }
 
@@ -178,13 +189,24 @@ mito_vs_ribo<- function (pheno_var, tissue, age, label){
     else {
       RSE<-eval(parse_expr(paste("rse_gene", tissue, age, sep="_")))
       }
-    plot=ggplot(data=as.data.frame(colData(RSE)), 
-           aes(x=subsets_Mito_percent, y=subsets_Ribo_percent, color=eval(parse_expr(pheno_var)),
-               label=label))+ 
-        geom_point() +
-        theme(text = element_text(size = 10)) +
-        theme(legend.position="right", plot.margin=unit (c (1.5,2,1,2), 'cm')) +
-        labs(x="Percentage of mt counts", y="Percentage of ribosomal counts", color=pheno_var)
+    if (label==""){
+      plot=ggplot(data=as.data.frame(colData(RSE)), 
+             aes(x=subsets_Mito_percent, y=subsets_Ribo_percent, color=eval(parse_expr(pheno_var)),
+                 label=label))+ 
+          geom_point() +
+          theme(text = element_text(size = 10)) +
+          theme(legend.position="right", plot.margin=unit (c (1.5,2,1,2), 'cm')) +
+          labs(x="Percentage of mt counts", y="Percentage of ribosomal counts", color=pheno_var)
+      }
+    else {
+      plot=ggplot(data=as.data.frame(colData(RSE)), 
+             aes(x=subsets_Mito_percent, y=subsets_Ribo_percent, color=eval(parse_expr(pheno_var)),
+                 label=eval(parse_expr(label))))+ 
+          geom_point() +
+          theme(text = element_text(size = 10)) +
+          theme(legend.position="right", plot.margin=unit (c (1.5,2,1,2), 'cm')) +
+          labs(x="Percentage of mt counts", y="Percentage of ribosomal counts", color=pheno_var)      
+      }
     return(plot)
 }
 
