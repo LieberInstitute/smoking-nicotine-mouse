@@ -102,27 +102,29 @@ sum_vs_qc<- function (pheno_var, qc_stats, qc_stats_lab, label, tissue, age){
       }
     else {
       RSE<-eval(parse_expr(paste("rse_gene", tissue, age, sep="_")))
-      }
+    }
+    ## Samples' labels
     if (label==""){
       plot=ggplot(data=as.data.frame(colData(RSE)), 
-             aes(x=sum, y=eval(parse_expr(qc_stats)), color=eval(parse_expr(pheno_var)),
-                 label=label))+ 
-          geom_point() +
-          theme(text = element_text(size = 10)) +
-          theme(legend.position="right", plot.margin=unit (c (1.5,2,1,2), 'cm')) +
-          labs(x="Total read counts", y=qc_stats_lab, color=pheno_var)
-      }
+         aes(x=sum, y=eval(parse_expr(qc_stats)), color=eval(parse_expr(pheno_var)), 
+             label=""))+ 
+      geom_point() +
+      theme(text = element_text(size = 10)) +
+      theme(legend.position="right", plot.margin=unit (c (1.5,2,1,2), 'cm')) +
+      labs(x="Total read counts", y=qc_stats_lab, color=pheno_var)
+    
+    }
     else {
       plot=ggplot(data=as.data.frame(colData(RSE)), 
-             aes(x=sum, y=eval(parse_expr(qc_stats)), color=eval(parse_expr(pheno_var)),
-                 label=eval(parse_expr(label))))+ 
-          geom_point() +
-          ## Add samples' labels
-          geom_text_repel(color="black", size=2) +
-          theme(text = element_text(size = 10)) +
-          theme(legend.position="right", plot.margin=unit (c (1.5,2,1,2), 'cm')) +
-          labs(x="Total read counts", y=qc_stats_lab, color=pheno_var)
-      }
+         aes(x=sum, y=eval(parse_expr(qc_stats)), color=eval(parse_expr(pheno_var)), 
+             label=eval(parse_expr(label))))+ 
+      geom_point() +
+      ## Add labels
+      geom_text_repel(color="black", size=2, max.overlaps = 100) +
+      theme(text = element_text(size = 10)) +
+      theme(legend.position="right", plot.margin=unit (c (1.5,2,1,2), 'cm')) +
+      labs(x="Total read counts", y=qc_stats_lab, color=pheno_var)
+    }
     return(plot)
 }
 
@@ -191,27 +193,29 @@ mito_vs_ribo<- function (pheno_var, tissue, age, label){
       }
     else {
       RSE<-eval(parse_expr(paste("rse_gene", tissue, age, sep="_")))
-      }
+    }
     if (label==""){
       plot=ggplot(data=as.data.frame(colData(RSE)), 
-             aes(x=subsets_Mito_percent, y=subsets_Ribo_percent, color=eval(parse_expr(pheno_var)),
-                 label=label))+ 
-          geom_point() +
-          theme(text = element_text(size = 10)) +
-          theme(legend.position="right", plot.margin=unit (c (1.5,2,1,2), 'cm')) +
-          labs(x="Percentage of mt counts", y="Percentage of ribosomal counts", color=pheno_var)
-      }
+           aes(x=subsets_Mito_percent, y=subsets_Ribo_percent, color=eval(parse_expr(pheno_var)), 
+               label=label))+ 
+        geom_point() +
+        theme(text = element_text(size = 10)) +
+        theme(legend.position="right", plot.margin=unit (c (1.5,2,1,2), 'cm')) +
+        labs(x="Percentage of mt counts", y="Percentage of ribosomal counts", color=pheno_var)
+    }
     else {
       plot=ggplot(data=as.data.frame(colData(RSE)), 
-             aes(x=subsets_Mito_percent, y=subsets_Ribo_percent, color=eval(parse_expr(pheno_var)),
-                 label=eval(parse_expr(label))))+ 
-          geom_point() +
-          ## Add samples' labels
-          geom_text_repel(color="black", size=2) +
-          theme(text = element_text(size = 10)) +
-          theme(legend.position="right", plot.margin=unit (c (1.5,2,1,2), 'cm')) +
-          labs(x="Percentage of mt counts", y="Percentage of ribosomal counts", color=pheno_var)      
-      }
+           aes(x=subsets_Mito_percent, y=subsets_Ribo_percent, color=eval(parse_expr(pheno_var)), 
+               label=eval(parse_expr(label))))+ 
+        geom_point() +
+        ## Add samples' labels
+        geom_text_repel(color="black", size=2, max.overlaps = 100) +
+        theme(text = element_text(size = 10)) +
+        theme(legend.position="right", plot.margin=unit (c (1.5,2,1,2), 'cm')) +
+        labs(x="Percentage of mt counts", y="Percentage of ribosomal counts", color=pheno_var)
+      
+      
+    }
     return(plot)
 }
 
@@ -368,25 +372,25 @@ rse_gene_brain_adults$Dropped_samples<-qc_filt_col("brain", "adults")[[2]]
 rse_gene_brain_pups$Dropped_samples<-qc_filt_col("brain", "pups")[[2]]
 
 
-## Generate plots with samples separated by "Retention"
+## Generate plots with samples separated by Retention and with labels
 plots_Retained <- function(tissue, age){
   ## Plot total counts VS number of genes
   qc_stats="detected"
   qc_stats_lab="Detected number of genes"
-  p1<-sum_vs_qc("Retention", qc_stats, qc_stats_lab, tissue, age)
-  
+  p1<-sum_vs_qc("Retention", qc_stats, qc_stats_lab, "Dropped_samples", tissue, age)
+
   ## Plot total counts VS mt percentage
   qc_stats="subsets_Mito_percent"
   qc_stats_lab="Percentage of mt counts"
-  p2<-sum_vs_qc("Retention", qc_stats, qc_stats_lab, tissue, age)
+  p2<-sum_vs_qc("Retention", qc_stats, qc_stats_lab, "Dropped_samples", tissue, age)
   
   ## Plot total counts VS ribo percentage
   qc_stats="subsets_Ribo_percent"
   qc_stats_lab="Percentage of ribosomal counts"
-  p3<-sum_vs_qc("Retention", qc_stats, qc_stats_lab, tissue, age)
+  p3<-sum_vs_qc("Retention", qc_stats, qc_stats_lab, "Dropped_samples", tissue, age)
   
   ## Plot mt VS ribosomal percentage
-  p4<-mito_vs_ribo("Retention", tissue, age)
+  p4<-mito_vs_ribo("Retention", tissue, age, "Dropped_samples")
   
   plot_grid(p1, p2, p3, p4, nrow = 2)
   ## Save plots
