@@ -332,22 +332,36 @@ qc_filt_col <- function(tissue, age){
     RSE_qc<-eval(parse_expr(paste("rse_gene", tissue, age, "qc", sep="_")))
   }
   qc_filt<-vector()
+  names<-vector()
   for (sample in RSE$SAMPLE_ID){
+    ## Samples retained
     if(sample %in% RSE_qc$SAMPLE_ID){
-      ## Samples retained
       qc_filt<-append(qc_filt, "Yes")
-    }
+      ## Samples' names
+      names<-append(names, "")
+      }
     ## Samples dropped
-    else {qc_filt<-append(qc_filt, "No")}
+    else {
+      qc_filt<-append(qc_filt, "No")
+      names<-append(names, sample)
+      
+      }
   }
-  return(qc_filt)
+  return(list(qc_filt, names))
 }
 
-## Add column to all RSE
-rse_gene_brain$Retention<-qc_filt_col("brain", NULL)
-rse_gene_blood$Retention<-qc_filt_col("blood", NULL)
-rse_gene_brain_adults$Retention<-qc_filt_col("brain", "adults")
-rse_gene_brain_pups$Retention<-qc_filt_col("brain", "pups")
+## Add Retention column to all RSE
+rse_gene_brain$Retention<-qc_filt_col("brain", NULL)[[1]]
+rse_gene_blood$Retention<-qc_filt_col("blood", NULL)[[1]]
+rse_gene_brain_adults$Retention<-qc_filt_col("brain", "adults")[[1]]
+rse_gene_brain_pups$Retention<-qc_filt_col("brain", "pups")[[1]]
+
+## Add column with names of samples dropped 
+rse_gene_brain$Dropped_samples<-qc_filt_col("brain", NULL)[[2]]
+rse_gene_blood$Dropped_samples<-qc_filt_col("blood", NULL)[[2]]
+rse_gene_brain_adults$Dropped_samples<-qc_filt_col("brain", "adults")[[2]]
+rse_gene_brain_pups$Dropped_samples<-qc_filt_col("brain", "pups")[[2]]
+
 
 ## Generate plots with samples separated by "Retention"
 plots_Retained <- function(tissue, age){
