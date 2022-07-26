@@ -49,41 +49,61 @@ PCx_vs_PCy <- function (PCx, PCy, pca_data, pca_vars, pheno_var) {
 
 ## All PCA plots 
 plot_PCAs<-function(type, tissue, age){
+  ## PC data
   pca_data<-PCA(tissue, type, age)[[1]]
   pca_vars<-PCA(tissue, type, age)[[2]]
-  ## Plot for type and tissue
+  
+  ## Plots for blood
   if (is.null(age)){
     for (PCs in list(c("PC1", "PC2"), c("PC3", "PC4"), c("PC5", "PC6"))){
       plots<-list()
       i=1
-        for (pheno_var in c("Age", "plate","Expt", "Sex", "Group", "Pregnancy", "medium", "flowcell")){
+        for (pheno_var in c("plate","Group", "Pregnancy", "flowcell")){
            p<-PCx_vs_PCy(PCs[1], PCs[2], pca_data, pca_vars, pheno_var)
            plots[[i]]=p
            i=i+1
         }
-      plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]], plots[[6]], plots[[7]], plots[[8]],
-                nrow = 2)
+      plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], nrow = 2)
       ## Save plots
       ggsave(paste("plots/03_EDA/03_PCA_MDS/",PCs[1],"_vs_",PCs[2],"_", type, "_", tissue ,".pdf", sep=""), 
-             width = 65, height = 25, units = "cm")
+             width = 30, height = 25, units = "cm")
     }
   }
-  ## Plot for type and age
-  else {
+  
+  ## Plots for brain and adults
+  else if (age=="adults") {
     for (PCs in list(c("PC1", "PC2"), c("PC3", "PC4"), c("PC5", "PC6"))){
       plots<-list()
       i=1
-      for (pheno_var in c("plate","Expt", "Sex", "Group", "Pregnancy", "flowcell")){
+      for (pheno_var in c("plate","Expt", "Group", "Pregnancy", "flowcell")){
          p<-PCx_vs_PCy(PCs[1], PCs[2], pca_data, pca_vars, pheno_var)
          plots[[i]]=p
          i=i+1
       }
-      plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]], plots[[6]],nrow = 2)
+      plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]], nrow = 2)
       ## Save plots
       ggsave(paste("plots/03_EDA/03_PCA_MDS/",PCs[1],"_vs_",PCs[2],"_", type, "_", tissue ,"_", age, ".pdf", sep=""), 
-             width = 45, height = 25, units = "cm")
+             width = 40, height = 20, units = "cm")
     }
   }
+  
+  ## Plots for brain and pups
+  else if  (age=="pups") {
+    for (PCs in list(c("PC1", "PC2"), c("PC3", "PC4"), c("PC5", "PC6"))){
+      plots<-list()
+      i=1
+      for (pheno_var in c("plate","Expt", "Sex", "Group", "flowcell")){
+         p<-PCx_vs_PCy(PCs[1], PCs[2], pca_data, pca_vars, pheno_var)
+         plots[[i]]=p
+         i=i+1
+      }
+      plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]], nrow = 2)
+      ## Save plots
+      ggsave(paste("plots/03_EDA/03_PCA_MDS/",PCs[1],"_vs_",PCs[2],"_", type, "_", tissue ,"_", age, ".pdf", sep=""), 
+             width = 40, height = 20, units = "cm")
+
+  }
+ }
 }
 
 ## Plots
