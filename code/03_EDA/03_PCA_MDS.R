@@ -131,7 +131,7 @@ pca_data_exon_brain_pups<-PCA("brain", "exon", "pups")[[1]]
 pca_data_tx_brain_pups<-PCA("brain", "tx", "pups")[[1]]
 pca_data_jx_brain_pups<-PCA("brain", "jx", "pups")[[1]]
 
-## Rare samples in adult plots
+## In adult plots
 pca_data_gene_brain_adults[which.max(pca_data_gene_brain_adults$PC2), "SAMPLE_ID"]
 # "Sample_FE3P2"
 pca_data_gene_brain_adults[which.max(pca_data_gene_brain_adults$PC3), "SAMPLE_ID"]
@@ -144,8 +144,13 @@ pca_data_tx_brain_adults[which.max(pca_data_tx_brain_adults$PC2), "SAMPLE_ID"]
 # "Sample_FE3P2"
 pca_data_jx_brain_adults[which.min(pca_data_jx_brain_adults$PC3), "SAMPLE_ID"]
 # "Sample_FE3P2"
+pca_data_jx_brain_adults[which.min(pca_data_jx_brain_adults$PC5), "SAMPLE_ID"]
+# "Sample_4057"
+pca_data_jx_brain_adults[which.min(pca_data_jx_brain_adults$PC6), "SAMPLE_ID"]
+# "Sample_FC41"
 
-## Rare samples in pup plots
+
+## In pup plots
 pca_data_gene_brain_pups[which.min(pca_data_gene_brain_pups$PC2), "SAMPLE_ID"]
 # "Sample_P2_fe2_022019"
 ## Male samples in females at gene level 
@@ -155,8 +160,14 @@ pca_data_exon_brain_pups[which.min(pca_data_exon_brain_pups$PC1), "SAMPLE_ID"]
 # "Sample_P2_fe2_022019"
 pca_data_tx_brain_pups[which.min(pca_data_tx_brain_pups$PC1), "SAMPLE_ID"]
 # "Sample_P2_fe2_022019"
+pca_data_tx_brain_pups[which.min(pca_data_tx_brain_pups$PC6), "SAMPLE_ID"]
+# "Sample_P2_fe2_022019"
 pca_data_jx_brain_pups[which.max(pca_data_jx_brain_pups$PC1), "SAMPLE_ID"]
 # "Sample_P2_fe2_022019"
+pca_data_jx_brain_pups[which.max(pca_data_jx_brain_pups$PC3), "SAMPLE_ID"]
+# "Sample_P5_fe1_021919"
+pca_data_jx_brain_pups[which.min(pca_data_jx_brain_pups$PC5), "SAMPLE_ID"]
+# "Sample_P7_fe3_021719"
 
 
 ## Explore Sample_FE3P2 info:
@@ -172,7 +183,8 @@ pca_data_gene_brain_adults[which.max(pca_data_gene_brain_adults$rRNA_rate), "SAM
 colData(rse_gene_brain_adults_qc)[which(rse_gene_brain_adults_qc$SAMPLE_ID=="Sample_4067"),
                           c("mitoRate", "rRNA_rate", "totalAssignedGene", "overallMapRate", 
                             "ERCCsumLogErr", "sum", "Sex")]
-## This sample has the max mito rate, % of mt and ribo counts and min prop of reads assigned to genes
+## This sample has the max mito rate, % of mt and ribo counts and min prop of reads assigned to genes 
+## and number of genes
 pca_data_gene_brain_adults[which.max(pca_data_gene_brain_adults$mitoRate), "SAMPLE_ID"]
 # "Sample_4067"
 pca_data_gene_brain_adults[which.max(pca_data_gene_brain_adults$subsets_Mito_percent), "SAMPLE_ID"]
@@ -181,7 +193,25 @@ pca_data_gene_brain_adults[which.max(pca_data_gene_brain_adults$subsets_Ribo_per
 # "Sample_4067"
 pca_data_gene_brain_adults[which.min(pca_data_gene_brain_adults$totalAssignedGene), "SAMPLE_ID"]
 # "Sample_4067"
+pca_data_gene_brain_adults[which.min(pca_data_gene_brain_adults$detected), "SAMPLE_ID"]
+# "Sample_4067"
 
+
+## Explore Sample_FC41 info:
+colData(rse_gene_brain_adults_qc)[which(rse_gene_brain_adults_qc$SAMPLE_ID=="Sample_FC41"),
+                          c("mitoRate", "rRNA_rate", "totalAssignedGene", "overallMapRate", 
+                            "ERCCsumLogErr", "sum", "Sex")]
+## This sample has the min overall mapping rate and library size
+pca_data_gene_brain_adults[which.min(pca_data_gene_brain_adults$overallMapRate), "SAMPLE_ID"]
+# "Sample_FC41"
+pca_data_gene_brain_adults[which.min(pca_data_gene_brain_adults$sum), "SAMPLE_ID"]
+# "Sample_FC41"
+
+
+## Explore Sample_4057 info:
+colData(rse_gene_brain_adults_qc)[which(rse_gene_brain_adults_qc$SAMPLE_ID=="Sample_4057"),
+                          c("mitoRate", "rRNA_rate", "totalAssignedGene", "overallMapRate", 
+                            "ERCCsumLogErr", "sum", "Sex")]
 
 
 ## Explore Sample_P2_fe2_022019 info:
@@ -193,7 +223,6 @@ pca_data_gene_brain_pups[which.min(pca_data_gene_brain_pups$totalAssignedGene), 
 # "Sample_P2_fe2_022019"
 
 
-
 ## Explore Sample_P1_fe3_021819 info:
 colData(rse_gene_brain_pups_qc)[which(rse_gene_brain_pups_qc$SAMPLE_ID=="Sample_P1_fe3_021819"),
                           c("mitoRate", "rRNA_rate", "totalAssignedGene", "overallMapRate", 
@@ -201,6 +230,23 @@ colData(rse_gene_brain_pups_qc)[which(rse_gene_brain_pups_qc$SAMPLE_ID=="Sample_
 ## This sample has the max Error value
 pca_data_gene_brain_pups[which.max(abs(pca_data_gene_brain_pups$ERCCsumLogErr)), "SAMPLE_ID"]
 # "Sample_P1_fe3_021819"
+
+
+## Explore Sample_P5_fe1_021919 info:
+colData(rse_gene_brain_pups_qc)[which(rse_gene_brain_pups_qc$SAMPLE_ID=="Sample_P5_fe1_021919"),
+                          c("mitoRate", "rRNA_rate", "totalAssignedGene", "overallMapRate", 
+                            "ERCCsumLogErr", "sum", "Sex")]
+
+
+## Explore Sample_P7_fe3_021719 info:
+colData(rse_gene_brain_pups_qc)[which(rse_gene_brain_pups_qc$SAMPLE_ID=="Sample_P7_fe3_021719"),
+                          c("mitoRate", "rRNA_rate", "totalAssignedGene", "overallMapRate", 
+                            "ERCCsumLogErr", "sum", "Sex")]
+## This sample has the min overall mapping rate and library size
+pca_data_gene_brain_pups[which.min(pca_data_gene_brain_pups$overallMapRate), "SAMPLE_ID"]
+# "Sample_P7_fe3_021719"
+pca_data_gene_brain_pups[which.min(pca_data_gene_brain_pups$sum), "SAMPLE_ID"]
+# "Sample_P7_fe3_021719"
 
 
 
