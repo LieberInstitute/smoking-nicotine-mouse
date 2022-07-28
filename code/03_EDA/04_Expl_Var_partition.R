@@ -11,15 +11,43 @@ load(here("processed-data/03_EDA/02_QC/rse_tx_brain_pups_qc.Rdata"))
 load(here("processed-data/03_EDA/02_QC/rse_jx_brain_adults_qc.Rdata"))
 load(here("processed-data/03_EDA/02_QC/rse_jx_brain_pups_qc.Rdata"))
 
+## Brain data separated by type of experiment
+rse_gene_brain_adults_smoking<-rse_gene_brain_adults_qc[,rse_gene_brain_adults_qc$Expt=="Smoking"]
+save(rse_gene_brain_adults_smoking, 
+     file="processed-data/03_EDA/04_Expl_Var_partition/rse_gene_brain_adults_smoking.Rdata")
+rse_gene_brain_adults_nicotine<-rse_gene_brain_adults_qc[,rse_gene_brain_adults_qc$Expt=="Nicotine"]
+save(rse_gene_brain_adults_nicotine,
+     file="processed-data/03_EDA/04_Expl_Var_partition/rse_gene_brain_adults_nicotine.Rdata")
+rse_gene_brain_pups_smoking<-rse_gene_brain_pups_qc[,rse_gene_brain_pups_qc$Expt=="Smoking"]
+save(rse_gene_brain_pups_smoking, 
+     file="processed-data/03_EDA/04_Expl_Var_partition/rse_gene_brain_pups_smoking.Rdata")
+rse_gene_brain_pups_nicotine<-rse_gene_brain_pups_qc[,rse_gene_brain_pups_qc$Expt=="Nicotine"]
+save(rse_gene_brain_pups_nicotine, 
+     file="processed-data/03_EDA/04_Expl_Var_partition/rse_gene_brain_pups_nicotine.Rdata")
+
 
 ## 1.1 Explanatory Variables
 ## Plot density function for % of variance explained 
-expl_var<- function(type, tissue, age){
-  if (is.null(age)){
-    RSE<-eval(parse_expr(paste("rse", type, tissue, "qc", sep="_")))
+expl_var<- function(type, tissue, age, expt){
+  ## For blood or all adults/pups data
+  if (is.null(expt)){
+    if (is.null(age)){ 
+      RSE<-eval(parse_expr(paste("rse", type, tissue, "qc", sep="_")))
+      fileName=paste("plots/03_EDA/04_Expl_Var_partition/Expl_vars_density_",type,"_",tissue,".pdf",
+                     sep="")
+    }
+    else {
+      RSE<-eval(parse_expr(paste("rse", type, tissue, age, "qc", sep="_")))
+      fileName=paste("plots/03_EDA/04_Expl_Var_partition/Expl_vars_density_",type,"_",tissue,"_", 
+                     age, ".pdf", sep="")
+    }
   }
+ 
+  ## Smoking/nicotine brain data for adults/pups
   else {
-    RSE<-eval(parse_expr(paste("rse", type, tissue, age, "qc", sep="_")))
+    RSE<-eval(parse_expr(paste("rse", type, tissue, age, expt, sep="_")))
+    fileName=paste("plots/03_EDA/04_Expl_Var_partition/Expl_vars_density_",type,"_",tissue, "_", 
+                   age, "_", expt, ".pdf", sep="")
   }
   
   ## % of variance in gene expression explained by each variable
@@ -43,19 +71,16 @@ expl_var<- function(type, tissue, age){
   p<-plotExplanatoryVariables(exp_vars, theme_size = 10, nvars_to_plot = 12)
   p + scale_colour_manual(values = colors[c(values)]) + labs(color="Variables")
   ## Save plot
-  if (is.null(age)){
-    fileName=paste("plots/03_EDA/04_Expl_Var_partition/Expl_vars_density_",type,"_",tissue,".pdf", sep="")
-  }
-  else {
-    fileName=paste("plots/03_EDA/04_Expl_Var_partition/Expl_vars_density_",type,"_",tissue, "_", 
-                   age, ".pdf", sep="")
-  }
   ggsave(fileName, width = 25, height = 15, units = "cm")
   return(NULL)
 
 }
 
 ## Plots
-expl_var("gene", "blood", NULL)
-expl_var("gene", "brain", "adults")
-expl_var("gene", "brain", "pups")
+expl_var("gene", "blood", NULL, NULL)
+expl_var("gene", "brain", "adults", NULL)
+expl_var("gene", "brain", "adults", "smoking")
+expl_var("gene", "brain", "adults", "nicotine")
+expl_var("gene", "brain", "pups", NULL)
+expl_var("gene", "brain", "pups", "smoking")
+expl_var("gene", "brain", "pups", "nicotine")
