@@ -314,7 +314,9 @@ PCA_Expt_Group<- function(type, tissue, age){
   pca_data<-cbind(pca$x,colData(RSE_smoking))
   pca_data<-as.data.frame(pca_data)
   ## Plot
-  p1<-PCx_vs_PCy("PC1", "PC2", pca_data, pca_vars_labs, "Group")
+  p1<-PCx_vs_PCy("PC1", "PC2", pca_data, pca_vars_labs, "Group") + ggtitle("Smoking")
+  p2<-PCx_vs_PCy("PC3", "PC4", pca_data, pca_vars_labs, "Group") + ggtitle("Smoking")
+  p3<-PCx_vs_PCy("PC5", "PC6", pca_data, pca_vars_labs, "Group") + ggtitle("Smoking")
   
   
   ## PCA plots for nicotine samples separated by Group
@@ -327,11 +329,13 @@ PCA_Expt_Group<- function(type, tissue, age){
   pca_data<-cbind(pca$x,colData(RSE_nicotine))
   pca_data<-as.data.frame(pca_data)
   ## Plot
-  p2<-PCx_vs_PCy("PC1", "PC2", pca_data, pca_vars_labs, "Group")
+  p4<-PCx_vs_PCy("PC1", "PC2", pca_data, pca_vars_labs, "Group") + ggtitle("Nicotine")
+  p5<-PCx_vs_PCy("PC3", "PC4", pca_data, pca_vars_labs, "Group") + ggtitle("Nicotine")
+  p6<-PCx_vs_PCy("PC5", "PC6", pca_data, pca_vars_labs, "Group") + ggtitle("Nicotine")
   
-  plot_grid(p1,p2, nrow=1)
+  plot_grid(p1,p2,p3,p4,p5,p6, nrow=2)
   ggsave(paste("plots/03_EDA/03_PCA_MDS/Expt_samples_", type, "_", tissue, "_", age, ".pdf", sep=""), 
-           width = 30, height = 10, units = "cm")
+           width = 40, height = 20, units = "cm")
   return(NULL)
 }
 
