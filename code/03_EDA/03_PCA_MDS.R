@@ -431,18 +431,8 @@ plot_PC_boxplots("PC2", "gene", "brain", "pups")
 
 
 ## 1.2  Multidimensional scaling (MDS)
-MDS<- function(tissue, type, age, pheno_var){
-  if (is.null(age)){
-    RSE <-eval(parse_expr(paste("rse", type, tissue, "qc", sep="_")))
-  }
-  else {
-    RSE <-eval(parse_expr(paste("rse", type, tissue, age, "qc", sep="_")))
-  }
-  
-  ## MDS in 2 components
-  MDS <-calculateMDS(assays(RSE)$logcounts, ncomponents=2)
-  ## Add sample information
-  MDS <- cbind(MDS, colData(RSE)[49:61])
+## MDS plot
+MDS<- function(pheno_var, MDS){
   plot=ggplot(data=as.data.frame(MDS), 
          aes(x=V1,y=V2, color=eval(parse_expr(pheno_var)))) + 
          geom_point() + 
@@ -451,35 +441,62 @@ MDS<- function(tissue, type, age, pheno_var){
     return(plot)
 } 
 
-
+## All MDS plots
 plot_MDS<- function(tissue, type, age) {
+  
   if (is.null(age)){
+    RSE <-eval(parse_expr(paste("rse", type, tissue, "qc", sep="_")))
+    ## MDS in 2 components
+    MDS <-calculateMDS(assays(RSE)$logcounts, ncomponents=2)
+    MDS <- cbind(MDS, colData(RSE)[49:61])
+    
     i=1
     plots<-list()
-    for (pheno_var in c("Age", "plate","Expt", "Sex", "Group", "Pregnancy", "medium", "flowcell")){
-        p<-MDS(tissue, type, age, pheno_var)
+    for (pheno_var in c("plate", "Group", "Pregnancy", "flowcell")){
+        p<-MDS(pheno_var, MDS)
         plots[[i]]=p
         i=i+1
       }
-    plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]], 
-              plots[[6]], plots[[7]], plots[[8]], nrow = 2)
+    plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], nrow = 2)
     ## Save plot
     ggsave(paste("plots/03_EDA/03_PCA_MDS/MDS_", type, "_", tissue, ".pdf", 
-           sep=""), width = 65, height = 25, units = "cm")
+           sep=""), width = 30, height = 25, units = "cm")
   }
-  else {
+  
+  else if (age=="adults") {
+    RSE <-eval(parse_expr(paste("rse", type, tissue, age, "qc", sep="_")))
+    MDS <-calculateMDS(assays(RSE)$logcounts, ncomponents=2)
+    MDS <- cbind(MDS, colData(RSE)[49:61])
+    
     i=1
     plots<-list()
-    for (pheno_var in c("plate","Expt", "Sex", "Group", "Pregnancy", "flowcell")){
-        p<-MDS(tissue, type, age, pheno_var)
+    for (pheno_var in c("plate","Expt", "Group", "Pregnancy", "flowcell")){
+        p<-MDS(pheno_var, MDS)
         plots[[i]]=p
         i=i+1
       }
-    plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]], 
-              plots[[6]], nrow = 2)
+    plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]], nrow = 2)
     ## Save plot
     ggsave(paste("plots/03_EDA/03_PCA_MDS/MDS_", type, "_", tissue, "_", age, ".pdf", 
-           sep=""), width = 45, height = 25, units = "cm")
+           sep=""), width = 40, height = 20, units = "cm")
+  }
+  
+  else if (age=="pups") {
+    RSE <-eval(parse_expr(paste("rse", type, tissue, age, "qc", sep="_")))
+    MDS <-calculateMDS(assays(RSE)$logcounts, ncomponents=2)
+    MDS <- cbind(MDS, colData(RSE)[49:61])
+    
+    i=1
+    plots<-list()
+    for (pheno_var in c("plate","Expt", "Sex", "Group", "flowcell")){
+        p<-MDS(pheno_var, MDS)
+        plots[[i]]=p
+        i=i+1
+      }
+    plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]], nrow = 2)
+    ## Save plot
+    ggsave(paste("plots/03_EDA/03_PCA_MDS/MDS_", type, "_", tissue, "_", age, ".pdf", 
+           sep=""), width = 40, height = 20, units = "cm")
   }
 }
 
