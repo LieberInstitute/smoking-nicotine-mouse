@@ -84,3 +84,65 @@ expl_var("gene", "brain", "adults", "nicotine")
 expl_var("gene", "brain", "pups", NULL)
 expl_var("gene", "brain", "pups", "smoking")
 expl_var("gene", "brain", "pups", "nicotine")
+
+
+
+
+
+
+
+## 1.2 Variance Partition
+### 1.2.1 Canonical Correlation Analysis (CCA) 
+
+## Plot Heatmap of CC between variables
+plot_CCA<- function(tissue, age, expt){
+  ## For blood
+  if (is.null(expt)){
+    RSE<-rse_gene_blood_qc
+    formula <- ~ Pregnancy + Group + plate + flowcell + mitoRate + rRNA_rate + 
+      overallMapRate + totalAssignedGene + ERCCsumLogErr
+  }
+  
+  ## For brain adults
+  else if (age=="adults"){
+    formula <- ~ Pregnancy + Group + plate + flowcell + mitoRate + rRNA_rate + overallMapRate +
+      totalAssignedGene + ERCCsumLogErr
+    if ( expt=="smoking") {
+      RSE<-eval(parse_expr(paste("rse_gene_brain", age, "smoking", sep="_")))
+    }
+    else {
+      RSE<-eval(parse_expr(paste("rse_gene_brain", age, "nicotine", sep="_")))
+    }
+  }
+
+  
+  ## For brain pups
+  else if (age=="pups"){
+    formula <- ~ Sex + Group + plate + flowcell + mitoRate + rRNA_rate + overallMapRate +
+      totalAssignedGene + ERCCsumLogErr
+    if ( expt=="smoking") {
+      RSE<-eval(parse_expr(paste("rse_gene_brain", age, "smoking", sep="_")))
+    }
+    else {
+      RSE<-eval(parse_expr(paste("rse_gene_brain", age, "nicotine", sep="_")))
+    }
+  }
+
+  ## Assess correlation between all pairs of variables
+  C=canCorPairs(formula, colData(RSE))
+  ## Heatmap
+  plotCorrMatrix(C)
+  
+  return(NULL)
+}
+
+## Plots
+plot_CCA("blood", NULL, NULL)
+plot_CCA("brain", "adults", "smoking")
+plot_CCA("brain", "adults", "nicotine")
+plot_CCA("brain", "pups", "smoking")
+plot_CCA("brain", "pups", "nicotine")
+
+
+
+
