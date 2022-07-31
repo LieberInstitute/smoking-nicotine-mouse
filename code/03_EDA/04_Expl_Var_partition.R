@@ -225,3 +225,74 @@ var_part("brain", "adults", "nicotine")
 var_part("brain", "pups", "smoking")
 var_part("brain", "pups", "nicotine")
 
+
+
+
+
+### 1.2.3 Variation within subsets 
+
+var_part_subsets<-function(tissue, age, expt) {
+  ## For blood
+  if (is.null(expt)){
+    RSE<-rse_gene_blood_qc
+    ## Specify formula to model Group variance separately for each Pregnancy state
+    formula <- ~ (Pregnancy+0|Group) + (1|Pregnancy) + (1|plate) + (1|flowcell) + mitoRate + rRNA_rate + 
+      overallMapRate + totalAssignedGene + ERCCsumLogErr
+    fileName<-paste("plots/03_EDA/04_Expl_Var_partition/ViolinPlot_subsets_", tissue, ".pdf", sep="")
+  }
+  
+  ## For brain adults
+  else if (age=="adults"){
+    formula <- ~ (Pregnancy+0|Group) + (1|Pregnancy) + (1|plate) + (1|flowcell) + mitoRate + rRNA_rate + 
+      overallMapRate + totalAssignedGene + ERCCsumLogErr
+    if (expt=="smoking") {
+      RSE<-eval(parse_expr(paste("rse_gene_brain", age, "smoking", sep="_")))
+    }
+    else {
+      RSE<-eval(parse_expr(paste("rse_gene_brain", age, "nicotine", sep="_")))
+    }
+ 
+    fileName<-paste("plots/03_EDA/04_Expl_Var_partition/ViolinPlot_subsets_", tissue, "_", 
+                     age, "_", expt, ".pdf", sep="")
+  }
+
+  
+  ## For brain pups
+  else if (age=="pups"){
+    ## Group variance for each sex
+    formula <- ~ (Sex+0|Group) + (1|Sex) + (1|plate) + (1|flowcell) + mitoRate + rRNA_rate + overallMapRate +
+      totalAssignedGene + ERCCsumLogErr
+    if ( expt=="smoking") {
+      RSE<-eval(parse_expr(paste("rse_gene_brain", age, "smoking", sep="_")))
+    }
+    else {
+      RSE<-eval(parse_expr(paste("rse_gene_brain", age, "nicotine", sep="_")))
+    }
+
+    fileName<-paste("plots/03_EDA/04_Expl_Var_partition/ViolinPlot_subsets_", tissue, "_", 
+                     age, "_", expt, ".pdf", sep="")
+  }
+
+  ## Genes with variance of 0
+  genes_var_zero<-which(apply(assays(RSE)$logcounts, 1, var)==0)
+  
+  ## Fit model and extract variance percents
+  if (length(genes_var_zero)>0){
+    varPart <- fitExtractVarPartModel(assays(RSE)$logcounts[-genes_var_zero,],formula, colData(RSE))
+  }
+  else {
+    varPart <- fitExtractVarPartModel(assays(RSE)$logcounts,formula, colData(RSE))
+  }
+  
+  ## Sort variables 
+  sort_vars <- sortCols(varPart)
+  p<-plotVarPart(sort_vars, label.angle=60)
+  ggsave(fileName,  p, width = 40, height = 20, units = "cm")
+
+}
+
+var_part_subsets("blood", NULL, NULL)
+var_part_subsets("brain", "adults", "smoking")
+var_part_subsets("brain", "adults", "nicotine")
+var_part_subsets("brain", "pups", "smoking")
+var_part_subsets("brain", "pups", "nicotine")
