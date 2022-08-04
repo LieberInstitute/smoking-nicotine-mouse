@@ -13,6 +13,9 @@ load(here("processed-data/03_EDA/02_QC/rse_gene_brain_pups_qc.Rdata"))
 load(here("processed-data/03_EDA/02_QC/rse_exon_brain_pups_qc.Rdata"))
 load(here("processed-data/03_EDA/02_QC/rse_tx_brain_pups_qc.Rdata"))
 load(here("processed-data/03_EDA/02_QC/rse_jx_brain_pups_qc.Rdata"))
+## Use not filtered brain data
+rse_gene_brain_qc<-rse_gene_brain
+
 
 ## Generate PCA data
 PCA<-function(tissue, type, age){
@@ -53,20 +56,38 @@ plot_PCAs<-function(type, tissue, age){
   pca_data<-PCA(tissue, type, age)[[1]]
   pca_vars<-PCA(tissue, type, age)[[2]]
   
-  ## Plots for blood
+  ## Plots for blood and brain 
   if (is.null(age)){
-    for (PCs in list(c("PC1", "PC2"), c("PC3", "PC4"), c("PC5", "PC6"))){
-      plots<-list()
-      i=1
+    if (tissue=="blood"){
+      for (PCs in list(c("PC1", "PC2"), c("PC3", "PC4"), c("PC5", "PC6"))){
+        plots<-list()
+        i=1
         for (pheno_var in c("plate","Group", "Pregnancy", "flowcell")){
            p<-PCx_vs_PCy(PCs[1], PCs[2], pca_data, pca_vars, pheno_var)
            plots[[i]]=p
            i=i+1
         }
-      plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], nrow = 2)
-      ## Save plots
-      ggsave(paste("plots/03_EDA/03_PCA_MDS/",PCs[1],"_vs_",PCs[2],"_", type, "_", tissue ,".pdf", sep=""), 
-             width = 30, height = 25, units = "cm")
+        plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], nrow = 2)
+        ## Save plots
+        ggsave(paste("plots/03_EDA/03_PCA_MDS/",PCs[1],"_vs_",PCs[2],"_", type, "_", tissue ,".pdf", sep=""), 
+                 width = 30, height = 25, units = "cm")
+      }
+    }  
+    ## For brain
+    else {
+       for (PCs in list(c("PC1", "PC2"), c("PC3", "PC4"), c("PC5", "PC6"))){
+        plots<-list()
+        i=1
+        for (pheno_var in c("Age", "plate","Group", "Pregnancy", "flowcell")){
+           p<-PCx_vs_PCy(PCs[1], PCs[2], pca_data, pca_vars, pheno_var)
+           plots[[i]]=p
+           i=i+1
+        }
+        plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]], nrow = 2)
+        ## Save plots
+        ggsave(paste("plots/03_EDA/03_PCA_MDS/",PCs[1],"_vs_",PCs[2],"_", type, "_", tissue ,".pdf", sep=""), 
+                 width = 40, height = 20, units = "cm")
+      }
     }
   }
   
@@ -108,6 +129,7 @@ plot_PCAs<-function(type, tissue, age){
 
 ## Plots
 plot_PCAs("gene", "blood", NULL)
+plot_PCAs("gene", "brain", NULL)
 plot_PCAs("gene", "brain", "adults")
 plot_PCAs("gene", "brain", "pups")
 plot_PCAs("exon", "brain", "adults")
