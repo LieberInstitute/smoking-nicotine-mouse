@@ -96,36 +96,44 @@ expl_var("gene", "brain", "pups", "nicotine")
 
 ## Plot Heatmap of CC between variables
 plot_CCA<- function(tissue, age, expt){
-  ## For blood
+  
   if (is.null(expt)){
-    RSE<-rse_gene_blood_qc
-    formula <- ~ Pregnancy + Group + plate + flowcell + mitoRate + rRNA_rate + 
+    
+    ## For blood 
+    if (is.null(age)){
+      RSE<-eval(parse_expr(paste("rse", type, tissue, "qc", sep="_")))
+      formula <- ~ Pregnancy + Group + plate + flowcell + mitoRate + rRNA_rate + 
       overallMapRate + totalAssignedGene + ERCCsumLogErr
+      
+    }
+    
+    ## For adults
+    else if (age=="adults"){
+      RSE<-eval(parse_expr(paste("rse", type, tissue, age, "qc", sep="_")))
+      formula <- ~ Pregnancy + Expt + Group + plate + flowcell + mitoRate + rRNA_rate + 
+      overallMapRate + totalAssignedGene + ERCCsumLogErr      
+    }
+    
+    ## For pups
+    else if (age=="pups"){
+      RSE<-eval(parse_expr(paste("rse", type, tissue, age, "qc", sep="_")))
+      formula <- ~ Sex + Expt + Group + plate + flowcell + mitoRate + rRNA_rate + 
+      overallMapRate + totalAssignedGene + ERCCsumLogErr     
+    }
   }
   
-  ## For brain adults
-  else if (age=="adults"){
-    formula <- ~ Pregnancy + Group + plate + flowcell + mitoRate + rRNA_rate + overallMapRate +
-      totalAssignedGene + ERCCsumLogErr
-    if ( expt=="smoking") {
-      RSE<-eval(parse_expr(paste("rse_gene_brain", age, "smoking", sep="_")))
+  ## For brain adults/pups and smoking/nicotine
+  else {
+    RSE<-eval(parse_expr(paste("rse_gene", tissue, age, expt, sep="_")))
+    if (age=="adults"){
+      formula <- ~ Pregnancy + Group + plate + flowcell + mitoRate + rRNA_rate + 
+      overallMapRate + totalAssignedGene + ERCCsumLogErr         
     }
-    else {
-      RSE<-eval(parse_expr(paste("rse_gene_brain", age, "nicotine", sep="_")))
+    else{
+      formula <- ~ Sex + Group + plate + flowcell + mitoRate + rRNA_rate + 
+      overallMapRate + totalAssignedGene + ERCCsumLogErr   
     }
-  }
 
-  
-  ## For brain pups
-  else if (age=="pups"){
-    formula <- ~ Sex + Group + plate + flowcell + mitoRate + rRNA_rate + overallMapRate +
-      totalAssignedGene + ERCCsumLogErr
-    if ( expt=="smoking") {
-      RSE<-eval(parse_expr(paste("rse_gene_brain", age, "smoking", sep="_")))
-    }
-    else {
-      RSE<-eval(parse_expr(paste("rse_gene_brain", age, "nicotine", sep="_")))
-    }
   }
 
   ## Assess correlation between all pairs of variables
@@ -138,6 +146,8 @@ plot_CCA<- function(tissue, age, expt){
 
 ## Plots
 plot_CCA("blood", NULL, NULL)
+plot_CCA("brain", "adults", NULL)
+plot_CCA("brain", "pups", NULL)
 plot_CCA("brain", "adults", "smoking")
 plot_CCA("brain", "adults", "nicotine")
 plot_CCA("brain", "pups", "smoking")
