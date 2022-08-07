@@ -326,3 +326,22 @@ var_part_subsets("brain", "adults", "smoking")
 var_part_subsets("brain", "adults", "nicotine")
 var_part_subsets("brain", "pups", "smoking")
 var_part_subsets("brain", "pups", "nicotine")
+
+
+
+
+
+## Reproducibility information
+options(width = 120)
+session_info()
+# version  R version 4.2.0 (2022-04-22 ucrt)
+#  os       Windows 10 x64 (build 19044)
+#  system   x86_64, mingw32
+#  ui       RStudio
+#  language (EN)
+#  collate  Spanish_Mexico.utf8
+#  ctype    Spanish_Mexico.utf8
+#  tz       America/Mexico_City
+#  date     2022-08-06
+#  rstudio  2022.02.3+492 Prairie Trillium (desktop)
+#  pandoc   2.17.1.1 @ C:/Program Files/RStudio/bin/quarto/bin/ (via rmarkdown)
