@@ -236,66 +236,92 @@ var_part("brain", "pups", "nicotine")
 ### 1.2.3 Variation within subsets 
 
 var_part_subsets<-function(tissue, age, expt) {
-  ## For blood
   if (is.null(expt)){
-    RSE<-rse_gene_blood_qc
-    ## Specify formula to model Group variance separately for each Pregnancy state
-    formula <- ~ (Pregnancy+0|Group) + (1|Pregnancy) + (1|plate) + (1|flowcell) + mitoRate + rRNA_rate + 
-      overallMapRate + totalAssignedGene + ERCCsumLogErr
-    fileName<-paste("plots/03_EDA/04_Expl_Var_partition/ViolinPlot_subsets_", tissue, ".pdf", sep="")
+    ## For blood
+    if (is.null(age)){
+      RSE<-rse_gene_blood_qc
+      ## Specify formula to model Group variance separately for each Pregnancy group
+      ## Drop highly correlated variables (retain the ones with higher contribution to the variance)
+      formula <- ~ (Pregnancy+0|Group) + (1|Pregnancy) + (1|plate) + (1|flowcell) + rRNA_rate + 
+                    totalAssignedGene + ERCCsumLogErr
+      fileName<-paste("plots/03_EDA/04_Expl_Var_partition/ViolinPlot_subsets_", tissue, ".pdf", sep="")
+    }
+    
+    ## For all adults and pups
+    else {
+      RSE<-eval(parse_expr(paste("rse", type, tissue, age, "qc", sep="_")))
+      fileName<-paste("plots/03_EDA/04_Expl_Var_partition/ViolinPlot_subsets_", tissue, "_", age, ".pdf", sep="")
+     
+      if (age=="adults"){
+        ## Specify formula to model Group variance separately for each Expt group
+        formula <- ~ (1|Pregnancy) + (Expt+0|Group) + (1|Expt) + (1|plate) + (1|flowcell) + mitoRate + 
+                      rRNA_rate + overallMapRate + ERCCsumLogErr}
+      else{
+        formula <- ~ (1|Sex) + (Expt+0|Group) + (1|Expt) +  (1|plate) + (1|flowcell) + mitoRate + 
+                      rRNA_rate + overallMapRate + totalAssignedGene + ERCCsumLogErr}
+    }
   }
   
-  ## For brain adults
-  else if (age=="adults"){
-    formula <- ~ (Pregnancy+0|Group) + (1|Pregnancy) + (1|plate) + (1|flowcell) + mitoRate + rRNA_rate + 
-      overallMapRate + totalAssignedGene + ERCCsumLogErr
-    if (expt=="smoking") {
-      RSE<-eval(parse_expr(paste("rse_gene_brain", age, "smoking", sep="_")))
-    }
-    else {
-      RSE<-eval(parse_expr(paste("rse_gene_brain", age, "nicotine", sep="_")))
-    }
- 
+  else {
+    RSE<-eval(parse_expr(paste("rse_gene", tissue, age, expt, sep="_")))
     fileName<-paste("plots/03_EDA/04_Expl_Var_partition/ViolinPlot_subsets_", tissue, "_", 
-                     age, "_", expt, ".pdf", sep="")
+                       age, "_", expt, ".pdf", sep="")
+    ## For brain adults
+    if (age=="adults"){
+      if (expt=="nicotine"){
+        ## Group variance for each Pregnancy group
+        formula <- ~ (Pregnancy+0|Group) + (1|Pregnancy) + (1|plate) + (1|flowcell) + rRNA_rate + 
+                     overallMapRate + totalAssignedGene + ERCCsumLogErr}
+      else if (expt=="smoking"){
+        formula <- ~ (Pregnancy+0|Group) + (1|Pregnancy) + (1|plate) + (1|flowcell) + rRNA_rate + 
+                     overallMapRate + totalAssignedGene + ERCCsumLogErr}
+      }
+      
+    ## For brain pups
+    if (age=="pups"){
+      if (expt=="nicotine"){
+        ## Group variance for each sex
+        formula <- ~ (Sex+0|Group) + (1|Sex) + (1|plate) + (1|flowcell) + mitoRate + rRNA_rate + overallMapRate +
+                      totalAssignedGene + ERCCsumLogErr}
+
+     else if (expt=="smoking"){
+        ## Group variance for each sex
+        formula <- ~ (Sex+0|Group) + (1|Sex) + (1|plate) + (1|flowcell) + mitoRate + rRNA_rate + overallMapRate +
+                      totalAssignedGene + ERCCsumLogErr}      
+    }
   }
 
   
-  ## For brain pups
-  else if (age=="pups"){
-    ## Group variance for each sex
-    formula <- ~ (Sex+0|Group) + (1|Sex) + (1|plate) + (1|flowcell) + mitoRate + rRNA_rate + overallMapRate +
-      totalAssignedGene + ERCCsumLogErr
-    if ( expt=="smoking") {
-      RSE<-eval(parse_expr(paste("rse_gene_brain", age, "smoking", sep="_")))
-    }
-    else {
-      RSE<-eval(parse_expr(paste("rse_gene_brain", age, "nicotine", sep="_")))
-    }
-
-    fileName<-paste("plots/03_EDA/04_Expl_Var_partition/ViolinPlot_subsets_", tissue, "_", 
-                     age, "_", expt, ".pdf", sep="")
-  }
-
   ## Genes with variance of 0
   genes_var_zero<-which(apply(assays(RSE)$logcounts, 1, var)==0)
   
-  ## Fit model and extract variance percents
   if (length(genes_var_zero)>0){
+    ## Fit linear mixed model without those genes
     varPart <- fitExtractVarPartModel(assays(RSE)$logcounts[-genes_var_zero,],formula, colData(RSE))
   }
   else {
+  ## Fit linear mixed model with all genes
     varPart <- fitExtractVarPartModel(assays(RSE)$logcounts,formula, colData(RSE))
   }
   
-  ## Sort variables 
+  ## Sort variables by median fraction of variance explained
   sort_vars <- sortCols(varPart)
+  # Violin plot of contribution of each variable to total variance
   p<-plotVarPart(sort_vars, label.angle=60)
-  ggsave(fileName,  p, width = 40, height = 20, units = "cm")
+  if (!is.null(age) && is.null(expt)){
+    ggsave(fileName,  p, width = 35, height = 18, units = "cm")
+  }
+  else{
+    ggsave(fileName,  p, width = 40, height = 20, units = "cm")
+  }
 
 }
 
+
+
 var_part_subsets("blood", NULL, NULL)
+var_part_subsets("brain", "adults", NULL)
+var_part_subsets("brain", "pups", NULL)
 var_part_subsets("brain", "adults", "smoking")
 var_part_subsets("brain", "adults", "nicotine")
 var_part_subsets("brain", "pups", "smoking")
