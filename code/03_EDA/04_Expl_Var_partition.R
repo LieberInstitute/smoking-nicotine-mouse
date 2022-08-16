@@ -241,9 +241,9 @@ var_part_subsets<-function(tissue, age, expt) {
     if (is.null(age)){
       RSE<-rse_gene_blood_qc
       ## Specify formula to model Group variance separately for each Pregnancy group
-      ## Drop highly correlated variables (retain the ones with higher contribution to the variance)
+      ## Drop highly correlated variables 
       formula <- ~ (Pregnancy+0|Group) + (1|Pregnancy) + (1|plate) + (1|flowcell) + rRNA_rate + 
-                    totalAssignedGene + ERCCsumLogErr
+                    totalAssignedGene + ERCCsumLogErr + overallMapRate
       fileName<-paste("plots/03_EDA/04_Expl_Var_partition/ViolinPlot_subsets_", tissue, ".pdf", sep="")
     }
     
@@ -254,11 +254,11 @@ var_part_subsets<-function(tissue, age, expt) {
      
       if (age=="adults"){
         ## Specify formula to model Group variance separately for each Expt group
-        formula <- ~ (1|Pregnancy) + (Expt+0|Group) + (1|Expt) + (1|plate) + (1|flowcell) + mitoRate + 
+        formula <- ~ (1|Pregnancy) + (Expt+0|Group) + (1|Expt) + (1|plate) + (1|flowcell) + totalAssignedGene + 
                       rRNA_rate + overallMapRate + ERCCsumLogErr}
       else{
-        formula <- ~ (1|Sex) + (Expt+0|Group) + (1|Expt) +  (1|plate) + (1|flowcell) + mitoRate + 
-                      rRNA_rate + overallMapRate + totalAssignedGene + ERCCsumLogErr}
+        formula <- ~ (1|Sex) + (Expt+0|Group) + (1|Expt) +  (1|plate) + (1|flowcell) + totalAssignedGene + 
+                      rRNA_rate + overallMapRate + ERCCsumLogErr}
     }
   }
   
@@ -281,12 +281,12 @@ var_part_subsets<-function(tissue, age, expt) {
     if (age=="pups"){
       if (expt=="nicotine"){
         ## Group variance for each sex
-        formula <- ~ (Sex+0|Group) + (1|Sex) + (1|plate) + (1|flowcell) + mitoRate + rRNA_rate + overallMapRate +
+        formula <- ~ (Sex+0|Group) + (1|Sex) + (1|plate) + (1|flowcell) + rRNA_rate + overallMapRate +
                       totalAssignedGene + ERCCsumLogErr}
 
      else if (expt=="smoking"){
         ## Group variance for each sex
-        formula <- ~ (Sex+0|Group) + (1|Sex) + (1|plate) + (1|flowcell) + mitoRate + rRNA_rate + overallMapRate +
+        formula <- ~ (Sex+0|Group) + (1|Sex) + (1|plate) + (1|flowcell) + rRNA_rate + overallMapRate +
                       totalAssignedGene + ERCCsumLogErr}      
     }
   }
@@ -316,6 +316,7 @@ var_part_subsets<-function(tissue, age, expt) {
   }
 
 }
+
 
 
 
