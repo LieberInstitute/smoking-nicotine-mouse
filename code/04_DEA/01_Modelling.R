@@ -20,19 +20,34 @@ load(here("processed-data/03_EDA/04_Expl_Var_partition/rse_gene_brain_pups_smoki
 
 ## 1.1 Modelling
 
+## Extract previous output from calcNormFactors for all samples
+norm_factors<-calcNormFactors(rse_gene, method = "TMM")
+samples_factors<-data.frame(SAMPLE_ID=norm_factors$samples$SAMPLE_ID,
+                            norm.factors=norm_factors$samples$norm.factors,
+                            lib.size=norm_factors$samples$lib.size)
+
+
 ## DEA for experiment mice (nicotine/smoking) vs ctrls
 DEA_expt_vs_ctl<- function(RSE, formula, name, coef){
   
-  pdf(file = paste("plots/04_DEA/DEA_plots_", name, ".pdf", sep="" ))
+  ## Previous lib sizes of each sample
+  match_samples <- match(RSE$SAMPLE_ID, samples_factors$SAMPLE_ID)
+  stopifnot(all(!is.na(m)))
+  factors<-samples_factors[match_samples, ]
+  
+  pdf(file = paste("plots/04_DEA/01_Modelling/DEA_plots_", name, ".pdf", sep="" ))
   par(mfrow=c(2,2))
   
   ## Model matrix
   model=model.matrix(formula, data=colData(RSE))
-  ## Compute normalization factors to scale the raw library sizes
+  ## Use previous norm factors to scale the raw library sizes
   RSE_scaled = calcNormFactors(RSE)
+  RSE_scaled$samples$lib.size<-factors$lib.size
+  RSE_scaled$samples$norm.factors<-factors$norm.factors
+  
   ## Transform counts to log2(CPM) 
   ## Estimate mean-variance relationship for each gene
-  vGene = voom(RSE_scaled, model, plot=TRUE)
+  vGene = voom(RSE_scaled, design=model, plot=TRUE)
   
   ## Fit linear model for each gene 
   fitGene = lmFit(vGene)
@@ -50,7 +65,7 @@ DEA_expt_vs_ctl<- function(RSE, formula, name, coef){
   ## Select top-ranked genes for Group (expt vs ctrl)
   top_genes = topTable(eBGene, coef=coef, p.value = 1, number=nrow(RSE), sort.by="none")
   ## Histogram of adjusted p values
-  hist(top_genes$adj.P.Val, xlab="p-value", main="")
+  hist(top_genes$adj.P.Val, xlab="q-value", main="")
   
   dev.off()
   
@@ -60,11 +75,11 @@ DEA_expt_vs_ctl<- function(RSE, formula, name, coef){
 
 
 ## Plots for DE genes
-plots_DE<-function(top_gene, vGene, p_value, name) {
+plots_DE<-function(top_genes, vGene, FDR=0.05, name) {
   ## NS/Down/Upregulated genes
   DE<-vector()
   for (i in 1:dim(top_genes)[1]) {
-    if (top_genes$adj.P.Val[i]>p_value) {
+    if (top_genes$adj.P.Val[i]>FDR) {
       DE<-append(DE, "ns")
     }
     else {
@@ -78,6 +93,19 @@ plots_DE<-function(top_gene, vGene, p_value, name) {
   }
   top_genes$DE<- DE
   
+  ## Gene symbols for DEG with |logFC|>1
+  DEG_symbol<-vector()
+  for (i in 1:dim(top_genes)[1]) {
+    if (top_genes$DE[i]!="ns" & abs(top_genes$logFC[i])>1) {
+      DEG_symbol<-append(DEG_symbol, top_genes$Symbol[i])
+    }
+    else {
+      DEG_symbol<-append(DEG_symbol, NA)
+    }
+  }
+  top_genes$DEG_symbol<- DEG_symbol
+  
+  
   ## MA plot for DE genes
   cols <- c("Up" = "#ffad73", "Down" = "#26b3ff", "ns" = "grey") 
   sizes <- c("Up" = 2, "Down" = 2, "ns" = 1) 
@@ -90,8 +118,6 @@ plots_DE<-function(top_gene, vGene, p_value, name) {
                alpha = DE)) + 
     geom_point(shape = 21,    
                colour = "black") +
-    #geom_vline(xintercept = c(log2(0.5), log2(2)),
-    #          linetype = "dashed") +
     scale_fill_manual(values = cols) + 
     scale_size_manual(values = sizes) + 
     scale_alpha_manual(values = alphas) +
@@ -103,51 +129,52 @@ plots_DE<-function(top_gene, vGene, p_value, name) {
         aes(x = logFC,y = -log10(adj.P.Val),
                fill = DE,    
                size = DE,
-               alpha = DE)) + 
-    geom_point(shape = 21,    
-               colour = "black") + 
-    geom_hline(yintercept = -log10(p_value),
+               alpha = DE,
+               label= DEG_symbol)) +
+    geom_point(shape = 21) + 
+    geom_hline(yintercept = -log10(FDR),
                linetype = "dashed") + 
-    #geom_vline(xintercept = c(log2(0.5), log2(2)),
-    #          linetype = "dashed") +
+    geom_vline(xintercept = c(-1,1),
+               linetype = "dashed") +
+    geom_label_repel(fill="white", size=2, max.overlaps = Inf,  
+                     box.padding = 0.2, 
+                     show.legend=FALSE) +
+    labs(y="-log10(FDR)")+
     scale_fill_manual(values = cols) + 
     scale_size_manual(values = sizes) + 
     scale_alpha_manual(values = alphas) 
   
   plot_grid(p1, p2, ncol=2)
-  ggsave(paste("plots/04_DEA/DEG_plots_", name, ".pdf", sep=""), 
+  ggsave(paste("plots/04_DEA/01_Modelling/DEG_plots_", name, ".pdf", sep=""), 
          width = 35, height = 15, units = "cm")
 }
 
 
+
  
 ## Boxplot of lognorm counts for top 3 DE genes
+## Obtain lognorm counts of DE genes
 DE_boxplots <- function(RSE, vGene, de_genes){
-  ## Order genes by adjusted p-value
+  ## vGene$E<-cleaningY(vGene$E, model, P=2)
+  
+  
+  ## Order genes by q-value
   de_genes<-de_genes[order(de_genes$adj.P.Val),]
-  ## Obtain lognorm counts of DE genes
   lognorm_DE<-vGene$E[rownames(de_genes),]
   ## Samples as rows and genes as columns
-  if (dim(de_genes)[1]!=1) {
-    lognorm_DE<-t(lognorm_DE)
-  }
-  else {
-    lognorm_DE<-matrix(lognorm_DE, ncol = 1)
-    colnames(lognorm_DE)<-rownames(de_genes)
-  }
+  lognorm_DE<-t(lognorm_DE)
+  colnames(lognorm_DE)<-rowData(RSE)[rownames(de_genes),"Symbol"]
   ## Add samples' Group information
   lognorm_DE<-data.frame(lognorm_DE, "Group"=colData(RSE)$Group)
   
   ## Boxplot for each DE gene
-  if (dim(de_genes)[1]< 4) {
-    n=dim(de_genes)[1]
-    }
-  else {
-    n=3
-    }
   plots<-list()
   i=1
-  for (DEgene in colnames(lognorm_DE)[1:n]){
+  ## Here
+  for (DEgene in colnames(lognorm_DE)[1:3]){
+     ## q-value for each gene
+     q_value<-signif(de_genes[which(de_genes$Symbol==DEgene), "adj.P.Val"], digits = 3)
+     print(q_value)
      p<-ggplot(data=as.data.frame(lognorm_DE), 
      aes(x=Group,y=eval(parse_expr(DEgene)))) + 
      ## Hide outliers
@@ -156,36 +183,43 @@ DE_boxplots <- function(RSE, vGene, de_genes){
      geom_jitter(aes(colour=Group),shape=16, 
                  position=position_jitter(0.2)) +
      theme_classic() +
-     ggtitle(DEgene) +
-     theme(legend.position="right", plot.margin=unit (c (1,1.5,1,1), 'cm'),
-           plot.title = element_text(hjust=0.5, size=10, face="bold")) +
-     labs(x= "Group", y = "lognorm counts")
+     labs(x = "Group", y = "lognorm counts",
+          title = DEgene, 
+          subtitle = paste("q-value:", as.character(q_value))) +
+     theme(plot.margin=unit (c (1,1.5,1,1), 'cm'), legend.position = "none",
+           plot.title = element_text(hjust=0.5, size=10, face="bold")) 
      
      plots[[i]]<-p
      i=i+1
   }
-  
-  if (n==3){
-    plot_grid(plots[[1]], plots[[2]], plots[[3]], ncol=3)
-    ## Save plot
-    ggsave(here(paste("plots/04_DEA/DE_boxplots_",name, ".pdf", sep="")), 
-        width = 35, height = 10, units = "cm")
-  }
-  else if(n==2) {
-    plot_grid(plots[[1]], plots[[2]], ncol=2)
-    ggsave(here(paste("plots/04_DEA/DE_boxplots_",name, ".pdf", sep="")), 
-        width = 12, height = 10, units = "cm")    
-  }
-  else {
-    plot_grid(plots[[1]])
-    ggsave(here(paste("plots/04_DEA/DE_boxplots_",name, ".pdf", sep="")), 
-        width = 12, height = 10, units = "cm")
-  }
-
+  plot_grid(plots[[1]], plots[[2]], plots[[3]], ncol = 3)
+  ggsave(here(paste("plots/04_DEA/01_Modelling/DE_boxplots_",name, ".pdf", sep="")), 
+         width = 25, height = 10, units = "cm")
 }
 
 
 
+## Perform DEA for each group of samples
+apply_DEA<-function(RSE, formula, name, coef){
+  ## DEA
+  results<-DEA_expt_vs_ctl(RSE, formula, name, coef)
+  top_genes<-results[[1]]
+  
+  ## If there are DEG
+  if (length(which(top_genes$adj.P.Val<0.05))>0){
+    vGene<-results[[2]]
+    de_genes<-top_genes[top_genes$adj.P.Val < 0.05,]
+    ## Plots for DE genes
+    plots_DE(top_genes, vGene, 0.05, name)
+    DE_boxplots(RSE, vGene, de_genes)
+    print(paste(length(which(top_genes$adj.P.Val<0.05)), "differentially expressed genes", sep=" "))
+    return(list(results, de_genes))
+  }
+  else {
+    print("No differentially expressed genes")
+    return(results)
+  }
+}
 
 ###############################
 #         Blood DEA 
@@ -197,43 +231,27 @@ RSE<-rse_gene_blood_qc
 ## Naive model
 formula<- ~ Group + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr + overallMapRate 
 name<-"blood_smoking_naive"
-top_genes<-DEA_expt_vs_ctl(RSE, formula, name, "GroupExperimental")[[1]]
-# vGene<-DEA_expt_vs_ctl(RSE, formula, name, "GroupExperimental")[[2]]
+coef<-"GroupExperimental"
+results_blood_smoking_naive<-apply_DEA(RSE, formula, name, coef)[[1]]
+# "No differentially expressed genes"
 
-## DE genes
-table(top_genes$adj.P.Val < 0.85)
-# FALSE   
-# 19974   
 
 
 ## Model fitted by Pregnancy
 formula<- ~ Group + Pregnancy + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr + overallMapRate
 name<-"blood_smoking_fitted"
-top_genes<-DEA_expt_vs_ctl(RSE, formula, name, "GroupExperimental")[[1]]
-vGene<-DEA_expt_vs_ctl(RSE, formula, name, "GroupExperimental")[[2]]
-
-## DE genes
-table(top_genes$adj.P.Val < 0.6)
-# FALSE  TRUE 
-# 19808   166 
-de_genes_blood_smoking_fitted<-top_genes[top_genes$adj.P.Val < 0.6,]
-## Plots for DE genes
-plots_DE(top_gene, vGene, 0.6, name)
-## Boxplots of lognorm counts for DEG
-DE_boxplots(RSE, vGene, de_genes_blood_smoking_fitted)
+coef<-"GroupExperimental"
+results_blood_smoking_fitted<-apply_DEA(RSE, formula, name, coef)[[1]]
+# "No differentially expressed genes"
 
 
 
 ## Model with interaction between Group and Pregnancy
 formula<- ~ Group*Pregnancy + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr + overallMapRate 
 name<-"blood_smoking_interaction"
-top_genes<-DEA_expt_vs_ctl(RSE, formula, name, "GroupExperimental:PregnancyYes")[[1]]
-# vGene<-DEA_expt_vs_ctl(RSE, formula, name, "GroupExperimental:PregnancyYes")[[2]]
-
-## DE genes
-table(top_genes$adj.P.Val < 0.9)
-# FALSE   
-# 19974   
+coef<-"GroupExperimental:PregnancyYes"
+results_blood_smoking_interaction<-apply_DEA(RSE, formula, name, coef)[[1]]
+# "No differentially expressed genes" 
 
 
 
@@ -251,38 +269,27 @@ RSE<-rse_gene_brain_adults_nicotine
 ## Naive model
 formula<- ~ Group + plate + flowcell + rRNA_rate + overallMapRate + totalAssignedGene + ERCCsumLogErr 
 name<-"adults_nicotine_naive"
-top_genes<-DEA_expt_vs_ctl(RSE, formula, name, "GroupExperimental")[[1]]
-# vGene<-DEA_expt_vs_ctl(RSE, formula, name, "GroupExperimental")[[2]]
+coef<-"GroupExperimental"
+results_adults_nicotine_naive<-apply_DEA(RSE, formula, name, coef)[[1]]
+# "No differentially expressed genes" 
 
-## DE genes
-table(top_genes$adj.P.Val < 0.9)
-# FALSE   
-# 19974     
-
-
+ 
 
 ## Model fitted by Pregnancy
 formula<- ~ Group + Pregnancy + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr + overallMapRate 
 name<-"adults_nicotine_fitted"
-top_genes<-DEA_expt_vs_ctl(RSE, formula, name, "GroupExperimental")[[1]]
-# vGene<-DEA_expt_vs_ctl(RSE, formula, name, "GroupExperimental")[[2]]
+coef<-"GroupExperimental"
+results_adults_nicotine_fitted<-apply_DEA(RSE, formula, name, coef)[[1]]
+# "No differentially expressed genes" 
 
-## DE genes
-table(top_genes$adj.P.Val < 0.9)
-# FALSE  
-# 19974  
 
 
 ## Model with interaction between Group and Pregnancy
 formula<- ~ Group*Pregnancy + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr + overallMapRate
 name<-"adults_nicotine_interaction"
-top_genes<-DEA_expt_vs_ctl(RSE, formula, name, "GroupExperimental:PregnancyYes")[[1]]
-# vGene<-DEA_expt_vs_ctl(RSE, formula, name, "GroupExperimental:PregnancyYes")[[2]]
-
-## DE genes
-table(top_genes$adj.P.Val < 0.9)
-# FALSE 
-# 19974
+coef<-"GroupExperimental:PregnancyYes"
+results_adults_nicotine_interaction<-apply_DEA(RSE, formula, name, coef)[[1]]
+# "No differentially expressed genes" 
 
 
 
@@ -298,48 +305,27 @@ RSE<-rse_gene_brain_adults_smoking
 ## Naive model
 formula<- ~ Group + plate + flowcell + rRNA_rate + overallMapRate + totalAssignedGene + ERCCsumLogErr 
 name<-"adults_smoking_naive"
-top_genes<-DEA_expt_vs_ctl(RSE, formula, name, "GroupExperimental")[[1]]
-vGene<-DEA_expt_vs_ctl(RSE, formula, name, "GroupExperimental")[[2]]
-
-## DE genes
-table(top_genes$adj.P.Val < 0.65)
-# FALSE  TRUE 
-# 19973     1 
-de_genes_adults_smoking_naive<-top_genes[top_genes$adj.P.Val < 0.65,]
-## Plots for DE genes
-plots_DE(top_gene, vGene, 0.65, name)
-DE_boxplots(RSE, vGene, de_genes_adults_smoking_naive)
+coef<-"GroupExperimental"
+results_adults_smoking_naive<-apply_DEA(RSE, formula, name, coef)[[1]]
+# "No differentially expressed genes"
 
 
 
 ## Model fitted by Pregnancy
 formula<- ~ Group + Pregnancy + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr + overallMapRate 
 name<-"adults_smoking_fitted"
-top_genes<-DEA_expt_vs_ctl(RSE, formula, name, "GroupExperimental")[[1]]
-# vGene<-DEA_expt_vs_ctl(RSE, formula, name, "GroupExperimental")[[2]]
-
-## DE genes
-table(top_genes$adj.P.Val < 0.9)
-# FALSE  
-# 19974  
+coef<-"GroupExperimental"
+results_adults_smoking_fitted<-apply_DEA(RSE, formula, name, coef)[[1]]
+# "No differentially expressed genes"
 
 
 
 ## Model with interaction between Group and Pregnancy
 formula<- ~ Group*Pregnancy + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr + overallMapRate 
 name<-"adults_smoking_interaction"
-top_genes<-DEA_expt_vs_ctl(RSE, formula, name, "GroupExperimental:PregnancyYes")[[1]]
-vGene<-DEA_expt_vs_ctl(RSE, formula, name, "GroupExperimental:PregnancyYes")[[2]]
-
-## DE genes
-table(top_genes$adj.P.Val < 0.30)
-# FALSE  TRUE 
-# 19973     1  
-de_genes_adults_smoking_interaction<-top_genes[top_genes$adj.P.Val < 0.30,]
-## Plots for DE genes
-plots_DE(top_gene, vGene, 0.30, name)
-DE_boxplots(RSE, vGene, de_genes_adults_smoking_interaction)
-
+coef<-"GroupExperimental:PregnancyYes"
+results_adults_smoking_interaction<-apply_DEA(RSE, formula, name, coef)[[1]]
+# "No differentially expressed genes"
 
 
 
@@ -356,52 +342,32 @@ RSE<-rse_gene_brain_pups_nicotine
 ## Naive model
 formula<- ~ Group + plate + flowcell + rRNA_rate + overallMapRate + totalAssignedGene + ERCCsumLogErr + mitoRate
 name<-"pups_nicotine_naive"
-top_genes<-DEA_expt_vs_ctl(RSE, formula, name, "GroupExperimental")[[1]]
-vGene<-DEA_expt_vs_ctl(RSE, formula, name, "GroupExperimental")[[2]]
-
+coef<-"GroupExperimental"
+results_pups_nicotine_naive<-apply_DEA(RSE, formula, name, coef)[[1]]
+# "1038 differentially expressed genes"
 ## DE genes
-table(top_genes$adj.P.Val < 0.05)
-# FALSE  TRUE 
-# 19001   973 
-de_genes_pups_nicotine_naive<-top_genes[top_genes$adj.P.Val < 0.05,]
-## Plots for DE genes
-plots_DE(top_gene, vGene, 0.05, name)
-DE_boxplots(RSE, vGene, de_genes_pups_nicotine_naive)
+de_genes_pups_nicotine_naive<-apply_DEA(RSE, formula, name, coef)[[2]]
 
 
 
 ## Model fitted by Sex
 formula<- ~ Group + Sex + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr + overallMapRate + mitoRate
 name<-"pups_nicotine_fitted"
-top_genes<-DEA_expt_vs_ctl(RSE, formula, name, "GroupExperimental")[[1]]
-vGene<-DEA_expt_vs_ctl(RSE, formula, name, "GroupExperimental")[[2]]
-
+coef<-"GroupExperimental"
+results_pups_nicotine_fitted<-apply_DEA(RSE, formula, name, coef)[[1]]
+# "1010 differentially expressed genes"
 ## DE genes
-table(top_genes$adj.P.Val < 0.05)
-# FALSE  TRUE 
-# 18887  1087  
-de_genes_pups_nicotine_fitted<-top_genes[top_genes$adj.P.Val < 0.05,]
-## Plots for DE genes
-plots_DE(top_gene, vGene, 0.05, name)
-DE_boxplots(RSE, vGene, de_genes_pups_nicotine_fitted)
+de_genes_pups_nicotine_fitted<-apply_DEA(RSE, formula, name, coef)[[2]]
+
 
 
 
 ## Model with interaction between Group and Sex
 formula<- ~ Group*Sex + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr + overallMapRate + mitoRate
 name<-"pups_nicotine_interaction"
-top_genes<-DEA_expt_vs_ctl(RSE, formula, name, "GroupExperimental:SexM")[[1]]
-vGene<-DEA_expt_vs_ctl(RSE, formula, name, "GroupExperimental:SexM")[[2]]
-
-## DE genes
-table(top_genes$adj.P.Val < 0.3)
-# FALSE  TRUE 
-# 19958    16 
-de_genes_pups_nicotine_interaction<-top_genes[top_genes$adj.P.Val < 0.3,]
-## Plots for DE genes
-plots_DE(top_gene, vGene, 0.3, name)
-DE_boxplots(RSE, vGene, de_genes_pups_nicotine_interaction)
-
+coef<-"GroupExperimental:SexM"
+results_pups_nicotine_interaction<-apply_DEA(RSE, formula, name, coef)[[1]]
+# "No differentially expressed genes"
 
 
 
@@ -418,48 +384,29 @@ RSE<-rse_gene_brain_pups_smoking
 ## Naive model
 formula<- ~ Group + plate + flowcell + rRNA_rate + overallMapRate + totalAssignedGene + ERCCsumLogErr + mitoRate
 name<-"pups_smoking_naive"
-top_genes<-DEA_expt_vs_ctl(RSE, formula, name, "GroupExperimental")[[1]]
-vGene<-DEA_expt_vs_ctl(RSE, formula, name, "GroupExperimental")[[2]]
-
+coef<-"GroupExperimental"
+results_pups_smoking_naive<-apply_DEA(RSE, formula, name, coef)[[1]]
+# "4108 differentially expressed genes"
 ## DE genes
-table(top_genes$adj.P.Val < 0.05)
-# FALSE  TRUE 
-# 15645  4329
-de_genes_pups_smoking_naive<-top_genes[top_genes$adj.P.Val < 0.05,]
-## Plots for DE genes
-plots_DE(top_gene, vGene, 0.05, name)
-DE_boxplots(RSE, vGene, de_genes_pups_smoking_naive)
+de_genes_pups_smoking_naive<-apply_DEA(RSE, formula, name, coef)[[2]]
 
 
 
 ## Model fitted by Sex
 formula<- ~ Group + Sex + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr + overallMapRate + mitoRate
 name<-"pups_smoking_fitted"
-top_genes<-DEA_expt_vs_ctl(RSE, formula, name, "GroupExperimental")[[1]]
-vGene<-DEA_expt_vs_ctl(RSE, formula, name, "GroupExperimental")[[2]]
-
+coef<-"GroupExperimental"
+results_pups_smoking_fitted<-apply_DEA(RSE, formula, name, coef)[[1]]
+# "4165 differentially expressed genes"
 ## DE genes
-table(top_genes$adj.P.Val < 0.05)
-# FALSE  TRUE 
-# 15592  4382  
-de_genes_pups_smoking_fitted<-top_genes[top_genes$adj.P.Val < 0.05,]
-## Plots for DE genes
-plots_DE(top_gene, vGene, 0.05, name)
-DE_boxplots(RSE, vGene, de_genes_pups_smoking_fitted)
+de_genes_pups_smoking_fitted<-apply_DEA(RSE, formula, name, coef)[[2]]
 
 
 
 ## Model with interaction between Group and Sex
 formula<- ~ Group*Sex + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr + overallMapRate + mitoRate
 name<-"pups_smoking_interaction"
-top_genes<-DEA_expt_vs_ctl(RSE, formula, name, "GroupExperimental:SexM")[[1]]
-vGene<-DEA_expt_vs_ctl(RSE, formula, name, "GroupExperimental:SexM")[[2]]
+coef<-"GroupExperimental:SexM"
+results_pups_smoking_interaction<-apply_DEA(RSE, formula, name, coef)[[1]]
+# "No differentially expressed genes"
 
-## DE genes
-table(top_genes$adj.P.Val < 0.57)
-# FALSE  TRUE 
-# 18435  1539 
-de_genes_pups_smoking_interaction<-top_genes[top_genes$adj.P.Val < 0.57,]
-## Plots for DE genes
-plots_DE(top_gene, vGene, 0.57, name)
-DE_boxplots(RSE, vGene, de_genes_pups_smoking_interaction)
