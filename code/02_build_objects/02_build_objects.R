@@ -11,6 +11,7 @@ library(jaffelab)
 library(here)
 library(WGCNA)
 library(scater)
+library(biomartr)
 library(sessioninfo)
 
 
@@ -107,13 +108,13 @@ assays(rse_tx)$logcounts<-log2(assays(rse_tx)$tpm + 0.5)
 
 
 
-
 ## Compute QC metrics for posterior QCA at gene level
 ## Mt and ribosomal genes 
 subsets=list(Mito=which(seqnames(rse_gene)=="chrM"), 
              Ribo=grep("rRNA",rowData(rse_gene)$gene_type))
 ## Add general qc-stats based on counts
 rse_gene <-addPerCellQC(rse_gene, subsets)
+
 
 
 
@@ -125,9 +126,29 @@ rse_gene <-addPerCellQC(rse_gene, subsets)
 ## Add design matrix to account for group differences
 rse_gene_filt<-rse_gene[which(filterByExpr(assay(rse_gene), 
                 design=with(colData(rse_gene), model.matrix(~ Tissue + Age + Expt + Group)))),]
-save(rse_gene_filt, file = 'processed-data/02_build_objects/rse_gene_filt.Rdata')
 dim(rse_gene_filt)
 # 19974   208
+
+## Add actual gene symbols instead of MGI symbols
+rowData(rse_gene_filt)$MGI_Symbol<-rowData(rse_gene_filt)$Symbol
+symbols<-biomart(genes  = rowData(rse_gene_filt)$ensemblID,
+         mart       = "ENSEMBL_MART_ENSEMBL",
+         dataset    = "mmusculus_gene_ensembl",
+         attributes = c("external_gene_name"),
+         filters    = "ensembl_gene_id")
+## Genes without symbol
+no_symbol<-rowData(rse_gene_filt)$ensemblID[(! rowData(rse_gene_filt)$ensemblID 
+                                             %in% symbols$ensembl_gene_id)]
+for (gene in no_symbol){
+    symbols[nrow(symbols)+1,]<-c(gene, NA)
+}
+
+## Preserve original genes' order
+symbols<-symbols[match(rowData(rse_gene_filt)$ensemblID, symbols$ensembl_gene_id), ]
+rowData(rse_gene_filt)$Symbol<-symbols$external_gene_name
+save(rse_gene_filt, file = 'processed-data/02_build_objects/rse_gene_filt.Rdata')
+
+
 
 ## Filter exons
 rse_exon_filt<-rse_exon[which(filterByExpr(assay(rse_exon), 
