@@ -3,10 +3,11 @@ library(SummarizedExperiment)
 library(stats)
 library(edgeR)
 library(limma)
-library(ExploreModelMatrix)
 library(ggplot2)
 library(rlang)
 library(cowplot)
+library(ggrepel)
+library(jaffelab)
 
 
 # 1. Differential Expression Analysis 
@@ -57,7 +58,7 @@ DEA_expt_vs_ctl<- function(RSE, formula, name, coef){
   eBGene = eBayes(fitGene)
 
   ## Plot average log expression vs logFC
-  plotMA(eBGene, coef = coef, xlab = "Mean of normalized counts", 
+  limma::plotMA(eBGene, coef = coef, xlab = "Mean of normalized counts", 
          ylab="logFC")
   ## Plot -log(p-value) vs logFC
   volcanoplot(eBGene, coef = coef)
@@ -72,6 +73,7 @@ DEA_expt_vs_ctl<- function(RSE, formula, name, coef){
   return(list(top_genes, vGene, eBGene))
   
 }  
+
 
 
 ## Plots for DE genes
@@ -151,13 +153,39 @@ plots_DE<-function(top_genes, vGene, FDR=0.05, name) {
 
 
 
+## Boxplot of a single gene
+DE_one_boxplot <- function (de_genes, lognorm_DE, DEgene){
+  
+  ## q-value for the gene
+  DEgene<-chartr(".", ":",DEgene)  
+  q_value<-signif(de_genes[which(de_genes$Symbol==DEgene), "adj.P.Val"], digits = 3)
+  
+  ## Boxplot for each DE gene
+  DEgene<-chartr(":", ".",DEgene)  
+  ggplot(data=as.data.frame(lognorm_DE), 
+  aes(x=Group,y=eval(parse_expr(DEgene)))) + 
+  ## Hide outliers
+  geom_boxplot(outlier.color = "#FFFFFFFF") +
+  ## Samples colored by Group + noise
+  geom_jitter(aes(colour=Group),shape=16, 
+             position=position_jitter(0.2)) +
+  theme_classic() +
+  labs(x = "Group", y = "norm counts",
+      title = DEgene, 
+      subtitle = paste("q-value:", q_value)) +
+  theme(plot.margin=unit (c (1,1.5,1,1), 'cm'), legend.position = "none",
+       plot.title = element_text(hjust=0.5, size=10, face="bold"), 
+       plot.subtitle = element_text(size = 9)) 
+  
+}
+
+
  
 ## Boxplot of lognorm counts for top 3 DE genes
 ## Obtain lognorm counts of DE genes
-DE_boxplots <- function(RSE, vGene, de_genes){
-  ## vGene$E<-cleaningY(vGene$E, model, P=2)
-  
-  
+DE_boxplots <- function(RSE, vGene, model, de_genes){
+  ## Regress out residuals to remove batch effects
+  vGene$E<-cleaningY(vGene$E, model, P=2)
   ## Order genes by q-value
   de_genes<-de_genes[order(de_genes$adj.P.Val),]
   lognorm_DE<-vGene$E[rownames(de_genes),]
@@ -167,30 +195,12 @@ DE_boxplots <- function(RSE, vGene, de_genes){
   ## Add samples' Group information
   lognorm_DE<-data.frame(lognorm_DE, "Group"=colData(RSE)$Group)
   
-  ## Boxplot for each DE gene
+ 
   plots<-list()
-  i=1
-  ## Here
-  for (DEgene in colnames(lognorm_DE)[1:3]){
-     ## q-value for each gene
-     q_value<-signif(de_genes[which(de_genes$Symbol==DEgene), "adj.P.Val"], digits = 3)
-     print(q_value)
-     p<-ggplot(data=as.data.frame(lognorm_DE), 
-     aes(x=Group,y=eval(parse_expr(DEgene)))) + 
-     ## Hide outliers
-     geom_boxplot(outlier.color = "#FFFFFFFF") +
-     ## Samples colored by Group + noise
-     geom_jitter(aes(colour=Group),shape=16, 
-                 position=position_jitter(0.2)) +
-     theme_classic() +
-     labs(x = "Group", y = "lognorm counts",
-          title = DEgene, 
-          subtitle = paste("q-value:", as.character(q_value))) +
-     theme(plot.margin=unit (c (1,1.5,1,1), 'cm'), legend.position = "none",
-           plot.title = element_text(hjust=0.5, size=10, face="bold")) 
-     
-     plots[[i]]<-p
-     i=i+1
+  for (i in 1:3){
+    DEgene<-colnames(lognorm_DE)[i]
+    p<-DE_one_boxplot(de_genes, lognorm_DE, DEgene)
+    plots[[i]]<-p
   }
   plot_grid(plots[[1]], plots[[2]], plots[[3]], ncol = 3)
   ggsave(here(paste("plots/04_DEA/01_Modelling/DE_boxplots_",name, ".pdf", sep="")), 
@@ -207,11 +217,12 @@ apply_DEA<-function(RSE, formula, name, coef){
   
   ## If there are DEG
   if (length(which(top_genes$adj.P.Val<0.05))>0){
+    model=model.matrix(formula, data=colData(RSE))
     vGene<-results[[2]]
     de_genes<-top_genes[top_genes$adj.P.Val < 0.05,]
     ## Plots for DE genes
     plots_DE(top_genes, vGene, 0.05, name)
-    DE_boxplots(RSE, vGene, de_genes)
+    DE_boxplots(RSE, vGene, model, de_genes)
     print(paste(length(which(top_genes$adj.P.Val<0.05)), "differentially expressed genes", sep=" "))
     return(list(results, de_genes))
   }
@@ -220,6 +231,8 @@ apply_DEA<-function(RSE, formula, name, coef){
     return(results)
   }
 }
+
+
 
 ###############################
 #         Blood DEA 
