@@ -4,6 +4,7 @@
 ### 1.1.1 Explore Samples' expression variation
 
 ## Load data
+load(here("processed-data/02_build_objects/rse_gene_brain.Rdata"))
 load(here("processed-data/03_EDA/02_QC/rse_gene_blood_qc.Rdata"))
 load(here("processed-data/03_EDA/02_QC/rse_gene_brain_adults_qc.Rdata"))
 load(here("processed-data/03_EDA/02_QC/rse_exon_brain_adults_qc.Rdata"))
