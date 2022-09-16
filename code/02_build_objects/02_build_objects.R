@@ -136,11 +136,18 @@ symbols<-biomart(genes  = rowData(rse_gene_filt)$ensemblID,
          dataset    = "mmusculus_gene_ensembl",
          attributes = c("external_gene_name"),
          filters    = "ensembl_gene_id")
-## Genes without symbol
+
+## Add MGI/ensembl ID for genes without symbol
 no_symbol<-rowData(rse_gene_filt)$ensemblID[(! rowData(rse_gene_filt)$ensemblID 
                                              %in% symbols$ensembl_gene_id)]
 for (gene in no_symbol){
-    symbols[nrow(symbols)+1,]<-c(gene, NA)
+    MGI_symbol<-rowData(rse_gene_filt)[which(rowData(rse_gene_filt)$ensemblID==gene), "MGI_Symbol"]
+    if (! is.na(MGI_symbol)) {
+      symbols[nrow(symbols)+1,]<-c(gene, MGI_symbol)
+    }
+    else {
+      symbols[nrow(symbols)+1,]<-c(gene,gene)
+    }
 }
 
 ## Preserve original genes' order
