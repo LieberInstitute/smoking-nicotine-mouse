@@ -66,7 +66,7 @@ DEA_expt_vs_ctl<- function(RSE, formula, name, coef){
   ## Select top-ranked genes for Group (expt vs ctrl)
   top_genes = topTable(eBGene, coef=coef, p.value = 1, number=nrow(RSE), sort.by="none")
   ## Histogram of adjusted p values
-  hist(top_genes$adj.P.Val, xlab="q-value", main="")
+  hist(top_genes$adj.P.Val, xlab="FDR", main="")
   
   dev.off()
   
@@ -172,7 +172,7 @@ DE_one_boxplot <- function (de_genes, lognorm_DE, DEgene){
   theme_classic() +
   labs(x = "Group", y = "norm counts",
       title = DEgene, 
-      subtitle = paste("q-value:", q_value)) +
+      subtitle = paste("FDR:", q_value)) +
   theme(plot.margin=unit (c (1,1.5,1,1), 'cm'), legend.position = "none",
        plot.title = element_text(hjust=0.5, size=10, face="bold"), 
        plot.subtitle = element_text(size = 9)) 
