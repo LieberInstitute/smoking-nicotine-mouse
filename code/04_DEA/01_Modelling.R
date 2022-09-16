@@ -245,8 +245,9 @@ RSE<-rse_gene_blood_qc
 formula<- ~ Group + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr + overallMapRate 
 name<-"blood_smoking_naive"
 coef<-"GroupExperimental"
-results_blood_smoking_naive<-apply_DEA(RSE, formula, name, coef)[[1]]
+results_blood_smoking_naive<-apply_DEA(RSE, formula, name, coef)
 # "No differentially expressed genes"
+top_genes_blood_smoking_naive<-results_blood_smoking_naive[[1]]
 
 
 
@@ -254,8 +255,9 @@ results_blood_smoking_naive<-apply_DEA(RSE, formula, name, coef)[[1]]
 formula<- ~ Group + Pregnancy + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr + overallMapRate
 name<-"blood_smoking_fitted"
 coef<-"GroupExperimental"
-results_blood_smoking_fitted<-apply_DEA(RSE, formula, name, coef)[[1]]
+results_blood_smoking_fitted<-apply_DEA(RSE, formula, name, coef)
 # "No differentially expressed genes"
+top_genes_blood_smoking_fitted<-results_blood_smoking_fitted[[1]]
 
 
 
@@ -263,8 +265,9 @@ results_blood_smoking_fitted<-apply_DEA(RSE, formula, name, coef)[[1]]
 formula<- ~ Group*Pregnancy + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr + overallMapRate 
 name<-"blood_smoking_interaction"
 coef<-"GroupExperimental:PregnancyYes"
-results_blood_smoking_interaction<-apply_DEA(RSE, formula, name, coef)[[1]]
+results_blood_smoking_interaction<-apply_DEA(RSE, formula, name, coef)
 # "No differentially expressed genes" 
+top_genes_blood_smoking_interaction<-results_blood_smoking_interaction[[1]]
 
 
 
@@ -283,8 +286,9 @@ RSE<-rse_gene_brain_adults_nicotine
 formula<- ~ Group + plate + flowcell + rRNA_rate + overallMapRate + totalAssignedGene + ERCCsumLogErr 
 name<-"adults_nicotine_naive"
 coef<-"GroupExperimental"
-results_adults_nicotine_naive<-apply_DEA(RSE, formula, name, coef)[[1]]
+results_adults_nicotine_naive<-apply_DEA(RSE, formula, name, coef)
 # "No differentially expressed genes" 
+top_genes_adults_nicotine_naive<-results_adults_nicotine_naive[[1]]
 
  
 
@@ -292,8 +296,9 @@ results_adults_nicotine_naive<-apply_DEA(RSE, formula, name, coef)[[1]]
 formula<- ~ Group + Pregnancy + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr + overallMapRate 
 name<-"adults_nicotine_fitted"
 coef<-"GroupExperimental"
-results_adults_nicotine_fitted<-apply_DEA(RSE, formula, name, coef)[[1]]
+results_adults_nicotine_fitted<-apply_DEA(RSE, formula, name, coef)
 # "No differentially expressed genes" 
+top_genes_adults_nicotine_fitted<-results_adults_nicotine_fitted[[1]]
 
 
 
@@ -301,8 +306,9 @@ results_adults_nicotine_fitted<-apply_DEA(RSE, formula, name, coef)[[1]]
 formula<- ~ Group*Pregnancy + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr + overallMapRate
 name<-"adults_nicotine_interaction"
 coef<-"GroupExperimental:PregnancyYes"
-results_adults_nicotine_interaction<-apply_DEA(RSE, formula, name, coef)[[1]]
+results_adults_nicotine_interaction<-apply_DEA(RSE, formula, name, coef)
 # "No differentially expressed genes" 
+top_genes_adults_nicotine_interaction<-results_adults_nicotine_interaction[[1]]
 
 
 
@@ -319,8 +325,9 @@ RSE<-rse_gene_brain_adults_smoking
 formula<- ~ Group + plate + flowcell + rRNA_rate + overallMapRate + totalAssignedGene + ERCCsumLogErr 
 name<-"adults_smoking_naive"
 coef<-"GroupExperimental"
-results_adults_smoking_naive<-apply_DEA(RSE, formula, name, coef)[[1]]
+results_adults_smoking_naive<-apply_DEA(RSE, formula, name, coef)
 # "No differentially expressed genes"
+top_genes_adults_smoking_naive<-results_adults_smoking_naive[[1]]
 
 
 
@@ -328,8 +335,9 @@ results_adults_smoking_naive<-apply_DEA(RSE, formula, name, coef)[[1]]
 formula<- ~ Group + Pregnancy + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr + overallMapRate 
 name<-"adults_smoking_fitted"
 coef<-"GroupExperimental"
-results_adults_smoking_fitted<-apply_DEA(RSE, formula, name, coef)[[1]]
+results_adults_smoking_fitted<-apply_DEA(RSE, formula, name, coef)
 # "No differentially expressed genes"
+top_genes_adults_smoking_fitted<-results_adults_smoking_fitted[[1]]
 
 
 
@@ -337,8 +345,9 @@ results_adults_smoking_fitted<-apply_DEA(RSE, formula, name, coef)[[1]]
 formula<- ~ Group*Pregnancy + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr + overallMapRate 
 name<-"adults_smoking_interaction"
 coef<-"GroupExperimental:PregnancyYes"
-results_adults_smoking_interaction<-apply_DEA(RSE, formula, name, coef)[[1]]
+results_adults_smoking_interaction<-apply_DEA(RSE, formula, name, coef)
 # "No differentially expressed genes"
+top_genes_adults_smoking_interaction<-results_adults_smoking_interaction[[1]]
 
 
 
@@ -356,10 +365,11 @@ RSE<-rse_gene_brain_pups_nicotine
 formula<- ~ Group + plate + flowcell + rRNA_rate + overallMapRate + totalAssignedGene + ERCCsumLogErr + mitoRate
 name<-"pups_nicotine_naive"
 coef<-"GroupExperimental"
-results_pups_nicotine_naive<-apply_DEA(RSE, formula, name, coef)[[1]]
+results_pups_nicotine_naive<-apply_DEA(RSE, formula, name, coef)
 # "1038 differentially expressed genes"
+top_genes_pups_nicotine_naive<-results_pups_nicotine_naive[[1]][[1]]
 ## DE genes
-de_genes_pups_nicotine_naive<-apply_DEA(RSE, formula, name, coef)[[2]]
+de_genes_pups_nicotine_naive<-results_pups_nicotine_naive[[2]]
 
 
 
@@ -367,11 +377,11 @@ de_genes_pups_nicotine_naive<-apply_DEA(RSE, formula, name, coef)[[2]]
 formula<- ~ Group + Sex + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr + overallMapRate + mitoRate
 name<-"pups_nicotine_fitted"
 coef<-"GroupExperimental"
-results_pups_nicotine_fitted<-apply_DEA(RSE, formula, name, coef)[[1]]
+results_pups_nicotine_fitted<-apply_DEA(RSE, formula, name, coef)
 # "1010 differentially expressed genes"
+top_genes_pups_nicotine_fitted<-results_pups_nicotine_fitted[[1]][[1]]
 ## DE genes
-de_genes_pups_nicotine_fitted<-apply_DEA(RSE, formula, name, coef)[[2]]
-
+de_genes_pups_nicotine_fitted<-results_pups_nicotine_fitted[[2]]
 
 
 
@@ -379,8 +389,9 @@ de_genes_pups_nicotine_fitted<-apply_DEA(RSE, formula, name, coef)[[2]]
 formula<- ~ Group*Sex + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr + overallMapRate + mitoRate
 name<-"pups_nicotine_interaction"
 coef<-"GroupExperimental:SexM"
-results_pups_nicotine_interaction<-apply_DEA(RSE, formula, name, coef)[[1]]
+results_pups_nicotine_interaction<-apply_DEA(RSE, formula, name, coef)
 # "No differentially expressed genes"
+top_genes_pups_nicotine_interaction<-results_pups_nicotine_interaction[[1]]
 
 
 
@@ -398,10 +409,11 @@ RSE<-rse_gene_brain_pups_smoking
 formula<- ~ Group + plate + flowcell + rRNA_rate + overallMapRate + totalAssignedGene + ERCCsumLogErr + mitoRate
 name<-"pups_smoking_naive"
 coef<-"GroupExperimental"
-results_pups_smoking_naive<-apply_DEA(RSE, formula, name, coef)[[1]]
+results_pups_smoking_naive<-apply_DEA(RSE, formula, name, coef)
 # "4108 differentially expressed genes"
+top_genes_pups_smoking_naive<-results_pups_smoking_naive[[1]][[1]]
 ## DE genes
-de_genes_pups_smoking_naive<-apply_DEA(RSE, formula, name, coef)[[2]]
+de_genes_pups_smoking_naive<-results_pups_smoking_naive[[2]]
 
 
 
@@ -409,10 +421,11 @@ de_genes_pups_smoking_naive<-apply_DEA(RSE, formula, name, coef)[[2]]
 formula<- ~ Group + Sex + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr + overallMapRate + mitoRate
 name<-"pups_smoking_fitted"
 coef<-"GroupExperimental"
-results_pups_smoking_fitted<-apply_DEA(RSE, formula, name, coef)[[1]]
+results_pups_smoking_fitted<-apply_DEA(RSE, formula, name, coef)
 # "4165 differentially expressed genes"
+top_genes_pups_smoking_fitted<-results_pups_smoking_fitted[[1]][[1]]
 ## DE genes
-de_genes_pups_smoking_fitted<-apply_DEA(RSE, formula, name, coef)[[2]]
+de_genes_pups_smoking_fitted<-results_pups_smoking_fitted[[2]]
 
 
 
@@ -420,6 +433,7 @@ de_genes_pups_smoking_fitted<-apply_DEA(RSE, formula, name, coef)[[2]]
 formula<- ~ Group*Sex + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr + overallMapRate + mitoRate
 name<-"pups_smoking_interaction"
 coef<-"GroupExperimental:SexM"
-results_pups_smoking_interaction<-apply_DEA(RSE, formula, name, coef)[[1]]
+results_pups_smoking_interaction<-apply_DEA(RSE, formula, name, coef)
 # "No differentially expressed genes"
+top_genes_pups_smoking_interaction<-results_pups_smoking_interaction[[1]]
 
