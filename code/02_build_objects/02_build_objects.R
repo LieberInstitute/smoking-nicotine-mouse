@@ -129,17 +129,19 @@ rse_gene_filt<-rse_gene[which(filterByExpr(assay(rse_gene),
 dim(rse_gene_filt)
 # 19974   208
 
-## Add actual gene symbols instead of MGI symbols
-rowData(rse_gene_filt)$MGI_Symbol<-rowData(rse_gene_filt)$Symbol
-symbols<-biomart(genes  = rowData(rse_gene_filt)$ensemblID,
-         mart       = "ENSEMBL_MART_ENSEMBL",
-         dataset    = "mmusculus_gene_ensembl",
-         attributes = c("external_gene_name"),
-         filters    = "ensembl_gene_id")
 
 ## Add MGI/ensembl ID for genes without symbol
+## Genes without symbol found
 no_symbol<-rowData(rse_gene_filt)$ensemblID[(! rowData(rse_gene_filt)$ensemblID 
                                              %in% symbols$ensembl_gene_id)]
+## Genes with empty symbol or NA
+which_na_symbol<-which(is.na(symbols$external_gene_name) | symbols$external_gene_name=="")
+na_symbol<-symbols[which_na_symbol,1]
+## Add these genes' IDs
+no_symbol<-append(no_symbol, na_symbol)
+## Remove these genes from symbols
+symbols<-symbols[-which_na_symbol,]
+## Add MGI/ensembl IDs for them
 for (gene in no_symbol){
     MGI_symbol<-rowData(rse_gene_filt)[which(rowData(rse_gene_filt)$ensemblID==gene), "MGI_Symbol"]
     if (! is.na(MGI_symbol)) {
