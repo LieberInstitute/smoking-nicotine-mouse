@@ -248,6 +248,8 @@ coef<-"GroupExperimental"
 results_blood_smoking_naive<-apply_DEA(RSE, formula, name, coef)
 # "No differentially expressed genes"
 top_genes_blood_smoking_naive<-results_blood_smoking_naive[[1]]
+save(results_blood_smoking_naive, file="processed-data/04_DEA/results_blood_smoking_naive.Rdata")
+save(top_genes_blood_smoking_naive, file="processed-data/04_DEA/top_genes_blood_smoking_naive.Rdata")
 
 
 
@@ -258,6 +260,8 @@ coef<-"GroupExperimental"
 results_blood_smoking_fitted<-apply_DEA(RSE, formula, name, coef)
 # "No differentially expressed genes"
 top_genes_blood_smoking_fitted<-results_blood_smoking_fitted[[1]]
+save(results_blood_smoking_fitted, file="processed-data/04_DEA/results_blood_smoking_fitted.Rdata")
+save(top_genes_blood_smoking_fitted, file="processed-data/04_DEA/top_genes_blood_smoking_fitted.Rdata")
 
 
 
@@ -268,7 +272,10 @@ coef<-"GroupExperimental:PregnancyYes"
 results_blood_smoking_interaction<-apply_DEA(RSE, formula, name, coef)
 # "No differentially expressed genes" 
 top_genes_blood_smoking_interaction<-results_blood_smoking_interaction[[1]]
-
+save(results_blood_smoking_interaction, 
+     file="processed-data/04_DEA/results_blood_smoking_interaction.Rdata")
+save(top_genes_blood_smoking_interaction,
+     file="processed-data/04_DEA/top_genes_blood_smoking_interaction.Rdata")
 
 
 
@@ -289,8 +296,10 @@ coef<-"GroupExperimental"
 results_adults_nicotine_naive<-apply_DEA(RSE, formula, name, coef)
 # "No differentially expressed genes" 
 top_genes_adults_nicotine_naive<-results_adults_nicotine_naive[[1]]
-
+save(results_adults_nicotine_naive, file="processed-data/04_DEA/results_adults_nicotine_naive.Rdata")
+save(top_genes_adults_nicotine_naive, file="processed-data/04_DEA/top_genes_adults_nicotine_naive.Rdata")
  
+
 
 ## Model fitted by Pregnancy
 formula<- ~ Group + Pregnancy + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr + overallMapRate 
@@ -299,6 +308,8 @@ coef<-"GroupExperimental"
 results_adults_nicotine_fitted<-apply_DEA(RSE, formula, name, coef)
 # "No differentially expressed genes" 
 top_genes_adults_nicotine_fitted<-results_adults_nicotine_fitted[[1]]
+save(results_adults_nicotine_fitted, file="processed-data/04_DEA/results_adults_nicotine_fitted.Rdata")
+save(top_genes_adults_nicotine_fitted, file="processed-data/04_DEA/top_genes_adults_nicotine_fitted.Rdata")
 
 
 
@@ -309,6 +320,10 @@ coef<-"GroupExperimental:PregnancyYes"
 results_adults_nicotine_interaction<-apply_DEA(RSE, formula, name, coef)
 # "No differentially expressed genes" 
 top_genes_adults_nicotine_interaction<-results_adults_nicotine_interaction[[1]]
+save(results_adults_nicotine_interaction, 
+     file="processed-data/04_DEA/results_adults_nicotine_interaction.Rdata")
+save(top_genes_adults_nicotine_interaction,
+     file="processed-data/04_DEA/top_genes_adults_nicotine_interaction.Rdata")
 
 
 
@@ -328,6 +343,8 @@ coef<-"GroupExperimental"
 results_adults_smoking_naive<-apply_DEA(RSE, formula, name, coef)
 # "No differentially expressed genes"
 top_genes_adults_smoking_naive<-results_adults_smoking_naive[[1]]
+save(results_adults_smoking_naive, file="processed-data/04_DEA/results_adults_smoking_naive.Rdata")
+save(top_genes_adults_smoking_naive, file="processed-data/04_DEA/top_genes_adults_smoking_naive.Rdata")
 
 
 
@@ -338,6 +355,8 @@ coef<-"GroupExperimental"
 results_adults_smoking_fitted<-apply_DEA(RSE, formula, name, coef)
 # "No differentially expressed genes"
 top_genes_adults_smoking_fitted<-results_adults_smoking_fitted[[1]]
+save(results_adults_smoking_fitted, file="processed-data/04_DEA/results_adults_smoking_fitted.Rdata")
+save(top_genes_adults_smoking_fitted, file="processed-data/04_DEA/top_genes_adults_smoking_fitted.Rdata")
 
 
 
@@ -348,7 +367,10 @@ coef<-"GroupExperimental:PregnancyYes"
 results_adults_smoking_interaction<-apply_DEA(RSE, formula, name, coef)
 # "No differentially expressed genes"
 top_genes_adults_smoking_interaction<-results_adults_smoking_interaction[[1]]
-
+save(results_adults_smoking_interaction,
+     file="processed-data/04_DEA/results_adults_smoking_interaction.Rdata")
+save(top_genes_adults_smoking_interaction,
+     file="processed-data/04_DEA/top_genes_adults_smoking_interaction.Rdata")
 
 
 
@@ -370,6 +392,9 @@ results_pups_nicotine_naive<-apply_DEA(RSE, formula, name, coef)
 top_genes_pups_nicotine_naive<-results_pups_nicotine_naive[[1]][[1]]
 ## DE genes
 de_genes_pups_nicotine_naive<-results_pups_nicotine_naive[[2]]
+save(results_pups_nicotine_naive, file="processed-data/04_DEA/results_pups_nicotine_naive.Rdata")
+save(top_genes_pups_nicotine_naive, file="processed-data/04_DEA/top_genes_pups_nicotine_naive.Rdata")
+save(de_genes_pups_nicotine_naive, file="processed-data/04_DEA/de_genes_pups_nicotine_naive.Rdata")
 
 
 
@@ -382,6 +407,9 @@ results_pups_nicotine_fitted<-apply_DEA(RSE, formula, name, coef)
 top_genes_pups_nicotine_fitted<-results_pups_nicotine_fitted[[1]][[1]]
 ## DE genes
 de_genes_pups_nicotine_fitted<-results_pups_nicotine_fitted[[2]]
+save(results_pups_nicotine_fitted, file="processed-data/04_DEA/results_pups_nicotine_fitted.Rdata")
+save(top_genes_pups_nicotine_fitted, file="processed-data/04_DEA/top_genes_pups_nicotine_fitted.Rdata")
+save(de_genes_pups_nicotine_fitted, file="processed-data/04_DEA/de_genes_pups_nicotine_fitted.Rdata")
 
 
 
@@ -392,7 +420,10 @@ coef<-"GroupExperimental:SexM"
 results_pups_nicotine_interaction<-apply_DEA(RSE, formula, name, coef)
 # "No differentially expressed genes"
 top_genes_pups_nicotine_interaction<-results_pups_nicotine_interaction[[1]]
-
+save(results_pups_nicotine_interaction, 
+     file="processed-data/04_DEA/results_pups_nicotine_interaction.Rdata")
+save(top_genes_pups_nicotine_interaction,
+     file="processed-data/04_DEA/top_genes_pups_nicotine_interaction.Rdata")
 
 
 
@@ -414,6 +445,9 @@ results_pups_smoking_naive<-apply_DEA(RSE, formula, name, coef)
 top_genes_pups_smoking_naive<-results_pups_smoking_naive[[1]][[1]]
 ## DE genes
 de_genes_pups_smoking_naive<-results_pups_smoking_naive[[2]]
+save(results_pups_smoking_naive, file="processed-data/04_DEA/results_pups_smoking_naive.Rdata")
+save(top_genes_pups_smoking_naive, file="processed-data/04_DEA/top_genes_pups_smoking_naive.Rdata")
+save(de_genes_pups_smoking_naive, file="processed-data/04_DEA/de_genes_pups_smoking_naive.Rdata")
 
 
 
@@ -426,6 +460,9 @@ results_pups_smoking_fitted<-apply_DEA(RSE, formula, name, coef)
 top_genes_pups_smoking_fitted<-results_pups_smoking_fitted[[1]][[1]]
 ## DE genes
 de_genes_pups_smoking_fitted<-results_pups_smoking_fitted[[2]]
+save(results_pups_smoking_fitted, file="processed-data/04_DEA/results_pups_smoking_fitted.Rdata")
+save(top_genes_pups_smoking_fitted, file="processed-data/04_DEA/top_genes_pups_smoking_fitted.Rdata")
+save(de_genes_pups_smoking_fitted, file="processed-data/04_DEA/de_genes_pups_smoking_fitted.Rdata")
 
 
 
@@ -436,4 +473,9 @@ coef<-"GroupExperimental:SexM"
 results_pups_smoking_interaction<-apply_DEA(RSE, formula, name, coef)
 # "No differentially expressed genes"
 top_genes_pups_smoking_interaction<-results_pups_smoking_interaction[[1]]
+save(results_pups_smoking_interaction, 
+     file="processed-data/04_DEA/results_pups_smoking_interaction.Rdata")
+save(top_genes_pups_smoking_interaction, 
+     file="processed-data/04_DEA/top_genes_pups_smoking_interaction.Rdata")
+
 
