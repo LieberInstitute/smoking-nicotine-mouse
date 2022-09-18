@@ -1,3 +1,8 @@
+## 1.2 Comparison of DEG 
+
+
+### 1.2.1 T-stats plots
+
 ## Function to add DE info of genes in both groups
 add_DE_info <-function(top_genes1, top_genes2, name_1, name_2) {
   DE<-vector()
@@ -232,11 +237,12 @@ t_stat_plot(top_genes1, top_genes2, "Nicotine pups", "Nicotine adults", "interac
 ## rho = 0.09
 
 
-```
 
-```{r}
 
-## Venn diagrams
+
+
+
+### 1.2.3 Venn diagrams
 
 ## Function to create multiple Venn diagrams
 venn_plot<-function(DEG_lists, colors, filename){
