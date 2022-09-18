@@ -1,3 +1,4 @@
+
 ## 1.2 Comparison of DEG 
 
 
@@ -28,9 +29,6 @@ add_DE_info <-function(top_genes1, top_genes2, name_1, name_2) {
 }
 
 
-
-
-
 ## Compare t-stats of genes from different samples' groups
 t_stat_plot <- function(top_genes1, top_genes2, name_1, name_2, model_name){
   
@@ -48,13 +46,11 @@ t_stat_plot <- function(top_genes1, top_genes2, name_1, name_2, model_name){
   alphas <- c( 1, 1, 1,0.5)  
   names(alphas)<-c("sig Both", paste0("sig ", name_1), paste0("sig ", name_2), "None")
    
-  title = paste(name_1, "vs.", name_2)
-   
   plot <- ggplot(t_stats, aes(x = t1, y = t2, color=DEG, alpha=DEG)) +
      geom_point(size = 1) +
      labs(x = paste("t-stats", name_1), 
           y = paste("t-stats", name_2),
-          title = title, 
+          title = model_name, 
           subtitle = rho_anno, 
           parse = T) +
      theme_bw() +
@@ -66,20 +62,18 @@ t_stat_plot <- function(top_genes1, top_genes2, name_1, name_2, model_name){
 
 
 ## Function to create multiple t-stats plots
-tstats_plots<-function(top_genes_pairs, name1, name2, models){
+tstats_plots<-function(top_genes_pairs, name_1, name_2, models){
   
   plots<-list()
-  for (i in length(top_genes_pairs)){
-    p<-t_stat_plot(top_genes_pairs[[i]][[1]], top_genes_pairs[[i]][[2]], name1, name2, models[i])
+  for (i in 1:length(top_genes_pairs)){
+    p<-t_stat_plot(top_genes_pairs[[i]][[1]], top_genes_pairs[[i]][[2]], name_1, name_2, models[i])
     plots[[i]]<-p
   }
   plot_grid(plots[[1]], plots[[2]], plots[[3]], ncol=2)
   ggsave(filename=paste("plots/04_DEA/02_Comparisons/t_stats_",gsub(" ", "_", name_1), "_VS_",
                         gsub(" ", "_", name_2), ".pdf", sep=""), 
-                        height = 12, width = 15, units = "cm")
+                        height = 20, width = 25, units = "cm")
 }
-
-
 
 
 
@@ -88,153 +82,58 @@ tstats_plots<-function(top_genes_pairs, name1, name2, models){
 # Blood vs brain adults (smoking)
 ####################################
 
-## Naive models
-top_genes1<-top_genes_blood_smoking_naive
-top_genes2<-top_genes_adults_smoking_naive
-## Compare t-stats
-t_stat_plot(top_genes1, top_genes2, "Smoking blood", "Smoking brain", "naive")
-# rho = -0.01
-
-
-## Fitted models 
-top_genes1<-top_genes_blood_smoking_fitted
-top_genes2<-top_genes_adults_smoking_fitted
-## Compare t-stats
-t_stat_plot(top_genes1, top_genes2, "Smoking blood", "Smoking brain", "fitted")
-# rho = -0.01
-
-
-## Interaction models
-top_genes1<-top_genes_blood_smoking_interaction
-top_genes2<-top_genes_adults_smoking_interaction
-## Compare t-stats
-t_stat_plot(top_genes1, top_genes2, "Smoking blood", "Smoking brain", "interaction")
-# rho = -0.06
-
-
 top_genes_pairs<-list(list(top_genes_blood_smoking_naive, top_genes_adults_smoking_naive), 
                       list(top_genes_blood_smoking_fitted, top_genes_adults_smoking_fitted),
                       list(top_genes_blood_smoking_interaction, top_genes_adults_smoking_interaction))
-models<-c("naive", "fitted", "interaction")
+models<-c("Naive model", "Fitted model", "Interaction model")
 tstats_plots(top_genes_pairs,  "Smoking blood", "Smoking brain", models)
+
 
 #########################################
 # Smoking adults vs nicotine adults 
 #########################################
 
-## Naive models 
-top_genes1<-top_genes_adults_smoking_naive
-top_genes2<-top_genes_adults_nicotine_naive
-## Compare t-stats
-t_stat_plot(top_genes1, top_genes2, "Smoking adults", "Nicotine adults", "naive")
-## rho = 0.04
-
-
-## Fitted models 
-top_genes1<-top_genes_adults_smoking_fitted
-top_genes2<-top_genes_adults_nicotine_fitted
-## Compare t-stats
-t_stat_plot(top_genes1, top_genes2, "Smoking adults", "Nicotine adults", "fitted")
-## rho = 0.03
-
-
-## Interaction models 
-top_genes1<-top_genes_adults_smoking_interaction
-top_genes2<-top_genes_adults_nicotine_interaction
-## Compare t-stats
-t_stat_plot(top_genes1, top_genes2, "Smoking adults", "Nicotine adults", "interaction")
-## rho = -0.05
-
-
+top_genes_pairs<-list(list(top_genes_adults_smoking_naive, top_genes_adults_nicotine_naive), 
+                      list(top_genes_adults_smoking_fitted, top_genes_adults_nicotine_fitted),
+                      list(top_genes_adults_smoking_interaction, top_genes_adults_nicotine_interaction))
+models<-c("Naive model", "Fitted model", "Interaction model")
+tstats_plots(top_genes_pairs,  "Smoking adults", "Nicotine adults", models)
 
 
 #####################################
 # Smoking pups vs nicotine pups 
 #####################################
 
-## Naive models 
-top_genes1<-top_genes_pups_smoking_naive
-top_genes2<-top_genes_pups_nicotine_naive
-## Compare t-stats
-t_stat_plot(top_genes1, top_genes2, "Smoking pups", "Nicotine pups", "naive")
-## rho = 0.15
-
-
-## Fitted models 
-top_genes1<-top_genes_pups_smoking_fitted
-top_genes2<-top_genes_pups_nicotine_fitted
-## Compare t-stats
-t_stat_plot(top_genes1, top_genes2, "Smoking pups", "Nicotine pups", "fitted")
-## rho = 0.13
-
-
-## Interaction models 
-top_genes1<-top_genes_pups_smoking_interaction
-top_genes2<-top_genes_pups_nicotine_interaction
-## Compare t-stats
-t_stat_plot(top_genes1, top_genes2, "Smoking pups", "Nicotine pups", "interaction")
-## rho = 0.48
-
-
+top_genes_pairs<-list(list(top_genes_pups_smoking_naive, top_genes_pups_nicotine_naive), 
+                      list(top_genes_pups_smoking_fitted, top_genes_pups_nicotine_fitted),
+                      list(top_genes_pups_smoking_interaction, top_genes_pups_nicotine_interaction))
+models<-c("Naive model", "Fitted model", "Interaction model")
+tstats_plots(top_genes_pairs,  "Smoking pups", "Nicotine pups", models)
 
 
 #####################################
 # Smoking pups vs smoking adults
 #####################################
 
-## Naive models 
-top_genes1<-top_genes_pups_smoking_naive
-top_genes2<-top_genes_adults_smoking_naive
-## Compare t-stats
-t_stat_plot(top_genes1, top_genes2, "Smoking pups", "Smoking adults", "naive")
-## rho = 0.02
-
-
-## Fitted models 
-top_genes1<-top_genes_pups_smoking_fitted
-top_genes2<-top_genes_adults_smoking_fitted
-## Compare t-stats
-t_stat_plot(top_genes1, top_genes2, "Smoking pups", "Smoking adults", "fitted")
-## rho = 0.02
-
-
-## Interaction models 
-top_genes1<-top_genes_pups_smoking_interaction
-top_genes2<-top_genes_adults_smoking_interaction
-## Compare t-stats
-t_stat_plot(top_genes1, top_genes2, "Smoking pups", "Smoking adults", "interaction")
-## rho = 0.13
-
-
-
+top_genes_pairs<-list(list(top_genes_pups_smoking_naive, top_genes_adults_smoking_naive), 
+                      list(top_genes_pups_smoking_fitted, top_genes_adults_smoking_fitted),
+                      list(top_genes_pups_smoking_interaction, top_genes_adults_smoking_interaction))
+models<-c("Naive model", "Fitted model", "Interaction model")
+tstats_plots(top_genes_pairs,  "Smoking pups", "Smoking adults", models)
 
 
 #####################################
 # Nicotine pups vs nicotine adults
 #####################################
 
-## Naive models 
-top_genes1<-top_genes_pups_nicotine_naive
-top_genes2<-top_genes_adults_nicotine_naive
-## Compare t-stats
-t_stat_plot(top_genes1, top_genes2, "Nicotine pups", "Nicotine adults", "naive")
-## rho = -0.01
+top_genes_pairs<-list(list(top_genes_pups_nicotine_naive, top_genes_adults_nicotine_naive), 
+                      list(top_genes_pups_nicotine_fitted, top_genes_adults_nicotine_fitted),
+                      list(top_genes_pups_nicotine_interaction, top_genes_adults_nicotine_interaction))
+models<-c("Naive model", "Fitted model", "Interaction model")
+tstats_plots(top_genes_pairs,  "Nicotine pups", "Nicotine adults", models)
 
 
-## Fitted models 
-top_genes1<-top_genes_pups_nicotine_fitted
-top_genes2<-top_genes_adults_nicotine_fitted
-## Compare t-stats
-t_stat_plot(top_genes1, top_genes2, "Nicotine pups", "Nicotine adults", "fitted")
-## rho = 0.01
 
-
-## Interaction models 
-top_genes1<-top_genes_pups_nicotine_interaction
-top_genes2<-top_genes_adults_nicotine_interaction
-## Compare t-stats
-t_stat_plot(top_genes1, top_genes2, "Nicotine pups", "Nicotine adults", "interaction")
-## rho = 0.09
 
 
 
