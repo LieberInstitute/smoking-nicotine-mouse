@@ -133,7 +133,6 @@ models<-c("Naive model", "Fitted model", "Interaction model")
 tstats_plots(top_genes_pairs,  "Nicotine pups", "Nicotine adults", models)
 
 
-<<<<<<< HEAD
 ####################################
 # Naive vs fitted nicotine pups
 ####################################
@@ -153,8 +152,7 @@ t<-t_stat_plot(top_genes_pups_smoking_naive, top_genes_pups_smoking_fitted,
 ggsave("plots/04_DEA/02_Comparisons/t_stats_Naive_VS_Fitted_Smoking.pdf", t, 
        height = 10, width = 12, units = "cm")
 
-=======
->>>>>>> 389c2d70bf3c8f44bbb5f4b9f7cc976faee1f9f9
+
 
 
 
