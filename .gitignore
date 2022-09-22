@@ -3,3 +3,5 @@ processed-data/01_SPEAQeasy
 processed-data/*
 code/01_SPEAQeasy/.nextflow*
 .Rproj.user
+.Rhistory
+smokingMouse_Indirects.Rproj
