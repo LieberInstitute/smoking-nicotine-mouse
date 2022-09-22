@@ -354,3 +354,34 @@ DEG_lists<-list(DEG_all, DEG_all_Up_and_Down, DEG_all_smo_vs_all_nic)
 colors<-list(c("palegreen2", "yellow3", "lightsalmon", "slategray3"), 
              c("brown3", "cyan3", "coral", "cyan4"), c("olivedrab1", "rosybrown2"))
 venn_plot(DEG_lists, colors, "all_DEG")
+
+
+
+
+
+
+
+
+
+## Reproducibility information
+
+options(width = 120)
+session_info()
+# setting  value
+# version  R version 4.2.0 (2022-04-22 ucrt)
+# os       Windows 10 x64 (build 19044)
+# system   x86_64, mingw32
+# ui       RStudio
+# language (EN)
+# collate  Spanish_Mexico.utf8
+# ctype    Spanish_Mexico.utf8
+# tz       America/Mexico_City
+# date     2022-09-22
+# rstudio  2022.02.3+492 Prairie Trillium (desktop)
+# pandoc   2.17.1.1 @ C:/Program Files/RStudio/bin/quarto/bin/ (via rmarkdown)
+
+
+
+
+
+
