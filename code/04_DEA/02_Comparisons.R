@@ -336,13 +336,13 @@ DEG_all<-list(
   "Smoking naive"=de_genes_pups_smoking_naive$Symbol,
   "Smoking fitted"=de_genes_pups_smoking_fitted$Symbol)
 
-## Compare DEG genes comprised by both models (naive and fitted)
+## Compare DEG from the fitted model
 ## Compare all Up/Down regulated genes
 DEG_all_Up_and_Down<-list(
-  "Nicotine up"=union(nic_fitted_up, nic_naive_up),
-  "Nicotine down"=union(nic_fitted_down, nic_naive_down),
-  "Smoking up"=union(smo_fitted_up, smo_naive_up),
-  "Smoking down"=union(smo_fitted_down, smo_naive_down))
+  "Nicotine up"=nic_fitted_up,
+  "Nicotine down"=nic_fitted_down,
+  "Smoking up"=smo_fitted_up, 
+  "Smoking down"=smo_fitted_down)
 
 ## Compare all smoking VS all nicotine DEG
 DEG_all_smo_vs_all_nic<-list(
