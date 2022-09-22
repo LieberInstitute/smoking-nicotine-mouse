@@ -1,5 +1,5 @@
-raw-data
+raw-data/
 processed-data/01_SPEAQeasy
-processed-data/build_objects/*.Rdata
-plots
+processed-data/*
 code/01_SPEAQeasy/.nextflow*
+.Rproj.user
