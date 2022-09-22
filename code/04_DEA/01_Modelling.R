@@ -1,4 +1,4 @@
-## All libraries used for the DEA
+## All libraries used for the whole DEA
 library(here)
 library(SummarizedExperiment)
 library(stats)
@@ -11,6 +11,7 @@ library(ggrepel)
 library(jaffelab)
 library(VennDiagram) 
 library(gridExtra)
+library(sessioninfo)
 
 
 # 1. Differential Expression Analysis 
