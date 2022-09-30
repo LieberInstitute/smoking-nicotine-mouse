@@ -161,7 +161,6 @@ plots_DE<-function(top_genes, vGene, FDR=0.05, name) {
 DE_one_boxplot <- function (de_genes, lognorm_DE, DEgene){
   
   ## q-value for the gene
-  DEgene<-chartr(".", ":",DEgene)  
   q_value<-signif(de_genes[which(de_genes$Symbol==DEgene), "adj.P.Val"], digits = 3)
   
   ## Boxplot for each DE gene
