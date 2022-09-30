@@ -6,12 +6,16 @@ library(here)
 library(SummarizedExperiment)
 library(clusterProfiler)
 library(org.Mm.eg.db)
+library(jaffelab)
 
 load(here("processed-data/04_DEA/top_genes_pups_nicotine_fitted.Rdata"))
 load(here("processed-data/04_DEA/de_genes_pups_nicotine_fitted.Rdata"))
 load(here("processed-data/04_DEA/top_genes_pups_smoking_fitted.Rdata"))
 load(here("processed-data/04_DEA/de_genes_pups_smoking_fitted.Rdata"))
-
+load(here("processed-data/04_DEA/results_pups_nicotine_fitted.Rdata"))
+load(here("processed-data/04_DEA/results_pups_smoking_fitted.Rdata"))
+load(here("processed-data/03_EDA/04_Expl_Var_partition/rse_gene_brain_pups_nicotine.Rdata"))
+load(here("processed-data/03_EDA/04_Expl_Var_partition/rse_gene_brain_pups_smoking.Rdata"))
 
 
 ## GO and KEGG analyses for DEG from fitted model only
