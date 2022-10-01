@@ -8,6 +8,7 @@ library(clusterProfiler)
 library(org.Mm.eg.db)
 library(jaffelab)
 library(ggplot2)
+library(cowplot)
 
 load(here("processed-data/04_DEA/top_genes_pups_nicotine_fitted.Rdata"))
 load(here("processed-data/04_DEA/de_genes_pups_nicotine_fitted.Rdata"))
