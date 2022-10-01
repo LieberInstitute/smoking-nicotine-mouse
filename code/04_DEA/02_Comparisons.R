@@ -1,6 +1,31 @@
 
 ## 1.2 Comparison of DEG 
 
+load(here("processed-data/04_DEA/top_genes_blood_smoking_naive.Rdata"))
+load(here("processed-data/04_DEA/top_genes_blood_smoking_fitted.Rdata"))
+load(here("processed-data/04_DEA/top_genes_blood_smoking_interaction.Rdata"))
+
+load(here("processed-data/04_DEA/top_genes_adults_nicotine_naive.Rdata"))
+load(here("processed-data/04_DEA/top_genes_adults_nicotine_fitted.Rdata"))
+load(here("processed-data/04_DEA/top_genes_adults_nicotine_interaction.Rdata"))
+
+load(here("processed-data/04_DEA/top_genes_adults_smoking_naive.Rdata"))
+load(here("processed-data/04_DEA/top_genes_adults_smoking_fitted.Rdata"))
+load(here("processed-data/04_DEA/top_genes_adults_smoking_interaction.Rdata"))
+
+load(here("processed-data/04_DEA/de_genes_pups_nicotine_naive.Rdata"))
+load(here("processed-data/04_DEA/top_genes_pups_nicotine_naive.Rdata"))
+load(here("processed-data/04_DEA/de_genes_pups_nicotine_fitted.Rdata"))
+load(here("processed-data/04_DEA/top_genes_pups_nicotine_fitted.Rdata"))
+load(here("processed-data/04_DEA/top_genes_pups_nicotine_interaction.Rdata"))
+
+load(here("processed-data/04_DEA/de_genes_pups_smoking_naive.Rdata"))
+load(here("processed-data/04_DEA/top_genes_pups_smoking_naive.Rdata"))
+load(here("processed-data/04_DEA/de_genes_pups_smoking_fitted.Rdata"))
+load(here("processed-data/04_DEA/top_genes_pups_smoking_fitted.Rdata"))
+load(here("processed-data/04_DEA/top_genes_pups_smoking_interaction.Rdata"))
+
+
 
 ### 1.2.1 T-stats plots
 
@@ -258,18 +283,20 @@ venn_plot(DEG_lists, colors, "nic_and_smo_Up_and_Down")
 
 
 
-
 ## Compare smoking VS nicotine Up and Down regulated genes
 ## For genes from either naive or fitted model
 DEG_smo_vs_nic_Up<-list(
   "Smoking up"=union(smo_fitted_up, smo_naive_up),
   "Nicotine up"=union(nic_fitted_up, nic_naive_up))
+
 DEG_smo_vs_nic_Down<-list(
   "Smoking down"=union(smo_fitted_down, smo_naive_down),
   "Nicotine down"=union(nic_fitted_down, nic_naive_down))
+
 DEG_smoUp_vs_nicDown<-list(
   "Smoking up"=union(smo_fitted_up, smo_naive_up),
   "Nicotine down"=union(nic_fitted_down, nic_naive_down))
+
 DEG_smoDown_vs_nicUp<-list(
   "Smoking down"=union(smo_fitted_down, smo_naive_down),
   "Nicotine up"=union(nic_fitted_up, nic_naive_up))
@@ -277,7 +304,6 @@ DEG_smoDown_vs_nicUp<-list(
 DEG_lists<-list(DEG_smo_vs_nic_Up, DEG_smo_vs_nic_Down, DEG_smoUp_vs_nicDown, DEG_smoDown_vs_nicUp)
 colors<-list(c("coral", "brown3"), c("cyan4", "cyan3"), c("coral", "cyan3"), c("cyan4", "brown3"))
 venn_plot(DEG_lists, colors, "smo_VS_nic_Up_and_Down")
-
 
 
 
@@ -310,15 +336,22 @@ venn_plot(DEG_lists, colors, "Naive_smo_VS_nic_Up_and_Down")
 DEG_fitted_smo_vs_nic_up<-list(
   "Smoking fitted up"=smo_fitted_up,
   "Nicotine fitted up"=nic_fitted_up)
+save(DEG_fitted_smo_vs_nic_up, file="processed-data/04_DEA/DEG_fitted_smo_vs_nic_up.Rdata")
+
 DEG_fitted_smo_vs_nic_down<-list(
   "Smoking fitted down"=smo_fitted_down,
   "Nicotine fitted down"=nic_fitted_down)
+save(DEG_fitted_smo_vs_nic_down, file="processed-data/04_DEA/DEG_fitted_smo_vs_nic_down.Rdata")
+
 DEG_fitted_smoUp_nicDown<-list(
   "Smoking fitted up"=smo_fitted_up,
   "Nicotine fitted down"=nic_fitted_down)
+save(DEG_fitted_smoUp_nicDown, file = "processed-data/04_DEA/DEG_fitted_smoUp_nicDown.Rdata")
+
 DEG_fitted_smoDown_nicUp<-list(
   "Smoking fitted down"=smo_fitted_down,
   "Nicotine fitted up"=nic_fitted_up)
+save(DEG_fitted_smoDown_nicUp, file="processed-data/04_DEA/DEG_fitted_smoDown_nicUp.Rdata")
 
 DEG_lists<-list(DEG_fitted_smo_vs_nic_up, DEG_fitted_smo_vs_nic_down, 
                 DEG_fitted_smoUp_nicDown, DEG_fitted_smoDown_nicUp)
