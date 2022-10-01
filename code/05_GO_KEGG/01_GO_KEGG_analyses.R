@@ -7,6 +7,7 @@ library(SummarizedExperiment)
 library(clusterProfiler)
 library(org.Mm.eg.db)
 library(jaffelab)
+library(ggplot2)
 
 load(here("processed-data/04_DEA/top_genes_pups_nicotine_fitted.Rdata"))
 load(here("processed-data/04_DEA/de_genes_pups_nicotine_fitted.Rdata"))
