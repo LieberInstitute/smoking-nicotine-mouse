@@ -185,7 +185,7 @@ geneUniverse <- as.character(union(top_genes_pups_nicotine_fitted$EntrezID,
 geneUniverse <- geneUniverse[!is.na(geneUniverse)]
 
 goList_global<-GO_KEGG(sigGeneList, geneUniverse, "global")
-save(goList_global, "processed-data/05_GO_KEGG/goList_global.Rdata")
+save(goList_global, file="processed-data/05_GO_KEGG/goList_global.Rdata")
 
 
 
@@ -203,7 +203,7 @@ geneUniverse <- as.character(top_genes_pups_nicotine_fitted$EntrezID)
 geneUniverse <- geneUniverse[!is.na(geneUniverse)]
 
 goList_nic<-GO_KEGG(sigGeneList, geneUniverse, "nicotine")
-save(goList_nic, "processed-data/05_GO_KEGG/goList_nic.Rdata")
+save(goList_nic, file="processed-data/05_GO_KEGG/goList_nic.Rdata")
 
 
 
@@ -221,7 +221,7 @@ geneUniverse <- as.character(top_genes_pups_smoking_fitted$EntrezID)
 geneUniverse <- geneUniverse[!is.na(geneUniverse)]
 
 goList_smo<-GO_KEGG(sigGeneList, geneUniverse, "smoking")
-save(goList_smo, "processed-data/05_GO_KEGG/goList_smo.Rdata")
+save(goList_smo, file="processed-data/05_GO_KEGG/goList_smo.Rdata")
 
 
 
@@ -242,7 +242,7 @@ geneUniverse <- as.character(union(top_genes_pups_nicotine_fitted$EntrezID,
 geneUniverse <- geneUniverse[!is.na(geneUniverse)]
 
 goList_intersections<-GO_KEGG(sigGeneList, geneUniverse, "intersections")
-save(goList_intersections, "processed-data/05_GO_KEGG/goList_intersections.Rdata")
+save(goList_intersections, file="processed-data/05_GO_KEGG/goList_intersections.Rdata")
 
 
 
