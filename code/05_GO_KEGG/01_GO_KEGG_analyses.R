@@ -534,7 +534,8 @@ GO_KEGG_boxplots(genes[1], "Semaphorin_receptor_binding", "SmoUp_nicDown" )
 
 
 
-## Genes in asymmetric synapses
+## Genes in asymmetric synapses, postsynaptic specialization, postsynaptic density and neuron to 
+## neuron synapses
 genes<-GO_KEGG_genes("goList_intersections", "CC", "Only up nic", "asymmetric synapse")
 GO_KEGG_boxplots(genes[1:6], "Asymmetric_synapses", "Only_up_nic" )
 
@@ -552,3 +553,7 @@ GO_KEGG_boxplots(genes[1:5], "Asymmetric_synapses", "SmoDown_nicUp" )
 
 genes<-GO_KEGG_genes("goList_intersections", "CC", "Smo up, nic up", "asymmetric synapse")
 GO_KEGG_boxplots(genes[1:6], "Asymmetric_synapses", "SmoUp_nicUp" )
+
+
+
+## Genes involved in Synaptic vesicle cycle
