@@ -409,3 +409,19 @@ GO_KEGG_genes<- function(golist, term, cluster, description){
   genes<-unique(unlist(genes))
   
 }
+
+
+## Boxplots of the first 6 genes involved in a process/pathway
+GO_KEGG_boxplots<-function(DEG_list, description, cluster){
+  plots<-list()
+  i=1
+  for (DEgene in DEG_list){
+    plots[[i]]<-DEG_GO_boxplot(DEgene)
+    i=i+1
+  }
+  
+  plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]], plots[[6]], ncol=3)
+  ggsave(here(paste("plots/05_GO_KEGG/", description,"_boxplots_",cluster, ".pdf", sep="")), 
+         width = 50, height = 20, units = "cm") 
+  
+}
