@@ -466,6 +466,9 @@ GO_KEGG_boxplots(genes[1:4], "Postsynapse_organization", "SmoDown_nicUp" )
 genes<-GO_KEGG_genes("goList_intersections", "BP", "Smo up, nic up", "postsynapse organization")
 GO_KEGG_boxplots(genes[1:4], "Postsynapse_organization", "SmoUp_nicUp" )
 
+
+
+## Genes involved in neuronal stem cell population maintenance
 genes<-GO_KEGG_genes("goList_intersections", "BP", "Only up nic", "neuronal stem cell population maintenance")
 GO_KEGG_boxplots(genes[1], "Neuronal_stem_cell_population_maintenance", "Only_up_nic" )
 
@@ -516,3 +519,36 @@ GO_KEGG_boxplots(genes[1:6], "Response_to_inorganic_substance", "Only_down_smo" 
 
 genes<-GO_KEGG_genes("goList_intersections", "BP", "Smo up, nic up", "response to inorganic substance")
 GO_KEGG_boxplots(genes[1:5], "Response_to_inorganic_substance", "SmoUp_nicUp" )
+
+
+
+## Genes with semaphorin receptor binding activity
+genes<-GO_KEGG_genes("goList_intersections", "MF", "Only up smo", "semaphorin receptor binding")
+GO_KEGG_boxplots(genes[1], "Semaphorin_receptor_binding", "Only_up_smo" )
+
+genes<-GO_KEGG_genes("goList_intersections", "MF", "Only down smo", "semaphorin receptor binding")
+GO_KEGG_boxplots(genes[1:3], "Semaphorin_receptor_binding", "Only_down_smo" )
+
+genes<-GO_KEGG_genes("goList_intersections", "MF", "Smo up, nic down", "semaphorin receptor binding")
+GO_KEGG_boxplots(genes[1], "Semaphorin_receptor_binding", "SmoUp_nicDown" )
+
+
+
+## Genes in asymmetric synapses
+genes<-GO_KEGG_genes("goList_intersections", "CC", "Only up nic", "asymmetric synapse")
+GO_KEGG_boxplots(genes[1:6], "Asymmetric_synapses", "Only_up_nic" )
+
+genes<-GO_KEGG_genes("goList_intersections", "CC", "Only up smo", "asymmetric synapse")
+GO_KEGG_boxplots(genes[1:6], "Asymmetric_synapses", "Only_up_smo" )
+
+genes<-GO_KEGG_genes("goList_intersections", "CC", "Only down nic", "asymmetric synapse")
+GO_KEGG_boxplots(genes[1], "Asymmetric_synapses", "Only_down_nic" )
+
+genes<-GO_KEGG_genes("goList_intersections", "CC", "Only down smo", "asymmetric synapse")
+GO_KEGG_boxplots(genes[1:6], "Asymmetric_synapses", "Only_down_smo" )
+
+genes<-GO_KEGG_genes("goList_intersections", "CC", "Smo down, nic up", "asymmetric synapse")
+GO_KEGG_boxplots(genes[1:5], "Asymmetric_synapses", "SmoDown_nicUp" )
+
+genes<-GO_KEGG_genes("goList_intersections", "CC", "Smo up, nic up", "asymmetric synapse")
+GO_KEGG_boxplots(genes[1:6], "Asymmetric_synapses", "SmoUp_nicUp" )
