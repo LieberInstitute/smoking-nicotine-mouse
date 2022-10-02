@@ -130,6 +130,14 @@ dim(rse_gene_filt)
 # 19974   208
 
 
+## Add actual gene symbols instead of MGI symbols
+rowData(rse_gene_filt)$MGI_Symbol<-rowData(rse_gene_filt)$Symbol
+symbols<-biomart(genes  = rowData(rse_gene_filt)$ensemblID,
+                 mart       = "ENSEMBL_MART_ENSEMBL",
+                 dataset    = "mmusculus_gene_ensembl",
+                 attributes = c("external_gene_name"),
+                 filters    = "ensembl_gene_id")
+
 ## Add MGI/ensembl ID for genes without symbol
 ## Genes without symbol found
 no_symbol<-rowData(rse_gene_filt)$ensemblID[(! rowData(rse_gene_filt)$ensemblID 
