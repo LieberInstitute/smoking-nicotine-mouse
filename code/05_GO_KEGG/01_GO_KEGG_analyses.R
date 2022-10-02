@@ -10,6 +10,8 @@ library(jaffelab)
 library(ggplot2)
 library(cowplot)
 library(rlang)
+library(biomartr)
+library(sessioninfo)
 
 
 load(here("processed-data/04_DEA/top_genes_pups_nicotine_fitted.Rdata"))
@@ -408,6 +410,17 @@ GO_KEGG_genes<- function(golist, term, cluster, description){
   genes<-strsplit(genes, "/")
   genes<-unique(unlist(genes))
   
+  if (term=="KEGG"){
+    ## KEGG ids (entrez ids) to gene symbols
+    symbols<-biomart(genes  = genes,
+                     mart       = "ENSEMBL_MART_ENSEMBL",
+                     dataset    = "mmusculus_gene_ensembl",
+                     attributes = c("external_gene_name"),
+                     filters    = "entrezgene_id")
+    genes<-symbols$external_gene_name
+  }
+  return(genes)
+  
 }
 
 
@@ -419,9 +432,87 @@ GO_KEGG_boxplots<-function(DEG_list, description, cluster){
     plots[[i]]<-DEG_GO_boxplot(DEgene)
     i=i+1
   }
+  if (length(DEG_list)<6){
+    for (i in (length(plots)+1):6){
+      plots[[i]]<-NA
+    }
+  }
+
   
+  options(warn = - 1)   
   plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]], plots[[6]], ncol=3)
   ggsave(here(paste("plots/05_GO_KEGG/", description,"_boxplots_",cluster, ".pdf", sep="")), 
          width = 50, height = 20, units = "cm") 
   
 }
+
+
+
+## Boxplots 
+
+## Genes involved in postsynapse organization
+genes<-GO_KEGG_genes("goList_intersections", "BP", "Only up nic", "postsynapse organization")
+GO_KEGG_boxplots(genes[1:6], "Postsynapse_organization", "Only_up_nic" )
+
+genes<-GO_KEGG_genes("goList_intersections", "BP", "Only up smo", "postsynapse organization")
+GO_KEGG_boxplots(genes[1:6], "Postsynapse_organization", "Only_up_smo" )
+
+genes<-GO_KEGG_genes("goList_intersections", "BP", "Only down smo", "postsynapse organization")
+GO_KEGG_boxplots(genes[1:6], "Postsynapse_organization", "Only_down_smo" )
+
+genes<-GO_KEGG_genes("goList_intersections", "BP", "Smo down, nic up", "postsynapse organization")
+GO_KEGG_boxplots(genes[1:4], "Postsynapse_organization", "SmoDown_nicUp" )
+
+genes<-GO_KEGG_genes("goList_intersections", "BP", "Smo up, nic up", "postsynapse organization")
+GO_KEGG_boxplots(genes[1:4], "Postsynapse_organization", "SmoUp_nicUp" )
+
+genes<-GO_KEGG_genes("goList_intersections", "BP", "Only up nic", "neuronal stem cell population maintenance")
+GO_KEGG_boxplots(genes[1], "Neuronal_stem_cell_population_maintenance", "Only_up_nic" )
+
+genes<-GO_KEGG_genes("goList_intersections", "BP", "Only down smo", "neuronal stem cell population maintenance")
+GO_KEGG_boxplots(genes[1:4], "Neuronal_stem_cell_population_maintenance", "Only_down_smo" )
+
+genes<-GO_KEGG_genes("goList_intersections", "BP", "Smo down, nic up", "neuronal stem cell population maintenance")
+GO_KEGG_boxplots(genes[1:2], "Neuronal_stem_cell_population_maintenance", "SmoDown_nicUp" )
+
+
+
+## Genes involved in long-term synaptic potentiation
+genes<-GO_KEGG_genes("goList_intersections", "BP", "Only up nic", "long-term synaptic potentiation")
+GO_KEGG_boxplots(genes[1:3], "Long-term_synaptic_potentiation", "Only_up_nic" )
+
+genes<-GO_KEGG_genes("goList_intersections", "BP", "Only up smo", "long-term synaptic potentiation")
+GO_KEGG_boxplots(genes[1:6], "Long-term_synaptic_potentiation", "Only_up_smo" )
+
+genes<-GO_KEGG_genes("goList_intersections", "BP", "Only down nic", "long-term synaptic potentiation")
+GO_KEGG_boxplots(genes[1:2], "Long-term_synaptic_potentiation", "Only_down_nic" )
+
+genes<-GO_KEGG_genes("goList_intersections", "BP", "Only down smo", "long-term synaptic potentiation")
+GO_KEGG_boxplots(genes[1:6], "Long-term_synaptic_potentiation", "Only_down_smo" )
+
+genes<-GO_KEGG_genes("goList_intersections", "BP", "Smo up, nic down", "long-term synaptic potentiation")
+GO_KEGG_boxplots(genes[1], "Long-term_synaptic_potentiation", "SmoUp_nicDown" )
+
+genes<-GO_KEGG_genes("goList_intersections", "BP", "Smo down, nic up", "long-term synaptic potentiation")
+GO_KEGG_boxplots(genes[1:2], "Long-term_synaptic_potentiation", "SmoDown_nicUp" )
+
+genes<-GO_KEGG_genes("goList_intersections", "BP", "Smo up, nic up", "long-term synaptic potentiation")
+GO_KEGG_boxplots(genes[1], "Long-term_synaptic_potentiation", "SmoUp_nicUp" )
+
+
+
+## Genes involved in response to inorganic substance
+genes<-GO_KEGG_genes("goList_intersections", "BP", "Only up nic", "response to inorganic substance")
+GO_KEGG_boxplots(genes[1:6], "Response_to_inorganic_substance", "Only_up_nic" )
+
+genes<-GO_KEGG_genes("goList_intersections", "BP", "Only up smo", "response to inorganic substance")
+GO_KEGG_boxplots(genes[1:6], "Response_to_inorganic_substance", "Only_up_smo" )
+
+genes<-GO_KEGG_genes("goList_intersections", "BP", "Only down nic", "response to inorganic substance")
+GO_KEGG_boxplots(genes[1:5], "Response_to_inorganic_substance", "Only_down_nic" )
+
+genes<-GO_KEGG_genes("goList_intersections", "BP", "Only down smo", "response to inorganic substance")
+GO_KEGG_boxplots(genes[1:6], "Response_to_inorganic_substance", "Only_down_smo" )
+
+genes<-GO_KEGG_genes("goList_intersections", "BP", "Smo up, nic up", "response to inorganic substance")
+GO_KEGG_boxplots(genes[1:5], "Response_to_inorganic_substance", "SmoUp_nicUp" )
