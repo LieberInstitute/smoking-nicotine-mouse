@@ -292,9 +292,9 @@ DEG_GO_boxplot <- function(DEgene){
   ## Extract necessary data
   df<-get_df_DEG(gene = DEgene, vGene_nic, vGene_smo)
   ## q-value for the gene in nicotine and smoking 
-  q_value_nic<-signif(de_genes_pups_nicotine_fitted[which(de_genes_pups_nicotine_fitted$Symbol==DEgene),
+  q_value_nic<-signif(top_genes_pups_nicotine_fitted[which(top_genes_pups_nicotine_fitted$Symbol==DEgene),
                                                     "adj.P.Val"], digits = 3)
-  q_value_smo<-signif(de_genes_pups_smoking_fitted[which(de_genes_pups_smoking_fitted$Symbol==DEgene),
+  q_value_smo<-signif(top_genes_pups_smoking_fitted[which(top_genes_pups_smoking_fitted$Symbol==DEgene),
                                                    "adj.P.Val"], digits = 3)
   
   ## Boxplot for each DE gene
@@ -390,3 +390,22 @@ nicDown_smoUp_DEG<-de_genes_pups_smoking_fitted[which(de_genes_pups_smoking_fitt
 nicDown_smoUp_sorted<-nicDown_smoUp_DEG[order(nicDown_smoUp_DEG$adj.P.Val),"Symbol"]
 GO_boxplots(nicDown_smoUp_sorted[1:6], "nicDown_smoUp_inSmo")
 
+
+
+
+
+
+
+
+
+### 1.1.2 Genes in GO and KEGG descriptions
+
+## Extract genes from each BP, CC, MF and KEGG
+GO_KEGG_genes<- function(golist, term, cluster, description){
+  
+  GOdata<-as.data.frame(eval(parse_expr(paste(golist, "$", term, sep=""))))
+  genes<-unique(GOdata[which(GOdata$Description==description & GOdata$Cluster==cluster), "geneID"])
+  genes<-strsplit(genes, "/")
+  genes<-unique(unlist(genes))
+  
+}
