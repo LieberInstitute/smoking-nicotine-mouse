@@ -556,4 +556,142 @@ GO_KEGG_boxplots(genes[1:6], "Asymmetric_synapses", "SmoUp_nicUp" )
 
 
 
-## Genes involved in Synaptic vesicle cycle
+## Genes involved in synaptic vesicle cycle
+genes<-GO_KEGG_genes("goList_smo", "KEGG", "all", "Synaptic vesicle cycle")
+GO_KEGG_boxplots(genes[1:6], "Synaptic_vesicle_cycle", "Smo_all" )
+
+genes<-GO_KEGG_genes("goList_smo", "KEGG", "up", "Synaptic vesicle cycle")
+GO_KEGG_boxplots(genes[1:6], "Synaptic_vesicle_cycle", "Smo_up")
+
+genes<-GO_KEGG_genes("goList_smo", "KEGG", "down", "Synaptic vesicle cycle")
+GO_KEGG_boxplots(genes[1:6], "Synaptic_vesicle_cycle", "Smo_down")
+
+genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only up nic", "Synaptic vesicle cycle")
+GO_KEGG_boxplots(genes[1], "Synaptic_vesicle_cycle", "Only_up_nic")
+
+genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only up smo", "Synaptic vesicle cycle")
+GO_KEGG_boxplots(genes[1:6], "Synaptic_vesicle_cycle", "Only_up_smo")
+
+genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only down smo", "Synaptic vesicle cycle")
+GO_KEGG_boxplots(genes[1:6], "Synaptic_vesicle_cycle", "Only_down_smo" )
+
+genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Smo up, nic up", "Synaptic vesicle cycle")
+GO_KEGG_boxplots(genes[1], "Synaptic_vesicle_cycle", "SmoUp_nicUp")
+
+
+
+## Genes involved in Parkinson disease
+genes<-GO_KEGG_genes("goList_smo", "KEGG", "all", "Parkinson disease")
+GO_KEGG_boxplots(genes[1:6], "Parkinson_disease", "Smo_all" )
+
+genes<-GO_KEGG_genes("goList_smo", "KEGG", "up", "Parkinson disease")
+GO_KEGG_boxplots(genes[1:6], "Parkinson_disease", "Smo_up" )
+
+genes<-GO_KEGG_genes("goList_smo", "KEGG", "down", "Parkinson disease")
+GO_KEGG_boxplots(genes[1:6], "Parkinson_disease", "Smo_down" )
+
+genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only up nic", "Parkinson disease")
+GO_KEGG_boxplots(genes[1:6], "Parkinson_disease", "Only_up_nic" )
+
+genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only up smo", "Parkinson disease")
+GO_KEGG_boxplots(genes[1:6], "Parkinson_disease", "Only_up_smo" )
+
+genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only down nic", "Parkinson disease")
+GO_KEGG_boxplots(genes[1], "Parkinson_disease", "Only_down_nic" )
+
+genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only down smo", "Parkinson disease")
+GO_KEGG_boxplots(genes[1:6], "Parkinson_disease", "Only_down_smo" )
+
+genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Smo down, nic up", "Parkinson disease")
+GO_KEGG_boxplots(genes[1], "Parkinson_disease", "SmoDown_nicUp")
+
+genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Smo up, nic up", "Parkinson disease")
+GO_KEGG_boxplots(genes[1:6], "Parkinson_disease", "SmoUp_nicUp")
+
+genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Smo down, nic down", "Parkinson disease")
+GO_KEGG_boxplots(genes[1:2], "Parkinson_disease", "SmoDown_nicDown")
+
+
+
+## Genes involved in Prion disease
+genes<-GO_KEGG_genes("goList_smo", "KEGG", "all", "Prion disease")
+GO_KEGG_boxplots(genes[1:6], "Prion_disease", "Smo_all" )
+
+genes<-GO_KEGG_genes("goList_smo", "KEGG", "up", "Prion disease")
+GO_KEGG_boxplots(genes[1:6], "Prion_disease", "Smo_up" )
+
+genes<-GO_KEGG_genes("goList_smo", "KEGG", "down", "Prion disease")
+GO_KEGG_boxplots(genes[1:6], "Prion_disease", "Smo_down" )
+
+
+
+## Genes involved in dopaminergic synapses
+genes<-GO_KEGG_genes("goList_nic", "KEGG", "all", "Dopaminergic synapse")
+GO_KEGG_boxplots(genes[1:6], "Dopaminergic_synapse", "Nic_all" )
+
+genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only up nic", "Dopaminergic synapse")
+GO_KEGG_boxplots(genes[1:6], "Dopaminergic_synapse", "Only_up_nic" )
+
+genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only up smo", "Dopaminergic synapse")
+GO_KEGG_boxplots(genes[1:6], "Dopaminergic_synapse", "Only_up_smo" )
+
+genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only down smo", "Dopaminergic synapse")
+GO_KEGG_boxplots(genes[1:6], "Dopaminergic_synapse", "Only_down_smo" )
+
+genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Smo up, nic up", "Dopaminergic synapse")
+GO_KEGG_boxplots(genes[1:3], "Dopaminergic_synapse", "SmoUp_NicUp" )
+
+
+
+## Genes involved in long-term depression
+genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only up nic", "Long-term depression")
+GO_KEGG_boxplots(genes[1:6], "Long-term_depression", "Only_up_nic" )
+
+genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only up smo", "Long-term depression")
+GO_KEGG_boxplots(genes[1:6], "Long-term_depression", "Only_up_smo" )
+
+genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only down smo", "Long-term depression")
+GO_KEGG_boxplots(genes[1:6], "Long-term_depression", "Only_down_smo" )
+
+genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Smo up, nic up", "Long-term depression")
+GO_KEGG_boxplots(genes[1:2], "Long-term_depression", "SmoUp_NicUp" )
+
+
+
+## Genes involved in Glutamatergic synapse
+genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only up nic", "Glutamatergic synapse")
+GO_KEGG_boxplots(genes[1:6], "Glutamatergic_synapse", "Only_up_nic" )
+
+genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only up smo", "Glutamatergic synapse")
+GO_KEGG_boxplots(genes[1:6], "Glutamatergic_synapse", "Only_up_smo" )
+
+genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only down smo", "Glutamatergic synapse")
+GO_KEGG_boxplots(genes[1:6], "Glutamatergic_synapse", "Only_down_smo" )
+
+
+
+## Genes involved in Amyotrophic lateral sclerosis
+genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only up nic", "Amyotrophic lateral sclerosis")
+GO_KEGG_boxplots(genes[1:6], "Amyotrophic_lateral_sclerosis", "Only_up_nic" )
+
+genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only up smo", "Amyotrophic lateral sclerosis")
+GO_KEGG_boxplots(genes[1:6], "Amyotrophic_lateral_sclerosis", "Only_up_smo" )
+
+genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only down nic", "Amyotrophic lateral sclerosis")
+GO_KEGG_boxplots(genes[1], "Amyotrophic_lateral_sclerosis", "Only_down_nic" )
+
+genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only down smo", "Amyotrophic lateral sclerosis")
+GO_KEGG_boxplots(genes[1:6], "Amyotrophic_lateral_sclerosis", "Only_down_smo" )
+
+genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Smo down, nic up", "Amyotrophic lateral sclerosis")
+GO_KEGG_boxplots(genes[1], "Amyotrophic_lateral_sclerosis", "SmoDown_nicUp")
+
+genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Smo up, nic up", "Amyotrophic lateral sclerosis")
+GO_KEGG_boxplots(genes[1:6], "Amyotrophic_lateral_sclerosis", "SmoUp_nicUp")
+
+genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Smo down, nic down", "Amyotrophic lateral sclerosis")
+GO_KEGG_boxplots(genes[1], "Amyotrophic_lateral_sclerosis", "SmoDown_nicDown")
+
+
+
+
