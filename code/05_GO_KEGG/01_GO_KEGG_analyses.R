@@ -695,3 +695,28 @@ GO_KEGG_boxplots(genes[1], "Amyotrophic_lateral_sclerosis", "SmoDown_nicDown")
 
 
 
+
+
+
+
+
+## Reproducibility information
+print('Reproducibility information:')
+Sys.time()
+proc.time()
+options(width = 120)
+session_info()
+# setting  value
+# version  R version 4.2.0 (2022-04-22 ucrt)
+# os       Windows 10 x64 (build 19044)
+# system   x86_64, mingw32
+# ui       RStudio
+# language (EN)
+# collate  Spanish_Mexico.utf8
+# ctype    Spanish_Mexico.utf8
+# tz       America/Mexico_City
+# date     2022-10-02
+# rstudio  2022.07.2+576 Spotted Wakerobin (desktop)
+# pandoc   2.19.2 @ C:/Program Files/RStudio/bin/quarto/bin/tools/ (via rmarkdown)
+
+
