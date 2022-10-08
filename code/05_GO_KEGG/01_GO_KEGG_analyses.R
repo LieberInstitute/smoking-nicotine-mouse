@@ -82,17 +82,13 @@ GO_KEGG<- function(sigGeneList, geneUniverse, name){
     OrgDb = org.Mm.eg.db,
     ont = "BP",
     pAdjustMethod = "BH",
-    pvalueCutoff = 1,
-    qvalueCutoff = 1,
+    qvalueCutoff = 0.05,
     readable = TRUE
   )
   
   ## Save
   pdf(paste("plots/05_GO_KEGG/GO_BP_", name, ".pdf", sep=""), height = height, width = width)
   print(dotplot(goBP_Adj, title="GO Enrichment Analysis: Biological processes"))
-  dev.off()
-  pdf(paste("plots/05_GO_KEGG/GO_BP_", name, "_includeAllFalse.pdf", sep=""), height = height, width = width)
-  print(dotplot(goBP_Adj, title="GO Enrichment Analysis: Biological processes", includeAll=FALSE))
   dev.off()
   
   
@@ -104,17 +100,13 @@ GO_KEGG<- function(sigGeneList, geneUniverse, name){
     OrgDb = org.Mm.eg.db,
     ont = "MF",
     pAdjustMethod = "BH",
-    pvalueCutoff = 1,
-    qvalueCutoff = 1,
+    qvalueCutoff = 0.05,
     readable = TRUE
   )
   
   ## Save
   pdf(paste("plots/05_GO_KEGG/GO_MF_", name, ".pdf", sep=""), height = height, width = width)
   print(dotplot(goMF_Adj, title="GO Enrichment Analysis: Molecular function"))
-  dev.off()
-  pdf(paste("plots/05_GO_KEGG/GO_MF_", name, "_includeAllFalse.pdf", sep=""), height = height, width = width)
-  print(dotplot(goMF_Adj, title="GO Enrichment Analysis: Molecular function", includeAll=FALSE))
   dev.off()
   
   
@@ -126,17 +118,13 @@ GO_KEGG<- function(sigGeneList, geneUniverse, name){
     OrgDb = org.Mm.eg.db,
     ont = "CC",
     pAdjustMethod = "BH",
-    pvalueCutoff = 1,
-    qvalueCutoff = 1,
+    qvalueCutoff = 0.05,
     readable = TRUE
   )
   
   ## Save
   pdf(paste("plots/05_GO_KEGG/GO_CC_", name, ".pdf", sep=""), height = height, width = width)
   print(dotplot(goCC_Adj, title="GO Enrichment Analysis: Cellular components"))
-  dev.off()
-  pdf(paste("plots/05_GO_KEGG/GO_CC_", name, "_includeAllFalse.pdf", sep=""), height = height, width = width)
-  print(dotplot(goCC_Adj, title="GO Enrichment Analysis: Cellular components", includeAll=FALSE))
   dev.off()
   
   
@@ -147,16 +135,12 @@ GO_KEGG<- function(sigGeneList, geneUniverse, name){
     organism = "mmu",
     universe = geneUniverse,
     pAdjustMethod = "BH",
-    pvalueCutoff = 1,
-    qvalueCutoff = 1
+    qvalueCutoff = 0.05
   )
   
   ## Save
   pdf(paste("plots/05_GO_KEGG/KEGG_", name, ".pdf", sep=""), height = height, width = width)
   print(dotplot(kegg_Adj, title="KEGG Enrichment Analysis"))
-  dev.off()
-  pdf(paste("plots/05_GO_KEGG/KEGG_", name, "_includeAllFalse.pdf", sep=""), height =height, width = width)
-  print(dotplot(kegg_Adj, title="KEGG Enrichment Analysis", includeAll=FALSE))
   dev.off()
   
   
