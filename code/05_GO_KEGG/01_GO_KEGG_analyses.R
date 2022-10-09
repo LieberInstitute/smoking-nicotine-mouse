@@ -65,8 +65,8 @@ only_down_smo<-down_smo[which(! (down_smo$Symbol %in% smoDown_nicDown$Symbol |
 GO_KEGG<- function(sigGeneList, geneUniverse, name){
   
   if (name=="intersections"){
-    height=26
-    width=18
+    height=17
+    width=15
   }
   else {
     height=10
@@ -257,8 +257,11 @@ vGene_nic$E<-cleaningY(vGene_nic$E, model, P=2)
 rownames(vGene_smo$E)<-vGene_smo$genes$Symbol
 
 
+
+
 ## Data frame for a single gene with its nicotine and smoking logcounts 
 get_df_DEG<- function(gene, vGene_nic, vGene_smo) {
+  
   ## Logcounts for that gene 
   logcounts_nic<-vGene_nic$E[which(rownames(vGene_nic)==gene),]
   logcounts_smo<-vGene_smo$E[which(rownames(vGene_smo)==gene),]
@@ -272,7 +275,36 @@ get_df_DEG<- function(gene, vGene_nic, vGene_smo) {
 }
 
 
-## Compare the Nicotine vs Smoking lognorm counts for a single gene
+
+## Extract top 6 genes from a list based on their max q-values 
+## in nicotine and smoking 
+
+extact_top_genes <- function(DEG_list){
+  
+  nic_qvals<-vector()
+  smo_qvals<-vector()
+  max_qvals<-vector()
+  for (DEgene in DEG_list){
+    ## q-values for the gene in nicotine and smoking 
+    q_value_nic<-signif(top_genes_pups_nicotine_fitted[which(top_genes_pups_nicotine_fitted$Symbol==DEgene),
+                                                       "adj.P.Val"], digits = 3)
+    q_value_smo<-signif(top_genes_pups_smoking_fitted[which(top_genes_pups_smoking_fitted$Symbol==DEgene),
+                                                      "adj.P.Val"], digits = 3)
+    nic_qvals<-append(nic_qvals, q_value_nic)
+    smo_qvals<-append(smo_qvals, q_value_smo)
+    ## Max q-value
+    max_qvals<-append(max_qvals, max(q_value_nic, q_value_smo))
+  }
+  
+  q_vals<-data.frame(Gene=DEG_list, Nicotine=nic_qvals, Smoking=smo_qvals, Max=max_qvals)
+  
+  ## The 6 genes with the lowest max q-values
+  genes<-q_vals[order(q_vals$Max),1][1:6]
+}
+
+
+
+## Boxplot to compare the nicotine vs smoking lognorm counts for a single gene
 DEG_GO_boxplot <- function(DEgene){
   
   ## Extract necessary data
@@ -284,19 +316,20 @@ DEG_GO_boxplot <- function(DEgene){
                                                    "adj.P.Val"], digits = 3)
   
   ## Boxplot for each DE gene
-  p<-ggplot(data=as.data.frame(df), aes(x=Expt,y=Gene_counts)) + 
-    ## Hide outliers
-    geom_boxplot(aes(fill=Group),  outlier.color = "#FFFFFFFF") +
-    theme_classic() +
-    labs(x = "Experiment", y = "lognorm counts",
-         title = DEgene, 
-         subtitle = paste("FDR in nicotine:", q_value_nic, "               ", "FDR in smoking:",
-                          q_value_smo)) +
-    theme(plot.margin=unit (c (1,1.5,1,1), 'cm'), legend.position = "right",
-          plot.title = element_text(hjust=0.5, size=10, face="bold"),
-          plot.subtitle = element_text(size = 9, hjust = 0.5), axis.text.x=element_blank()) +
-    scale_fill_manual(values = c("Dodgerblue", "orangered")) +
-    facet_wrap(~ Expt, scales = "free") 
+  p <-ggplot(data=as.data.frame(df), aes(x=Group,y=Gene_counts)) + 
+      geom_boxplot(outlier.color = "#FFFFFFFF") +
+      geom_jitter(aes(color=Group), position=position_jitter(0.2)) +
+      theme_classic() +
+      labs(x = "Experiment", y = "logcounts - covariates",
+           title = paste(DEgene), 
+           subtitle = paste("FDR:", q_value_nic, "               ", "FDR:",
+                            q_value_smo)) +
+      theme(plot.margin=unit (c (1,1.5,1,1), 'cm'), legend.position = "none",
+            plot.title = element_text(hjust=0.5, size=10, face="bold"),
+            plot.subtitle = element_text(size = 9, hjust = 0.5))+
+      scale_color_manual(values = c("orangered", "Dodgerblue")) +
+      facet_wrap(~ Expt, scales = "free") +
+      scale_x_discrete(labels=c("Ctrl", "Expt"))
   
 }
 
@@ -324,33 +357,6 @@ nic_smo_Up<-intersect(DEG_fitted_smo_vs_nic_up[[1]], DEG_fitted_smo_vs_nic_up[[2
 nic_smo_Down<-intersect(DEG_fitted_smo_vs_nic_down[[1]], DEG_fitted_smo_vs_nic_down[[2]])
 nicUp_smoDown<-intersect(DEG_fitted_smoDown_nicUp[[1]], DEG_fitted_smoDown_nicUp[[2]])
 nicDown_smoUp<-intersect(DEG_fitted_smoUp_nicDown[[1]], DEG_fitted_smoUp_nicDown[[2]])
-
-
-
-## Top 6 genes in nicotine
-
-## DEG Up in Nic and Up in Smo
-## Order genes by their FDRs  
-nic_smo_Up_DEG<-de_genes_pups_nicotine_fitted[which(de_genes_pups_nicotine_fitted$Symbol %in% nic_smo_Up),]
-nic_smo_Up_sorted<-nic_smo_Up_DEG[order(nic_smo_Up_DEG$adj.P.Val),"Symbol"]
-GO_boxplots(nic_smo_Up_sorted[1:6], "nic_smo_Up_inNic")
-
-## DEG Down in Nic and Down in Smo
-nic_smo_Down_DEG<-de_genes_pups_nicotine_fitted[which(de_genes_pups_nicotine_fitted$Symbol %in% nic_smo_Down),]
-nic_smo_Down_sorted<-nic_smo_Down_DEG[order(nic_smo_Down_DEG$adj.P.Val),"Symbol"]
-GO_boxplots(nic_smo_Down_sorted[1:6], "nic_smo_Down_inNic")
-
-## DEG Up in Nic and Down in Smo
-nicUp_smoDown_DEG<-de_genes_pups_nicotine_fitted[which(de_genes_pups_nicotine_fitted$Symbol %in% nicUp_smoDown),]
-nicUp_smoDown_sorted<-nicUp_smoDown_DEG[order(nicUp_smoDown_DEG$adj.P.Val),"Symbol"]
-GO_boxplots(nicUp_smoDown_sorted[1:6], "nicUp_smoDown_inNic")
-
-## DEG Down in Nic and Up in Smo
-nicDown_smoUp_DEG<-de_genes_pups_nicotine_fitted[which(de_genes_pups_nicotine_fitted$Symbol %in% nicDown_smoUp),]
-nicDown_smoUp_sorted<-nicDown_smoUp_DEG[order(nicDown_smoUp_DEG$adj.P.Val),"Symbol"]
-GO_boxplots(nicDown_smoUp_sorted[1:6], "nicDown_smoUp_inNic")
-
-
 
 
 
