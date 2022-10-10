@@ -508,7 +508,7 @@ GO_KEGG_boxplots(top_DEG, "SNARE_complex", "all_smo")
 ## Genes in asymmetric synapses
 GO_genes<-GO_KEGG_genes("goList_nic", "CC", "up", "asymmetric synapse")
 top_DEG<-extract_top_genes(GO_genes)
-GO_KEGG_boxplots(top_DEG, "Asymmetric_synapse", "up")
+GO_KEGG_boxplots(top_DEG, "Asymmetric_synapse", "up_nic")
 
 
 
