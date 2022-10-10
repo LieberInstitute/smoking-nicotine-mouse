@@ -20,8 +20,6 @@ load(here("processed-data/04_DEA/top_genes_pups_smoking_fitted.Rdata"))
 load(here("processed-data/04_DEA/de_genes_pups_smoking_fitted.Rdata"))
 load(here("processed-data/04_DEA/results_pups_nicotine_fitted.Rdata"))
 load(here("processed-data/04_DEA/results_pups_smoking_fitted.Rdata"))
-load(here("processed-data/03_EDA/04_Expl_Var_partition/rse_gene_brain_pups_nicotine.Rdata"))
-load(here("processed-data/03_EDA/04_Expl_Var_partition/rse_gene_brain_pups_smoking.Rdata"))
 load(here("processed-data/04_DEA/DEG_fitted_smo_vs_nic_up.Rdata"))
 load(here("processed-data/04_DEA/DEG_fitted_smo_vs_nic_down.Rdata"))
 load(here("processed-data/04_DEA/DEG_fitted_smoDown_nicUp.Rdata"))
@@ -279,27 +277,63 @@ get_df_DEG<- function(gene, vGene_nic, vGene_smo) {
 ## Extract top 6 genes from a list based on their max q-values 
 ## in nicotine and smoking 
 
-extact_top_genes <- function(DEG_list){
+extract_top_genes <- function(DEG_list){
   
-  nic_qvals<-vector()
-  smo_qvals<-vector()
-  max_qvals<-vector()
-  for (DEgene in DEG_list){
-    ## q-values for the gene in nicotine and smoking 
-    q_value_nic<-signif(top_genes_pups_nicotine_fitted[which(top_genes_pups_nicotine_fitted$Symbol==DEgene),
-                                                       "adj.P.Val"], digits = 3)
-    q_value_smo<-signif(top_genes_pups_smoking_fitted[which(top_genes_pups_smoking_fitted$Symbol==DEgene),
-                                                      "adj.P.Val"], digits = 3)
-    nic_qvals<-append(nic_qvals, q_value_nic)
-    smo_qvals<-append(smo_qvals, q_value_smo)
-    ## Max q-value
-    max_qvals<-append(max_qvals, max(q_value_nic, q_value_smo))
+  ## If the genes are only from smoking 
+  if (length(which(DEG_list %in% de_genes_pups_nicotine_fitted$Symbol))==0){
+    
+    ## q-values for the gene  
+    q_values_smo<-top_genes_pups_smoking_fitted[which(top_genes_pups_smoking_fitted$Symbol %in% DEG_list),
+                                                       c("Symbol", "adj.P.Val")]
+    q_values_smo$adj.P.Val<-signif(q_values_smo$adj.P.Val, digits = 3)
+    ## Genes with the lowest q-values
+    genes<-q_values_smo[order(q_values_smo$adj.P.Val),1]
+    
+  }
+
+  ## If the genes are only from nicotine
+  else if (length(which(DEG_list %in% de_genes_pups_smoking_fitted$Symbol))==0){
+    
+    ## q-values for the gene  
+    q_values_nic<-top_genes_pups_nicotine_fitted[which(top_genes_pups_nicotine_fitted$Symbol %in% DEG_list),
+                                                c("Symbol", "adj.P.Val")]
+    q_values_nic$adj.P.Val<-signif(q_values_nic$adj.P.Val, digits = 3)
+    ## Genes with the lowest q-values
+    genes<-q_values_nic[order(q_values_nic$adj.P.Val),1]
+    
   }
   
-  q_vals<-data.frame(Gene=DEG_list, Nicotine=nic_qvals, Smoking=smo_qvals, Max=max_qvals)
+  else {
+    
+    nic_qvals<-vector()
+    smo_qvals<-vector()
+    max_qvals<-vector()
+    
+    for (DEgene in DEG_list){
+      ## q-values for the gene in nicotine and smoking 
+      q_value_nic<-signif(top_genes_pups_nicotine_fitted[which(top_genes_pups_nicotine_fitted$Symbol==DEgene),
+                                                         "adj.P.Val"], digits = 3)
+      q_value_smo<-signif(top_genes_pups_smoking_fitted[which(top_genes_pups_smoking_fitted$Symbol==DEgene),
+                                                        "adj.P.Val"], digits = 3)
+      nic_qvals<-append(nic_qvals, q_value_nic)
+      smo_qvals<-append(smo_qvals, q_value_smo)
+      ## Max q-value
+      max_qvals<-append(max_qvals, max(q_value_nic, q_value_smo))
+    }
+    
+    q_vals<-data.frame(Gene=DEG_list, Nicotine=nic_qvals, Smoking=smo_qvals, Max=max_qvals)
+    
+    ## Genes with the lowest max q-values
+    genes<-q_vals[order(q_vals$Max),1]
+  }
+
   
-  ## The 6 genes with the lowest max q-values
-  genes<-q_vals[order(q_vals$Max),1][1:6]
+  if (length(genes)<6){
+    return(genes)
+  }
+  else {
+    return(genes[1:6])
+  }
 }
 
 
@@ -309,27 +343,42 @@ DEG_GO_boxplot <- function(DEgene){
   
   ## Extract necessary data
   df<-get_df_DEG(gene = DEgene, vGene_nic, vGene_smo)
+  ## Extract Ensembl ID of the gene
+  ensemblID<-top_genes_pups_nicotine_fitted[which(top_genes_pups_nicotine_fitted$Symbol==DEgene), "ensemblID"]
+  
   ## q-value for the gene in nicotine and smoking 
   q_value_nic<-signif(top_genes_pups_nicotine_fitted[which(top_genes_pups_nicotine_fitted$Symbol==DEgene),
                                                     "adj.P.Val"], digits = 3)
   q_value_smo<-signif(top_genes_pups_smoking_fitted[which(top_genes_pups_smoking_fitted$Symbol==DEgene),
                                                    "adj.P.Val"], digits = 3)
-  
+  ## Log FC for the gene in nicotine and smoking 
+  logFC_nic<-signif(top_genes_pups_nicotine_fitted[which(top_genes_pups_nicotine_fitted$Symbol==DEgene),
+                                                     "logFC"], digits = 3)
+  logFC_smo<-signif(top_genes_pups_smoking_fitted[which(top_genes_pups_smoking_fitted$Symbol==DEgene),
+                                                    "logFC"], digits = 3)
+
   ## Boxplot for each DE gene
   p <-ggplot(data=as.data.frame(df), aes(x=Group,y=Gene_counts)) + 
       geom_boxplot(outlier.color = "#FFFFFFFF") +
       geom_jitter(aes(color=Group), position=position_jitter(0.2)) +
       theme_classic() +
       labs(x = "Experiment", y = "logcounts - covariates",
-           title = paste(DEgene), 
-           subtitle = paste("FDR:", q_value_nic, "               ", "FDR:",
-                            q_value_smo)) +
+           title = paste(DEgene, ensemblID, sep=" - "),
+           subtitle=" ") +
       theme(plot.margin=unit (c (1,1.5,1,1), 'cm'), legend.position = "none",
-            plot.title = element_text(hjust=0.5, size=10, face="bold"),
-            plot.subtitle = element_text(size = 9, hjust = 0.5))+
+            plot.title = element_text(hjust=0.5, size=10, face="bold"), 
+            plot.subtitle = element_text(size=17)) +
       scale_color_manual(values = c("orangered", "Dodgerblue")) +
       facet_wrap(~ Expt, scales = "free") +
       scale_x_discrete(labels=c("Ctrl", "Expt"))
+  
+  p <-ggdraw(p) + 
+      draw_label(paste("FDR:", q_value_nic), x = 0.35, y = 0.87, size=9, color = "darkslategray") +
+      draw_label(paste("LogFC:", logFC_nic), x = 0.35, y = 0.84, size=9, color = "darkslategray") +
+      draw_label(paste("FDR:", q_value_smo), x = 0.72, y = 0.87, size=9, color = "darkslategray") +
+      draw_label(paste("LogFC:", logFC_smo), x = 0.71, y = 0.84, size=9, color = "darkslategray") 
+  
+  return(p)
   
 }
 
@@ -345,8 +394,8 @@ GO_boxplots<- function (DEG_list, groups){
     i=i+1
   }
   plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]], plots[[6]], ncol=3)
-  ggsave(here(paste("plots/05_GO_KEGG/Top_DEG_boxplots_", groups, ".pdf", sep="")), 
-         width = 50, height = 20, units = "cm") 
+  ggsave(here(paste("plots/05_GO_KEGG/Top", length(DEG_list), "_DEG_boxplots_", groups, ".pdf", sep="")), 
+         width = 40, height = 25, units = "cm") 
 }
 
 
@@ -360,28 +409,23 @@ nicDown_smoUp<-intersect(DEG_fitted_smoUp_nicDown[[1]], DEG_fitted_smoUp_nicDown
 
 
 
-## Top 6 genes in smoking
+## Top 6 genes in each group
 
 ## DEG Up in Nic and Up in Smo
-nic_smo_Up_DEG<-de_genes_pups_smoking_fitted[which(de_genes_pups_smoking_fitted$Symbol %in% nic_smo_Up),]
-nic_smo_Up_sorted<-nic_smo_Up_DEG[order(nic_smo_Up_DEG$adj.P.Val),"Symbol"]
-GO_boxplots(nic_smo_Up_sorted[1:6], "nic_smo_Up_inSmo")
+nic_smo_Up<-extract_top_genes(nic_smo_Up)
+GO_boxplots(nic_smo_Up, "nic_smo_Up")
 
 ## DEG Down in Nic and Down in Smo
-nic_smo_Down_DEG<-de_genes_pups_smoking_fitted[which(de_genes_pups_smoking_fitted$Symbol %in% nic_smo_Down),]
-nic_smo_Down_sorted<-nic_smo_Down_DEG[order(nic_smo_Down_DEG$adj.P.Val),"Symbol"]
-GO_boxplots(nic_smo_Down_sorted[1:6], "nic_smo_Down_inSmo")
+nic_smo_Down<-extract_top_genes(nic_smo_Down)
+GO_boxplots(nic_smo_Down, "nic_smo_Down")
 
 ## DEG Up in Nic and Down in Smo
-nicUp_smoDown_DEG<-de_genes_pups_smoking_fitted[which(de_genes_pups_smoking_fitted$Symbol %in% nicUp_smoDown),]
-nicUp_smoDown_sorted<-nicUp_smoDown_DEG[order(nicUp_smoDown_DEG$adj.P.Val),"Symbol"]
-GO_boxplots(nicUp_smoDown_sorted[1:6], "nicUp_smoDown_inSmo")
+nicUp_smoDown<-extract_top_genes(nicUp_smoDown)
+GO_boxplots(nicUp_smoDown, "nicUp_smoDown")
 
 ## DEG Down in Nic and Up in Smo
-nicDown_smoUp_DEG<-de_genes_pups_smoking_fitted[which(de_genes_pups_smoking_fitted$Symbol %in% nicDown_smoUp),]
-nicDown_smoUp_sorted<-nicDown_smoUp_DEG[order(nicDown_smoUp_DEG$adj.P.Val),"Symbol"]
-GO_boxplots(nicDown_smoUp_sorted[1:6], "nicDown_smoUp_inSmo")
-
+nicDown_smoUp<-extract_top_genes(nicDown_smoUp)
+GO_boxplots(nicDown_smoUp, "nicDown_smoUp")
 
 
 
@@ -431,8 +475,8 @@ GO_KEGG_boxplots<-function(DEG_list, description, cluster){
   
   options(warn = - 1)   
   plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]], plots[[6]], ncol=3)
-  ggsave(here(paste("plots/05_GO_KEGG/", description,"_boxplots_",cluster, ".pdf", sep="")), 
-         width = 50, height = 20, units = "cm") 
+  ggsave(here(paste("plots/05_GO_KEGG/Top", length(DEG_list), "_", description,"_boxplots_",cluster, 
+                    ".pdf", sep="")), width = 40, height = 25, units = "cm") 
   
 }
 
@@ -440,249 +484,60 @@ GO_KEGG_boxplots<-function(DEG_list, description, cluster){
 
 ## Boxplots 
 
-## Genes involved in postsynapse organization
-genes<-GO_KEGG_genes("goList_intersections", "BP", "Only up nic", "postsynapse organization")
-GO_KEGG_boxplots(genes[1:6], "Postsynapse_organization", "Only_up_nic" )
 
-genes<-GO_KEGG_genes("goList_intersections", "BP", "Only up smo", "postsynapse organization")
-GO_KEGG_boxplots(genes[1:6], "Postsynapse_organization", "Only_up_smo" )
+## 1. Cellular components
 
-genes<-GO_KEGG_genes("goList_intersections", "BP", "Only down smo", "postsynapse organization")
-GO_KEGG_boxplots(genes[1:6], "Postsynapse_organization", "Only_down_smo" )
+## Genes of the SNARE complex
+GO_genes<-GO_KEGG_genes("goList_global", "CC", "all", "SNARE complex")
+top_DEG<-extract_top_genes(GO_genes)
+GO_KEGG_boxplots(top_DEG, "SNARE_complex", "all")
 
-genes<-GO_KEGG_genes("goList_intersections", "BP", "Smo down, nic up", "postsynapse organization")
-GO_KEGG_boxplots(genes[1:4], "Postsynapse_organization", "SmoDown_nicUp" )
+GO_genes<-GO_KEGG_genes("goList_intersections", "CC", "Only up smo", "SNARE complex")
+top_DEG<-extract_top_genes(GO_genes)
+GO_KEGG_boxplots(top_DEG, "SNARE_complex", "Only_up_smo")
 
-genes<-GO_KEGG_genes("goList_intersections", "BP", "Smo up, nic up", "postsynapse organization")
-GO_KEGG_boxplots(genes[1:4], "Postsynapse_organization", "SmoUp_nicUp" )
+GO_genes<-GO_KEGG_genes("goList_intersections", "CC", "Smo up, nic down", "SNARE complex")
+top_DEG<-extract_top_genes(GO_genes)
+GO_KEGG_boxplots(top_DEG, "SNARE_complex", "smoUp_nicDown")
+
+GO_genes<-GO_KEGG_genes("goList_smo", "CC", "all", "SNARE complex")
+top_DEG<-extract_top_genes(GO_genes)
+GO_KEGG_boxplots(top_DEG, "SNARE_complex", "all_smo")
 
 
-
-## Genes involved in neuronal stem cell population maintenance
-genes<-GO_KEGG_genes("goList_intersections", "BP", "Only up nic", "neuronal stem cell population maintenance")
-GO_KEGG_boxplots(genes[1], "Neuronal_stem_cell_population_maintenance", "Only_up_nic" )
-
-genes<-GO_KEGG_genes("goList_intersections", "BP", "Only down smo", "neuronal stem cell population maintenance")
-GO_KEGG_boxplots(genes[1:4], "Neuronal_stem_cell_population_maintenance", "Only_down_smo" )
-
-genes<-GO_KEGG_genes("goList_intersections", "BP", "Smo down, nic up", "neuronal stem cell population maintenance")
-GO_KEGG_boxplots(genes[1:2], "Neuronal_stem_cell_population_maintenance", "SmoDown_nicUp" )
+## Genes in asymmetric synapses
+GO_genes<-GO_KEGG_genes("goList_nic", "CC", "up", "asymmetric synapse")
+top_DEG<-extract_top_genes(GO_genes)
+GO_KEGG_boxplots(top_DEG, "Asymmetric_synapse", "up")
 
 
 
-## Genes involved in long-term synaptic potentiation
-genes<-GO_KEGG_genes("goList_intersections", "BP", "Only up nic", "long-term synaptic potentiation")
-GO_KEGG_boxplots(genes[1:3], "Long-term_synaptic_potentiation", "Only_up_nic" )
-
-genes<-GO_KEGG_genes("goList_intersections", "BP", "Only up smo", "long-term synaptic potentiation")
-GO_KEGG_boxplots(genes[1:6], "Long-term_synaptic_potentiation", "Only_up_smo" )
-
-genes<-GO_KEGG_genes("goList_intersections", "BP", "Only down nic", "long-term synaptic potentiation")
-GO_KEGG_boxplots(genes[1:2], "Long-term_synaptic_potentiation", "Only_down_nic" )
-
-genes<-GO_KEGG_genes("goList_intersections", "BP", "Only down smo", "long-term synaptic potentiation")
-GO_KEGG_boxplots(genes[1:6], "Long-term_synaptic_potentiation", "Only_down_smo" )
-
-genes<-GO_KEGG_genes("goList_intersections", "BP", "Smo up, nic down", "long-term synaptic potentiation")
-GO_KEGG_boxplots(genes[1], "Long-term_synaptic_potentiation", "SmoUp_nicDown" )
-
-genes<-GO_KEGG_genes("goList_intersections", "BP", "Smo down, nic up", "long-term synaptic potentiation")
-GO_KEGG_boxplots(genes[1:2], "Long-term_synaptic_potentiation", "SmoDown_nicUp" )
-
-genes<-GO_KEGG_genes("goList_intersections", "BP", "Smo up, nic up", "long-term synaptic potentiation")
-GO_KEGG_boxplots(genes[1], "Long-term_synaptic_potentiation", "SmoUp_nicUp" )
-
-
-
-## Genes involved in response to inorganic substance
-genes<-GO_KEGG_genes("goList_intersections", "BP", "Only up nic", "response to inorganic substance")
-GO_KEGG_boxplots(genes[1:6], "Response_to_inorganic_substance", "Only_up_nic" )
-
-genes<-GO_KEGG_genes("goList_intersections", "BP", "Only up smo", "response to inorganic substance")
-GO_KEGG_boxplots(genes[1:6], "Response_to_inorganic_substance", "Only_up_smo" )
-
-genes<-GO_KEGG_genes("goList_intersections", "BP", "Only down nic", "response to inorganic substance")
-GO_KEGG_boxplots(genes[1:5], "Response_to_inorganic_substance", "Only_down_nic" )
-
-genes<-GO_KEGG_genes("goList_intersections", "BP", "Only down smo", "response to inorganic substance")
-GO_KEGG_boxplots(genes[1:6], "Response_to_inorganic_substance", "Only_down_smo" )
-
-genes<-GO_KEGG_genes("goList_intersections", "BP", "Smo up, nic up", "response to inorganic substance")
-GO_KEGG_boxplots(genes[1:5], "Response_to_inorganic_substance", "SmoUp_nicUp" )
-
-
-
-## Genes with semaphorin receptor binding activity
-genes<-GO_KEGG_genes("goList_intersections", "MF", "Only up smo", "semaphorin receptor binding")
-GO_KEGG_boxplots(genes[1], "Semaphorin_receptor_binding", "Only_up_smo" )
-
-genes<-GO_KEGG_genes("goList_intersections", "MF", "Only down smo", "semaphorin receptor binding")
-GO_KEGG_boxplots(genes[1:3], "Semaphorin_receptor_binding", "Only_down_smo" )
-
-genes<-GO_KEGG_genes("goList_intersections", "MF", "Smo up, nic down", "semaphorin receptor binding")
-GO_KEGG_boxplots(genes[1], "Semaphorin_receptor_binding", "SmoUp_nicDown" )
-
-
-
-## Genes in asymmetric synapses, postsynaptic specialization, postsynaptic density and neuron to 
-## neuron synapses
-genes<-GO_KEGG_genes("goList_intersections", "CC", "Only up nic", "asymmetric synapse")
-GO_KEGG_boxplots(genes[1:6], "Asymmetric_synapses", "Only_up_nic" )
-
-genes<-GO_KEGG_genes("goList_intersections", "CC", "Only up smo", "asymmetric synapse")
-GO_KEGG_boxplots(genes[1:6], "Asymmetric_synapses", "Only_up_smo" )
-
-genes<-GO_KEGG_genes("goList_intersections", "CC", "Only down nic", "asymmetric synapse")
-GO_KEGG_boxplots(genes[1], "Asymmetric_synapses", "Only_down_nic" )
-
-genes<-GO_KEGG_genes("goList_intersections", "CC", "Only down smo", "asymmetric synapse")
-GO_KEGG_boxplots(genes[1:6], "Asymmetric_synapses", "Only_down_smo" )
-
-genes<-GO_KEGG_genes("goList_intersections", "CC", "Smo down, nic up", "asymmetric synapse")
-GO_KEGG_boxplots(genes[1:5], "Asymmetric_synapses", "SmoDown_nicUp" )
-
-genes<-GO_KEGG_genes("goList_intersections", "CC", "Smo up, nic up", "asymmetric synapse")
-GO_KEGG_boxplots(genes[1:6], "Asymmetric_synapses", "SmoUp_nicUp" )
-
-
-
-## Genes involved in synaptic vesicle cycle
-genes<-GO_KEGG_genes("goList_smo", "KEGG", "all", "Synaptic vesicle cycle")
-GO_KEGG_boxplots(genes[1:6], "Synaptic_vesicle_cycle", "Smo_all" )
-
-genes<-GO_KEGG_genes("goList_smo", "KEGG", "up", "Synaptic vesicle cycle")
-GO_KEGG_boxplots(genes[1:6], "Synaptic_vesicle_cycle", "Smo_up")
-
-genes<-GO_KEGG_genes("goList_smo", "KEGG", "down", "Synaptic vesicle cycle")
-GO_KEGG_boxplots(genes[1:6], "Synaptic_vesicle_cycle", "Smo_down")
-
-genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only up nic", "Synaptic vesicle cycle")
-GO_KEGG_boxplots(genes[1], "Synaptic_vesicle_cycle", "Only_up_nic")
-
-genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only up smo", "Synaptic vesicle cycle")
-GO_KEGG_boxplots(genes[1:6], "Synaptic_vesicle_cycle", "Only_up_smo")
-
-genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only down smo", "Synaptic vesicle cycle")
-GO_KEGG_boxplots(genes[1:6], "Synaptic_vesicle_cycle", "Only_down_smo" )
-
-genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Smo up, nic up", "Synaptic vesicle cycle")
-GO_KEGG_boxplots(genes[1], "Synaptic_vesicle_cycle", "SmoUp_nicUp")
-
-
+## 2. Pathways
 
 ## Genes involved in Parkinson disease
-genes<-GO_KEGG_genes("goList_smo", "KEGG", "all", "Parkinson disease")
-GO_KEGG_boxplots(genes[1:6], "Parkinson_disease", "Smo_all" )
-
-genes<-GO_KEGG_genes("goList_smo", "KEGG", "up", "Parkinson disease")
-GO_KEGG_boxplots(genes[1:6], "Parkinson_disease", "Smo_up" )
-
-genes<-GO_KEGG_genes("goList_smo", "KEGG", "down", "Parkinson disease")
-GO_KEGG_boxplots(genes[1:6], "Parkinson_disease", "Smo_down" )
-
-genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only up nic", "Parkinson disease")
-GO_KEGG_boxplots(genes[1:6], "Parkinson_disease", "Only_up_nic" )
-
-genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only up smo", "Parkinson disease")
-GO_KEGG_boxplots(genes[1:6], "Parkinson_disease", "Only_up_smo" )
-
-genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only down nic", "Parkinson disease")
-GO_KEGG_boxplots(genes[1], "Parkinson_disease", "Only_down_nic" )
-
-genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only down smo", "Parkinson disease")
-GO_KEGG_boxplots(genes[1:6], "Parkinson_disease", "Only_down_smo" )
-
-genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Smo down, nic up", "Parkinson disease")
-GO_KEGG_boxplots(genes[1], "Parkinson_disease", "SmoDown_nicUp")
-
-genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Smo up, nic up", "Parkinson disease")
-GO_KEGG_boxplots(genes[1:6], "Parkinson_disease", "SmoUp_nicUp")
-
-genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Smo down, nic down", "Parkinson disease")
-GO_KEGG_boxplots(genes[1:2], "Parkinson_disease", "SmoDown_nicDown")
-
-
-
-## Genes involved in Prion disease
-genes<-GO_KEGG_genes("goList_smo", "KEGG", "all", "Prion disease")
-GO_KEGG_boxplots(genes[1:6], "Prion_disease", "Smo_all" )
-
-genes<-GO_KEGG_genes("goList_smo", "KEGG", "up", "Prion disease")
-GO_KEGG_boxplots(genes[1:6], "Prion_disease", "Smo_up" )
-
-genes<-GO_KEGG_genes("goList_smo", "KEGG", "down", "Prion disease")
-GO_KEGG_boxplots(genes[1:6], "Prion_disease", "Smo_down" )
-
-
+GO_genes<-GO_KEGG_genes("goList_global", "KEGG", "up", "Parkinson disease")
+top_DEG<-extract_top_genes(GO_genes)
+GO_KEGG_boxplots(top_DEG, "Parkinson_disease", "up")
 
 ## Genes involved in dopaminergic synapses
-genes<-GO_KEGG_genes("goList_nic", "KEGG", "all", "Dopaminergic synapse")
-GO_KEGG_boxplots(genes[1:6], "Dopaminergic_synapse", "Nic_all" )
+GO_genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only up nic", "Dopaminergic synapse")
+top_DEG<-extract_top_genes(GO_genes)
+GO_KEGG_boxplots(top_DEG, "Dopaminergic_synapse", "Only_up_nic")
 
-genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only up nic", "Dopaminergic synapse")
-GO_KEGG_boxplots(genes[1:6], "Dopaminergic_synapse", "Only_up_nic" )
-
-genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only up smo", "Dopaminergic synapse")
-GO_KEGG_boxplots(genes[1:6], "Dopaminergic_synapse", "Only_up_smo" )
-
-genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only down smo", "Dopaminergic synapse")
-GO_KEGG_boxplots(genes[1:6], "Dopaminergic_synapse", "Only_down_smo" )
-
-genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Smo up, nic up", "Dopaminergic synapse")
-GO_KEGG_boxplots(genes[1:3], "Dopaminergic_synapse", "SmoUp_NicUp" )
+GO_genes<-GO_KEGG_genes("goList_nic", "KEGG", "all", "Dopaminergic synapse")
+top_DEG<-extract_top_genes(GO_genes)
+GO_KEGG_boxplots(top_DEG, "Dopaminergic_synapse", "all_nic")
 
 
+## Genes involved in long−term depression
+GO_genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only up nic", "Long-term depression")
+top_DEG<-extract_top_genes(GO_genes)
+GO_KEGG_boxplots(top_DEG, "Long-term_depression", "Only_up_nic")
 
-## Genes involved in long-term depression
-genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only up nic", "Long-term depression")
-GO_KEGG_boxplots(genes[1:6], "Long-term_depression", "Only_up_nic" )
-
-genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only up smo", "Long-term depression")
-GO_KEGG_boxplots(genes[1:6], "Long-term_depression", "Only_up_smo" )
-
-genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only down smo", "Long-term depression")
-GO_KEGG_boxplots(genes[1:6], "Long-term_depression", "Only_down_smo" )
-
-genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Smo up, nic up", "Long-term depression")
-GO_KEGG_boxplots(genes[1:2], "Long-term_depression", "SmoUp_NicUp" )
-
-
-
-## Genes involved in Glutamatergic synapse
-genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only up nic", "Glutamatergic synapse")
-GO_KEGG_boxplots(genes[1:6], "Glutamatergic_synapse", "Only_up_nic" )
-
-genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only up smo", "Glutamatergic synapse")
-GO_KEGG_boxplots(genes[1:6], "Glutamatergic_synapse", "Only_up_smo" )
-
-genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only down smo", "Glutamatergic synapse")
-GO_KEGG_boxplots(genes[1:6], "Glutamatergic_synapse", "Only_down_smo" )
-
-
-
-## Genes involved in Amyotrophic lateral sclerosis
-genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only up nic", "Amyotrophic lateral sclerosis")
-GO_KEGG_boxplots(genes[1:6], "Amyotrophic_lateral_sclerosis", "Only_up_nic" )
-
-genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only up smo", "Amyotrophic lateral sclerosis")
-GO_KEGG_boxplots(genes[1:6], "Amyotrophic_lateral_sclerosis", "Only_up_smo" )
-
-genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only down nic", "Amyotrophic lateral sclerosis")
-GO_KEGG_boxplots(genes[1], "Amyotrophic_lateral_sclerosis", "Only_down_nic" )
-
-genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only down smo", "Amyotrophic lateral sclerosis")
-GO_KEGG_boxplots(genes[1:6], "Amyotrophic_lateral_sclerosis", "Only_down_smo" )
-
-genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Smo down, nic up", "Amyotrophic lateral sclerosis")
-GO_KEGG_boxplots(genes[1], "Amyotrophic_lateral_sclerosis", "SmoDown_nicUp")
-
-genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Smo up, nic up", "Amyotrophic lateral sclerosis")
-GO_KEGG_boxplots(genes[1:6], "Amyotrophic_lateral_sclerosis", "SmoUp_nicUp")
-
-genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Smo down, nic down", "Amyotrophic lateral sclerosis")
-GO_KEGG_boxplots(genes[1], "Amyotrophic_lateral_sclerosis", "SmoDown_nicDown")
-
-
+## Genes involved in SNARE interactions in vesicle transport
+GO_genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Smo up, nic down", "SNARE interactions in vesicular transport")
+top_DEG<-extract_top_genes(GO_genes)
+GO_KEGG_boxplots(top_DEG, "SNARE_int_ves_transport", "smoUp_nicDown")
 
 
 
