@@ -39,6 +39,11 @@ down_nic<-de_genes_pups_nicotine_fitted[de_genes_pups_nicotine_fitted$logFC<0, c
 down_smo<-de_genes_pups_smoking_fitted[de_genes_pups_smoking_fitted$logFC<0, c("EntrezID", "Symbol")]
 all_down<-unique(rbind(down_nic, down_smo))
 
+all_nic<-unique(rbind(up_nic, down_nic))
+all_smo<-unique(rbind(up_smo, down_smo))
+all<-unique(rbind(all_nic, all_smo))
+save(all, file="processed-data/05_GO_KEGG/all_DEG.Rdata")
+
 ## Intersections between groups
 smoUp_nicDown<-merge(up_smo, down_nic)
 smoDown_nicUp<-merge(down_smo, up_nic)
