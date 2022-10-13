@@ -485,10 +485,6 @@ GO_KEGG_boxplots<-function(DEG_list, description, cluster){
 ## 1. Cellular components
 
 ## Genes of the SNARE complex
-GO_genes<-GO_KEGG_genes("goList_global", "CC", "up", "SNARE complex")
-top_DEG<-extract_top_genes(GO_genes)
-GO_KEGG_boxplots(top_DEG, "SNARE_complex", "up")
-
 GO_genes<-GO_KEGG_genes("goList_intersections", "CC", "Only up smo", "SNARE complex")
 top_DEG<-extract_top_genes(GO_genes)
 GO_KEGG_boxplots(top_DEG, "SNARE_complex", "Only_up_smo")
@@ -509,7 +505,16 @@ GO_KEGG_boxplots(top_DEG, "Asymmetric_synapse", "up_nic")
 
 
 
-## 2. Pathways
+## 2. Molecular functions
+
+## Genes with heat shock protein binding activity
+GO_genes<-GO_KEGG_genes("goList_intersections", "MF", "Smo down, nic up", "heat shock protein binding")
+top_DEG<-extract_top_genes(GO_genes)
+GO_KEGG_boxplots(top_DEG, "HeatShock_protein_binding", "smoDown_nicUp")
+
+
+
+## 3. Pathways
 
 ## Genes involved in Parkinson disease
 GO_genes<-GO_KEGG_genes("goList_global", "KEGG", "up", "Parkinson disease")
@@ -525,7 +530,6 @@ GO_genes<-GO_KEGG_genes("goList_nic", "KEGG", "up", "Dopaminergic synapse")
 top_DEG<-extract_top_genes(GO_genes)
 GO_KEGG_boxplots(top_DEG, "Dopaminergic_synapse", "up_nic")
 
-
 ## Genes involved in long−term depression
 GO_genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only up nic", "Long-term depression")
 top_DEG<-extract_top_genes(GO_genes)
@@ -535,6 +539,7 @@ GO_KEGG_boxplots(top_DEG, "Long-term_depression", "Only_up_nic")
 GO_genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Smo up, nic down", "SNARE interactions in vesicular transport")
 top_DEG<-extract_top_genes(GO_genes)
 GO_KEGG_boxplots(top_DEG, "SNARE_int_ves_transport", "smoUp_nicDown")
+
 
 
 
