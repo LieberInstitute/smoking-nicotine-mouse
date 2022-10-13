@@ -37,10 +37,6 @@ down_nic<-de_genes_pups_nicotine_fitted[de_genes_pups_nicotine_fitted$logFC<0, c
 down_smo<-de_genes_pups_smoking_fitted[de_genes_pups_smoking_fitted$logFC<0, c("EntrezID", "Symbol")]
 all_down<-unique(rbind(down_nic, down_smo))
 
-all_nic<-unique(rbind(up_nic, down_nic))
-all_smo<-unique(rbind(up_smo, down_smo))
-all<-unique(rbind(all_nic, all_smo))
-
 ## Intersections between groups
 smoUp_nicDown<-merge(up_smo, down_nic)
 smoDown_nicUp<-merge(down_smo, up_nic)
@@ -148,7 +144,6 @@ GO_KEGG<- function(sigGeneList, geneUniverse, name){
     CC = goCC_Adj,
     KEGG = kegg_Adj
   )
-  save(goList, file = paste("processed-data/05_GO_KEGG/goList_", name, ".Rdata", sep=""))
   
   return(goList)
 }
@@ -157,11 +152,11 @@ GO_KEGG<- function(sigGeneList, geneUniverse, name){
 
 
 ######################
-# All/Up/Down DEG
+# Up/Down DEG
 ######################
 
 ## List of DEG sets
-sigGeneList <- list("all"=all$EntrezID, "up"=all_up$EntrezID, "down"=all_down$EntrezID) 
+sigGeneList <- list("up"=all_up$EntrezID, "down"=all_down$EntrezID) 
 sigGeneList <-lapply(sigGeneList, function(x) {
   x[!is.na(x)]
 })
@@ -176,11 +171,11 @@ save(goList_global, file="processed-data/05_GO_KEGG/goList_global.Rdata")
 
 
 ###################################
-# Nicotine pups All/Up/Down DEG
+# Nicotine pups Up/Down DEG
 ###################################
 
 ## List of DEG sets
-sigGeneList <- list("all"=all_nic$EntrezID, "up"=up_nic$EntrezID, "down"=down_nic$EntrezID) 
+sigGeneList <- list("up"=up_nic$EntrezID, "down"=down_nic$EntrezID) 
 sigGeneList <-lapply(sigGeneList, function(x) {
   x[!is.na(x)]
 })
@@ -194,11 +189,11 @@ save(goList_nic, file="processed-data/05_GO_KEGG/goList_nic.Rdata")
 
 
 ###################################
-# Smoking pups All/Up/Down DEG
+# Smoking pups Up/Down DEG
 ###################################
 
 ## List of DEG sets
-sigGeneList <- list("all"=all_smo$EntrezID, "up"=up_smo$EntrezID, "down"=down_smo$EntrezID) 
+sigGeneList <- list("up"=up_smo$EntrezID, "down"=down_smo$EntrezID) 
 sigGeneList <-lapply(sigGeneList, function(x) {
   x[!is.na(x)]
 })
@@ -488,9 +483,9 @@ GO_KEGG_boxplots<-function(DEG_list, description, cluster){
 ## 1. Cellular components
 
 ## Genes of the SNARE complex
-GO_genes<-GO_KEGG_genes("goList_global", "CC", "all", "SNARE complex")
+GO_genes<-GO_KEGG_genes("goList_global", "CC", "up", "SNARE complex")
 top_DEG<-extract_top_genes(GO_genes)
-GO_KEGG_boxplots(top_DEG, "SNARE_complex", "all")
+GO_KEGG_boxplots(top_DEG, "SNARE_complex", "up")
 
 GO_genes<-GO_KEGG_genes("goList_intersections", "CC", "Only up smo", "SNARE complex")
 top_DEG<-extract_top_genes(GO_genes)
@@ -500,9 +495,9 @@ GO_genes<-GO_KEGG_genes("goList_intersections", "CC", "Smo up, nic down", "SNARE
 top_DEG<-extract_top_genes(GO_genes)
 GO_KEGG_boxplots(top_DEG, "SNARE_complex", "smoUp_nicDown")
 
-GO_genes<-GO_KEGG_genes("goList_smo", "CC", "all", "SNARE complex")
+GO_genes<-GO_KEGG_genes("goList_smo", "CC", "up", "SNARE complex")
 top_DEG<-extract_top_genes(GO_genes)
-GO_KEGG_boxplots(top_DEG, "SNARE_complex", "all_smo")
+GO_KEGG_boxplots(top_DEG, "SNARE_complex", "up_smo")
 
 
 ## Genes in asymmetric synapses
@@ -524,9 +519,9 @@ GO_genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only up nic", "Dopamine
 top_DEG<-extract_top_genes(GO_genes)
 GO_KEGG_boxplots(top_DEG, "Dopaminergic_synapse", "Only_up_nic")
 
-GO_genes<-GO_KEGG_genes("goList_nic", "KEGG", "all", "Dopaminergic synapse")
+GO_genes<-GO_KEGG_genes("goList_nic", "KEGG", "up", "Dopaminergic synapse")
 top_DEG<-extract_top_genes(GO_genes)
-GO_KEGG_boxplots(top_DEG, "Dopaminergic_synapse", "all_nic")
+GO_KEGG_boxplots(top_DEG, "Dopaminergic_synapse", "up_nic")
 
 
 ## Genes involved in long−term depression
