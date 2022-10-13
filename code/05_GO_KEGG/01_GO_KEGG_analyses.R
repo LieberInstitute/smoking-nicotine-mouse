@@ -24,6 +24,8 @@ load(here("processed-data/04_DEA/DEG_fitted_smo_vs_nic_up.Rdata"))
 load(here("processed-data/04_DEA/DEG_fitted_smo_vs_nic_down.Rdata"))
 load(here("processed-data/04_DEA/DEG_fitted_smoDown_nicUp.Rdata"))
 load(here("processed-data/04_DEA/DEG_fitted_smoUp_nicDown.Rdata"))
+load(here("processed-data/03_EDA/04_Expl_Var_partition/rse_gene_brain_pups_smoking.Rdata"))
+load(here("processed-data/03_EDA/04_Expl_Var_partition/rse_gene_brain_pups_nicotine.Rdata"))
 
 
 ## GO and KEGG analyses for DEG from fitted model only
