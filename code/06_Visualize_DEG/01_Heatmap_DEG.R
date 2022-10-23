@@ -15,7 +15,7 @@ load(here("processed-data/04_DEA/results_pups_smoking_fitted.Rdata"))
 load(here("processed-data/04_DEA/de_genes_pups_nicotine_fitted.Rdata"))
 load(here("processed-data/04_DEA/de_genes_pups_smoking_fitted.Rdata"))
 load(here("processed-data/05_GO_KEGG/all_DEG.Rdata"))
-
+load(here("processed-data/05_GO_KEGG/intersections.Rdata"))
 
 
 ## 1.1 Heatmaps of Nicotine and Smoking DEG 
