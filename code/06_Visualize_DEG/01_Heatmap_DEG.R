@@ -7,6 +7,7 @@ library(stats)
 library(jaffelab)
 library(pheatmap)
 library(rlang)
+library(sessioninfo)
 
 
 load(here("processed-data/03_EDA/04_Expl_Var_partition/rse_gene_brain_pups_nicotine.Rdata"))
@@ -17,6 +18,9 @@ load(here("processed-data/04_DEA/de_genes_pups_nicotine_fitted.Rdata"))
 load(here("processed-data/04_DEA/de_genes_pups_smoking_fitted.Rdata"))
 load(here("processed-data/05_GO_KEGG/all_DEG.Rdata"))
 load(here("processed-data/05_GO_KEGG/intersections.Rdata"))
+
+
+## (For fitted models only)
 
 
 ## 1.1 Heatmaps of Nicotine and Smoking DEG 
@@ -110,7 +114,6 @@ DEG_heatmaps<- function(rse, results, de_genes, name){
 }
 
 
-## For fitted models only
 ## Nicotine DEG
 DEG_heatmaps(rse_gene_brain_pups_nicotine, results_pups_nicotine_fitted, de_genes_pups_nicotine_fitted, "nicotine")
 ## Smoking DEG
@@ -130,8 +133,9 @@ nic_vs_smo_heatmaps<- function(DEG_list, option, name){
 
   ## Counts for both smo and nic DEG
   vGene_nic<-results_pups_nicotine_fitted[[1]][[2]]
+  colnames(vGene_nic)<-vGene_nic$targets$SAMPLE_ID
   vGene_smo<-results_pups_smoking_fitted[[1]][[2]]
-  
+  colnames(vGene_smo)<-vGene_smo$targets$SAMPLE_ID
   
   
   ## Heatmaps comparing DEG in nic VS smo 
@@ -169,13 +173,13 @@ nic_vs_smo_heatmaps<- function(DEG_list, option, name){
     ## Genes' info
     top_genes_nic<-results_pups_nicotine_fitted[[1]][[1]]
     FDR_nic<-top_genes_nic[which(top_genes_nic$ensemblID %in% DEG_list$ensemblID), c("ensemblID","adj.P.Val")]
-    rownames<-FDR_nic$ensemblID
+    rownames<-rownames(FDR_nic)
     FDR_nic<-data.frame("FDR nic"=signif(FDR_nic$adj.P.Val, digits = 3), check.names=FALSE)
     rownames(FDR_nic)<-rownames
     
     top_genes_smo<-results_pups_smoking_fitted[[1]][[1]]
     FDR_smo<-top_genes_smo[which(top_genes_smo$ensemblID %in% DEG_list$ensemblID), c("ensemblID","adj.P.Val")]
-    rownames<-FDR_smo$ensemblID
+    rownames<-rownames(FDR_smo)
     FDR_smo<-data.frame("FDR smo"=signif(FDR_smo$adj.P.Val, digits = 3), check.names=FALSE)
     rownames(FDR_smo)<-rownames
     
@@ -257,9 +261,10 @@ nic_vs_smo_heatmaps<- function(DEG_list, option, name){
     
     ## Samples' info
     df <- as.data.frame(vGene$targets[, c("Group", "Sex")])
+    rownames(df)<-vGene$targets$SAMPLE_ID
     ## Genes' info
     FDRs<-top_genes[which(top_genes$ensemblID %in% DEG_list$ensemblID), c("ensemblID","adj.P.Val")]
-    rownames<-FDR_smo$ensemblID
+    rownames<-rownames(FDRs)
     FDRs<-data.frame("FDR"=signif(FDRs$adj.P.Val, digits = 3), check.names=FALSE)
     rownames(FDRs)<-rownames
     
@@ -310,43 +315,154 @@ nic_vs_smo_heatmaps<- function(DEG_list, option, name){
 
 
 
+## Create heatmaps
+
 ### All DEG in either smo or nic
+
 DEG_list<-all
 option<-"nic_and_smo"
 name<-"all"
 nic_vs_smo_heatmaps(DEG_list, option, name)
 
 
+
 ### Heatmap for DEG Up regulated in nicotine only
+
 DEG_list<-intersections[["only up nic"]]
-option<-"nic"
 name<-"only_Up_nic"
+
+option<-"nic"
+nic_vs_smo_heatmaps(DEG_list, option, name)
+
+option<-"nic_and_smo"
+nic_vs_smo_heatmaps(DEG_list, option, name)
+
 
 
 ### Heatmap for DEG Up regulated in smoking only
 
+DEG_list<-intersections[["only up smo"]]
+name<-"only_Up_smo"
+
+option<-"smo"
+nic_vs_smo_heatmaps(DEG_list, option, name)
+
+option<-"nic_and_smo"
+nic_vs_smo_heatmaps(DEG_list, option, name)
+
 
 
 ### Heatmap for DEG Up regulated in both nicotine and smoking
+
 DEG_list<-intersections[["smo Up nic Up"]]
 name<-"smoUp_nicUp"
 
+option<-"smo"
+nic_vs_smo_heatmaps(DEG_list, option, name)
+
+option<-"nic"
+nic_vs_smo_heatmaps(DEG_list, option, name)
+
+option<-"nic_and_smo"
+nic_vs_smo_heatmaps(DEG_list, option, name)
+
+
+
 ### Heatmap for DEG Down regulated in nicotine only
+
+DEG_list<-intersections[["only down nic"]]
+name<-"only_Down_nic"
+
+option<-"nic"
+nic_vs_smo_heatmaps(DEG_list, option, name)
+
+option<-"nic_and_smo"
+nic_vs_smo_heatmaps(DEG_list, option, name)
 
 
 
 ### Heatmap for DEG Down regulated in smoking only
 
+DEG_list<-intersections[["only down smo"]]
+name<-"only_Down_smo"
+
+option<-"smo"
+nic_vs_smo_heatmaps(DEG_list, option, name)
+
+option<-"nic_and_smo"
+nic_vs_smo_heatmaps(DEG_list, option, name)
+
 
 
 ### Heatmap for DEG Down regulated in both nicotine and smoking
+
+DEG_list<-intersections[["smo Down nic Down"]]
+name<-"smoDown_nicDown"
+
+option<-"smo"
+nic_vs_smo_heatmaps(DEG_list, option, name)
+
+option<-"nic"
+nic_vs_smo_heatmaps(DEG_list, option, name)
+
+option<-"nic_and_smo"
+nic_vs_smo_heatmaps(DEG_list, option, name)
 
 
 
 ### Hetamap for DEG Up regulated in nicotine and down in smoking
 
+DEG_list<-intersections[["smo Down nic Up"]]
+name<-"smoDown_nicUp"
+
+option<-"smo"
+nic_vs_smo_heatmaps(DEG_list, option, name)
+
+option<-"nic"
+nic_vs_smo_heatmaps(DEG_list, option, name)
+
+option<-"nic_and_smo"
+nic_vs_smo_heatmaps(DEG_list, option, name)
+
 
 
 ### Heatmap for DEG Up regulated in smoking and down in nicotine
 
+DEG_list<-intersections[["smo Up nic Down"]]
+name<-"smoUp_nicDown"
 
+option<-"smo"
+nic_vs_smo_heatmaps(DEG_list, option, name)
+
+option<-"nic"
+nic_vs_smo_heatmaps(DEG_list, option, name)
+
+option<-"nic_and_smo"
+nic_vs_smo_heatmaps(DEG_list, option, name)
+
+
+
+
+
+
+
+
+
+## Reproducibility information
+print('Reproducibility information:')
+Sys.time()
+proc.time()
+options(width = 120)
+session_info()
+# setting  value
+# version  R version 4.2.0 (2022-04-22 ucrt)
+# os       Windows 10 x64 (build 19044)
+# system   x86_64, mingw32
+# ui       RStudio
+# language (EN)
+# collate  Spanish_Mexico.utf8
+# ctype    Spanish_Mexico.utf8
+# tz       America/Mexico_City
+# date     2022-10-23
+# rstudio  2022.07.2+576 Spotted Wakerobin (desktop)
+# pandoc   2.19.2 @ C:/Program Files/RStudio/bin/quarto/bin/tools/ (via rmarkdown)
