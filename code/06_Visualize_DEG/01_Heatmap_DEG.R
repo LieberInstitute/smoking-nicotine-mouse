@@ -6,6 +6,7 @@ library(SummarizedExperiment)
 library(stats)
 library(jaffelab)
 library(pheatmap)
+library(rlang)
 
 
 load(here("processed-data/03_EDA/04_Expl_Var_partition/rse_gene_brain_pups_nicotine.Rdata"))
@@ -125,6 +126,195 @@ DEG_heatmaps(rse_gene_brain_pups_smoking, results_pups_smoking_fitted, de_genes_
 
 ## 1.2 Heatmaps for Nicotine VS Smoking DEG
 
+nic_vs_smo_heatmaps<- function(DEG_list, option, name){
+
+  ## Counts for both smo and nic DEG
+  vGene_nic<-results_pups_nicotine_fitted[[1]][[2]]
+  vGene_smo<-results_pups_smoking_fitted[[1]][[2]]
+  
+  
+  
+  ## Heatmaps comparing DEG in nic VS smo 
+  if (option=="nic_and_smo"){
+  
+    ## Extract lognorm counts of the genes
+    vGene_DEG_nic <-vGene_nic$E[which(vGene_nic$genes$ensemblID %in% DEG_list$ensemblID), ]
+    vGene_DEG_smo <-vGene_smo$E[which(vGene_smo$genes$ensemblID %in% DEG_list$ensemblID), ]
+    
+    ## Remove technical variables' contributions 
+    formula<- ~ Group + Sex + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr +
+      overallMapRate + mitoRate
+    model_nic<- model.matrix(formula, data=colData(rse_gene_brain_pups_nicotine))
+    vGene_DEG_nic<-cleaningY(vGene_DEG_nic, model_nic, P=2)
+    model_smo<- model.matrix(formula, data=colData(rse_gene_brain_pups_smoking))
+    vGene_DEG_smo<-cleaningY(vGene_DEG_smo, model_smo, P=2)
+    
+    ## Center the data
+    for (i in 1:nrow(vGene_DEG_smo)){
+      vGene_DEG_smo[i,]<-vGene_DEG_smo[i,]-mean(vGene_DEG_smo[i,])
+    }
+    for (i in 1:nrow(vGene_DEG_nic)){
+      vGene_DEG_nic[i,]<-vGene_DEG_nic[i,]-mean(vGene_DEG_nic[i,])
+    }
+    
+    
+    ## Join data of nic and smo samples 
+    vGene_DEG<-cbind(vGene_DEG_nic, vGene_DEG_smo)
+    
+    
+    ## Samples' info
+    df_nic <- as.data.frame(vGene_nic$targets[, c("Group", "Sex", "Expt")])
+    df_smo <- as.data.frame(vGene_smo$targets[, c("Group", "Sex", "Expt")])
+    df<-rbind(df_nic, df_smo)
+    ## Genes' info
+    top_genes_nic<-results_pups_nicotine_fitted[[1]][[1]]
+    FDR_nic<-top_genes_nic[which(top_genes_nic$ensemblID %in% DEG_list$ensemblID), c("ensemblID","adj.P.Val")]
+    rownames<-FDR_nic$ensemblID
+    FDR_nic<-data.frame("FDR nic"=signif(FDR_nic$adj.P.Val, digits = 3), check.names=FALSE)
+    rownames(FDR_nic)<-rownames
+    
+    top_genes_smo<-results_pups_smoking_fitted[[1]][[1]]
+    FDR_smo<-top_genes_smo[which(top_genes_smo$ensemblID %in% DEG_list$ensemblID), c("ensemblID","adj.P.Val")]
+    rownames<-FDR_smo$ensemblID
+    FDR_smo<-data.frame("FDR smo"=signif(FDR_smo$adj.P.Val, digits = 3), check.names=FALSE)
+    rownames(FDR_smo)<-rownames
+    
+    FDRs<-cbind(FDR_nic, FDR_smo)
+    
+    
+    ## Coloring for plot annotation
+    palette_names = c('Dark2', 'Accent', 'RdPu')
+    ann_colors = list()
+    for (i in 1:ncol(df)) {
+      col_name = colnames(df)[i]
+      n_uniq_colors = length(unique(df[,col_name]))
+      ann_colors[[col_name]] = RColorBrewer::brewer.pal(n=6, palette_names[i])[4:3+n_uniq_colors]
+      names(ann_colors[[col_name]]) = unique(df[,col_name])
+    }
+    
+    ann_colors[["FDR smo"]]=colorRampPalette(colors = c("#FFB6C1", "#CD6090"))(n = nrow(vGene_DEG))
+    ann_colors[["FDR nic"]]=colorRampPalette(colors = c("#97FFFF", "#008B8B"))(n = nrow(vGene_DEG))
+    
+    
+    ## Heatmap colors
+    break1<-seq(min(vGene_DEG),0.001,by=0.01)
+    break2<-seq(0.01,max(vGene_DEG),by=0.01)
+    my_palette <- c(colorRampPalette(colors = c("darkblue", "lightblue"))(n = length(break1)),
+                    c(colorRampPalette(colors = c("darkred", "tomato1"))(n = length(break2)))
+    )
+  
+  
+    ## Display heatmap
+    pheatmap(
+      vGene_DEG,
+      breaks = c(break1, break2),
+      color=my_palette,
+      cluster_rows = TRUE,
+      show_rownames = FALSE,
+      cluster_cols = TRUE,
+      annotation_col = df,
+      annotation_row = FDRs,
+      annotation_colors = ann_colors, 
+      fontsize=8, 
+      width = 15,
+      height = 13,
+      filename=paste("plots/06_Heatmap_DEG/Heatmap_", name, "_DEG.pdf", sep="")
+    )
+  }
+  
+  
+  
+  
+  ## Heatmaps of DEG list in only nic or smo
+  else {
+    
+    if (option=="nic"){
+      expt_name="nicotine"
+    }
+    else {
+      expt_name="smoking"
+    }
+    
+    vGene=eval(parse_expr(paste("vGene", option, sep="_")))
+    de_genes=eval(parse_expr(paste("de_genes_pups", expt_name, "fitted", sep="_")))
+    top_genes<-eval(parse_expr(paste("results_pups", expt_name, "fitted", sep="_")))[[1]][[1]]
+    rse<-eval(parse_expr(paste("rse_gene_brain_pups", expt_name, sep="_")))
+    
+    ## Extract lognorm counts of the genes
+    vGene_DEG <-vGene$E[which(vGene$genes$ensemblID %in% DEG_list$ensemblID), ]
+   
+    ## Remove technical variables' contributions 
+    formula<- ~ Group + Sex + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr +
+      overallMapRate + mitoRate
+    model<- model.matrix(formula, data=colData(rse))
+    vGene_DEG<-cleaningY(vGene_DEG, model, P=2)
+    
+    ## Center the data
+    for (i in 1:nrow(vGene_DEG)){
+      vGene_DEG[i,]<-vGene_DEG[i,]-mean(vGene_DEG[i,])
+    }
+  
+    
+    ## Samples' info
+    df <- as.data.frame(vGene$targets[, c("Group", "Sex")])
+    ## Genes' info
+    FDRs<-top_genes[which(top_genes$ensemblID %in% DEG_list$ensemblID), c("ensemblID","adj.P.Val")]
+    rownames<-FDR_smo$ensemblID
+    FDRs<-data.frame("FDR"=signif(FDRs$adj.P.Val, digits = 3), check.names=FALSE)
+    rownames(FDRs)<-rownames
+    
+  
+    ## Coloring for plot annotation
+    palette_names = c('Dark2', 'Accent')
+    ann_colors = list()
+    for (i in 1:ncol(df)) {
+      col_name = colnames(df)[i]
+      n_uniq_colors = length(unique(df[,col_name]))
+      ann_colors[[col_name]] = RColorBrewer::brewer.pal(n=6, palette_names[i])[4:3+n_uniq_colors]
+      names(ann_colors[[col_name]]) = unique(df[,col_name])
+      
+    }
+    
+    ann_colors[["FDR"]]=colorRampPalette(colors = c("#FFB6C1", "#CD6090"))(n = nrow(vGene_DEG))
+    
+    
+    ## Heatmap colors
+    break1<-seq(min(vGene_DEG),0.001,by=0.009)
+    break2<-seq(0.01,max(vGene_DEG),by=0.001)
+    my_palette <- c(colorRampPalette(colors = c("darkblue", "lightblue"))(n = length(break1)-1),
+                    c(colorRampPalette(colors = c("darkred", "tomato1"))(n = length(break2)-1))
+    )
+    
+    
+    ## Display heatmap
+    pheatmap(
+      vGene_DEG,
+      breaks = c(break1, break2),
+      color=my_palette,
+      cluster_rows = TRUE,
+      show_rownames = FALSE,
+      cluster_cols = TRUE,
+      annotation_col = df,
+      annotation_row = FDRs,
+      annotation_colors = ann_colors, 
+      fontsize=8, 
+      width = 12,
+      height = 11,
+      filename=paste("plots/06_Heatmap_DEG/Heatmap_", name, "_DEG_", option, ".pdf", sep="")
+    )  
+  }
+
+}
+
+
+
+
+
+
+
+
+
+
 
 
 ### All DEG in either smo or nic
@@ -219,13 +409,17 @@ pheatmap(
 
 
 
-
-
-
+### All DEG in either smo or nic
+DEG_list<-all
+option<-"nic_and_smo"
+name<-"all"
+nic_vs_smo_heatmaps(DEG_list, option, name)
 
 
 ### Heatmap for DEG Up regulated in nicotine only
-
+DEG_list<-intersections[["only up nic"]]
+option<-"nic"
+name<-"only_Up_nic"
 
 
 ### Heatmap for DEG Up regulated in smoking only
@@ -233,8 +427,8 @@ pheatmap(
 
 
 ### Heatmap for DEG Up regulated in both nicotine and smoking
-
-
+DEG_list<-intersections[["smo Up nic Up"]]
+name<-"smoUp_nicUp"
 
 ### Heatmap for DEG Down regulated in nicotine only
 
