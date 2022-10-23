@@ -57,8 +57,12 @@ only_up_smo<-up_smo[which(! (up_smo$Symbol %in% smoUp_nicUp$Symbol |
                                up_smo$Symbol %in% smoUp_nicDown$Symbol)),]
 only_down_smo<-down_smo[which(! (down_smo$Symbol %in% smoDown_nicDown$Symbol | 
                                    down_smo$Symbol %in% smoDown_nicUp$Symbol)),]
+intersections<-list("only up nic"=only_up_nic, "only up smo"=only_up_smo, 
+                    "only down nic"=only_down_nic, "only down smo"=only_down_smo, 
+                    "smo Up nic Up"=smoUp_nicUp, "smo Down nic Down"=smoDown_nicDown, 
+                    "smo Up nic Down"=smoUp_nicDown, "smo Down nic Up"=smoDown_nicUp)
 
-
+save(intersections, file="processed-data/05_GO_KEGG/intersections.Rdata")
 
 
 ## Function to do GO and KEGG analyses
