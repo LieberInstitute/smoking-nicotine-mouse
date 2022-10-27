@@ -358,10 +358,10 @@ DEG_GO_boxplot <- function(DEgene){
   q_value_smo<-signif(top_genes_pups_smoking_fitted[which(top_genes_pups_smoking_fitted$Symbol==DEgene),
                                                    "adj.P.Val"], digits = 3)
   ## Log FC for the gene in nicotine and smoking 
-  logFC_nic<-signif(top_genes_pups_nicotine_fitted[which(top_genes_pups_nicotine_fitted$Symbol==DEgene),
-                                                     "logFC"], digits = 3)
-  logFC_smo<-signif(top_genes_pups_smoking_fitted[which(top_genes_pups_smoking_fitted$Symbol==DEgene),
-                                                    "logFC"], digits = 3)
+  FC_nic<-signif(2**(top_genes_pups_nicotine_fitted[which(top_genes_pups_nicotine_fitted$Symbol==DEgene),
+                                                     "logFC"]), digits = 3)
+  FC_smo<-signif(2**(top_genes_pups_smoking_fitted[which(top_genes_pups_smoking_fitted$Symbol==DEgene),
+                                                    "logFC"]), digits = 3)
 
   ## Boxplot for each DE gene
   p <-ggplot(data=as.data.frame(df), aes(x=Group,y=Gene_counts)) + 
@@ -380,9 +380,9 @@ DEG_GO_boxplot <- function(DEgene){
   
   p <-ggdraw(p) + 
       draw_label(paste("FDR:", q_value_nic), x = 0.35, y = 0.87, size=9, color = "darkslategray") +
-      draw_label(paste("LogFC:", logFC_nic), x = 0.35, y = 0.84, size=9, color = "darkslategray") +
+      draw_label(paste("FC:", FC_nic), x = 0.35, y = 0.84, size=9, color = "darkslategray") +
       draw_label(paste("FDR:", q_value_smo), x = 0.72, y = 0.87, size=9, color = "darkslategray") +
-      draw_label(paste("LogFC:", logFC_smo), x = 0.71, y = 0.84, size=9, color = "darkslategray") 
+      draw_label(paste("FC:", FC_smo), x = 0.71, y = 0.84, size=9, color = "darkslategray") 
   
   return(p)
   
@@ -415,7 +415,7 @@ nicDown_smoUp<-intersect(DEG_fitted_smoUp_nicDown[[1]], DEG_fitted_smoUp_nicDown
 
 
 
-## Top 6 genes in each group
+## Boxplots of the top 6 genes in each group
 
 ## DEG Up in Nic and Up in Smo
 nic_smo_Up<-extract_top_genes(nic_smo_Up)
