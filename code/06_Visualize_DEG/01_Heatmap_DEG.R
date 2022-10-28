@@ -25,7 +25,7 @@ load(here("processed-data/05_GO_KEGG/intersections.Rdata"))
 
 ## 1.1 Heatmaps of Nicotine and Smoking DEG 
 
-DEG_heatmaps<- function(rse, results, de_genes, name){
+DEG_heatmaps<- function(rse, results, de_genes, filename){
   
   ## Extract lognorm counts of all genes
   vGene<-results[[1]][[2]]
@@ -43,54 +43,61 @@ DEG_heatmaps<- function(rse, results, de_genes, name){
   vGene_DEG<-cleaningY(vGene_DEG, model, P=2)
   
   ## Center the data to make differences more evident
-  for (i in 1:nrow(vGene_DEG)){
-    vGene_DEG[i,]<-vGene_DEG[i,]-mean(vGene_DEG[i,])
-  }
+  vGene_DEG<-(vGene_DEG-rowMeans(vGene_DEG))/rowSds(vGene_DEG)
   
   
   
   ## Samples' info
-  df <- as.data.frame(vGene$targets[, c("Group", "Sex")])
-  rownames(df) <- vGene$targets$SAMPLE_ID
-  colnames(df) <- c("Group", "Sex")
+  ann_cols <- as.data.frame(vGene$targets[, c("Group", "Sex")])
+  rownames(ann_cols) <- vGene$targets$SAMPLE_ID
+  colnames(ann_cols) <- c("Group", "Sex")
+  
   ## Genes' info
-  FDRs<-data.frame("FDR"=signif(de_genes$adj.P.Val, digits = 3))
-  rownames(FDRs)<-rownames(de_genes)
+  ## FDRs
+  FDRs<-data.frame(signif(de_genes$adj.P.Val, digits = 3))
+  rownames(FDRs)<-de_genes$ensemblID
+  FDRs<-data.frame("FDR"=apply(FDRs, 1, function(x){if(x>0.01|x==0.01){paste(">=0.01")} 
+                                                 else {paste("<0.01")}}))
+  ## FCs
+  FCs<-data.frame(signif(2**(de_genes$logFC), digits = 3))
+  rownames(FCs)<-de_genes$ensemblID
+  FCs<-data.frame("FC"=apply(FCs, 1, function(x){if(x>1|x==1){paste(">=1")} else {paste("<1")}}))
+  ann_rows<-cbind(FDRs, FCs)
+  
+  ## Join annotation info
+  anns<-list("Group"=ann_cols$Group, "Sex"=ann_cols$Sex, "FDR"=ann_rows$FDR, "FC"=ann_rows$FC)
   
   
   
   ## Manually determine coloring for plot annotation
-  ## Column annotation
-  palette_names = c('Dark2', 'Accent')
+  palette_names = c('Accent', 'Set2', 'RdPu', 'Paired')
   ann_colors = list()
-  for (i in 1:ncol(df)) {
-    col_name = colnames(df)[i]
-    n_uniq_colors = length(unique(df[,col_name]))
+  for (i in 1:length(anns)) {
+    name = names(anns)[i]
+    n_uniq_colors = length(unique(anns[[name]]))
     
     ## Use a unique palette with the correct number of levels, named with those levels
-    ann_colors[[col_name]] = RColorBrewer::brewer.pal(n=6, palette_names[i])[4:3+n_uniq_colors]
-    names(ann_colors[[col_name]]) = unique(df[,col_name])
-    
+    ann_colors[[name]] = RColorBrewer::brewer.pal(n=6, palette_names[i])[2:1+n_uniq_colors]
+    names(ann_colors[[name]]) = unique(anns[[name]])
   }
-  ## Row annotation 
-  ann_colors[["FDR"]]=colorRampPalette(colors = c("#FFB6C1", "#CD6090"))(n = nrow(vGene_DEG))
   
-  
+
   
   ## Heatmap colors
   break1<-seq(min(vGene_DEG),0,by=0.001)
   break2<-seq(0,max(vGene_DEG),by=0.001)
   my_palette <- c(colorRampPalette(colors = c("darkblue", "lightblue"))(n = length(break1)),
-                  c(colorRampPalette(colors = c("darkred", "tomato1"))(n = length(break2)))
+                  c(colorRampPalette(colors = c("lightsalmon", "darkred"))(n = length(break2)))
   )
+  
   
   if (name=="nicotine"){
     width=9
     height=8
   }
   else {
-    width=12
-    height=11
+    width=13
+    height=12
   }
   
   
@@ -102,13 +109,13 @@ DEG_heatmaps<- function(rse, results, de_genes, name){
     cluster_rows = TRUE,
     show_rownames = FALSE,
     cluster_cols = TRUE,
-    annotation_col = df,
-    annotation_row = FDRs,
+    annotation_col = ann_cols,
+    annotation_row = ann_rows,
     annotation_colors = ann_colors, 
-    fontsize=8, 
+    fontsize=8.5, 
     width = width,
     height = height,
-    filename=paste("plots/06_Heatmap_DEG/Heatmap_DEG_", name, ".pdf", sep="")
+    filename=paste("plots/06_Heatmap_DEG/Heatmap_DEG_", filename, ".pdf", sep="")
     
   )
 }
