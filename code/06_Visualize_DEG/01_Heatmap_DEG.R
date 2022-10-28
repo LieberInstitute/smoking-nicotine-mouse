@@ -136,13 +136,14 @@ DEG_heatmaps(rse_gene_brain_pups_smoking, results_pups_smoking_fitted, de_genes_
 
 ## 1.2 Heatmaps for Nicotine VS Smoking DEG
 
-nic_vs_smo_heatmaps<- function(DEG_list, option, name){
+nic_vs_smo_heatmaps<- function(DEG_list, option, filename){
 
   ## Counts for both smo and nic DEG
   vGene_nic<-results_pups_nicotine_fitted[[1]][[2]]
   colnames(vGene_nic)<-vGene_nic$targets$SAMPLE_ID
   vGene_smo<-results_pups_smoking_fitted[[1]][[2]]
   colnames(vGene_smo)<-vGene_smo$targets$SAMPLE_ID
+
   
   
   ## Heatmaps comparing DEG in nic VS smo 
@@ -161,60 +162,86 @@ nic_vs_smo_heatmaps<- function(DEG_list, option, name){
     vGene_DEG_smo<-cleaningY(vGene_DEG_smo, model_smo, P=2)
     
     ## Center the data
-    for (i in 1:nrow(vGene_DEG_smo)){
-      vGene_DEG_smo[i,]<-vGene_DEG_smo[i,]-mean(vGene_DEG_smo[i,])
-    }
-    for (i in 1:nrow(vGene_DEG_nic)){
-      vGene_DEG_nic[i,]<-vGene_DEG_nic[i,]-mean(vGene_DEG_nic[i,])
-    }
-    
+    vGene_DEG_smo<-(vGene_DEG_smo-rowMeans(vGene_DEG_smo))/rowSds(vGene_DEG_smo)
+    vGene_DEG_nic<-(vGene_DEG_nic-rowMeans(vGene_DEG_nic))/rowSds(vGene_DEG_nic)
     
     ## Join data of nic and smo samples 
     vGene_DEG<-cbind(vGene_DEG_nic, vGene_DEG_smo)
     
     
+    
     ## Samples' info
-    df_nic <- as.data.frame(vGene_nic$targets[, c("Group", "Sex", "Expt")])
-    df_smo <- as.data.frame(vGene_smo$targets[, c("Group", "Sex", "Expt")])
-    df<-rbind(df_nic, df_smo)
+    ann_cols_nic <- data.frame("Expt & Group"=paste(vGene_nic$targets$Expt, vGene_nic$targets$Group), 
+                               "Sex"=vGene_nic$targets$Sex, check.names=FALSE)
+    rownames(ann_cols_nic)<-vGene_nic$targets$SAMPLE_ID
+    ann_cols_smo <- data.frame("Expt & Group"=paste(vGene_smo$targets$Expt, vGene_smo$targets$Group), 
+                               "Sex"=vGene_smo$targets$Sex, check.names=FALSE)
+    rownames(ann_cols_smo)<-vGene_smo$targets$SAMPLE_ID
+    ann_cols<-rbind(ann_cols_nic, ann_cols_smo)
+    
     ## Genes' info
+    ## FDRs in nic and smo
     top_genes_nic<-results_pups_nicotine_fitted[[1]][[1]]
-    FDR_nic<-top_genes_nic[which(top_genes_nic$ensemblID %in% DEG_list$ensemblID), c("ensemblID","adj.P.Val")]
-    rownames<-rownames(FDR_nic)
-    FDR_nic<-data.frame("FDR nic"=signif(FDR_nic$adj.P.Val, digits = 3), check.names=FALSE)
+    data_nic<-top_genes_nic[which(top_genes_nic$ensemblID %in% DEG_list$ensemblID), c("ensemblID","adj.P.Val", "logFC")]
+    rownames<-rownames(data_nic)
+    FDR_nic<-data.frame("FDR nic"=signif(data_nic$adj.P.Val, digits = 3), check.names=FALSE)
     rownames(FDR_nic)<-rownames
     
     top_genes_smo<-results_pups_smoking_fitted[[1]][[1]]
-    FDR_smo<-top_genes_smo[which(top_genes_smo$ensemblID %in% DEG_list$ensemblID), c("ensemblID","adj.P.Val")]
-    rownames<-rownames(FDR_smo)
-    FDR_smo<-data.frame("FDR smo"=signif(FDR_smo$adj.P.Val, digits = 3), check.names=FALSE)
+    data_smo<-top_genes_smo[which(top_genes_smo$ensemblID %in% DEG_list$ensemblID), c("ensemblID","adj.P.Val", "logFC")]
+    rownames<-rownames(data_smo)
+    FDR_smo<-data.frame("FDR smo"=signif(data_smo$adj.P.Val, digits = 3), check.names=FALSE)
     rownames(FDR_smo)<-rownames
     
     FDRs<-cbind(FDR_nic, FDR_smo)
     
+    FDRs$Significance<-apply(FDRs, 1, function(x){if (x[1]<=0.05 && x[2]<=0.05){paste("Both")} 
+                                                  else if (x[1]<=0.05 && x[2]>0.05){paste("Nic")}
+                                                  else if (x[1]>0.05 && x[2]<=0.05){paste("Smo")}})
+    
+    ## FCs in nic and smo 
+    FC_nic<-data.frame(signif(2**data_nic$logFC, digits = 3))
+    rownames(FC_nic)<-rownames(data_nic)
+    FC_nic<-data.frame("FC nic"=apply(FC_nic, 1, function(x){if(x>1|x==1){paste(">=1")} else {paste("<1")}}),
+                       check.names=FALSE)
+    
+    FC_smo<-data.frame(signif(2**data_smo$logFC, digits = 3))
+    rownames(FC_smo)<-rownames(data_smo)
+    FC_smo<-data.frame("FC smo"=apply(FC_smo, 1, function(x){if(x>1|x==1){paste(">=1")} else {paste("<1")}}),
+                       check.names=FALSE)
+    
+    FCs<-cbind(FC_nic, FC_smo)
+    ann_rows<-cbind("Significance"=FDRs$Significance, FCs)
+    
+    ## Join annotation info
+    anns<-list("Expt & Group"=ann_cols$`Expt & Group`, "Sex"=ann_cols$Sex, "Significance"=ann_rows$Significance,
+               "FC nic"=ann_rows$`FC nic`, "FC smo"=ann_rows$`FC smo`)
+    
+    
     
     ## Coloring for plot annotation
-    palette_names = c('Dark2', 'Accent', 'RdPu')
+    palette_names = c('Paired', 'Set2', 'Set1', 'YlGnBu', 'YlOrBr')
     ann_colors = list()
-    for (i in 1:ncol(df)) {
-      col_name = colnames(df)[i]
-      n_uniq_colors = length(unique(df[,col_name]))
-      ann_colors[[col_name]] = RColorBrewer::brewer.pal(n=6, palette_names[i])[4:3+n_uniq_colors]
-      names(ann_colors[[col_name]]) = unique(df[,col_name])
+    for (i in 1:length(anns)) {
+      name = names(anns)[i]
+      n_uniq_colors = length(unique(anns[[name]]))
+      
+      ## Use a unique palette with the correct number of levels, named with those levels
+      ann_colors[[name]] = RColorBrewer::brewer.pal(n=8, palette_names[i])[3:(2+n_uniq_colors)]
+      names(ann_colors[[name]]) = unique(anns[[name]])
     }
     
-    ann_colors[["FDR smo"]]=colorRampPalette(colors = c("#FFB6C1", "#CD6090"))(n = nrow(vGene_DEG))
-    ann_colors[["FDR nic"]]=colorRampPalette(colors = c("#97FFFF", "#008B8B"))(n = nrow(vGene_DEG))
     
     
     ## Heatmap colors
     break1<-seq(min(vGene_DEG),0,by=0.001)
     break2<-seq(0,max(vGene_DEG),by=0.001)
     my_palette <- c(colorRampPalette(colors = c("darkblue", "lightblue"))(n = length(break1)),
-                    c(colorRampPalette(colors = c("darkred", "tomato1"))(n = length(break2)))
+                    c(colorRampPalette(colors = c("lightsalmon", "darkred"))(n = length(break2)))
     )
   
   
+    
     ## Display heatmap
     pheatmap(
       vGene_DEG,
@@ -223,13 +250,13 @@ nic_vs_smo_heatmaps<- function(DEG_list, option, name){
       cluster_rows = TRUE,
       show_rownames = FALSE,
       cluster_cols = TRUE,
-      annotation_col = df,
-      annotation_row = FDRs,
+      annotation_col = ann_cols,
+      annotation_row = ann_rows,
       annotation_colors = ann_colors, 
       fontsize=8, 
-      width = 15,
-      height = 13,
-      filename=paste("plots/06_Heatmap_DEG/Heatmap_", name, "_DEG.pdf", sep="")
+      width = 16,
+      height = 14,
+      filename=paste("plots/06_Heatmap_DEG/Heatmap_", filename, "_DEG.pdf", sep="")
     )
   }
   
@@ -312,10 +339,9 @@ nic_vs_smo_heatmaps<- function(DEG_list, option, name){
       fontsize=8, 
       width = 12,
       height = 11,
-      filename=paste("plots/06_Heatmap_DEG/Heatmap_", name, "_DEG_", option, ".pdf", sep="")
+      filename=paste("plots/06_Heatmap_DEG/Heatmap_", filename, "_DEG_", option, ".pdf", sep="")
     )  
   }
-
 }
 
 
