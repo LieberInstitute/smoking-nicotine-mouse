@@ -226,7 +226,7 @@ nic_vs_smo_heatmaps<- function(DEG_list, option, filename){
       name = names(anns)[i]
       n_uniq_colors = length(unique(anns[[name]]))
       
-      ## Use a unique palette with the correct number of levels, named with those levels
+      ## Use a unique palette 
       ann_colors[[name]] = RColorBrewer::brewer.pal(n=8, palette_names[i])[3:(2+n_uniq_colors)]
       names(ann_colors[[name]]) = unique(anns[[name]])
     }
@@ -287,42 +287,50 @@ nic_vs_smo_heatmaps<- function(DEG_list, option, filename){
     model<- model.matrix(formula, data=colData(rse))
     vGene_DEG<-cleaningY(vGene_DEG, model, P=2)
     
-    ## Center the data
-    for (i in 1:nrow(vGene_DEG)){
-      vGene_DEG[i,]<-vGene_DEG[i,]-mean(vGene_DEG[i,])
-    }
-  
+    ## Center the data to make differences more evident
+    vGene_DEG<-(vGene_DEG-rowMeans(vGene_DEG))/rowSds(vGene_DEG)
+    
+    
     
     ## Samples' info
-    df <- as.data.frame(vGene$targets[, c("Group", "Sex")])
-    rownames(df)<-vGene$targets$SAMPLE_ID
+    ann_cols <- as.data.frame(vGene$targets[, c("Group", "Sex")])
+    rownames(ann_cols) <- vGene$targets$SAMPLE_ID
+    
     ## Genes' info
-    FDRs<-top_genes[which(top_genes$ensemblID %in% DEG_list$ensemblID), c("ensemblID","adj.P.Val")]
-    rownames<-rownames(FDRs)
-    FDRs<-data.frame("FDR"=signif(FDRs$adj.P.Val, digits = 3), check.names=FALSE)
+    ## FDRs
+    data<-top_genes[which(top_genes$ensemblID %in% DEG_list$ensemblID), c("ensemblID","adj.P.Val")]
+    rownames<-rownames(data)
+    FDRs<-data.frame("FDR"=apply(as.data.frame(data$adj.P.Val), 1, function(x){if(x>0.01|x==0.01){paste(">=0.01")} 
+      else {paste("<0.01")}}))
     rownames(FDRs)<-rownames
+    ann_rows<-cbind(FDRs)
+    
+    ## Join annotation info
+    anns<-list("Group"=ann_cols$Group, "Sex"=ann_cols$Sex, "FDR"=ann_rows$FDR)
+    
     
   
     ## Coloring for plot annotation
-    palette_names = c('Dark2', 'Accent')
+    palette_names = c('Accent', 'Set2', 'RdPu')
     ann_colors = list()
-    for (i in 1:ncol(df)) {
-      col_name = colnames(df)[i]
-      n_uniq_colors = length(unique(df[,col_name]))
-      ann_colors[[col_name]] = RColorBrewer::brewer.pal(n=6, palette_names[i])[4:3+n_uniq_colors]
-      names(ann_colors[[col_name]]) = unique(df[,col_name])
+    for (i in 1:length(anns)) {
+      name = names(anns)[i]
+      n_uniq_colors = length(unique(anns[[name]]))
       
+      ## Use a unique palette with the correct number of levels, named with those levels
+      ann_colors[[name]] = RColorBrewer::brewer.pal(n=6, palette_names[i])[2:1+n_uniq_colors]
+      names(ann_colors[[name]]) = unique(anns[[name]])
     }
     
-    ann_colors[["FDR"]]=colorRampPalette(colors = c("#FFB6C1", "#CD6090"))(n = nrow(vGene_DEG))
     
     
     ## Heatmap colors
     break1<-seq(min(vGene_DEG),0,by=0.001)
     break2<-seq(0,max(vGene_DEG),by=0.001)
     my_palette <- c(colorRampPalette(colors = c("darkblue", "lightblue"))(n = length(break1)),
-                    c(colorRampPalette(colors = c("darkred", "tomato1"))(n = length(break2)))
+                    c(colorRampPalette(colors = c("lightsalmon", "darkred"))(n = length(break2)))
     )
+    
     
     
     ## Display heatmap
@@ -333,7 +341,7 @@ nic_vs_smo_heatmaps<- function(DEG_list, option, filename){
       cluster_rows = TRUE,
       show_rownames = FALSE,
       cluster_cols = TRUE,
-      annotation_col = df,
+      annotation_col = ann_cols,
       annotation_row = FDRs,
       annotation_colors = ann_colors, 
       fontsize=8, 
