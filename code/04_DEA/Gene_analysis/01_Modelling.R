@@ -1,4 +1,6 @@
+
 ## All libraries used for the whole DEA
+
 library(here)
 library(SummarizedExperiment)
 library(stats)
@@ -14,7 +16,7 @@ library(gridExtra)
 library(sessioninfo)
 
 
-# 1. Differential Expression Analysis 
+# 1. Differential Expression Analysis at the gene level
 
 load(here("processed-data/03_EDA/02_QC/rse_gene_blood_qc.Rdata"))
 load(here("processed-data/03_EDA/04_Expl_Var_partition/rse_gene_brain_adults_nicotine.Rdata"))
