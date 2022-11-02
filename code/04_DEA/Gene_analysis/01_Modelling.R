@@ -18,6 +18,7 @@ library(sessioninfo)
 
 # 1. Differential Expression Analysis at the gene level
 
+load(here("raw-data/rse_gene_smoking_mouse_n208.Rdata"))
 load(here("processed-data/03_EDA/02_QC/rse_gene_blood_qc.Rdata"))
 load(here("processed-data/03_EDA/04_Expl_Var_partition/rse_gene_brain_adults_nicotine.Rdata"))
 load(here("processed-data/03_EDA/04_Expl_Var_partition/rse_gene_brain_adults_smoking.Rdata"))
