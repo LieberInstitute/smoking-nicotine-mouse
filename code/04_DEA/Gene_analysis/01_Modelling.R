@@ -40,7 +40,7 @@ DEA_expt_vs_ctl<- function(RSE, formula, name, coef){
   
   ## Previous lib sizes of each sample
   match_samples <- match(RSE$SAMPLE_ID, samples_factors$SAMPLE_ID)
-  stopifnot(all(!is.na(m)))
+  stopifnot(all(!is.na(match_samples)))
   factors<-samples_factors[match_samples, ]
   
   pdf(file = paste("plots/04_DEA/01_Modelling/DEA_plots_", name, ".pdf", sep="" ))
