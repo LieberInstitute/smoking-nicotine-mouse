@@ -23,9 +23,30 @@ load(here("processed-data/05_GO_KEGG/intersections.Rdata"))
 ## (For fitted models only)
 
 
+## Manually determine coloring for plot annotation of all heatmaps
+ann_colors = list()
+ann_colors[["Sex"]]=c("F"="#FF99CC", "M"="#99CCFF")
+ann_colors[["Group"]]=c("Control"="#FFFF66", "Experimental"="#FF9933")
+ann_colors[["FDR nic"]]=c("0.01-0.05"="#9900CC", "<0.01"="#CC99FF")
+ann_colors[["FDR smo"]]=c("0.01-0.05"="#FF33FF", "<0.01"="#FF99FF")
+ann_colors[["FC smo"]]=c(">=1"="#00CC66", "<1"="#CCFF99")
+ann_colors[["FC nic"]]=c(">=1"="#CC6600", "<1"="#FFCC99")
+ann_colors[["Significance"]]=c("Nic only"="#9900CC", "Smo only"="#FF33FF", "Both"="#33FF33")
+ann_colors[["Expt & Group"]]=c("Nicotine Control"="#FF9999", "Nicotine Experimental"="#FF0066", 
+                               "Smoking Control"="#99CC99", "Smoking Experimental"="#669966")
+
+
 ## 1.1 Heatmaps of Nicotine and Smoking DEG 
 
+
 DEG_heatmaps<- function(rse, results, de_genes, filename){
+  
+  if (filename=="nicotine"){
+    name="nic"
+  }
+  else {
+    name="smo"
+  }
   
   ## Extract lognorm counts of all genes
   vGene<-results[[1]][[2]]
@@ -56,31 +77,23 @@ DEG_heatmaps<- function(rse, results, de_genes, filename){
   ## FDRs
   FDRs<-data.frame(signif(de_genes$adj.P.Val, digits = 3))
   rownames(FDRs)<-de_genes$ensemblID
-  FDRs<-data.frame("FDR"=apply(FDRs, 1, function(x){if(x>0.01|x==0.01){paste(">=0.01")} 
+  FDRs<-data.frame("FDR"=apply(FDRs, 1, function(x){if(x>0.01|x==0.01){paste("0.01-0.05")} 
                                                  else {paste("<0.01")}}))
+  FDRs[, paste("FDR", name)]<-FDRs$FDR
+  FDRs$FDR<-NULL
+  
   ## FCs
   FCs<-data.frame(signif(2**(de_genes$logFC), digits = 3))
   rownames(FCs)<-de_genes$ensemblID
   FCs<-data.frame("FC"=apply(FCs, 1, function(x){if(x>1|x==1){paste(">=1")} else {paste("<1")}}))
+  FCs[, paste("FC", name)]<-FCs$FC
+  FCs$FC<-NULL
   ann_rows<-cbind(FDRs, FCs)
   
   ## Join annotation info
-  anns<-list("Group"=ann_cols$Group, "Sex"=ann_cols$Sex, "FDR"=ann_rows$FDR, "FC"=ann_rows$FC)
-  
-  
-  
-  ## Manually determine coloring for plot annotation
-  palette_names = c('Accent', 'Set2', 'RdPu', 'Paired')
-  ann_colors = list()
-  for (i in 1:length(anns)) {
-    name = names(anns)[i]
-    n_uniq_colors = length(unique(anns[[name]]))
-    
-    ## Use a unique palette with the correct number of levels, named with those levels
-    ann_colors[[name]] = RColorBrewer::brewer.pal(n=6, palette_names[i])[2:1+n_uniq_colors]
-    names(ann_colors[[name]]) = unique(anns[[name]])
-  }
-  
+  anns<-list("Group"=ann_cols$Group, "Sex"=ann_cols$Sex)
+  anns[[paste("FDR", name)]]=ann_rows$FDRs
+  anns[[paste("FC", name)]]=ann_rows$FCs 
 
   
   ## Heatmap colors
@@ -91,7 +104,7 @@ DEG_heatmaps<- function(rse, results, de_genes, filename){
   )
   
   
-  if (name=="nicotine"){
+  if (filename=="nicotine"){
     width=9
     height=8
   }
@@ -196,8 +209,8 @@ nic_vs_smo_heatmaps<- function(DEG_list, option, filename){
     FDRs<-cbind(FDR_nic, FDR_smo)
     
     FDRs$Significance<-apply(FDRs, 1, function(x){if (x[1]<=0.05 && x[2]<=0.05){paste("Both")} 
-                                                  else if (x[1]<=0.05 && x[2]>0.05){paste("Nic")}
-                                                  else if (x[1]>0.05 && x[2]<=0.05){paste("Smo")}})
+                                                  else if (x[1]<=0.05 && x[2]>0.05){paste("Nic only")}
+                                                  else if (x[1]>0.05 && x[2]<=0.05){paste("Smo only")}})
     
     ## FCs in nic and smo 
     FC_nic<-data.frame(signif(2**data_nic$logFC, digits = 3))
@@ -216,20 +229,6 @@ nic_vs_smo_heatmaps<- function(DEG_list, option, filename){
     ## Join annotation info
     anns<-list("Expt & Group"=ann_cols$`Expt & Group`, "Sex"=ann_cols$Sex, "Significance"=ann_rows$Significance,
                "FC nic"=ann_rows$`FC nic`, "FC smo"=ann_rows$`FC smo`)
-    
-    
-    
-    ## Coloring for plot annotation
-    palette_names = c('Paired', 'Set2', 'Set1', 'YlGnBu', 'YlOrBr')
-    ann_colors = list()
-    for (i in 1:length(anns)) {
-      name = names(anns)[i]
-      n_uniq_colors = length(unique(anns[[name]]))
-      
-      ## Use a unique palette 
-      ann_colors[[name]] = RColorBrewer::brewer.pal(n=8, palette_names[i])[3:(2+n_uniq_colors)]
-      names(ann_colors[[name]]) = unique(anns[[name]])
-    }
     
     
     
@@ -298,32 +297,29 @@ nic_vs_smo_heatmaps<- function(DEG_list, option, filename){
     
     ## Genes' info
     ## FDRs
-    data<-top_genes[which(top_genes$ensemblID %in% DEG_list$ensemblID), c("ensemblID","adj.P.Val")]
+    data<-top_genes[which(top_genes$ensemblID %in% DEG_list$ensemblID), c("ensemblID","adj.P.Val", "logFC")]
     rownames<-rownames(data)
-    FDRs<-data.frame("FDR"=apply(as.data.frame(data$adj.P.Val), 1, function(x){if(x>0.01|x==0.01){paste(">=0.01")} 
+    FDRs<-data.frame("FDR"=apply(as.data.frame(data$adj.P.Val), 1, function(x){if(x>0.01|x==0.01){paste("0.01-0.05")} 
       else {paste("<0.01")}}))
+    FDRs[,paste("FDR", option)]<-FDRs$FDR
+    FDRs$FDR<-NULL
     rownames(FDRs)<-rownames
-    ann_rows<-cbind(FDRs)
+    
+    ## FCs in nic or smo 
+    FCs<-data.frame(signif(2**(data$logFC), digits = 3))
+    rownames(FCs)<-rownames
+    FCs<-data.frame("FC"=apply(FCs, 1, function(x){if(x>1|x==1){paste(">=1")} else {paste("<1")}}))
+    FCs[, paste("FC", option)]<-FCs$FC
+    FCs$FC<-NULL
+    ann_rows<-cbind(FDRs, FCs)
+
     
     ## Join annotation info
-    anns<-list("Group"=ann_cols$Group, "Sex"=ann_cols$Sex, "FDR"=ann_rows$FDR)
-    
+    anns<-list("Group"=ann_cols$Group, "Sex"=ann_cols$Sex)
+    anns[[paste("FDR", option)]]=ann_rows$FDR
+    anns[[paste("FC", option)]]=ann_rows$FC
     
   
-    ## Coloring for plot annotation
-    palette_names = c('Accent', 'Set2', 'RdPu')
-    ann_colors = list()
-    for (i in 1:length(anns)) {
-      name = names(anns)[i]
-      n_uniq_colors = length(unique(anns[[name]]))
-      
-      ## Use a unique palette with the correct number of levels, named with those levels
-      ann_colors[[name]] = RColorBrewer::brewer.pal(n=6, palette_names[i])[2:1+n_uniq_colors]
-      names(ann_colors[[name]]) = unique(anns[[name]])
-    }
-    
-    
-    
     ## Heatmap colors
     break1<-seq(min(vGene_DEG),0,by=0.001)
     break2<-seq(0,max(vGene_DEG),by=0.001)
@@ -342,7 +338,7 @@ nic_vs_smo_heatmaps<- function(DEG_list, option, filename){
       show_rownames = FALSE,
       cluster_cols = TRUE,
       annotation_col = ann_cols,
-      annotation_row = FDRs,
+      annotation_row = ann_rows,
       annotation_colors = ann_colors, 
       fontsize=8, 
       width = 12,
