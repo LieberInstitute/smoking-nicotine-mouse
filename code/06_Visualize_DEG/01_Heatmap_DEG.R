@@ -36,7 +36,9 @@ ann_colors[["Expt & Group"]]=c("Nicotine Control"="#FF9999", "Nicotine Experimen
                                "Smoking Control"="#99CC99", "Smoking Experimental"="#669966")
 
 
-## 1.1 Heatmaps of Nicotine and Smoking DEG 
+
+
+## 1.1 Heatmaps of all DEG in Nicotine or Smoking separately
 
 
 DEG_heatmaps<- function(rse, results, de_genes, filename){
@@ -96,12 +98,14 @@ DEG_heatmaps<- function(rse, results, de_genes, filename){
   anns[[paste("FC", name)]]=ann_rows$FCs 
 
   
+  
   ## Heatmap colors
   break1<-seq(min(vGene_DEG),0,by=0.001)
   break2<-seq(0,max(vGene_DEG),by=0.001)
   my_palette <- c(colorRampPalette(colors = c("darkblue", "lightblue"))(n = length(break1)),
                   c(colorRampPalette(colors = c("lightsalmon", "darkred"))(n = length(break2)))
   )
+  
   
   
   if (filename=="nicotine"){
@@ -112,6 +116,7 @@ DEG_heatmaps<- function(rse, results, de_genes, filename){
     width=13
     height=12
   }
+  
   
   
   ## Display heatmap
@@ -277,6 +282,8 @@ nic_vs_smo_heatmaps<- function(DEG_list, option, filename){
     top_genes<-eval(parse_expr(paste("results_pups", expt_name, "fitted", sep="_")))[[1]][[1]]
     rse<-eval(parse_expr(paste("rse_gene_brain_pups", expt_name, sep="_")))
     
+    
+    
     ## Extract lognorm counts of the genes
     vGene_DEG <-vGene$E[which(vGene$genes$ensemblID %in% DEG_list$ensemblID), ]
    
@@ -313,11 +320,11 @@ nic_vs_smo_heatmaps<- function(DEG_list, option, filename){
     FCs$FC<-NULL
     ann_rows<-cbind(FDRs, FCs)
 
-    
     ## Join annotation info
     anns<-list("Group"=ann_cols$Group, "Sex"=ann_cols$Sex)
     anns[[paste("FDR", option)]]=ann_rows$FDR
     anns[[paste("FC", option)]]=ann_rows$FC
+    
     
   
     ## Heatmap colors
