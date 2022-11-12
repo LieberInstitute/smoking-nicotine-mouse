@@ -40,7 +40,6 @@ ann_colors[["Expt & Group"]]=c("Nicotine Control"="#FF9999", "Nicotine Experimen
 
 ## 1.1 Heatmaps of all DEG in Nicotine or Smoking separately
 
-
 DEG_heatmaps<- function(rse, results, de_genes, filename){
   
   if (filename=="nicotine"){
