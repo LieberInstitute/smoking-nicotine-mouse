@@ -132,7 +132,6 @@ rse_gene_filt<-rse_gene[which(filterByExpr(assay(rse_gene),
 dim(rse_gene_filt)
 # 19974   208
 
-
 ## Add actual gene symbols instead of MGI symbols
 rowData(rse_gene_filt)$MGI_Symbol<-rowData(rse_gene_filt)$Symbol
 symbols<-biomart(genes  = rowData(rse_gene_filt)$ensemblID,
@@ -173,9 +172,45 @@ save(rse_gene_filt, file = 'processed-data/02_build_objects/rse_gene_filt.Rdata'
 ## Filter exons
 rse_exon_filt<-rse_exon[which(filterByExpr(assay(rse_exon), 
                 design=with(colData(rse_exon), model.matrix(~ Tissue + Age + Expt + Group)))),]
-save(rse_exon_filt, file = 'processed-data/02_build_objects/rse_exon_filt.Rdata')
 dim(rse_exon_filt)
 # 290800 208 
+
+## Add gene symbol of all genes associated to exons
+rowData(rse_exon_filt)$MGI_Symbol<-rowData(rse_exon_filt)$Symbol
+symbols<-biomart(genes  = unique(rowData(rse_exon_filt)$ensemblID),
+                 mart       = "ENSEMBL_MART_ENSEMBL",
+                 dataset    = "mmusculus_gene_ensembl",
+                 attributes = c("external_gene_name"),
+                 filters    = "ensembl_gene_id")
+
+## Add MGI/ensembl ID for genes without symbol
+## Genes without symbol found
+no_symbol<-unique(rowData(rse_exon_filt)$ensemblID)[which(! unique(rowData(rse_exon_filt)$ensemblID) 
+                                                  %in%  symbols$ensembl_gene_id)]
+## Genes with empty symbol or NA
+which_na_symbol<-which(is.na(symbols$external_gene_name) | symbols$external_gene_name=="")
+na_symbol<-symbols[which_na_symbol,1]
+## Add these genes' IDs
+no_symbol<-append(no_symbol, na_symbol)
+## Remove these genes from symbols
+symbols<-symbols[-which_na_symbol,]
+## Add MGI/ensembl IDs for them
+for (gene in no_symbol){
+  MGI_symbol<-unique(rowData(rse_exon_filt)[which(rowData(rse_exon_filt)$ensemblID==gene), "MGI_Symbol"])
+  if (! (is.na(MGI_symbol) | length(MGI_symbol)==0)) {
+    symbols[nrow(symbols)+1,]<-c(gene, MGI_symbol)
+  }
+  else {
+    symbols[nrow(symbols)+1,]<-c(gene,gene)
+  }
+}
+
+## Assign gene symbol to all exons
+symbols<-symbols[match(rowData(rse_exon_filt)$ensemblID, symbols$ensembl_gene_id), ]
+rowData(rse_exon_filt)$Symbol<-symbols$external_gene_name
+save(rse_exon_filt, file = 'processed-data/02_build_objects/rse_exon_filt.Rdata')
+
+
 
 ## Filter junctions
 rse_jx_filt<-rse_jx[which(filterByExpr(assay(rse_jx), 
