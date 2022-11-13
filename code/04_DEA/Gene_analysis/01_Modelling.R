@@ -43,7 +43,7 @@ DEA_expt_vs_ctl<- function(RSE, formula, name, coef){
   stopifnot(all(!is.na(match_samples)))
   factors<-samples_factors[match_samples, ]
   
-  pdf(file = paste("plots/04_DEA/01_Modelling/DEA_plots_", name, ".pdf", sep="" ))
+  pdf(file = paste("plots/04_DEA/01_Modelling/Gene_analysis/DEA_plots_", name, ".pdf", sep="" ))
   par(mfrow=c(2,2))
   
   ## Model matrix
@@ -154,7 +154,7 @@ plots_DE<-function(top_genes, vGene, FDR=0.05, name) {
     scale_alpha_manual(values = alphas) 
   
   plot_grid(p1, p2, ncol=2)
-  ggsave(paste("plots/04_DEA/01_Modelling/DEG_plots_", name, ".pdf", sep=""), 
+  ggsave(paste("plots/04_DEA/01_Modelling/Gene_analysis/DEG_plots_", name, ".pdf", sep=""), 
          width = 35, height = 15, units = "cm")
 }
 
@@ -209,7 +209,7 @@ DE_boxplots <- function(RSE, vGene, model, de_genes){
     plots[[i]]<-p
   }
   plot_grid(plots[[1]], plots[[2]], plots[[3]], ncol = 3)
-  ggsave(here(paste("plots/04_DEA/01_Modelling/DE_boxplots_",name, ".pdf", sep="")), 
+  ggsave(here(paste("plots/04_DEA/01_Modelling/Gene_analysis/DE_boxplots_",name, ".pdf", sep="")), 
          width = 25, height = 10, units = "cm")
 }
 
