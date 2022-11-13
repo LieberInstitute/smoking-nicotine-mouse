@@ -19,7 +19,6 @@ library(sessioninfo)
 
 ## 1.1 Data exploration and preparation
 
-
 ## Load RSE objects
 load(here("raw-data/rse_exon_smoking_mouse_n208.Rdata"))
 load(here("raw-data/rse_gene_smoking_mouse_n208.Rdata"))
