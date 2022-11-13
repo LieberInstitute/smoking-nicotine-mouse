@@ -3,6 +3,8 @@
 
 
 # 1. Build objects
+
+
 ## Load required libraries
 library(SummarizedExperiment)
 library(recount)
@@ -15,7 +17,9 @@ library(biomartr)
 library(sessioninfo)
 
 
-## 1.1 Load data, data exploration and preparation
+## 1.1 Data exploration and preparation
+
+
 ## Load RSE objects
 load(here("raw-data/rse_exon_smoking_mouse_n208.Rdata"))
 load(here("raw-data/rse_gene_smoking_mouse_n208.Rdata"))
@@ -201,6 +205,7 @@ dim(rse_tx_filt)
 
 
 ## 1.4 Data separation
+
 ## Brain data
 ## Genes
 rse_gene_brain<-rse_gene_filt[,(rse_gene_filt$Tissue=="Brain")]
@@ -240,6 +245,7 @@ save(rse_jx_brain_pups, file = 'processed-data/02_build_objects/rse_jx_brain_pup
 ## Tx
 rse_tx_brain_pups<-rse_tx_filt[,(rse_tx_filt$Tissue=="Brain" & rse_tx_filt$Age=="Pup")]
 save(rse_tx_brain_pups, file = 'processed-data/02_build_objects/rse_tx_brain_pups.Rdata')
+
 
 
 
