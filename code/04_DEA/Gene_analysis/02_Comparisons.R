@@ -1,29 +1,29 @@
 
 ## 1.2 Comparison of DEG 
 
-load(here("processed-data/04_DEA/top_genes_blood_smoking_naive.Rdata"))
-load(here("processed-data/04_DEA/top_genes_blood_smoking_fitted.Rdata"))
-load(here("processed-data/04_DEA/top_genes_blood_smoking_interaction.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/top_genes_blood_smoking_naive.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/top_genes_blood_smoking_fitted.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/top_genes_blood_smoking_interaction.Rdata"))
 
-load(here("processed-data/04_DEA/top_genes_adults_nicotine_naive.Rdata"))
-load(here("processed-data/04_DEA/top_genes_adults_nicotine_fitted.Rdata"))
-load(here("processed-data/04_DEA/top_genes_adults_nicotine_interaction.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/top_genes_adults_nicotine_naive.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/top_genes_adults_nicotine_fitted.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/top_genes_adults_nicotine_interaction.Rdata"))
 
-load(here("processed-data/04_DEA/top_genes_adults_smoking_naive.Rdata"))
-load(here("processed-data/04_DEA/top_genes_adults_smoking_fitted.Rdata"))
-load(here("processed-data/04_DEA/top_genes_adults_smoking_interaction.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/top_genes_adults_smoking_naive.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/top_genes_adults_smoking_fitted.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/top_genes_adults_smoking_interaction.Rdata"))
 
-load(here("processed-data/04_DEA/de_genes_pups_nicotine_naive.Rdata"))
-load(here("processed-data/04_DEA/top_genes_pups_nicotine_naive.Rdata"))
-load(here("processed-data/04_DEA/de_genes_pups_nicotine_fitted.Rdata"))
-load(here("processed-data/04_DEA/top_genes_pups_nicotine_fitted.Rdata"))
-load(here("processed-data/04_DEA/top_genes_pups_nicotine_interaction.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/de_genes_pups_nicotine_naive.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_nicotine_naive.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/de_genes_pups_nicotine_fitted.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_nicotine_fitted.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_nicotine_interaction.Rdata"))
 
-load(here("processed-data/04_DEA/de_genes_pups_smoking_naive.Rdata"))
-load(here("processed-data/04_DEA/top_genes_pups_smoking_naive.Rdata"))
-load(here("processed-data/04_DEA/de_genes_pups_smoking_fitted.Rdata"))
-load(here("processed-data/04_DEA/top_genes_pups_smoking_fitted.Rdata"))
-load(here("processed-data/04_DEA/top_genes_pups_smoking_interaction.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/de_genes_pups_smoking_naive.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_smoking_naive.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/de_genes_pups_smoking_fitted.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_smoking_fitted.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_smoking_interaction.Rdata"))
 
 
 
@@ -95,7 +95,7 @@ tstats_plots<-function(top_genes_pairs, name_1, name_2, models){
     plots[[i]]<-p
   }
   plot_grid(plots[[1]], plots[[2]], plots[[3]], ncol=2)
-  ggsave(filename=paste("plots/04_DEA/02_Comparisons/t_stats_",gsub(" ", "_", name_1), "_VS_",
+  ggsave(filename=paste("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_",gsub(" ", "_", name_1), "_VS_",
                         gsub(" ", "_", name_2), ".pdf", sep=""), 
                         height = 20, width = 25, units = "cm")
 }
@@ -164,7 +164,7 @@ tstats_plots(top_genes_pairs,  "Nicotine pups", "Nicotine adults", models)
 
 t<-t_stat_plot(top_genes_pups_nicotine_naive, top_genes_pups_nicotine_fitted, 
                "Naive model", "Fitted model", "Nicotine pups")
-ggsave("plots/04_DEA/02_Comparisons/t_stats_Naive_VS_Fitted_Nicotine.pdf", t, 
+ggsave("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_Naive_VS_Fitted_Nicotine.pdf", t, 
        height = 10, width = 12, units = "cm")
 
 
@@ -174,7 +174,7 @@ ggsave("plots/04_DEA/02_Comparisons/t_stats_Naive_VS_Fitted_Nicotine.pdf", t,
 
 t<-t_stat_plot(top_genes_pups_smoking_naive, top_genes_pups_smoking_fitted, 
                "Naive model", "Fitted model", "Smoking pups")
-ggsave("plots/04_DEA/02_Comparisons/t_stats_Naive_VS_Fitted_Smoking.pdf", t, 
+ggsave("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_Naive_VS_Fitted_Smoking.pdf", t, 
        height = 10, width = 12, units = "cm")
 
 
@@ -191,7 +191,7 @@ ggsave("plots/04_DEA/02_Comparisons/t_stats_Naive_VS_Fitted_Smoking.pdf", t,
 ## Function to create multiple Venn diagrams
 venn_plot<-function(DEG_lists, colors, filename){
   plots<-list()
-  pdf(file = paste("plots/04_DEA/02_Comparisons/Venn_", filename, ".pdf", sep=""))
+  pdf(file = paste("plots/04_DEA/02_Comparisons/Gene_analysis/Venn_", filename, ".pdf", sep=""))
   for (i in 1:length(DEG_lists)){
      v<-venn.diagram(DEG_lists[[i]], fill=colors[[i]], alpha = rep(0.5, length(DEG_lists[[i]])), 
                      lwd =0, margin=0.2, cat.cex=0.6, cex=0.6, height = 35, width = 35, units = "cm", 
@@ -336,22 +336,22 @@ venn_plot(DEG_lists, colors, "Naive_smo_VS_nic_Up_and_Down")
 DEG_fitted_smo_vs_nic_up<-list(
   "Smoking fitted up"=smo_fitted_up,
   "Nicotine fitted up"=nic_fitted_up)
-save(DEG_fitted_smo_vs_nic_up, file="processed-data/04_DEA/DEG_fitted_smo_vs_nic_up.Rdata")
+save(DEG_fitted_smo_vs_nic_up, file="processed-data/04_DEA/Gene_analysis/DEG_fitted_smo_vs_nic_up.Rdata")
 
 DEG_fitted_smo_vs_nic_down<-list(
   "Smoking fitted down"=smo_fitted_down,
   "Nicotine fitted down"=nic_fitted_down)
-save(DEG_fitted_smo_vs_nic_down, file="processed-data/04_DEA/DEG_fitted_smo_vs_nic_down.Rdata")
+save(DEG_fitted_smo_vs_nic_down, file="processed-data/04_DEA/Gene_analysis/DEG_fitted_smo_vs_nic_down.Rdata")
 
 DEG_fitted_smoUp_nicDown<-list(
   "Smoking fitted up"=smo_fitted_up,
   "Nicotine fitted down"=nic_fitted_down)
-save(DEG_fitted_smoUp_nicDown, file = "processed-data/04_DEA/DEG_fitted_smoUp_nicDown.Rdata")
+save(DEG_fitted_smoUp_nicDown, file = "processed-data/04_DEA/Gene_analysis/DEG_fitted_smoUp_nicDown.Rdata")
 
 DEG_fitted_smoDown_nicUp<-list(
   "Smoking fitted down"=smo_fitted_down,
   "Nicotine fitted up"=nic_fitted_up)
-save(DEG_fitted_smoDown_nicUp, file="processed-data/04_DEA/DEG_fitted_smoDown_nicUp.Rdata")
+save(DEG_fitted_smoDown_nicUp, file="processed-data/04_DEA/Gene_analysis/DEG_fitted_smoDown_nicUp.Rdata")
 
 DEG_lists<-list(DEG_fitted_smo_vs_nic_up, DEG_fitted_smo_vs_nic_down, 
                 DEG_fitted_smoUp_nicDown, DEG_fitted_smoDown_nicUp)
