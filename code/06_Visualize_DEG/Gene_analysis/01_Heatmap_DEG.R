@@ -12,12 +12,12 @@ library(sessioninfo)
 
 load(here("processed-data/03_EDA/04_Expl_Var_partition/rse_gene_brain_pups_nicotine.Rdata"))
 load(here("processed-data/03_EDA/04_Expl_Var_partition/rse_gene_brain_pups_smoking.Rdata"))
-load(here("processed-data/04_DEA/results_pups_nicotine_fitted.Rdata"))
-load(here("processed-data/04_DEA/results_pups_smoking_fitted.Rdata"))
-load(here("processed-data/04_DEA/de_genes_pups_nicotine_fitted.Rdata"))
-load(here("processed-data/04_DEA/de_genes_pups_smoking_fitted.Rdata"))
-load(here("processed-data/05_GO_KEGG/all_DEG.Rdata"))
-load(here("processed-data/05_GO_KEGG/intersections.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/results_pups_nicotine_fitted.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/results_pups_smoking_fitted.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/de_genes_pups_nicotine_fitted.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/de_genes_pups_smoking_fitted.Rdata"))
+load(here("processed-data/05_GO_KEGG/Gene_analysis/all_DEG.Rdata"))
+load(here("processed-data/05_GO_KEGG/Gene_analysis/intersections.Rdata"))
 
 
 ## (For fitted models only)
@@ -132,7 +132,7 @@ DEG_heatmaps<- function(rse, results, de_genes, filename){
     fontsize=8.5, 
     width = width,
     height = height,
-    filename=paste("plots/06_Heatmap_DEG/Heatmap_DEG_", filename, ".pdf", sep="")
+    filename=paste("plots/06_Heatmap_DEG/Gene_analysis/Heatmap_DEG_", filename, ".pdf", sep="")
     
   )
 }
@@ -259,7 +259,7 @@ nic_vs_smo_heatmaps<- function(DEG_list, option, filename){
       fontsize=8, 
       width = 16,
       height = 14,
-      filename=paste("plots/06_Heatmap_DEG/Heatmap_", filename, "_DEG.pdf", sep="")
+      filename=paste("plots/06_Heatmap_DEG/Gene_analysis/Heatmap_", filename, "_DEG.pdf", sep="")
     )
   }
   
@@ -349,7 +349,7 @@ nic_vs_smo_heatmaps<- function(DEG_list, option, filename){
       fontsize=8, 
       width = 12,
       height = 11,
-      filename=paste("plots/06_Heatmap_DEG/Heatmap_", filename, "_DEG_", option, ".pdf", sep="")
+      filename=paste("plots/06_Heatmap_DEG/Gene_analysis/Heatmap_", filename, "_DEG_", option, ".pdf", sep="")
     )  
   }
 }
