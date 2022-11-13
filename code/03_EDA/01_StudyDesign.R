@@ -1,10 +1,13 @@
-## 1. Study design
-library(sessioninfo)
 
-## 1.1 Load data
+## 1. Study design
+
+
+library(sessioninfo)
 load(here("processed-data/02_build_objects/pheno.tsv"))
 
-## 1.2 Number of samples for each pair of phenotypes
+
+## 1.1 Number of samples for each pair of phenotypes
+
 samples_pheno <- function(pheno_var1, pheno_var2){
     ## Pheno variables levels
     levels_var1<-sort(unique(pheno[,pheno_var1]))
@@ -28,7 +31,10 @@ for (pheno_var1 in c("Age", "Tissue", "plate", "medium","Expt", "Sex", "Group", 
     }
 } 
 
-## 1.3 Number of samples for each triad of phenotypes
+
+
+## 1.2 Number of samples for each triad of phenotypes
+
 three_pheno <- function(pheno_var1, pheno_var2, pheno_var3){
   ## Pheno variables levels
     levels_var1<-sort(unique(pheno[,pheno_var1]))
@@ -50,6 +56,8 @@ three_pheno("Pregnancy", "Age", "Tissue")
 three_pheno("Pregnancy", "Age", "Group")
 three_pheno("Tissue", "Expt", "Group")
 three_pheno("Pregnancy", "Expt", "Group")
+
+
 
 
 

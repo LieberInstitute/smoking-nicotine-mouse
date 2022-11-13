@@ -1,4 +1,9 @@
+
+## 1. Quality Control analysis
+
+
 ## Load all libraries for EDA 
+
 library(SummarizedExperiment)
 library(recount)
 library(edgeR)
@@ -14,9 +19,6 @@ library(gridExtra)
 library(sessioninfo)
 
 
-## 1. Quality Control anlaysis
-
-## 1.1 Load data
 load(here("processed-data/02_build_objects/rse_gene_brain.Rdata"))
 load(here("processed-data/02_build_objects/rse_gene_blood.Rdata"))
 load(here("processed-data/02_build_objects/rse_gene_brain_adults.Rdata"))
@@ -30,7 +32,8 @@ load(here("processed-data/02_build_objects/rse_jx_brain_pups.Rdata"))
 
 
 
-## 1.2 Relationships between QC variables and mouse phenotypes
+## 1.1 Relationships between QC variables and mouse phenotypes
+
 ## Boxplots 
 create_boxplots <- function(pheno_var, qc_var, tissue, age) {
   if (is.null(age)){
@@ -93,7 +96,8 @@ table(rse_gene_blood$trimmed)
 
 
 
-## 1.3 Plot quality metrics per sample
+## 1.2 Plot quality metrics per sample
+
 ## Detected/mt/ribo genes VS total counts 
 ## Samples separated by phenotypes
 sum_vs_qc<- function (pheno_var, qc_stats, qc_stats_lab, label, tissue, age){
@@ -245,8 +249,8 @@ plot_mito_vs_ribo("brain", "pups")
 
 
 
-## 1.4 Sample filtering by QC 
-### 1.4.1 Detection-based and Mito/Ribo filtering 
+## 1.3 Sample filtering by QC 
+### 1.3.1 Detection-based and Mito/Ribo filtering 
 
 # Filter brain samples
 ## Drop samples with lower library sizes and number of genes
@@ -327,7 +331,8 @@ save(rse_gene_blood_qc, file = 'processed-data/03_EDA/02_QC/rse_gene_blood_qc.Rd
 
 
 
-### 1.4.2 Plot QC metrics for samples retained and samples dropped
+### 1.3.2 Plot QC metrics for samples retained and samples dropped
+
 ## Generate column with samples retained/dropped
 qc_filt_col <- function(tissue, age){
   if (is.null(age)){

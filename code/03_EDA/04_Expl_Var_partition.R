@@ -1,4 +1,6 @@
+
 # 1. Explore gene level effects
+
 
 ## Load data without outliers and rare samples
 load(here("processed-data/03_EDA/02_QC/rse_gene_blood_qc.Rdata"))
@@ -26,7 +28,9 @@ save(rse_gene_brain_pups_nicotine,
      file="processed-data/03_EDA/04_Expl_Var_partition/rse_gene_brain_pups_nicotine.Rdata")
 
 
+
 ## 1.1 Explanatory Variables
+
 ## Plot density function for % of variance explained 
 expl_var<- function(type, tissue, age, expt){
   ## For blood or all adults/pups data
@@ -92,6 +96,7 @@ expl_var("gene", "brain", "pups", "nicotine")
 
 
 ## 1.2 Variance Partition
+
 ### 1.2.1 Canonical Correlation Analysis (CCA) 
 
 ## Plot Heatmap of CC between variables
@@ -152,6 +157,7 @@ plot_CCA("brain", "adults", "smoking")
 plot_CCA("brain", "adults", "nicotine")
 plot_CCA("brain", "pups", "smoking")
 plot_CCA("brain", "pups", "nicotine")
+
 
 
 
@@ -308,7 +314,6 @@ var_part_subsets<-function(tissue, age, expt) {
 }
 
 
-
 var_part_subsets("blood", NULL, NULL)
 var_part_subsets("brain", "adults", NULL)
 var_part_subsets("brain", "pups", NULL)
@@ -316,6 +321,8 @@ var_part_subsets("brain", "adults", "smoking")
 var_part_subsets("brain", "adults", "nicotine")
 var_part_subsets("brain", "pups", "smoking")
 var_part_subsets("brain", "pups", "nicotine")
+
+
 
 
 
