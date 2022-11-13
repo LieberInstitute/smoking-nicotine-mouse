@@ -14,16 +14,16 @@ library(biomartr)
 library(sessioninfo)
 
 
-load(here("processed-data/04_DEA/top_genes_pups_nicotine_fitted.Rdata"))
-load(here("processed-data/04_DEA/de_genes_pups_nicotine_fitted.Rdata"))
-load(here("processed-data/04_DEA/top_genes_pups_smoking_fitted.Rdata"))
-load(here("processed-data/04_DEA/de_genes_pups_smoking_fitted.Rdata"))
-load(here("processed-data/04_DEA/results_pups_nicotine_fitted.Rdata"))
-load(here("processed-data/04_DEA/results_pups_smoking_fitted.Rdata"))
-load(here("processed-data/04_DEA/DEG_fitted_smo_vs_nic_up.Rdata"))
-load(here("processed-data/04_DEA/DEG_fitted_smo_vs_nic_down.Rdata"))
-load(here("processed-data/04_DEA/DEG_fitted_smoDown_nicUp.Rdata"))
-load(here("processed-data/04_DEA/DEG_fitted_smoUp_nicDown.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_nicotine_fitted.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/de_genes_pups_nicotine_fitted.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_smoking_fitted.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/de_genes_pups_smoking_fitted.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/results_pups_nicotine_fitted.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/results_pups_smoking_fitted.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/DEG_fitted_smo_vs_nic_up.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/DEG_fitted_smo_vs_nic_down.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/DEG_fitted_smoDown_nicUp.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/DEG_fitted_smoUp_nicDown.Rdata"))
 load(here("processed-data/03_EDA/04_Expl_Var_partition/rse_gene_brain_pups_smoking.Rdata"))
 load(here("processed-data/03_EDA/04_Expl_Var_partition/rse_gene_brain_pups_nicotine.Rdata"))
 
@@ -42,7 +42,7 @@ all_down<-unique(rbind(down_nic, down_smo))
 all_nic<-unique(rbind(up_nic, down_nic))
 all_smo<-unique(rbind(up_smo, down_smo))
 all<-unique(rbind(all_nic, all_smo))
-save(all, file="processed-data/05_GO_KEGG/all_DEG.Rdata")
+save(all, file="processed-data/05_GO_KEGG/Gene_analysis/all_DEG.Rdata")
 
 ## Intersections between groups
 smoUp_nicDown<-merge(up_smo, down_nic)
@@ -62,7 +62,7 @@ intersections<-list("only up nic"=only_up_nic, "only up smo"=only_up_smo,
                     "smo Up nic Up"=smoUp_nicUp, "smo Down nic Down"=smoDown_nicDown, 
                     "smo Up nic Down"=smoUp_nicDown, "smo Down nic Up"=smoDown_nicUp)
 
-save(intersections, file="processed-data/05_GO_KEGG/intersections.Rdata")
+save(intersections, file="processed-data/05_GO_KEGG/Gene_analysis/intersections.Rdata")
 
 
 ## Function to do GO and KEGG analyses
@@ -92,7 +92,7 @@ GO_KEGG<- function(sigGeneList, geneUniverse, name){
   )
   
   ## Save
-  pdf(paste("plots/05_GO_KEGG/GO_BP_", name, ".pdf", sep=""), height = height, width = width)
+  pdf(paste("plots/05_GO_KEGG/Gene_analysis/GO_BP_", name, ".pdf", sep=""), height = height, width = width)
   print(dotplot(goBP_Adj, title="GO Enrichment Analysis: Biological processes"))
   dev.off()
   
@@ -110,7 +110,7 @@ GO_KEGG<- function(sigGeneList, geneUniverse, name){
   )
   
   ## Save
-  pdf(paste("plots/05_GO_KEGG/GO_MF_", name, ".pdf", sep=""), height = height, width = width)
+  pdf(paste("plots/05_GO_KEGG/Gene_analysis/GO_MF_", name, ".pdf", sep=""), height = height, width = width)
   print(dotplot(goMF_Adj, title="GO Enrichment Analysis: Molecular function"))
   dev.off()
   
@@ -128,7 +128,7 @@ GO_KEGG<- function(sigGeneList, geneUniverse, name){
   )
   
   ## Save
-  pdf(paste("plots/05_GO_KEGG/GO_CC_", name, ".pdf", sep=""), height = height, width = width)
+  pdf(paste("plots/05_GO_KEGG/Gene_analysis/GO_CC_", name, ".pdf", sep=""), height = height, width = width)
   print(dotplot(goCC_Adj, title="GO Enrichment Analysis: Cellular components"))
   dev.off()
   
@@ -144,7 +144,7 @@ GO_KEGG<- function(sigGeneList, geneUniverse, name){
   )
   
   ## Save
-  pdf(paste("plots/05_GO_KEGG/KEGG_", name, ".pdf", sep=""), height = height, width = width)
+  pdf(paste("plots/05_GO_KEGG/Gene_analysis/KEGG_", name, ".pdf", sep=""), height = height, width = width)
   print(dotplot(kegg_Adj, title="KEGG Enrichment Analysis"))
   dev.off()
   
@@ -177,7 +177,7 @@ geneUniverse <- as.character(union(top_genes_pups_nicotine_fitted$EntrezID,
 geneUniverse <- geneUniverse[!is.na(geneUniverse)]
 
 goList_global<-GO_KEGG(sigGeneList, geneUniverse, "global")
-save(goList_global, file="processed-data/05_GO_KEGG/goList_global.Rdata")
+save(goList_global, file="processed-data/05_GO_KEGG/Gene_analysis/goList_global.Rdata")
 
 
 
@@ -195,7 +195,7 @@ geneUniverse <- as.character(top_genes_pups_nicotine_fitted$EntrezID)
 geneUniverse <- geneUniverse[!is.na(geneUniverse)]
 
 goList_nic<-GO_KEGG(sigGeneList, geneUniverse, "nicotine")
-save(goList_nic, file="processed-data/05_GO_KEGG/goList_nic.Rdata")
+save(goList_nic, file="processed-data/05_GO_KEGG/Gene_analysis/goList_nic.Rdata")
 
 
 
@@ -213,7 +213,7 @@ geneUniverse <- as.character(top_genes_pups_smoking_fitted$EntrezID)
 geneUniverse <- geneUniverse[!is.na(geneUniverse)]
 
 goList_smo<-GO_KEGG(sigGeneList, geneUniverse, "smoking")
-save(goList_smo, file="processed-data/05_GO_KEGG/goList_smo.Rdata")
+save(goList_smo, file="processed-data/05_GO_KEGG/Gene_analysis/goList_smo.Rdata")
 
 
 
@@ -234,7 +234,7 @@ geneUniverse <- as.character(union(top_genes_pups_nicotine_fitted$EntrezID,
 geneUniverse <- geneUniverse[!is.na(geneUniverse)]
 
 goList_intersections<-GO_KEGG(sigGeneList, geneUniverse, "intersections")
-save(goList_intersections, file="processed-data/05_GO_KEGG/goList_intersections.Rdata")
+save(goList_intersections, file="processed-data/05_GO_KEGG/Gene_analysis/goList_intersections.Rdata")
 
 
 
@@ -400,7 +400,7 @@ GO_boxplots<- function (DEG_list, groups){
     i=i+1
   }
   plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]], plots[[6]], ncol=3)
-  ggsave(here(paste("plots/05_GO_KEGG/Top", length(DEG_list), "_DEG_boxplots_", groups, ".pdf", sep="")), 
+  ggsave(here(paste("plots/05_GO_KEGG/Gene_analysis/Top", length(DEG_list), "_DEG_boxplots_", groups, ".pdf", sep="")), 
          width = 40, height = 25, units = "cm") 
 }
 
@@ -481,7 +481,7 @@ GO_KEGG_boxplots<-function(DEG_list, description, cluster){
   
   options(warn = - 1)   
   plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]], plots[[6]], ncol=3)
-  ggsave(here(paste("plots/05_GO_KEGG/Top", length(DEG_list), "_", description,"_boxplots_",cluster, 
+  ggsave(here(paste("plots/05_GO_KEGG/Gene_analysis/Top", length(DEG_list), "_", description,"_boxplots_",cluster, 
                     ".pdf", sep="")), width = 40, height = 25, units = "cm") 
   
 }
