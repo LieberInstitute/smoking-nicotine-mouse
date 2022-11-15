@@ -6,9 +6,17 @@
 
 library(here)
 library(SummarizedExperiment)
+library(stats)
 library(edgeR)
+library(limma)
+library(ggplot2)
+library(rlang)
+library(cowplot)
+library(ggrepel)
+library(jaffelab)
+library(VennDiagram) 
+library(gridExtra)
 library(sessioninfo)
-##CHECK MISSING LIBRARIES
 
 load(here("raw-data/rse_exon_smoking_mouse_n208.Rdata"))
 load(here("processed-data/03_EDA/02_QC/rse_exon_brain_pups_qc.Rdata"))
@@ -96,7 +104,7 @@ plots_DE<-function(top_exons, vExon, FDR=0.05, name) {
   }
   top_exons$DE<- DE
   
-  ## Gene symbols for DE exons with |logFC|>1 ??????????
+  ## Gene symbols of DE exons with |logFC|>1 
   DEG_symbol<-vector()
   for (i in 1:dim(top_exons)[1]) {
     if (top_exons$DE[i]!="ns" & abs(top_exons$logFC[i])>1) {
@@ -148,9 +156,93 @@ plots_DE<-function(top_exons, vExon, FDR=0.05, name) {
     scale_alpha_manual(values = alphas) 
   
   plot_grid(p1, p2, ncol=2)
-  ggsave(paste("plots/04_DEA/01_Modelling/Gene_analysis/DEG_exon_plots_", name, ".pdf", sep=""), 
+  ggsave(paste("plots/04_DEA/01_Modelling/Exon_analysis/DEG_exon_plots_", name, ".pdf", sep=""), 
          width = 35, height = 15, units = "cm")
 }
+
+
+
+## Boxplot of a single exon
+DE_one_boxplot <- function (de_exons, lognorm_DE, DEexon){
+  
+  ## q-value for the exon
+  q_value<-signif(de_exons[which(de_exons$Symbol==DEexon), "adj.P.Val"], digits = 3)
+  
+  ## Boxplot for each DE exon
+  DEexon<-chartr(":", ".",DEexon)  
+  ggplot(data=as.data.frame(lognorm_DE), 
+         aes(x=Group,y=eval(parse_expr(DEexon)))) + 
+    ## Hide outliers
+    geom_boxplot(outlier.color = "#FFFFFFFF") +
+    ## Samples colored by Group + noise
+    geom_jitter(aes(colour=Group),shape=16, 
+                position=position_jitter(0.2)) +
+    theme_classic() +
+    labs(x = "Group", y = "norm counts",
+         title = DEgene, 
+         subtitle = paste("FDR:", q_value)) +
+    theme(plot.margin=unit (c (1,1.5,1,1), 'cm'), legend.position = "none",
+          plot.title = element_text(hjust=0.5, size=10, face="bold"), 
+          plot.subtitle = element_text(size = 9)) 
+  
+}
+
+
+
+## Boxplot of lognorm counts for top 3 DE exons
+## Obtain lognorm counts of DE exons
+DE_boxplots <- function(RSE, vExon, de_exons){
+  ## Regress out residuals to remove batch effects
+  formula<- ~ Group + Sex + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr + overallMapRate + mitoRate
+  model=model.matrix(formula, data=colData(RSE))
+  vExon$E<-cleaningY(vExon$E, model, P=2)
+  ## Order exons by q-value
+  de_exons<-de_exons[order(de_exons$adj.P.Val),]
+  lognorm_DE<-vExon$E[rownames(de_exons),]
+  ## Samples as rows and exons as columns
+  lognorm_DE<-t(lognorm_DE)
+  ## Gene symbol of the exons as colnames
+  colnames(lognorm_DE)<-rowData(RSE)[rownames(de_exons),"Symbol"]
+  ## Add samples' Group information
+  lognorm_DE<-data.frame(lognorm_DE, "Group"=colData(RSE)$Group)
+  
+  
+  plots<-list()
+  for (i in 1:3){
+    DEexon<-colnames(lognorm_DE)[i]
+    p<-DE_one_boxplot(de_exons, lognorm_DE, DEexon)
+    plots[[i]]<-p
+  }
+  plot_grid(plots[[1]], plots[[2]], plots[[3]], ncol = 3)
+  ggsave(here(paste("plots/04_DEA/01_Modelling/Exon_analysis/DE_boxplots_exons_",name, ".pdf", sep="")), 
+         width = 25, height = 10, units = "cm")
+}
+
+
+
+## Perform DEA for each group of samples
+apply_DEA<-function(RSE, name){
+  ## DEA
+  results<-DEA_expt_vs_ctl(RSE, name)
+  top_exons<-results[[1]]
+  
+  ## If there are DE exons
+  if (length(which(top_exons$adj.P.Val<0.05))>0){
+    vExon<-results[[2]]
+    de_exons<-top_exons[top_exons$adj.P.Val < 0.05,]
+    ## Plots for DE genes
+    plots_DE(top_exons, vExon, 0.05, name)
+    DE_boxplots(RSE, vExon, de_exons)
+    print(paste(length(which(top_exons$adj.P.Val<0.05)), "differentially expressed exons", sep=" "))
+    return(list(results, de_exons))
+  }
+  else {
+    print("No differentially expressed exons")
+    return(results)
+  }
+}
+
+
 
 
 
@@ -160,14 +252,15 @@ plots_DE<-function(top_exons, vExon, FDR=0.05, name) {
 ##################################
 
 RSE<-rse_exon_brain_pups_nicotine
-
-## Naive model
 name<-"nicotine"
-results<-DEA_expt_vs_ctl(RSE, name)
-top_exons<-results[[1]]
-vExon<-results[[2]]
-plots_DE(top_exons, vExon, name = name)
+results_nic<-apply_DEA(RSE, name)
 
+
+results_blood_smoking_naive<-apply_DEA(RSE, formula, name, coef)
+# "No differentially expressed genes"
+top_genes_blood_smoking_naive<-results_blood_smoking_naive[[1]]
+save(results_blood_smoking_naive, file="processed-data/04_DEA/Gene_analysis/results_blood_smoking_naive.Rdata")
+save(top_genes_blood_smoking_naive, file="processed-data/04_DEA/Gene_analysis/top_genes_blood_smoking_naive.Rdata")
 
 
 
