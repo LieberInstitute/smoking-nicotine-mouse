@@ -163,13 +163,12 @@ plots_DE<-function(top_exons, vExon, FDR=0.05, name) {
 
 
 ## Boxplot of a single DE exon
-DE_one_boxplot <- function (de_exons, lognorm_DE, DEexon){
+DE_one_boxplot <- function (de_exons, lognorm_DE, exon_ID, DEexon){
   
   ## q-value for the exon
-  q_value<-signif(de_exons[which(de_exons$Symbol==DEexon), "adj.P.Val"], digits = 3)
+  q_value<-signif(de_exons[which(de_exons$exon_libdID==exon_ID), "adj.P.Val"], digits = 3)
   
   ## Boxplot for the DE exon
-  DEexon<-chartr(":", ".",DEexon)  
   ggplot(data=as.data.frame(lognorm_DE), 
          aes(x=Group,y=eval(parse_expr(DEexon)))) + 
     ## Hide outliers
@@ -179,7 +178,7 @@ DE_one_boxplot <- function (de_exons, lognorm_DE, DEexon){
                 position=position_jitter(0.2)) +
     theme_classic() +
     labs(x = "Group", y = "norm counts",
-         title = DEgene, 
+         title = chartr(".", "-",DEexon),
          subtitle = paste("FDR:", q_value)) +
     theme(plot.margin=unit (c (1,1.5,1,1), 'cm'), legend.position = "none",
           plot.title = element_text(hjust=0.5, size=10, face="bold"), 
@@ -202,7 +201,8 @@ DE_boxplots <- function(RSE, vExon, de_exons){
   ## Samples as rows and exons as columns
   lognorm_DE<-t(lognorm_DE)
   ## Gene symbol of the exons as colnames
-  colnames(lognorm_DE)<-rowData(RSE)[rownames(de_exons),"Symbol"]
+  colnames(lognorm_DE)<-paste(de_exons$Symbol, "-", 
+                              de_exons$exon_libdID, sep="")
   ## Add samples' Group information
   lognorm_DE<-data.frame(lognorm_DE, "Group"=colData(RSE)$Group)
   
@@ -210,7 +210,8 @@ DE_boxplots <- function(RSE, vExon, de_exons){
   plots<-list()
   for (i in 1:3){
     DEexon<-colnames(lognorm_DE)[i]
-    p<-DE_one_boxplot(de_exons, lognorm_DE, DEexon)
+    exon_ID<-de_exons$exon_libdID[i]
+    p<-DE_one_boxplot(de_exons, lognorm_DE, exon_ID, DEexon)
     plots[[i]]<-p
   }
   plot_grid(plots[[1]], plots[[2]], plots[[3]], ncol = 3)
@@ -254,23 +255,12 @@ apply_DEA<-function(RSE, name){
 RSE<-rse_exon_brain_pups_nicotine
 name<-"nicotine"
 results_nic<-apply_DEA(RSE, name)
-
-top_exons_nicotine<-results_nic[[1]][[1]]
-
-
-## DE genes
-de_genes_pups_nicotine_naive<-results_pups_nicotine_naive[[2]]
-save(results_pups_nicotine_naive, file="processed-data/04_DEA/Gene_analysis/results_pups_nicotine_naive.Rdata")
-save(top_genes_pups_nicotine_naive, file="processed-data/04_DEA/Gene_analysis/top_genes_pups_nicotine_naive.Rdata")
-save(de_genes_pups_nicotine_naive, file="processed-data/04_DEA/Gene_analysis/de_genes_pups_nicotine_naive.Rdata")
-
-
-
-results_blood_smoking_naive<-apply_DEA(RSE, formula, name, coef)
-# "No differentially expressed genes"
-top_genes_blood_smoking_naive<-results_blood_smoking_naive[[1]]
-save(results_blood_smoking_naive, file="processed-data/04_DEA/Exon_analysis/results_blood_smoking_naive.Rdata")
-save(top_genes_blood_smoking_naive, file="processed-data/04_DEA/Exon_analysis/top_genes_blood_smoking_naive.Rdata")
+"3809 differentially expressed exons"
+top_exons_nic<-results_nic[[1]][[1]]
+de_exons_nic<-results_nic[[2]]
+save(results_nic, file="processed-data/04_DEA/Exon_analysis/results_nic.Rdata")
+save(top_exons_nic, file="processed-data/04_DEA/Exon_analysis/top_exons_nic.Rdata")
+save(de_exons_nic, file="processed-data/04_DEA/Exon_analysis/de_exons_nic.Rdata")
 
 
 
@@ -280,13 +270,15 @@ save(top_genes_blood_smoking_naive, file="processed-data/04_DEA/Exon_analysis/to
 ##################################
 
 RSE<-rse_exon_brain_pups_smoking
-
-## Naive model
 name<-"smoking"
-results<-DEA_expt_vs_ctl(RSE, name)
-top_exons<-results[[1]]
-vExon<-results[[2]]
-plots_DE(top_exons, vExon, name = name)
+results_smo<-apply_DEA(RSE, name)
+" differentially expressed exons"
+top_exons_smo<-results_smo[[1]][[1]]
+de_exons_smo<-results_smo[[2]]
+save(results_smo, file="processed-data/04_DEA/Exon_analysis/results_smo.Rdata")
+save(top_exons_smo, file="processed-data/04_DEA/Exon_analysis/top_exons_smo.Rdata")
+save(de_exons_smo, file="processed-data/04_DEA/Exon_analysis/de_exons_smo.Rdata")
+
 
 
 
