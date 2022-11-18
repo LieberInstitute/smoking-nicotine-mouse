@@ -162,13 +162,13 @@ plots_DE<-function(top_exons, vExon, FDR=0.05, name) {
 
 
 
-## Boxplot of a single exon
+## Boxplot of a single DE exon
 DE_one_boxplot <- function (de_exons, lognorm_DE, DEexon){
   
   ## q-value for the exon
   q_value<-signif(de_exons[which(de_exons$Symbol==DEexon), "adj.P.Val"], digits = 3)
   
-  ## Boxplot for each DE exon
+  ## Boxplot for the DE exon
   DEexon<-chartr(":", ".",DEexon)  
   ggplot(data=as.data.frame(lognorm_DE), 
          aes(x=Group,y=eval(parse_expr(DEexon)))) + 
@@ -255,12 +255,22 @@ RSE<-rse_exon_brain_pups_nicotine
 name<-"nicotine"
 results_nic<-apply_DEA(RSE, name)
 
+top_exons_nicotine<-results_nic[[1]][[1]]
+
+
+## DE genes
+de_genes_pups_nicotine_naive<-results_pups_nicotine_naive[[2]]
+save(results_pups_nicotine_naive, file="processed-data/04_DEA/Gene_analysis/results_pups_nicotine_naive.Rdata")
+save(top_genes_pups_nicotine_naive, file="processed-data/04_DEA/Gene_analysis/top_genes_pups_nicotine_naive.Rdata")
+save(de_genes_pups_nicotine_naive, file="processed-data/04_DEA/Gene_analysis/de_genes_pups_nicotine_naive.Rdata")
+
+
 
 results_blood_smoking_naive<-apply_DEA(RSE, formula, name, coef)
 # "No differentially expressed genes"
 top_genes_blood_smoking_naive<-results_blood_smoking_naive[[1]]
-save(results_blood_smoking_naive, file="processed-data/04_DEA/Gene_analysis/results_blood_smoking_naive.Rdata")
-save(top_genes_blood_smoking_naive, file="processed-data/04_DEA/Gene_analysis/top_genes_blood_smoking_naive.Rdata")
+save(results_blood_smoking_naive, file="processed-data/04_DEA/Exon_analysis/results_blood_smoking_naive.Rdata")
+save(top_genes_blood_smoking_naive, file="processed-data/04_DEA/Exon_analysis/top_genes_blood_smoking_naive.Rdata")
 
 
 
