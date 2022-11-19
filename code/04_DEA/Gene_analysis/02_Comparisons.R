@@ -54,7 +54,7 @@ add_DE_info <-function(top_genes1, top_genes2, name_1, name_2) {
 }
 
 
-## Compare t-stats of genes from different samples' groups
+## Compare t-stats of genes from different groups of samples
 t_stat_plot <- function(top_genes1, top_genes2, name_1, name_2, model_name){
   
   ## Correlation coeff
@@ -63,7 +63,7 @@ t_stat_plot <- function(top_genes1, top_genes2, name_1, name_2, model_name){
   
   ## Merge data
   t_stats<-data.frame(t1=top_genes1$t, t2=top_genes2$t)
-  ## Add DEG info for both groups
+  ## Add DE info for both groups
   t_stats$DEG<-add_DE_info(top_genes1, top_genes2, name_1, name_2)
   
   cols <- c("red", "#ffad73","#26b3ff", "dark grey") 
@@ -79,7 +79,7 @@ t_stat_plot <- function(top_genes1, top_genes2, name_1, name_2, model_name){
           subtitle = rho_anno, 
           parse = T) +
      theme_bw() +
-     scale_color_manual(values = cols)+ 
+     scale_color_manual(values = cols) + 
      scale_alpha_manual(values = alphas)
 
  return(plot)
@@ -190,6 +190,7 @@ ggsave("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_Naive_VS_Fitted_Smokin
 
 ## Function to create multiple Venn diagrams
 venn_plot<-function(DEG_lists, colors, filename){
+  
   plots<-list()
   pdf(file = paste("plots/04_DEA/02_Comparisons/Gene_analysis/Venn_", filename, ".pdf", sep=""))
   for (i in 1:length(DEG_lists)){
