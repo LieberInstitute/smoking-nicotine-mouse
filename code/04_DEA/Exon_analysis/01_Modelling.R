@@ -91,7 +91,7 @@ plots_DE<-function(top_exons, vExon, FDR=0.05, logFC=0.25, name) {
   DE<-vector()
   for (i in 1:dim(top_exons)[1]) {
     ## NS exons are those with p-values>0.05 and |logFC|<0.25
-    if (top_exons$adj.P.Val[i]>FDR || abs(top_exons$logFC)<logFC) {
+    if (top_exons$adj.P.Val[i]>FDR || abs(top_exons$logFC[i])<logFC) {
       DE<-append(DE, "ns")
     }
     else {
@@ -209,7 +209,7 @@ DE_boxplots <- function(RSE, vExon, de_exons){
   
   plots<-list()
   for (i in 1:3){
-    exonID<-colnames(lognorm_DE)[i]
+    exon_ID<-colnames(lognorm_DE)[i]
     exon_name<-paste(de_exons$Symbol[i]," - ", de_exons$seqnames[i], ":", de_exons$start[i], "-", de_exons$end[i], sep="")
     p<-DE_one_boxplot(de_exons, lognorm_DE, exon_ID, exon_name)
     plots[[i]]<-p
