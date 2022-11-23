@@ -13,6 +13,7 @@ load(here("processed-data/04_DEA/Gene_analysis/de_genes_pups_smoking_fitted.Rdat
 load(here("processed-data/05_GO_KEGG/Gene_analysis/intersections.Rdata"))     
 
 
+
 ### 1.2.1 T-stats plots
 
 ## Function to add DE info of exons in both groups of samples
