@@ -86,11 +86,12 @@ DEA_expt_vs_ctl<- function(RSE, name){
 
 
 ## Plots for DE exons
-plots_DE<-function(top_exons, vExon, FDR=0.05, name) {
+plots_DE<-function(top_exons, vExon, FDR=0.05, logFC=0.25, name) {
   ## NS/Down/Upregulated exons
   DE<-vector()
   for (i in 1:dim(top_exons)[1]) {
-    if (top_exons$adj.P.Val[i]>FDR) {
+    ## NS exons are those with p-values>0.05 and |logFC|<0.25
+    if (top_exons$adj.P.Val[i]>FDR || abs(top_exons$logFC)<logFC) {
       DE<-append(DE, "ns")
     }
     else {
@@ -163,14 +164,14 @@ plots_DE<-function(top_exons, vExon, FDR=0.05, name) {
 
 
 ## Boxplot of a single DE exon
-DE_one_boxplot <- function (de_exons, lognorm_DE, exon_ID, DEexon){
+DE_one_boxplot <- function (de_exons, lognorm_DE, exon_ID, exon_name){
   
   ## q-value for the exon
   q_value<-signif(de_exons[which(de_exons$exon_libdID==exon_ID), "adj.P.Val"], digits = 3)
   
   ## Boxplot for the DE exon
   ggplot(data=as.data.frame(lognorm_DE), 
-         aes(x=Group,y=eval(parse_expr(DEexon)))) + 
+         aes(x=Group,y=eval(parse_expr(exon_ID)))) + 
     ## Hide outliers
     geom_boxplot(outlier.color = "#FFFFFFFF") +
     ## Samples colored by Group + noise
@@ -178,7 +179,7 @@ DE_one_boxplot <- function (de_exons, lognorm_DE, exon_ID, DEexon){
                 position=position_jitter(0.2)) +
     theme_classic() +
     labs(x = "Group", y = "norm counts",
-         title = chartr(".", "-",DEexon),
+         title = exon_name,
          subtitle = paste("FDR:", q_value)) +
     theme(plot.margin=unit (c (1,1.5,1,1), 'cm'), legend.position = "none",
           plot.title = element_text(hjust=0.5, size=10, face="bold"), 
@@ -200,18 +201,17 @@ DE_boxplots <- function(RSE, vExon, de_exons){
   lognorm_DE<-vExon$E[rownames(de_exons),]
   ## Samples as rows and exons as columns
   lognorm_DE<-t(lognorm_DE)
-  ## Gene symbol of the exons as colnames
-  colnames(lognorm_DE)<-paste(de_exons$Symbol, "-", 
-                              de_exons$exon_libdID, sep="")
+  ## Exons' IDs as colnames
+  colnames(lognorm_DE)<-de_exons$exon_libdID
   ## Add samples' Group information
   lognorm_DE<-data.frame(lognorm_DE, "Group"=colData(RSE)$Group)
   
   
   plots<-list()
   for (i in 1:3){
-    DEexon<-colnames(lognorm_DE)[i]
-    exon_ID<-de_exons$exon_libdID[i]
-    p<-DE_one_boxplot(de_exons, lognorm_DE, exon_ID, DEexon)
+    exonID<-colnames(lognorm_DE)[i]
+    exon_name<-paste(de_exons$Symbol[i]," - ", de_exons$seqnames[i], ":", de_exons$start[i], "-", de_exons$end[i], sep="")
+    p<-DE_one_boxplot(de_exons, lognorm_DE, exon_ID, exon_name)
     plots[[i]]<-p
   }
   plot_grid(plots[[1]], plots[[2]], plots[[3]], ncol = 3)
@@ -230,11 +230,12 @@ apply_DEA<-function(RSE, name){
   ## If there are DE exons
   if (length(which(top_exons$adj.P.Val<0.05))>0){
     vExon<-results[[2]]
-    de_exons<-top_exons[top_exons$adj.P.Val < 0.05,]
+    ## Retain only DE exons with |logFC|>0.25
+    de_exons<-top_exons[which(top_exons$adj.P.Val < 0.05 & abs(top_exons$logFC)>0.25),]
     ## Plots for DE genes
-    plots_DE(top_exons, vExon, 0.05, name)
+    plots_DE(top_exons, vExon, 0.05, 0.25, name)
     DE_boxplots(RSE, vExon, de_exons)
-    print(paste(length(which(top_exons$adj.P.Val<0.05)), "differentially expressed exons", sep=" "))
+    print(paste(dim(de_exons)[1], "differentially expressed exons", sep=" "))
     return(list(results, de_exons))
   }
   else {
