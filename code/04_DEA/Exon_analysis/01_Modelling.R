@@ -256,7 +256,7 @@ apply_DEA<-function(RSE, name){
 RSE<-rse_exon_brain_pups_nicotine
 name<-"nicotine"
 results_nic<-apply_DEA(RSE, name)
-"3809 differentially expressed exons"
+"1115 differentially expressed exons"
 top_exons_nic<-results_nic[[1]][[1]]
 de_exons_nic<-results_nic[[2]]
 save(results_nic, file="processed-data/04_DEA/Exon_analysis/results_nic.Rdata")
