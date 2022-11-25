@@ -65,9 +65,9 @@ t_stat_plot <- function(top_exons1, top_exons2, name_1, name_2, title){
   t_stats$DE<-add_DE_info(top_exons1, top_exons2)
   
   cols <- c("red", "#ffad73","#26b3ff", "dark grey") 
-  names(cols)<-c("sig Both", paste0("sig ", name_1), paste0("sig ", name_2), "None")
+  names(cols)<-c("sig Both", "sig nic", "sig smo", "None")
   alphas <- c( 1, 1, 1,0.5)  
-  names(alphas)<-c("sig Both", paste0("sig ", name_1), paste0("sig ", name_2), "None")
+  names(alphas)<-c("sig Both", "sig nic", "sig smo", "None")
   
   plot <- ggplot(t_stats, aes(x = t1, y = t2, color=DE, alpha=DE)) +
     geom_point(size = 1) +
@@ -105,25 +105,38 @@ add_DE_info_exons_vs_genes <-function(t_stats) {
   
   DE<-vector()
   for (i in 1:dim(t_stats)[1]) {
+
     ## DE exons in both genes and exons
-    if (t_stats$adj.P.Val_exons[i]<0.05 && t_stats$adj.P.Val_genes[i]<0.05
-        && abs(t_stats$logFC_exons[i])>0.25) {
-      DE<-append(DE, "sig Both")
-    }
-    ## DE exons only
-    else if (t_stats$adj.P.Val_exons[i]<0.05 && abs(t_stats$logFC_exons[i])>0.25
-             && !t_stats$adj.P.Val_genes[i]<0.05) {
-      DE<-append(DE, "sig exon")
+    if (t_stats$adj.P.Val_exons[i]<0.05 && t_stats$adj.P.Val_genes[i]<0.05){
+      
+      if(abs(t_stats$logFC_exons[i])>0.25) {
+        DE<-append(DE, "sig Both")
+      }
+      ## DE genes only
+      else {
+        DE<-append(DE, "sig gene")
+      } 
     }
     
-    ## DE genes only
-    else if (t_stats$adj.P.Val_genes[i]<0.05 && !t_stats$adj.P.Val_exons[i]<0.05) {
+    else if(t_stats$adj.P.Val_exons[i]<0.05 && t_stats$adj.P.Val_genes[i]>=0.05){
+      
+      ## DE exons only
+      if(abs(t_stats$logFC_exons[i])>0.25) {
+        DE<-append(DE, "sig exon")
+      }
+      else{
+        DE<-append(DE, "None")
+      }
+    }
+    
+    else if(t_stats$adj.P.Val_exons[i]>=0.05 && t_stats$adj.P.Val_genes[i]<0.05){
+      ## DE genes only
       DE<-append(DE, "sig gene")
     }
-    
-    ## No DE genes in neither group
+      
     else {
-      DE<-append(DE, "None")
+      ## Neither DE exons nor DE genes
+      DE<-append(DE, "None")      
     }
   }
   return(DE)
@@ -131,7 +144,7 @@ add_DE_info_exons_vs_genes <-function(t_stats) {
 
 
 
-## Create data frame with t-stats of exons and genes
+## Create plots of t-stats of exons vs genes
 
 t_stat_exons_vs_genes<- function(expt){
   
@@ -140,13 +153,9 @@ t_stat_exons_vs_genes<- function(expt){
   
   ## Exons' genes
   exons_genes<-unique(top_exons$ensemblID)
-  length(exons_genes)
-  # [1] 21250
   
   ## Common genes
   exons_genes<-exons_genes[which(exons_genes %in% top_genes$ensemblID)]
-  length(exons_genes)
-  # [1] 19264
   
   ## Extract exons' info
   t_stats<-top_exons[which(top_exons$ensemblID %in% exons_genes), c("exon_libdID", "adj.P.Val", "Symbol", 
@@ -175,15 +184,15 @@ t_stat_exons_vs_genes<- function(expt){
   ## Add DE info for both groups
   t_stats$DE<-add_DE_info_exons_vs_genes(t_stats)
   
-  ## Exon-gene symbols of exons with>1 
+  ## Gene-exon symbols of exons with>1 
   exon_symbols<-vector()
   for (i in 1:dim(t_stats)[1]) {
-    if (t_stats$DE[i]!="sig exon" & t_stats$t_exons>6) {
-      exon_symbols<-append(exon_symbols, paste(t_stats$Symbol[i], "-", t_stats$seqname, ":", t_stats$start, "-",
-                                               t_stats$end, sep=""))
+    if (t_stats$DE[i]!="sig exon" & t_stats$t_exons[i]>7) {
+      exon_symbols<-append(exon_symbols, paste(t_stats$Symbol[i], "-", t_stats$seqname[i], ":", t_stats$start[i], "-",
+                                               t_stats$end[i], sep=""))
     }
     else {
-      exon_symbols<-append(exon_symbol, NA)
+      exon_symbols<-append(exon_symbols, NA)
     }
   }
   t_stats$exon_symbols<- exon_symbols
@@ -201,6 +210,9 @@ t_stat_exons_vs_genes<- function(expt){
          title = paste(capitalize(expt),"genes vs exons", sep=" "), 
          subtitle = rho_anno, 
          parse = T) +
+    geom_label_repel(fill="white", size=2, max.overlaps = Inf,  
+                     box.padding = 0.2, 
+                     show.legend=FALSE) +
     theme_bw() +
     scale_color_manual(values = cols) + 
     scale_alpha_manual(values = alphas)
