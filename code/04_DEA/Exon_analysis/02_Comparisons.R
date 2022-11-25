@@ -187,7 +187,7 @@ t_stat_exons_vs_genes<- function(expt){
   ## Gene-exon symbols of exons with>1 
   exon_symbols<-vector()
   for (i in 1:dim(t_stats)[1]) {
-    if (t_stats$DE[i]!="sig exon" & t_stats$t_exons[i]>7) {
+    if (t_stats$DE[i]=="sig exon" & abs(t_stats$t_exons[i])>6) {
       exon_symbols<-append(exon_symbols, paste(t_stats$Symbol[i], "-", t_stats$seqname[i], ":", t_stats$start[i], "-",
                                                t_stats$end[i], sep=""))
     }
