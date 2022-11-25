@@ -7,16 +7,19 @@ load(here("processed-data/04_DEA/Exon_analysis/de_exons_nic.Rdata"))
 load(here("processed-data/04_DEA/Exon_analysis/top_exons_smo.Rdata"))
 load(here("processed-data/04_DEA/Exon_analysis/de_exons_smo.Rdata"))
 load(here("processed-data/04_DEA/Gene_analysis/de_genes_pups_nicotine_fitted.Rdata"))
-#load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_nicotine_fitted.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_nicotine_fitted.Rdata"))
 load(here("processed-data/04_DEA/Gene_analysis/de_genes_pups_smoking_fitted.Rdata"))
-#load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_smoking_fitted.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_smoking_fitted.Rdata"))
 load(here("processed-data/05_GO_KEGG/Gene_analysis/intersections.Rdata"))     
 
 
 
 ### 1.2.1 T-stats plots
 
+### 1.2.1.1 T-stats of exons in nic vs smo
+
 ## Function to add DE info of exons in both groups of samples
+
 add_DE_info <-function(top_exons1, top_exons2, name_1, name_2) {
   DE<-vector()
   for (i in 1:dim(top_exons1)[1]) {
@@ -80,19 +83,145 @@ t_stat_plot <- function(top_exons1, top_exons2, name_1, name_2, title){
 ################################
 # Smoking vs nicotine (exons)
 ################################
+
 t_stat_plot(top_exons_nic, top_exons_smo, "Nicotine pups", "Smoking pups", "Nic vs Smo DE exons")
 
 
 
-##########################################
-# Smoking genes vs smoking exons' genes ????
-##########################################
+
+
+### 1.2.1.2 T-stats of genes vs exons
+
+## Function to add DE info of exons and genes
+
+add_DE_info_exons_vs_genes <-function(t_stats) {
+  
+  DE<-vector()
+  for (i in 1:dim(t_stats)[1]) {
+    ## DE exons in both genes and exons
+    if (t_stats$adj.P.Val_exons[i]<0.05 && t_stats$adj.P.Val_genes[i]<0.05) {
+      DE<-append(DE, "sig Both")
+    }
+    ## DE exons only
+    else if (t_stats$adj.P.Val_exons[i]<0.05 && !t_stats$adj.P.Val_genes[i]<0.05) {
+      DE<-append(DE, "sig exon")
+    }
+    
+    ## DE genes only
+    else if (t_stats$adj.P.Val_genes[i]<0.05 && !t_stats$adj.P.Val_exons[i]<0.05) {
+      DE<-append(DE, "sig gene")
+    }
+    
+    ## No DE genes in neither group
+    else {
+      DE<-append(DE, "None")
+    }
+  }
+  return(DE)
+}
+
+
+
+## Create data frame with t-stats of exons and genes
+
+t_stat_exons_vs_genes<- function(expt){
+  
+  top_exons<-eval(parse_expr(paste("top_exons_", substr(expt,1,3), sep="")))
+  top_genes<-eval(parse_expr(paste("top_genes_pups_", expt, "_fitted", sep="")))
+  
+  ## Exons' genes
+  exons_genes<-unique(top_exons$ensemblID)
+  length(exons_genes)
+  # [1] 21250
+  
+  ## Common genes
+  exons_genes<-exons_genes[which(exons_genes %in% top_genes$ensemblID)]
+  length(exons_genes)
+  # [1] 19264
+  
+  ## Extract exons' info
+  t_stats<-top_exons[which(top_exons$ensemblID %in% exons_genes), c("exon_libdID", "adj.P.Val", "Symbol", "t", "ensemblID")]
+  colnames(t_stats)[2]<-"adj.P.Val_exons"
+  colnames(t_stats)[4]<-"t_exons"
+  
+  ## Add t-stats and FDRs of exons' genes
+  t_genes<-vector()
+  FDRs<-vector()
+  for (i in 1:dim(t_stats)[1]){
+    t<-top_genes[which(top_genes$ensemblID==t_stats$ensemblID[i]), "t"]
+    FDR<-top_genes[which(top_genes$ensemblID==t_stats$ensemblID[i]), "adj.P.Val"]
+    t_genes<-append(t_genes, t)
+    FDRs<-append(FDRs, FDR)
+  }
+  t_stats$t_genes<-t_genes
+  t_stats$adj.P.Val_genes<-FDRs
+  
+  ## Correlation coeff between t-stats of genes and exons
+  rho <- cor(t_stats$t_exons, t_stats$t_genes, method = "spearman")
+  rho_anno = paste0("rho = ", format(round(rho, 2), nsmall = 2))
+  
+  ## Add DE info for both groups
+  t_stats$DE<-add_DE_info_exons_vs_genes(t_stats)
+  
+  ## Plot
+  cols <- c("red", "#ffad73","#26b3ff", "dark grey") 
+  names(cols)<-c("sig Both","sig exon", "sig gene", "None")
+  alphas <- c( 1, 1, 1,0.5)  
+  names(alphas)<-c("sig Both", "sig exon", "sig gene", "None")
+  
+  plot <- ggplot(t_stats, aes(x = t_genes, y = t_exons, color=DE, alpha=DE)) +
+    geom_point(size = 1) +
+    labs(x = "t-stats genes", 
+         y = "t-stats exons",
+         title = paste(capitalize(expt),"genes vs exons", sep=" "), 
+         subtitle = rho_anno, 
+         parse = T) +
+    theme_bw() +
+    scale_color_manual(values = cols) + 
+    scale_alpha_manual(values = alphas)
+  
+  plot
+  ggsave(filename=paste("plots/04_DEA/02_Comparisons/Exon_analysis/t_stats_global_", substr(expt,1,3), 
+                        ".pdf", sep=""), height = 20, width = 25, units = "cm")
+
+}
+
+
+#################################### 
+# Nicotine genes vs nicotine exons
+#####################################
+expt<-"nicotine"
+t_stat_exons_vs_genes(expt)
+
+
+#################################### 
+# Smoking genes vs smoking exons
+#####################################
+expt<-"smoking"
+t_stat_exons_vs_genes(expt)
 
 
 
 
 
-### 1.2.3 Venn diagrams
+### 1.2.1.3 T-stats of genes vs mean of |t-stats of gene exons - t-stat of gene|
+
+## Genes' exons 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### 1.2.2 Venn diagrams
 
 ## Function to create multiple Venn diagrams
 venn_plot<-function(DE_lists, colors, name, titles){
@@ -161,7 +290,7 @@ venn_plot<-function(DE_lists, colors, name, titles){
   }
 }
 
-
+### CON ENSEMBL ID
 
 
 ## Define groups of DE exons
