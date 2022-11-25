@@ -16,6 +16,7 @@ library(ggrepel)
 library(jaffelab)
 library(VennDiagram) 
 library(gridExtra)
+library(R.utils)
 library(sessioninfo)
 
 load(here("raw-data/rse_exon_smoking_mouse_n208.Rdata"))
