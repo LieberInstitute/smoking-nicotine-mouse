@@ -20,23 +20,30 @@ load(here("processed-data/05_GO_KEGG/Gene_analysis/intersections.Rdata"))
 
 ## Function to add DE info of exons in both groups of samples
 
-add_DE_info <-function(top_exons1, top_exons2, name_1, name_2) {
+add_DE_info <-function(top_exons1, top_exons2) {
+  
   DE<-vector()
   for (i in 1:dim(top_exons1)[1]) {
-    ## DE exons in both groups
-    if (top_exons1$adj.P.Val[i]<0.05 && top_exons2$adj.P.Val[i]<0.05) {
-      DE<-append(DE, "sig Both")
-    }
-    ## DE exons in only one of the groups
-    else if (top_exons1$adj.P.Val[i]<0.05 && !top_exons2$adj.P.Val[i]<0.05) {
-      DE<-append(DE, paste("sig", name_1))
+    
+    if(top_exons1$exon_libdID[i] %in% de_exons_nic$exon_libdID) {
+      ## DE exons in both groups
+      if(top_exons2$exon_libdID[i] %in% de_exons_smo$exon_libdID){
+        DE<-append(DE, "sig Both")
+      }
+      ## DE exons in nic only
+      else{
+        DE<-append(DE, "sig nic")
+      }
     }
     
-    else if (top_exons2$adj.P.Val[i]<0.05 && !top_exons1$adj.P.Val[i]<0.05) {
-      DE<-append(DE, paste("sig",name_2))
+      else if (top_exons2$exon_libdID[i] %in% de_exons_smo$exon_libdID){
+      if(!top_exons1$exon_libdID[i] %in% de_exons_nic$exon_libdID){
+        ## DE exons in smo only
+        DE<-append(DE, "sig smo")
+      }
     }
-    ## No DE genes in neither group
     else {
+      ## No DE exons in any group
       DE<-append(DE, "None")
     }
   }
@@ -55,7 +62,7 @@ t_stat_plot <- function(top_exons1, top_exons2, name_1, name_2, title){
   ## Merge data
   t_stats<-data.frame(t1=top_exons1$t, t2=top_exons2$t)
   ## Add DE info for both groups
-  t_stats$DE<-add_DE_info(top_exons1, top_exons2, name_1, name_2)
+  t_stats$DE<-add_DE_info(top_exons1, top_exons2)
   
   cols <- c("red", "#ffad73","#26b3ff", "dark grey") 
   names(cols)<-c("sig Both", paste0("sig ", name_1), paste0("sig ", name_2), "None")
@@ -99,11 +106,13 @@ add_DE_info_exons_vs_genes <-function(t_stats) {
   DE<-vector()
   for (i in 1:dim(t_stats)[1]) {
     ## DE exons in both genes and exons
-    if (t_stats$adj.P.Val_exons[i]<0.05 && t_stats$adj.P.Val_genes[i]<0.05) {
+    if (t_stats$adj.P.Val_exons[i]<0.05 && t_stats$adj.P.Val_genes[i]<0.05
+        && abs(t_stats$logFC_exons[i])>0.25) {
       DE<-append(DE, "sig Both")
     }
     ## DE exons only
-    else if (t_stats$adj.P.Val_exons[i]<0.05 && !t_stats$adj.P.Val_genes[i]<0.05) {
+    else if (t_stats$adj.P.Val_exons[i]<0.05 && abs(t_stats$logFC_exons[i])>0.25
+             && !t_stats$adj.P.Val_genes[i]<0.05) {
       DE<-append(DE, "sig exon")
     }
     
@@ -140,9 +149,12 @@ t_stat_exons_vs_genes<- function(expt){
   # [1] 19264
   
   ## Extract exons' info
-  t_stats<-top_exons[which(top_exons$ensemblID %in% exons_genes), c("exon_libdID", "adj.P.Val", "Symbol", "t", "ensemblID")]
+  t_stats<-top_exons[which(top_exons$ensemblID %in% exons_genes), c("exon_libdID", "adj.P.Val", "Symbol", 
+                                                                    "t", "ensemblID", "logFC", "seqnames", 
+                                                                    "start", "end")]
   colnames(t_stats)[2]<-"adj.P.Val_exons"
   colnames(t_stats)[4]<-"t_exons"
+  colnames(t_stats)[6]<-"logFC_exons"
   
   ## Add t-stats and FDRs of exons' genes
   t_genes<-vector()
@@ -163,13 +175,26 @@ t_stat_exons_vs_genes<- function(expt){
   ## Add DE info for both groups
   t_stats$DE<-add_DE_info_exons_vs_genes(t_stats)
   
+  ## Exon-gene symbols of exons with>1 
+  exon_symbols<-vector()
+  for (i in 1:dim(t_stats)[1]) {
+    if (t_stats$DE[i]!="sig exon" & t_stats$t_exons>6) {
+      exon_symbols<-append(exon_symbols, paste(t_stats$Symbol[i], "-", t_stats$seqname, ":", t_stats$start, "-",
+                                               t_stats$end, sep=""))
+    }
+    else {
+      exon_symbols<-append(exon_symbol, NA)
+    }
+  }
+  t_stats$exon_symbols<- exon_symbols
+  
   ## Plot
   cols <- c("red", "#ffad73","#26b3ff", "dark grey") 
   names(cols)<-c("sig Both","sig exon", "sig gene", "None")
   alphas <- c( 1, 1, 1,0.5)  
   names(alphas)<-c("sig Both", "sig exon", "sig gene", "None")
   
-  plot <- ggplot(t_stats, aes(x = t_genes, y = t_exons, color=DE, alpha=DE)) +
+  plot <- ggplot(t_stats, aes(x = t_genes, y = t_exons, color=DE, alpha=DE, label= exon_symbols)) +
     geom_point(size = 1) +
     labs(x = "t-stats genes", 
          y = "t-stats exons",
@@ -206,8 +231,17 @@ t_stat_exons_vs_genes(expt)
 
 ### 1.2.1.3 T-stats of genes vs mean of |t-stats of gene exons - t-stat of gene|
 
-## Genes' exons 
+## Exons' genes
+exons_genes<-unique(top_exons$ensemblID)
+## Common genes (genes with exons)
+exons_genes<-exons_genes[which(exons_genes %in% top_genes$ensemblID)]
+## t-stats of genes' exons
+for (gene in exons_genes){
+  genes_exons[[gene]]=top_exons[which(top_exons$ensemblID==gene), c("exon_libdID", "ensemblID", "t")]
+  tg<-top_genes[which(top_genes$ensemblID==gene), "t"]
+}
 
+top_exons[which(top_exons$ensemblID==gene), "t"]
 
 
 
