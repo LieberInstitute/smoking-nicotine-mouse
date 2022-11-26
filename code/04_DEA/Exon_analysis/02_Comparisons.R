@@ -86,7 +86,6 @@ t_stat_plot <- function(top_exons1, top_exons2, name_1, name_2, title){
 }
 
 
-
 ################################
 # Smoking vs nicotine (exons)
 ################################
@@ -241,26 +240,129 @@ t_stat_exons_vs_genes(expt)
 
 
 
-### 1.2.1.3 T-stats of genes vs mean of |t-stats of gene exons - t-stat of gene|
+### 1.2.1.3 T-stats of genes vs mean of |t-stat of gene - t-stats of gene's exons|
+
+t_stat_tg<-function(expt){
+
+  top_exons<-eval(parse_expr(paste("top_exons_", substr(expt,1,3), sep="")))
+  top_genes<-eval(parse_expr(paste("top_genes_pups_", expt, "_fitted", sep="")))
+  
+  ## Exons' genes
+  exons_genes<-unique(top_exons$ensemblID)
+  ## Common genes (genes with exons)
+  exons_genes<-exons_genes[which(exons_genes %in% top_genes$ensemblID)]
+  
+  ## Extract t-stats of each gene and its exons
+  tg_te<-data.frame("ensemblID", "tg", "t")
+  for (i in 1:length(exons_genes)){
+    ## t-stats of the gene
+    tg<-top_genes[which(top_genes$ensemblID==exons_genes[i]), "t"]
+    ## t-stats of the gene's exons
+    t_exons<-top_exons[which(top_exons$ensemblID==exons_genes[i]),  "t"]
+    ## mean(|tg-te|)
+    t<-mean(abs(tg-t_exons))
+    tg_te[i,]<-c(exons_genes[i], tg, t)
+  }
+  colnames(tg_te)<-c("ensemblID", "tg", "t")
+  tg_te$tg<-as.numeric(tg_te$tg)
+  tg_te$t<-as.numeric(tg_te$t)
+  
+  ## Add DE info of genes
+  DE<-vector()
+  for (gene in tg_te$ensemblID){
+    FDR=top_genes[which(top_genes$ensemblID==gene),"adj.P.Val"]
+    if(FDR<0.05){
+      DE<-append(DE, "sig gene")
+    }
+    else{
+      DE<-append(DE, "ns")
+    }
+  }
+  tg_te$DE<-DE
+  
+  ## Add gene symbols of DEG with mean(|tg-te|)>4
+  gene_symbols<-vector()
+  for (i in 1:length(tg_te$ensemblID)){
+    if(tg_te$DE[i]=="sig gene" && tg_te$t[i]>4){
+      symbol<-top_genes[which(top_genes$ensemblID==tg_te$ensemblID[i]), "Symbol"]
+      gene_symbols<-append(gene_symbols, paste(symbol, "-", tg_te$ensemblID[i]))
+    }
+    else{
+      gene_symbols<-append(gene_symbols, NA)
+    }
+  }
+  tg_te$gene_symbols<-gene_symbols
+  
+  ## Plot
+  cols <- c("red", "dark grey") 
+  names(cols)<-c("sig gene", "ns")
+  alphas <- c( 1,0.5)  
+  names(alphas)<-c("sig gene", "ns")
+  
+  plot <- ggplot(tg_te, aes(x =tg, y = t, color=DE, alpha=DE, label=gene_symbols)) +
+    geom_point(size = 1) +
+    labs(x = "t-stats of gene", 
+         y = "mean of |tg-te|",
+         title = paste(capitalize(expt),"genes", sep=" ")) +
+    geom_label_repel(fill="white", size=2, max.overlaps = Inf,
+                     box.padding = 0.2,
+                     show.legend=FALSE) +
+    theme_bw() +
+    scale_color_manual(values = cols) + 
+    scale_alpha_manual(values = alphas)
+  
+  plot
+  ggsave(filename=paste("plots/04_DEA/02_Comparisons/Exon_analysis/t_stats_tg_", substr(expt,1,3), 
+                        ".pdf", sep=""), height = 20, width = 25, units = "cm")
+}
+
+
+##################
+# Nicotine genes 
+##################
+expt<-"nicotine"
+t_stat_tg(expt)
+
+
+###################
+# Smoking genes 
+###################
+expt<-"smoking"
+t_stat_tg(expt)
+
+
+
+
+
+### 1.2.1.4 T-stats of exons vs |t-stat of exon's gene - t-stat of exon|
+top_exons<-eval(parse_expr(paste("top_exons_", substr(expt,1,3), sep="")))
+top_genes<-eval(parse_expr(paste("top_genes_pups_", expt, "_fitted", sep="")))
 
 ## Exons' genes
 exons_genes<-unique(top_exons$ensemblID)
-## Common genes (genes with exons)
+
+## Common genes
 exons_genes<-exons_genes[which(exons_genes %in% top_genes$ensemblID)]
-## t-stats of genes' exons
-for (gene in exons_genes){
-  genes_exons[[gene]]=top_exons[which(top_exons$ensemblID==gene), c("exon_libdID", "ensemblID", "t")]
-  tg<-top_genes[which(top_genes$ensemblID==gene), "t"]
+
+## Extract exons' info
+t_stats<-top_exons[which(top_exons$ensemblID %in% exons_genes), c("exon_libdID", "adj.P.Val", "Symbol", 
+                                                                  "t", "ensemblID", "logFC", "seqnames", 
+                                                                  "start", "end")]
+colnames(t_stats)[2]<-"adj.P.Val_exons"
+colnames(t_stats)[4]<-"t_exons"
+colnames(t_stats)[6]<-"logFC_exons"
+
+## Add t-stats and FDRs of exons' genes
+t_genes<-vector()
+FDRs<-vector()
+for (i in 1:dim(t_stats)[1]){
+  t<-top_genes[which(top_genes$ensemblID==t_stats$ensemblID[i]), "t"]
+  FDR<-top_genes[which(top_genes$ensemblID==t_stats$ensemblID[i]), "adj.P.Val"]
+  t_genes<-append(t_genes, t)
+  FDRs<-append(FDRs, FDR)
 }
-
-top_exons[which(top_exons$ensemblID==gene), "t"]
-
-
-
-
-
-
-
+t_stats$t_genes<-t_genes
+t_stats$adj.P.Val_genes<-FDRs
 
 
 
