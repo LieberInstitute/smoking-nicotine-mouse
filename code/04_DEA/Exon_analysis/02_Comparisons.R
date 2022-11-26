@@ -436,67 +436,12 @@ t_stat_te(expt)
 
 ## 1.2.2 Boxplots of relevant DEG and their exons
 
-top_exons<-eval(parse_expr(paste("top_exons_", substr(expt,1,3), sep="")))
-top_genes<-eval(parse_expr(paste("top_genes_pups_", expt, "_fitted", sep="")))
-results_genes<-eval(parse_expr(paste("results_pups_", expt, "_fitted", sep="")))
-
-## Expression values of all genes
-vGene<-results_genes[[1]][[2]]
-rownames(vGene)<- vGene$genes$ensemblID
-
-## Regress out residuals
-formula<- ~ Group + Sex + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr + overallMapRate + mitoRate
-model=model.matrix(formula, data=vGene$targets)
-vGene$E<-cleaningY(vGene$E, model, P=2)
-
-## Get ensembl ID of gene
-if(! gene %in% rownames(vGene)){
-  gene<-vGene$genes[which(vGene$genes$Symbol==gene), "ensemblID"]
-}
-## Gene ID for plot
-gene_ID<-paste(vGene$genes[which(vGene$genes$ensemblID==gene), "Symbol"], "-",
-               gene, sep="")
-
-## Extract expression values of the gene
-counts_gene<-vGene$E[rownames(vGene)==gene,]
-
-## Gene's exons
-gene_exons<-top_exons[which(top_exons$ensemblID==gene),]
-## Order them by FDR
-top_gene_exons<-gene_exons[order(gene_exons$adj.P.Val),"exon_libdID"][1:3]
-## Add specific exons
-if (!is.null(exon)){
-  top_gene_exons<-append(exon, top_gene_exons)
-}
-
-## Expression values of that exons
-vExon<-results_nic[[1]][[2]]
-## Regress out residuals
-formula<- ~ Group + Sex + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr + overallMapRate + mitoRate
-model=model.matrix(formula, data=vExon$targets)
-vExon$E<-cleaningY(vExon$E, model, P=2)
-counts_exons<-vExon$E[which(rownames(vExon) %in% top_gene_exons[1:3]),]
-counts_exons<-t(counts_exons)
-
-## Data frame with all expression values and samples' group
-counts<-cbind(counts_gene, counts_exons, "Group"=vGene$targets$Group)
-counts<-as.data.frame(counts)
-colnames(counts)[1]<-gene
-counts$counts_gene<-as.numeric(counts$counts_gene)
-counts[,2]<-as.numeric(counts[,2])
-counts[,3]<-as.numeric(counts[,3])
-counts[,4]<-as.numeric(counts[,4])
-
-
-
-## Boxplots 
-
+## Each boxplot
 create_boxplot<- function(counts, y, title, q_value){
   
   ## Boxplot
-  ggplot(data=counts, 
-         aes(x=Group,y=eval(parse_expr(y)))) + 
-    ## Hide outliers
+  p<-ggplot(data=counts, 
+            aes(x=Group,y=eval(parse_expr(y)))) + 
     geom_boxplot(outlier.color = "#FFFFFFFF") +
     geom_jitter(aes(colour=Group),shape=16, 
                 position=position_jitter(0.2)) +
@@ -507,64 +452,166 @@ create_boxplot<- function(counts, y, title, q_value){
     theme(plot.margin=unit (c (1,1.5,1,1), 'cm'), legend.position = "none",
           plot.title = element_text(hjust=0.5, size=10, face="bold"), 
           plot.subtitle = element_text(size = 9)) 
+  print(p)
 }
 
 
-plots<-list()
-for (i in 1:(dim(counts)[2]-1)){
+
+## Boxplots
+gene_exons_boxplots<- function(expt, gene, exon){
+
+  top_exons<-eval(parse_expr(paste("top_exons_", substr(expt,1,3), sep="")))
+  top_genes<-eval(parse_expr(paste("top_genes_pups_", expt, "_fitted", sep="")))
+  results_genes<-eval(parse_expr(paste("results_pups_", expt, "_fitted", sep="")))
   
-  ## Boxplot of the gene
-  if (i==1){
-    ## q-value for the gene
-    q_value=signif(top_genes[which(top_genes$ensemblID==gene), "adj.P.Val"], digits = 3)
-    y<-gene
-    title<-gene_ID
+  ## Expression values of all genes
+  vGene<-results_genes[[1]][[2]]
+  rownames(vGene)<- vGene$genes$ensemblID
+  
+  ## Regress out residuals
+  formula<- ~ Group + Sex + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr + overallMapRate + mitoRate
+  model=model.matrix(formula, data=vGene$targets)
+  vGene$E<-cleaningY(vGene$E, model, P=2)
+  
+  ## Get ensembl ID and symbol of the gene
+  if(! gene %in% rownames(vGene)){
+    gene_symbol<-gene
+    gene<-vGene$genes[which(vGene$genes$Symbol==gene), "ensemblID"]
+  }
+  else {
+    gene_symbol<-vGene$genes[which(vGene$genes$ensemblID==gene), "Symbol"]
   }
   
-  ## Boxplot of the exons
-  else if (i>1){
-    q_value<-signif(top_exons[which(top_exons$exon_libdID==colnames(counts)[i]), "adj.P.Val"], digits = 3)
-    y<-colnames(counts)[i]
-    ## Exon ID for plot
-    title<-paste(top_exons[which(top_exons$exon_libdID==colnames(counts)[i]), "Symbol"], "-",
-                 top_exons[which(top_exons$exon_libdID==colnames(counts)[i]), "seqnames"], ":", 
-                 top_exons[which(top_exons$exon_libdID==colnames(counts)[i]), "start"], "-", 
-                 top_exons[which(top_exons$exon_libdID==colnames(counts)[i]), "end"], sep="")
+  ## Gene ID for plot: Symbol-ensemblID
+  gene_ID<-paste(gene_symbol, "-", gene, sep="")
+  
+  ## Extract expression values of the gene
+  counts_gene<-vGene$E[rownames(vGene)==gene,]
+  
+  ## Gene's exons
+  gene_exons<-top_exons[which(top_exons$ensemblID==gene),]
+  ## Order them by FDR and extract the top 3
+  top_gene_exons<-gene_exons[order(gene_exons$adj.P.Val),"exon_libdID"][1:3]
+  ## Add specific exons
+  if (!is.null(exon)){
+    ## Exon ID to exon unique ID
+    exon_gene<-strsplit(exon, "−")[[1]][1]
+    exon_chr<-strsplit(strsplit(exon, "−")[[1]][2], ":")[[1]][1]
+    exon_start<-strsplit(strsplit(exon, "−")[[1]][2], ":")[[1]][2]
+    exon_end<-strsplit(exon, "−")[[1]][3]
+    exon_ID<-top_exons[which(top_exons$Symbol==exon_gene & top_exons$seqnames==exon_chr
+                             & top_exons$start==exon_start & top_exons$end==exon_end), "exon_libdID"]
+    if (! exon_ID %in% top_gene_exons){
+      top_gene_exons<-append(exon_ID, top_gene_exons) 
+    }
   }
   
-  ## Plots
-  p<-create_boxplot(counts, y, title, q_value)
-  plots[[i]]<-p
+  ## Expression values of that exons
+  vExon<-results_nic[[1]][[2]]
+  ## Regress out residuals
+  formula<- ~ Group + Sex + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr + overallMapRate + mitoRate
+  model=model.matrix(formula, data=vExon$targets)
+  vExon$E<-cleaningY(vExon$E, model, P=2)
+  counts_exons<-vExon$E[which(rownames(vExon) %in% top_gene_exons[1:3]),]
+  counts_exons<-t(counts_exons)
+  
+  ## Data frame with all expression values and samples' group
+  counts<-cbind(counts_gene, counts_exons, "Group"=vGene$targets$Group)
+  counts<-as.data.frame(counts)
+  counts$counts_gene<-as.numeric(counts$counts_gene)
+  colnames(counts)[1]<-gene
+  counts[,2]<-as.numeric(counts[,2])
+  counts[,3]<-as.numeric(counts[,3])
+  counts[,4]<-as.numeric(counts[,4])
+  
+  plots<-list()
+  for (i in 1:(dim(counts)[2]-1)){
+    
+    ## Boxplot of the gene
+    if (i==1){
+      ## q-value for the gene
+      q_value=signif(top_genes[which(top_genes$ensemblID==gene), "adj.P.Val"], digits = 3)
+      y<-gene
+      title<-gene_ID
+    }
+    
+    ## Boxplot of the exons
+    else {
+      q_value<-signif(top_exons[which(top_exons$exon_libdID==colnames(counts)[i]), "adj.P.Val"], digits = 3)
+      y<-colnames(counts)[i]
+      ## Exon ID for plot
+      title<-paste(top_exons[which(top_exons$exon_libdID==colnames(counts)[i]), "Symbol"], "-",
+                   top_exons[which(top_exons$exon_libdID==colnames(counts)[i]), "seqnames"], ":", 
+                   top_exons[which(top_exons$exon_libdID==colnames(counts)[i]), "start"], "-", 
+                   top_exons[which(top_exons$exon_libdID==colnames(counts)[i]), "end"], sep="")
+    }
+    
+    ## Plots
+    p<-create_boxplot(counts, y, title, q_value)
+    plots[[i]]<-p
+  }
+  
+  plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], ncol = 4)
+  ggsave(here(paste("plots/04_DEA/02_Comparisons/Exon_analysis/Boxplots_", gene_symbol, ".pdf", sep="")), 
+         width = 35, height = 10, units = "cm")
+
 }
 
-plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], ncol = 4)
-ggsave(here(paste("plots/04_DEA/01_Modelling/Exon_analysis/DE_boxplots_exons_",name, ".pdf", sep="")), 
-       width = 25, height = 10, units = "cm")
+#########################################
+## Nicotine boxplots for genes and exons
+#########################################
+
+#### Genes no DE but with DE exons ####
+
+## Ankrd11: acts in head morphogenesis; expressed in cerebral cortex
+gene_exons_boxplots("nicotine", "Ankrd11", "Ankrd11−chr8:122931509−122932058")
+
+## Scaf11: predicted to be involved in spliceosomal complex assembly
+gene_exons_boxplots("nicotine", "Scaf11", "Scaf11−chr15:96449740−96452139")
+
+## Pcdh7: predicted to be involved in cell adhesion; expressed in CNS
+gene_exons_boxplots("nicotine", "Pcdh7", "Pcdh7−chr5:57728114−57729465")
+
+## Rb1cc1: involved in autophagosome assembly; expressed in NS
+gene_exons_boxplots("nicotine", "Rb1cc1", "Rb1cc1−chr1:6250931−6251258")
+
+
+
+#### DE genes with high mean(|tg-te|) ####
+
+## Foxn3: acts upstream of or within craniofacial suture morphogenesis; expressed
+## in CNS, PNS andsensory organs
+gene_exons_boxplots("nicotine", "Foxn3", NULL)
+
+## Kat7: enables histone acetyltransferase activity; expressed in brain
+gene_exons_boxplots("nicotine", "Kat7", NULL)
+
+## Dis3l2: enables 3'-5'-exoribonuclease activity; magnesium ion binding activity; 
+## and poly(U) RNA binding activity; expressed in CNS
+gene_exons_boxplots("nicotine", "Dis3l2", NULL)
+
+
+
+#### DE exons with high |tg-te| values
+
+## Ttc17: predicted to be involved in actin filament polymerization and cilium organization;
+## expressed in cerebellum adult 
+gene_exons_boxplots("nicotine", "Ttc17", "Ttc17−chr2:94327937−94328485")
 
 
 
 
 
+#########################################
+## Smoking boxplots for genes and exons
+#########################################
 
+#### Genes no DE but with DE exons ####
 
+## Cd200: involved in negative regulation of neuroinflammatory response; expressed in NS
+gene_exons_boxplots("nicotine", "Cd200", "Cd200−chr16:45407194−45407311")
 
-
-
-plots<-list()
-for (i in 1:3){
-  exon_ID<-colnames(lognorm_DE)[i]
-  exon_name<-paste(de_exons$Symbol[i]," - ", de_exons$seqnames[i], ":", de_exons$start[i], "-", de_exons$end[i], sep="")
-  p<-DE_one_boxplot(de_exons, lognorm_DE, exon_ID, exon_name)
-  plots[[i]]<-p
-}
-plot_grid(plots[[1]], plots[[2]], plots[[3]], ncol = 3)
-ggsave(here(paste("plots/04_DEA/01_Modelling/Exon_analysis/DE_boxplots_exons_",name, ".pdf", sep="")), 
-       width = 25, height = 10, units = "cm")
-
-
-
-
-
+## : acts upstream of or within behavioral fear response;
 
 
 
