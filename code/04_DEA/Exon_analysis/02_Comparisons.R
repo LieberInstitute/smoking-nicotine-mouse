@@ -592,7 +592,7 @@ gene_exons_boxplots("nicotine", "Dis3l2", NULL)
 
 
 
-#### DE exons with high |tg-te| values
+#### DE exons with high |tg-te| values ####
 
 ## Ttc17: predicted to be involved in actin filament polymerization and cilium organization;
 ## expressed in cerebellum adult 
@@ -609,13 +609,56 @@ gene_exons_boxplots("nicotine", "Ttc17", "Ttc17−chr2:94327937−94328485")
 #### Genes no DE but with DE exons ####
 
 ## Cd200: involved in negative regulation of neuroinflammatory response; expressed in NS
-gene_exons_boxplots("nicotine", "Cd200", "Cd200−chr16:45407194−45407311")
+gene_exons_boxplots("smoking", "Cd200", "Cd200−chr16:45407194−45407311")
 
-## : acts upstream of or within behavioral fear response;
+## Rps6kb1: acts upstream of or within behavioral fear response; expressed in CNS
+gene_exons_boxplots("smoking", "Rps6kb1", "Rps6kb1−chr11:86543931−86544045")
+
+## N4bp2l1: expressed in frontal lobe adult and cortex adult
+gene_exons_boxplots("smoking", "N4bp2l1", "N4bp2l1−chr5:150591755−150592559")
+
+## Nsg2: predicted to be involved in clathrin coat assembly and endosomal transport;
+## expressed in NS
+gene_exons_boxplots("smoking", "Nsg2", "Nsg2−chr11:32031770−32033414")
+
+## Robo2: involved in neuron development; expressed in NS
+gene_exons_boxplots("smoking", "Robo2", "Robo2−chr16:73898912−73899184")
 
 
 
+#### DE genes with high mean(|tg-te|) ####
 
+## Rpl13a: involved in macrophage chemotaxis; expressed in CNS
+gene_exons_boxplots("smoking", "Rpl13a", NULL)
+
+## Kntc1: involved in mitotic sister chromatid segregation; biased expression in CNS
+gene_exons_boxplots("smoking", "Kntc1", NULL)
+
+## Ndufb2: involved in mitochondrial respiratory chain complex I assembly; expressed in cranium
+gene_exons_boxplots("smoking", "Ndufb2", NULL)
+
+## 5031439G07Rik: is expressed in nervous system and neural retina
+gene_exons_boxplots("smoking", "5031439G07Rik", NULL)
+
+## Ttf2: involved in RNA splicing and mRNA processing; expressed in CNS
+gene_exons_boxplots("smoking", "Ttf2", NULL)
+
+
+
+#### DE exons with high |tg-te| values ####
+
+## Sin3b: involved in skeletal muscle tissue development; expressed in CNS
+gene_exons_boxplots("smoking", "Sin3b", "Sin3b−chr8:72744458−72744665")
+
+## Tcaf1: involved in negative regulation of cell migration; broad expression in CNS
+gene_exons_boxplots("smoking", "Tcaf1", "Tcaf1−chr6:42690299−42690523")
+
+## Exoc4: involved in cilium assembly and protein localization to ciliary membrane;
+## expressed in CNS
+gene_exons_boxplots("smoking", "Exoc4", "Exoc4−chr6:33475997−33477149")
+
+## Ganab: involved in N-glycan processing; expressed in CNS
+gene_exons_boxplots("smoking", "Ganab", "Ganab−chr19:8899196−8899394")
 
 
 
