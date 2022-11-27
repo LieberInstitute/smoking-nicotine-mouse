@@ -28,7 +28,7 @@ load(here("processed-data/03_EDA/04_Expl_Var_partition/rse_gene_brain_pups_smoki
 load(here("processed-data/03_EDA/04_Expl_Var_partition/rse_gene_brain_pups_nicotine.Rdata"))
 
 
-## GO and KEGG analyses for DEG from fitted model only
+## GO and KEGG analyzes for DEG from fitted model only
 
 ## Groups of DEG
 up_nic<-de_genes_pups_nicotine_fitted[de_genes_pups_nicotine_fitted$logFC>0, c("EntrezID", "Symbol", "ensemblID")]
