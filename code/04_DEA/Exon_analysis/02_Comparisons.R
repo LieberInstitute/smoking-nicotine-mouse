@@ -664,9 +664,6 @@ gene_exons_boxplots("smoking", "Ganab", "Ganab−chr19:8899196−8899394")
 
 
 
-
-
-
 ### 1.2.3 Venn diagrams
 
 ## Function to create multiple Venn diagrams
@@ -736,7 +733,6 @@ venn_plot<-function(DE_lists, colors, name, titles){
   }
 }
 
-### CON ENSEMBL ID
 
 
 ## Define groups of DE exons
@@ -747,10 +743,10 @@ smo_down<-de_exons_smo[which(de_exons_smo$logFC<0),"exon_libdID"]
 
 
 ## Define groups of DE exons' genes
-nic_up_genes<-unique(de_exons_nic[which(de_exons_nic$logFC>0),"Symbol"])
-smo_up_genes<-unique(de_exons_smo[which(de_exons_smo$logFC>0),"Symbol"])
-nic_down_genes<-unique(de_exons_nic[which(de_exons_nic$logFC<0),"Symbol"])
-smo_down_genes<-unique(de_exons_smo[which(de_exons_smo$logFC<0),"Symbol"])
+nic_up_genes<-unique(de_exons_nic[which(de_exons_nic$logFC>0),"ensemblID"])
+smo_up_genes<-unique(de_exons_smo[which(de_exons_smo$logFC>0),"ensemblID"])
+nic_down_genes<-unique(de_exons_nic[which(de_exons_nic$logFC<0),"ensemblID"])
+smo_down_genes<-unique(de_exons_smo[which(de_exons_smo$logFC<0),"ensemblID"])
 
 smoUp_nicUp_genes<-intersect(nic_up_genes, smo_up_genes)
 smoDown_nicDown_genes<-intersect(nic_down_genes, smo_down_genes)
@@ -771,19 +767,19 @@ only_down_smo_genes<-smo_down_genes[which(! (smo_down_genes %in% smo_up_genes |
 
 
 ## Define groups of DEG
-nic_DEG_up<-de_genes_pups_nicotine_fitted[which(de_genes_pups_nicotine_fitted$logFC>0),"Symbol"]
-nic_DEG_down<-de_genes_pups_nicotine_fitted[which(de_genes_pups_nicotine_fitted$logFC<0),"Symbol"]
-smo_DEG_up<-de_genes_pups_smoking_fitted[which(de_genes_pups_smoking_fitted$logFC>0),"Symbol"]
-smo_DEG_down<-de_genes_pups_smoking_fitted[which(de_genes_pups_smoking_fitted$logFC<0),"Symbol"]
+nic_DEG_up<-de_genes_pups_nicotine_fitted[which(de_genes_pups_nicotine_fitted$logFC>0),"ensemblID"]
+nic_DEG_down<-de_genes_pups_nicotine_fitted[which(de_genes_pups_nicotine_fitted$logFC<0),"ensemblID"]
+smo_DEG_up<-de_genes_pups_smoking_fitted[which(de_genes_pups_smoking_fitted$logFC>0),"ensemblID"]
+smo_DEG_down<-de_genes_pups_smoking_fitted[which(de_genes_pups_smoking_fitted$logFC<0),"ensemblID"]
 
-only_up_nic_DEG<-intersections[[1]]$Symbol
-only_up_smo_DEG<-intersections[[2]]$Symbol
-only_down_nic_DEG<-intersections[[3]]$Symbol
-only_down_smo_DEG<-intersections[[4]]$Symbol
-smoUp_nicUp_DEG<-intersections[[5]]$Symbol
-smoDown_nicDown_DEG<-intersections[[6]]$Symbol
-smoUp_nicDown_DEG<-intersections[[7]]$Symbol
-smoDown_nicUp_DEG<-intersections[[8]]$Symbol
+only_up_nic_DEG<-intersections[[1]]$ensemblID
+only_up_smo_DEG<-intersections[[2]]$ensemblID
+only_down_nic_DEG<-intersections[[3]]$ensemblID
+only_down_smo_DEG<-intersections[[4]]$ensemblID
+smoUp_nicUp_DEG<-intersections[[5]]$ensemblID
+smoDown_nicDown_DEG<-intersections[[6]]$ensemblID
+smoUp_nicDown_DEG<-intersections[[7]]$ensemblID
+smoDown_nicUp_DEG<-intersections[[8]]$ensemblID
 
 
 
@@ -840,8 +836,8 @@ venn_plot(DE_lists, colors, "smo_VS_nic_DE_exons", NULL)
 
 ## Smo vs nic genes
 DE_exons_genes_smo_vs_nic <-list(
-  "Nicotine"=unique(de_exons_nic$Symbol),
-  "Smoking"=unique(de_exons_smo$Symbol))
+  "Nicotine"=unique(de_exons_nic$ensemblID),
+  "Smoking"=unique(de_exons_smo$ensemblID))
 
 ## Smo vs nic Up genes
 DE_exons_genes_smo_vs_nic_Up <-list(
