@@ -188,7 +188,7 @@ t_stat_exons_vs_genes<- function(expt){
   t_stats$DE<-add_DE_info_exons_vs_genes(t_stats)
   
   ## Gene-exon symbols of DE exons with no DEG 
-  ## and for DE exons and genes with opposite signs
+  ## and for DE exons whose DEG have an opposite sign in logFC
   exon_symbols<-vector()
   for (i in 1:dim(t_stats)[1]) {
     if (t_stats$DE[i]=="sig exon" & abs(t_stats$t_exons[i])>6) {
