@@ -196,7 +196,7 @@ t_stat_exons_vs_genes<- function(expt){
                                                t_stats$end[i], sep=""))
     }
     else if(t_stats$DE[i]=="sig Both"){
-      if ((t_stats$t_genes[i]< -4 & t_stats$t_exons[i]> 3) | (t_stats$t_genes[i]> 3 & t_stats$t_exons[i]< -4)){
+      if ((t_stats$t_genes[i]< -3.5 & t_stats$t_exons[i]> 3) | (t_stats$t_genes[i]> 3 & t_stats$t_exons[i]< -4)){
         exon_symbols<-append(exon_symbols, paste(t_stats$Symbol[i], "-", t_stats$seqname[i], ":", t_stats$start[i], "-",
                                                  t_stats$end[i], sep=""))
       }
@@ -295,12 +295,13 @@ t_stat_tg<-function(expt){
   }
   tg_te$DE<-DE
   
-  ## Add gene symbols of DEG with mean(|tg-te|)>4
+  ## Add symbols of genes with the highest values of mean(|tg-te|)
+  tg_te_ordered <- tg_te[order(-tg_te$t)[1:10], "ensemblID"]
   gene_symbols<-vector()
   for (i in 1:length(tg_te$ensemblID)){
-    if(tg_te$DE[i]=="sig gene" && tg_te$t[i]>4){
-      symbol<-top_genes[which(top_genes$ensemblID==tg_te$ensemblID[i]), "Symbol"]
-      gene_symbols<-append(gene_symbols, paste(symbol, "-", tg_te$ensemblID[i]))
+    if(tg_te$ensemblID %in% tg_te_ordered){
+      symbol<-top_genes[which(top_genes$ensemblID==tg_te_ordered$ensemblID[i]), "Symbol"]
+      gene_symbols<-append(gene_symbols, paste(symbol, "-", tg_te_ordered$ensemblID[i]))
     }
     else{
       gene_symbols<-append(gene_symbols, NA)
