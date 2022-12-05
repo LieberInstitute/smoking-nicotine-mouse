@@ -187,12 +187,23 @@ t_stat_exons_vs_genes<- function(expt){
   ## Add DE info for both groups
   t_stats$DE<-add_DE_info_exons_vs_genes(t_stats)
   
-  ## Gene-exon symbols of exons with>1 
+  ## Gene-exon symbols of DE exons with no DEG 
+  ## and for DE exons and genes with opposite signs
   exon_symbols<-vector()
   for (i in 1:dim(t_stats)[1]) {
     if (t_stats$DE[i]=="sig exon" & abs(t_stats$t_exons[i])>6) {
       exon_symbols<-append(exon_symbols, paste(t_stats$Symbol[i], "-", t_stats$seqname[i], ":", t_stats$start[i], "-",
                                                t_stats$end[i], sep=""))
+    }
+    else if(t_stats$DE[i]=="sig Both"){
+      if ((t_stats$t_genes[i]< -4 & t_stats$t_exons[i]> 3) | (t_stats$t_genes[i]> 3 & t_stats$t_exons[i]< -4)){
+        exon_symbols<-append(exon_symbols, paste(t_stats$Symbol[i], "-", t_stats$seqname[i], ":", t_stats$start[i], "-",
+                                                 t_stats$end[i], sep=""))
+      }
+      else{
+        exon_symbols<-append(exon_symbols, NA)
+      }
+
     }
     else {
       exon_symbols<-append(exon_symbols, NA)
@@ -580,7 +591,7 @@ gene_exons_boxplots("nicotine", "Rb1cc1", "Rb1cc1−chr1:6250931−6251258")
 #### DE genes with high mean(|tg-te|) ####
 
 ## Foxn3: acts upstream of or within craniofacial suture morphogenesis; expressed
-## in CNS, PNS andsensory organs
+## in CNS, PNS and sensory organs
 gene_exons_boxplots("nicotine", "Foxn3", NULL)
 
 ## Kat7: enables histone acetyltransferase activity; expressed in brain
