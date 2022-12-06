@@ -153,6 +153,7 @@ t_stat_exons_vs_genes<- function(expt){
   
   top_exons<-eval(parse_expr(paste("top_exons_", substr(expt,1,3), sep="")))
   top_genes<-eval(parse_expr(paste("top_genes_pups_", expt, "_fitted", sep="")))
+  de_exons<-eval(parse_expr(paste("de_exons_", substr(expt,1,3), sep="")))
   
   ## Exons' genes
   exons_genes<-unique(top_exons$ensemblID)
@@ -187,8 +188,19 @@ t_stat_exons_vs_genes<- function(expt){
   ## Add DE info for both groups
   t_stats$DE<-add_DE_info_exons_vs_genes(t_stats)
   
-  ## Gene-exon symbols of DE exons with no DEG 
-  ## and for DE exons whose DEG have an opposite sign in logFC
+  
+  ## Gene-exon symbols of DE exons with no DEG, 
+  ## DE exons whose DEG have an opposite sign in logFC
+  ## and also label DE exons from genes with up and down exons
+  
+  ## Up and down exons' genes
+  exons_up_genes<-unique(de_exons[which(de_exons$logFC>0),"ensemblID"])
+  exons_down_genes<-unique(de_exons[which(de_exons$logFC<0),"ensemblID"])
+  ## Genes with up and down exons
+  interest_genes<-intersect(exons_up_genes, exons_down_genes)
+  ## Retain only the exons' genes that were considered at the gene level
+  interest_genes<-intersect(interest_genes, exons_genes)
+
   exon_symbols<-vector()
   for (i in 1:dim(t_stats)[1]) {
     if (t_stats$DE[i]=="sig exon" & abs(t_stats$t_exons[i])>6) {
@@ -204,6 +216,10 @@ t_stat_exons_vs_genes<- function(expt){
         exon_symbols<-append(exon_symbols, NA)
       }
 
+    }
+    else if((t_stats$ensemblID[i] %in% interest_genes) & (t_stats$exon_libdID[i] %in% de_exons$exon_libdID)){
+      exon_symbols<-append(exon_symbols, paste(t_stats$Symbol[i], "-", t_stats$seqname[i], ":", t_stats$start[i], "-",
+                                               t_stats$end[i], sep=""))
     }
     else {
       exon_symbols<-append(exon_symbols, NA)
@@ -1001,6 +1017,19 @@ venn_plot(DE_lists, colors, "smo_VS_nic_DE_exons_genes", NULL)
 
 
 
+## Boxplots of genes with up and down exons in the same condition
+## Nicotine
+results_genes<-eval(parse_expr(paste("results_pups_", expt, "_fitted", sep="")))
+vGene<-results_genes[[1]][[2]]
+gene<-intersect(nic_up_genes, nic_down_genes)
+vGene$genes[which(vGene$genes$ensemblID==gene), "Symbol"]
+
+
+
+
+
+
+
 
 
 ## Compare DE exons' genes with DEG
@@ -1139,6 +1168,8 @@ venn_plot(DE_lists, colors, "intersections_DEG_VS_exons_genes", c("Only up in ni
                                                                   "Only up in smo", "Only down in smo", 
                                                                   "Smo up, nic up", "Smo down, nic down",
                                                                   "Smo up, nic down", "Smo down, nic up"))
+
+
 
 
 
