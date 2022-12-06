@@ -1,5 +1,5 @@
 
-# 1. Gene Ontology and KEGG analyses
+# 1. Gene Ontology and KEGG analyzes of DEG 
 
 
 library(here)
@@ -65,7 +65,7 @@ intersections<-list("only up nic"=only_up_nic, "only up smo"=only_up_smo,
 save(intersections, file="processed-data/05_GO_KEGG/Gene_analysis/intersections.Rdata")
 
 
-## Function to do GO and KEGG analyses
+## Function to do GO and KEGG analyzes
 
 GO_KEGG<- function(sigGeneList, geneUniverse, name){
   
