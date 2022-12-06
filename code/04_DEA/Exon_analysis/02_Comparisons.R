@@ -443,6 +443,8 @@ t_stat_te(expt)
 
 
 
+
+
 ## 1.2.2 Boxplots of relevant DEG and their exons
 
 ## Each boxplot
@@ -467,7 +469,7 @@ create_boxplot<- function(counts, y, title, q_value){
 
 
 ## Boxplots
-gene_exons_boxplots<- function(expt, gene, exon){
+gene_exons_boxplots<- function(expt, gene, exon1, exon2){
 
   top_exons<-eval(parse_expr(paste("top_exons_", substr(expt,1,3), sep="")))
   top_genes<-eval(parse_expr(paste("top_genes_pups_", expt, "_fitted", sep="")))
@@ -501,20 +503,54 @@ gene_exons_boxplots<- function(expt, gene, exon){
   gene_exons<-top_exons[which(top_exons$ensemblID==gene),]
   ## Order them by FDR and extract the top 3
   top_gene_exons<-gene_exons[order(gene_exons$adj.P.Val),"exon_libdID"][1:3]
+  
   ## Add specific exons
-  if (!is.null(exon)){
-    ## Exon ID to exon unique ID
-    exon_gene<-strsplit(exon, "−")[[1]][1]
-    exon_chr<-strsplit(strsplit(exon, "−")[[1]][2], ":")[[1]][1]
-    exon_start<-strsplit(strsplit(exon, "−")[[1]][2], ":")[[1]][2]
-    exon_end<-strsplit(exon, "−")[[1]][3]
-    exon_ID<-top_exons[which(top_exons$Symbol==exon_gene & top_exons$seqnames==exon_chr
-                             & top_exons$start==exon_start & top_exons$end==exon_end), "exon_libdID"]
-    if (! exon_ID %in% top_gene_exons){
-      top_gene_exons<-append(exon_ID, top_gene_exons) 
+  if (!is.null(exon1) | !is.null(exon2)){
+    
+    if (!is.null(exon1) &  is.null(exon2)){
+      exon<-exon1
+      ## Exon ID to exon unique ID
+      exon_gene<-strsplit(exon, "−")[[1]][1]
+      exon_chr<-strsplit(strsplit(exon, "−")[[1]][2], ":")[[1]][1]
+      exon_start<-strsplit(strsplit(exon, "−")[[1]][2], ":")[[1]][2]
+      exon_end<-strsplit(exon, "−")[[1]][3]
+      exon_ID<-top_exons[which(top_exons$Symbol==exon_gene & top_exons$seqnames==exon_chr
+                               & top_exons$start==exon_start & top_exons$end==exon_end), "exon_libdID"]
+      if (! exon_ID %in% top_gene_exons){
+        top_gene_exons<-append(exon_ID, top_gene_exons) 
+      }
+    }
+    else if(!is.null(exon2) & is.null(exon1)){
+      exon<-exon2
+      exon_gene<-strsplit(exon, "−")[[1]][1]
+      exon_chr<-strsplit(strsplit(exon, "−")[[1]][2], ":")[[1]][1]
+      exon_start<-strsplit(strsplit(exon, "−")[[1]][2], ":")[[1]][2]
+      exon_end<-strsplit(exon, "−")[[1]][3]
+      exon_ID<-top_exons[which(top_exons$Symbol==exon_gene & top_exons$seqnames==exon_chr
+                               & top_exons$start==exon_start & top_exons$end==exon_end), "exon_libdID"]
+      if (! exon_ID %in% top_gene_exons){
+        top_gene_exons<-append(exon_ID, top_gene_exons) 
+      }
+    }
+    
+    ## Add two exons
+    else {
+      ## Exon ID to exon unique ID
+      for (i in 1:2){
+        exon<-eval(parse_expr(paste("exon", i, sep="")))
+        exon_gene<-strsplit(exon, "−")[[1]][1]
+        exon_chr<-strsplit(strsplit(exon, "−")[[1]][2], ":")[[1]][1]
+        exon_start<-strsplit(strsplit(exon, "−")[[1]][2], ":")[[1]][2]
+        exon_end<-strsplit(exon, "−")[[1]][3]
+        exon_ID<-top_exons[which(top_exons$Symbol==exon_gene & top_exons$seqnames==exon_chr
+                                 & top_exons$start==exon_start & top_exons$end==exon_end), "exon_libdID"]
+        if (! exon_ID %in% top_gene_exons){
+          top_gene_exons<-append(exon_ID, top_gene_exons) 
+        }
+      }
     }
   }
-  
+    
   ## Expression values of that exons
   vExon<-results_nic[[1]][[2]]
   ## Regress out residuals
@@ -566,38 +602,44 @@ gene_exons_boxplots<- function(expt, gene, exon){
 
 }
 
+
+
 #########################################
-## Nicotine boxplots for genes and exons
+## Boxplots of nicotine genes and exons
 #########################################
 
-#### Genes no DE but with DE exons ####
+#### Non-DE genes but with DE exons ####
 
 ## Ankrd11: acts in head morphogenesis; expressed in cerebral cortex
-gene_exons_boxplots("nicotine", "Ankrd11", "Ankrd11−chr8:122931509−122932058")
-
-## Scaf11: predicted to be involved in spliceosomal complex assembly
-gene_exons_boxplots("nicotine", "Scaf11", "Scaf11−chr15:96449740−96452139")
+gene_exons_boxplots("nicotine", "Ankrd11", "Ankrd11−chr8:122931509−122932058", NULL)
 
 ## Pcdh7: predicted to be involved in cell adhesion; expressed in CNS
-gene_exons_boxplots("nicotine", "Pcdh7", "Pcdh7−chr5:57728114−57729465")
+gene_exons_boxplots("nicotine", "Pcdh7", "Pcdh7−chr5:57728114−57729465", NULL)
 
 ## Rb1cc1: involved in autophagosome assembly; expressed in NS
-gene_exons_boxplots("nicotine", "Rb1cc1", "Rb1cc1−chr1:6250931−6251258")
+gene_exons_boxplots("nicotine", "Rb1cc1", "Rb1cc1−chr1:6250931−6251258", NULL)
 
 
 
 #### DE genes with high mean(|tg-te|) ####
 
-## Foxn3: acts upstream of or within craniofacial suture morphogenesis; expressed
-## in CNS, PNS and sensory organs
-gene_exons_boxplots("nicotine", "Foxn3", NULL)
-
-## Kat7: enables histone acetyltransferase activity; expressed in brain
-gene_exons_boxplots("nicotine", "Kat7", NULL)
-
 ## Dis3l2: enables 3'-5'-exoribonuclease activity; magnesium ion binding activity; 
 ## and poly(U) RNA binding activity; expressed in CNS
-gene_exons_boxplots("nicotine", "Dis3l2", NULL)
+gene_exons_boxplots("nicotine", "Dis3l2", NULL, NULL)
+
+## Glcci1: located in cytoplasm; expressed in CNS
+gene_exons_boxplots("nicotine", "Glcci1", NULL, NULL)
+
+## Isca1: predicted to enable 2 iron, 2 sulfur cluster binding activity; expressed 
+## in brain; located in mitochondrion
+gene_exons_boxplots("nicotine", "Isca1", NULL, NULL)
+
+## N4bp2l2: acts upstream of or within blastocyst development
+gene_exons_boxplots("nicotine", "N4bp2l2", NULL, NULL)
+
+## Xkr6: predicted to be involved in apoptotic process involved in development;
+## expressed in NS
+gene_exons_boxplots("nicotine", "Xkr6", NULL, NULL)
 
 
 
@@ -605,69 +647,122 @@ gene_exons_boxplots("nicotine", "Dis3l2", NULL)
 
 ## Ttc17: predicted to be involved in actin filament polymerization and cilium organization;
 ## expressed in cerebellum adult 
-gene_exons_boxplots("nicotine", "Ttc17", "Ttc17−chr2:94327937−94328485")
+gene_exons_boxplots("nicotine", "Ttc17", "Ttc17−chr2:94327937−94328485", NULL)
 
+## Cirbp: involved in negative regulation of cell growth, and regulation of cell cycle G1/S phase 
+## transition; expressed in brain
+gene_exons_boxplots("nicotine", "Cirbp", "Cirbp−chr10:80171982−80172512", NULL)
 
+## Pnisr: predicted to be active in presynaptic active zone; expressed in NS
+gene_exons_boxplots("nicotine", "Pnisr", "Pnisr−chr4:21857614−21857990", NULL)
+
+## Foxn3: acts upstream of or within craniofacial suture morphogenesis; expressed
+## in CNS, PNS and sensory organs
+gene_exons_boxplots("nicotine", "Foxn3", "Foxn3−chr12:99219601−99219663", 
+                    "Foxn3−chr12:99219598−99219663")
+
+## Kat7: enables histone acetyltransferase activity; expressed in brain
+gene_exons_boxplots("nicotine", "Kat7", "Kat7−chr11:95309378−95309569", 
+                    "Kat7−chr11:95309537−95309602")
+
+## Bnip3l: acts upstream of or within positive regulation of apoptotic process;
+## located in mitochondrion; expressed in CNS
+gene_exons_boxplots("nicotine", "Bnip3l", "Bnip3l−chr14:67000405−67000508", NULL)
 
 
 
 #########################################
-## Smoking boxplots for genes and exons
+## Boxplots of smoking genes and exons
 #########################################
 
-#### Genes no DE but with DE exons ####
+#### Non-DE genes but with DE exons ####
 
 ## Cd200: involved in negative regulation of neuroinflammatory response; expressed in NS
-gene_exons_boxplots("smoking", "Cd200", "Cd200−chr16:45407194−45407311")
+gene_exons_boxplots("smoking", "Cd200", "Cd200−chr16:45407194−45407311", NULL)
 
 ## Rps6kb1: acts upstream of or within behavioral fear response; expressed in CNS
-gene_exons_boxplots("smoking", "Rps6kb1", "Rps6kb1−chr11:86543931−86544045")
+gene_exons_boxplots("smoking", "Rps6kb1", "Rps6kb1−chr11:86543931−86544045", NULL)
 
 ## N4bp2l1: expressed in frontal lobe adult and cortex adult
-gene_exons_boxplots("smoking", "N4bp2l1", "N4bp2l1−chr5:150591755−150592559")
+gene_exons_boxplots("smoking", "N4bp2l1", "N4bp2l1−chr5:150591755−150592559", 
+                    "N4bp2l1−chr5:150591752−150592559")
 
 ## Nsg2: predicted to be involved in clathrin coat assembly and endosomal transport;
 ## expressed in NS
-gene_exons_boxplots("smoking", "Nsg2", "Nsg2−chr11:32031770−32033414")
+gene_exons_boxplots("smoking", "Nsg2", "Nsg2−chr11:32031770−32033414", NULL)
 
 ## Robo2: involved in neuron development; expressed in NS
-gene_exons_boxplots("smoking", "Robo2", "Robo2−chr16:73898912−73899184")
+gene_exons_boxplots("smoking", "Robo2", "Robo2−chr16:73898912−73899184", 
+                    "Robo2−chr16:73898962−73899184")
+
+
+
+#### DE exons whose DEG have opposite direction of regulation ####
+
+## Tcaf1: involved in negative regulation of cell migration; broad expression in CNS
+gene_exons_boxplots("smoking", "Tcaf1", "Tcaf1−chr6:42690299−42690523", 
+                    "Tcaf1−chr6:42691037−42691192") 
+
+## Ganab: involved in N-glycan processing; expressed in CNS
+gene_exons_boxplots("smoking", "Ganab", "Ganab−chr19:8899196−8899394", NULL)
+
+## Myh10: involved in postsynaptic actin cytoskeleton organization;
+## acts in animal organ development; generation of neurons; and plasma membrane repair;
+## active in glutamatergic synapse; expressed in early embryo and neural ectoderm
+gene_exons_boxplots("smoking", "Myh10", "Myh10−chr11:68745935−68745964", 
+                    "Myh10−chr11:68745935−68746483")
+
+## Zfand6: involved in protein targeting to peroxisome; expressed in CNS
+gene_exons_boxplots("smoking", "Zfand6", "Zfand6−chr7:84642286−84642437", NULL)
+
+## Hspa12a: predicted to enable ATP binding activity; expressed in NS
+gene_exons_boxplots("smoking", "Hspa12a", "Hspa12a−chr19:58819719−58820377", NULL)
+
+## Synrg: predicted to act upstream of or within endocytosis and protein transport;
+## expressed in NS
+gene_exons_boxplots("smoking", "Synrg", "Synrg−chr11:84039656−84039691", 
+                    "Synrg−chr11:84039656−84040010")
+
+## Exoc4: involved in cilium assembly and protein localization to ciliary membrane;
+## expressed in CNS
+gene_exons_boxplots("smoking", "Exoc4", "Exoc4−chr6:33475997−33477149", NULL)
+
+## Sin3b: involved in skeletal muscle tissue development; expressed in CNS
+gene_exons_boxplots("smoking", "Sin3b", "Sin3b−chr8:72744458−72744665", 
+                    "Sin3b−chr8:72741810−72741915")
 
 
 
 #### DE genes with high mean(|tg-te|) ####
 
 ## Rpl13a: involved in macrophage chemotaxis; expressed in CNS
-gene_exons_boxplots("smoking", "Rpl13a", NULL)
+gene_exons_boxplots("smoking", "Rpl13a", NULL, NULL)
 
 ## Kntc1: involved in mitotic sister chromatid segregation; biased expression in CNS
-gene_exons_boxplots("smoking", "Kntc1", NULL)
+gene_exons_boxplots("smoking", "Kntc1", NULL, NULL)
 
 ## Ndufb2: involved in mitochondrial respiratory chain complex I assembly; expressed in cranium
-gene_exons_boxplots("smoking", "Ndufb2", NULL)
+gene_exons_boxplots("smoking", "Ndufb2", NULL, NULL)
 
 ## 5031439G07Rik: is expressed in nervous system and neural retina
-gene_exons_boxplots("smoking", "5031439G07Rik", NULL)
+gene_exons_boxplots("smoking", "5031439G07Rik", NULL, NULL)
 
-## Ttf2: involved in RNA splicing and mRNA processing; expressed in CNS
-gene_exons_boxplots("smoking", "Ttf2", NULL)
+## Zfhx2os: expressed in brain
+gene_exons_boxplots("smoking", "Zfhx2os", NULL, NULL)
 
 
 
 #### DE exons with high |tg-te| values ####
 
-## Sin3b: involved in skeletal muscle tissue development; expressed in CNS
-gene_exons_boxplots("smoking", "Sin3b", "Sin3b−chr8:72744458−72744665")
+## Khdrbs1: involved in cell surface receptor signaling pathway and regulation of mRNA splicing;
+## expressed in CNS, early conceptus and future brain
+gene_exons_boxplots("smoking", "Khdrbs1", "Khdrbs1−chr4:129703826−129704060", 
+                    "Khdrbs1−chr4:129703164−129704060")
 
-## Tcaf1: involved in negative regulation of cell migration; broad expression in CNS
-gene_exons_boxplots("smoking", "Tcaf1", "Tcaf1−chr6:42690299−42690523")
+## Dnaaf9: ubiquitous expression in CNS and whole brain
+gene_exons_boxplots("smoking", "Dnaaf9", "Dnaaf9−chr2:130803746−130803922", NULL)
 
-## Exoc4: involved in cilium assembly and protein localization to ciliary membrane;
-## expressed in CNS
-gene_exons_boxplots("smoking", "Exoc4", "Exoc4−chr6:33475997−33477149")
 
-## Ganab: involved in N-glycan processing; expressed in CNS
-gene_exons_boxplots("smoking", "Ganab", "Ganab−chr19:8899196−8899394")
 
 
 
