@@ -299,9 +299,9 @@ t_stat_tg<-function(expt){
   tg_te_ordered <- tg_te[order(-tg_te$t)[1:10], "ensemblID"]
   gene_symbols<-vector()
   for (i in 1:length(tg_te$ensemblID)){
-    if(tg_te$ensemblID %in% tg_te_ordered){
-      symbol<-top_genes[which(top_genes$ensemblID==tg_te_ordered$ensemblID[i]), "Symbol"]
-      gene_symbols<-append(gene_symbols, paste(symbol, "-", tg_te_ordered$ensemblID[i]))
+    if(tg_te$ensemblID[i] %in% tg_te_ordered){
+      symbol<-top_genes[which(top_genes$ensemblID==tg_te$ensemblID[i]), "Symbol"]
+      gene_symbols<-append(gene_symbols, paste(symbol, "-", tg_te$ensemblID[i]))
     }
     else{
       gene_symbols<-append(gene_symbols, NA)
@@ -368,33 +368,29 @@ t_stat_te<- function(expt){
   colnames(t_stats)[4]<-"te"
   colnames(t_stats)[6]<-"logFC_exons"
   
-  ## Add t-stats of exons' genes
+  ## Add t-stats and FDRs of exons' genes
   t_genes<-vector()
+  FDRs<-vector()
   for (i in 1:dim(t_stats)[1]){
     tg<-top_genes[which(top_genes$ensemblID==t_stats$ensemblID[i]), "t"]
+    FDR<-top_genes[which(top_genes$ensemblID==t_stats$ensemblID[i]), "adj.P.Val"]
     t_genes<-append(t_genes, tg)
+    FDRs<-append(FDRs, FDR)
   }
   t_stats$tg<-t_genes
+  t_stats$adj.P.Val_genes<-FDRs
   
   ## |te-tg| of each exon
   t_stats$t<-abs(t_stats$te - t_stats$tg)
   
-  ## Add DE info of exons
-  DE<-vector()
-  for (i in 1:dim(t_stats)[1]){
-    if(t_stats$adj.P.Val_exons[i]<0.05 && abs(t_stats$logFC_exons[i])>0.25){
-      DE<-append(DE, "sig exon")
-    }
-    else{
-      DE<-append(DE, "ns")
-    }
-  }
-  t_stats$DE<-DE
+  ## Add DE info of exons (and exons' genes)
+  t_stats$DE<-add_DE_info_exons_vs_genes(t_stats)
   
-  ## Add symbols of DE exons with |te-tg|>8.5
+  ## Add symbols of exons with the highest values of |te-tg|
+  t_stats_ordered <- t_stats[order(-t_stats$t)[1:10], "exon_libdID"]
   exon_symbols<-vector()
-  for (i in 1:length(t_stats$ensemblID)){
-    if(t_stats$DE[i]=="sig exon" && t_stats$t[i]>8.5){
+  for (i in 1:length(t_stats$exon_libdID)){
+    if(t_stats$exon_libdID[i] %in% t_stats_ordered){
       symbol<-top_genes[which(top_genes$ensemblID==t_stats$ensemblID[i]), "Symbol"]
       exon_symbols<-append(exon_symbols, paste(symbol, "-", t_stats$seqnames[i], ":", 
                                                t_stats$start[i], "-", t_stats$end[i], sep=""))
@@ -405,11 +401,12 @@ t_stat_te<- function(expt){
   }
   t_stats$exon_symbols<-exon_symbols
   
+  
   ## Plot
-  cols <- c("red", "dark grey") 
-  names(cols)<-c("sig exon", "ns")
-  alphas <- c( 1,0.5)  
-  names(alphas)<-c("sig exon", "ns")
+  cols <- c("red", "#ffad73","#26b3ff", "dark grey") 
+  names(cols)<-c("sig Both","sig exon", "sig gene", "None")
+  alphas <- c( 1, 1, 1,0.5)  
+  names(alphas)<-c("sig Both", "sig exon", "sig gene", "None")
   
   plot <- ggplot(t_stats, aes(x =te, y = t, color=DE, alpha=DE, label=exon_symbols)) +
     geom_point(size = 1) +
