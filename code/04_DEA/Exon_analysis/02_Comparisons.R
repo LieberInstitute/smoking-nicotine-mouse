@@ -724,10 +724,6 @@ gene_exons_boxplots("smoking", "Robo2", "Robo2−chr16:73898912−73899184",
 
 #### DE exons whose DEG have opposite direction of regulation ####
 
-## Tcaf1: involved in negative regulation of cell migration; broad expression in CNS
-gene_exons_boxplots("smoking", "Tcaf1", "Tcaf1−chr6:42690299−42690523", 
-                    "Tcaf1−chr6:42691037−42691192") 
-
 ## Ganab: involved in N-glycan processing; expressed in CNS
 gene_exons_boxplots("smoking", "Ganab", "Ganab−chr19:8899196−8899394", NULL)
 
@@ -790,8 +786,43 @@ gene_exons_boxplots("smoking", "Dnaaf9", "Dnaaf9−chr2:130803746−130803922", 
 
 
 ## Genes with Up and Down DE exons 
-## 
-gene_exons_boxplots("nicotine", "Rprd2", NULL, NULL)
+
+## Tcaf1: involved in negative regulation of cell migration; broad expression in CNS
+gene_exons_boxplots("smoking", "Tcaf1", "Tcaf1−chr6:42690299−42690523", 
+                    "Tcaf1−chr6:42709529−42709637") 
+
+## Kalrn: acts upstream of or within behavioral fear response, learning or memory, 
+## and modulation of chemical synaptic transmission: located in postsynaptic density;
+## expressed in dorsal root ganglion and spinal cord
+gene_exons_boxplots("smoking", "Kalrn", "Kalrn−chr16:34244114−34244556", 
+                    "Kalrn−chr16:34010522−34010645")
+
+## Adgrv1: involved in  detection of mechanical stimulus involved in sensory perception of sound, 
+## inner ear receptor cell stereocilium organization; active in stereocilium; expressed in brain
+## eye, neural ectoderm and spinal cord
+gene_exons_boxplots("smoking", "Adgrv1", "Adgrv1−chr13:81579285−81579850", 
+                    "Adgrv1−chr13:81095068−81095501")
+
+## Ccdc30: expressed in lateral ventricle choroid plexus and CNS
+gene_exons_boxplots("smoking", "Ccdc30", "Ccdc30−chr4:119352246−119352702", 
+                    "Ccdc30−chr4:119390498−119393277")
+
+## Rims2: involved in neurotransmitter secretion and regulation of nervous system process;
+## located in GABA-ergic synapse and inhibitory synapse; active in glutamatergic synapse;
+## expressed in cerebellum adult and cortex adult
+gene_exons_boxplots("smoking", "Rims2", "Rims2−chr15:39391800−39392243", 
+                    "Rims2−chr15:39274976−39275008")
+
+## Shisa9: involved in  regulation of postsynaptic neurotransmitter receptor activity
+## and regulation of short-term neuronal synaptic plasticity: located in glutamatergic synapse, 
+## postsynaptic density and synaptic membrane; expression in frontal lobe adult and CNS
+gene_exons_boxplots("smoking", "Shisa9", "Shisa9−chr16:11993994−11994050", 
+                    "Shisa9−chr16:12252785−12252832")
+
+## Ryr3: involved in calcium ion homeostasis and striated muscle contraction; expressed in CNS
+gene_exons_boxplots("smoking", "Ryr3", "Ryr3−chr2:112965849−112967227", 
+                    "Ryr3−chr2:112764566−112764706")
+
 
 
 
