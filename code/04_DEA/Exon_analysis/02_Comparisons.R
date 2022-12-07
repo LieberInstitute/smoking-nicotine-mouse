@@ -203,23 +203,23 @@ t_stat_exons_vs_genes<- function(expt){
 
   exon_symbols<-vector()
   for (i in 1:dim(t_stats)[1]) {
-    if (t_stats$DE[i]=="sig exon" & abs(t_stats$t_exons[i])>6) {
+    
+    if (t_stats$DE[i]=="sig exon" & (abs(t_stats$t_exons[i])>6 | (t_stats$ensemblID[i] %in% interest_genes))) {
       exon_symbols<-append(exon_symbols, paste(t_stats$Symbol[i], "-", t_stats$seqname[i], ":", t_stats$start[i], "-",
                                                t_stats$end[i], sep=""))
     }
     else if(t_stats$DE[i]=="sig Both"){
-      if ((t_stats$t_genes[i]< -3.5 & t_stats$t_exons[i]> 3) | (t_stats$t_genes[i]> 3 & t_stats$t_exons[i]< -4)){
+      if ((t_stats$t_genes[i]< -3.5 & t_stats$t_exons[i]> 4) | (t_stats$t_genes[i]> 3 & t_stats$t_exons[i]< -4)){
         exon_symbols<-append(exon_symbols, paste(t_stats$Symbol[i], "-", t_stats$seqname[i], ":", t_stats$start[i], "-",
                                                  t_stats$end[i], sep=""))
+      }
+      else if((t_stats$ensemblID[i] %in% interest_genes) & (t_stats$adj.P.Val_genes[i] <0.01)){
+        exon_symbols<-append(exon_symbols, paste(t_stats$Symbol[i], "-", t_stats$seqname[i], ":", t_stats$start[i], "-",
+                                                 t_stats$end[i], sep=""))        
       }
       else{
         exon_symbols<-append(exon_symbols, NA)
       }
-
-    }
-    else if((t_stats$ensemblID[i] %in% interest_genes) & (t_stats$exon_libdID[i] %in% de_exons$exon_libdID)){
-      exon_symbols<-append(exon_symbols, paste(t_stats$Symbol[i], "-", t_stats$seqname[i], ":", t_stats$start[i], "-",
-                                               t_stats$end[i], sep=""))
     }
     else {
       exon_symbols<-append(exon_symbols, NA)
@@ -254,14 +254,14 @@ t_stat_exons_vs_genes<- function(expt){
 }
 
 
-#################################### 
+##################################### 
 # Nicotine genes vs nicotine exons
 #####################################
 expt<-"nicotine"
 t_stat_exons_vs_genes(expt)
 
 
-#################################### 
+##################################### 
 # Smoking genes vs smoking exons
 #####################################
 expt<-"smoking"
@@ -532,7 +532,7 @@ gene_exons_boxplots<- function(expt, gene, exon1, exon2){
       exon_end<-strsplit(exon, "−")[[1]][3]
       exon_ID<-top_exons[which(top_exons$Symbol==exon_gene & top_exons$seqnames==exon_chr
                                & top_exons$start==exon_start & top_exons$end==exon_end), "exon_libdID"]
-      if (! exon_ID %in% top_gene_exons){
+      if (! exon_ID %in% top_gene_exons[1:3]){
         top_gene_exons<-append(exon_ID, top_gene_exons) 
       }
     }
@@ -544,7 +544,7 @@ gene_exons_boxplots<- function(expt, gene, exon1, exon2){
       exon_end<-strsplit(exon, "−")[[1]][3]
       exon_ID<-top_exons[which(top_exons$Symbol==exon_gene & top_exons$seqnames==exon_chr
                                & top_exons$start==exon_start & top_exons$end==exon_end), "exon_libdID"]
-      if (! exon_ID %in% top_gene_exons){
+      if (! exon_ID %in% top_gene_exons[1:3]){
         top_gene_exons<-append(exon_ID, top_gene_exons) 
       }
     }
@@ -560,7 +560,7 @@ gene_exons_boxplots<- function(expt, gene, exon1, exon2){
         exon_end<-strsplit(exon, "−")[[1]][3]
         exon_ID<-top_exons[which(top_exons$Symbol==exon_gene & top_exons$seqnames==exon_chr
                                  & top_exons$start==exon_start & top_exons$end==exon_end), "exon_libdID"]
-        if (! exon_ID %in% top_gene_exons){
+        if (! exon_ID %in% top_gene_exons[1:3]){
           top_gene_exons<-append(exon_ID, top_gene_exons) 
         }
       }
@@ -687,6 +687,15 @@ gene_exons_boxplots("nicotine", "Bnip3l", "Bnip3l−chr14:67000405−67000508", 
 
 
 
+#### Genes with Up and Down DE exons ####
+
+## Rprd2: predicted to be part of RNA polymerase II, holoenzyme; expressed in 
+## blastocyst, early embryo and extraembryonic component
+gene_exons_boxplots("nicotine", "Rprd2", "Rprd2−chr3:95771996−95772196", 
+                    "Rprd2−chr3:95773070−95773153")
+
+
+
 #########################################
 ## Boxplots of smoking genes and exons
 #########################################
@@ -778,6 +787,11 @@ gene_exons_boxplots("smoking", "Khdrbs1", "Khdrbs1−chr4:129703826−129704060"
 ## Dnaaf9: ubiquitous expression in CNS and whole brain
 gene_exons_boxplots("smoking", "Dnaaf9", "Dnaaf9−chr2:130803746−130803922", NULL)
 
+
+
+## Genes with Up and Down DE exons 
+## 
+gene_exons_boxplots("nicotine", "Rprd2", NULL, NULL)
 
 
 
