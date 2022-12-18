@@ -14,8 +14,8 @@ library(biomartr)
 library(sessioninfo)
 
 
-load(here("processed-data/04_DEA/Gene_analysis/de_exons_nic.Rdata"))
-load(here("processed-data/04_DEA/Gene_analysis/de_exons_smo.Rdata"))
+load(here("processed-data/04_DEA/Exon_analysis/de_exons_nic.Rdata"))
+load(here("processed-data/04_DEA/Exon_analysis/de_exons_smo.Rdata"))
 
 
 
@@ -35,24 +35,25 @@ all<-unique(rbind(all_nic_genes, all_smo_genes))
 save(all, file="processed-data/05_GO_KEGG/Exon_analysis/all_DE_exons_genes.Rdata")
 
 ## Intersections between groups
-smoUp_nicUp_genes<-intersect(nic_up_genes, smo_up_genes)
-smoDown_nicDown_genes<-intersect(nic_down_genes, smo_down_genes)
-smoUp_nicDown_genes<-intersect(nic_down_genes, smo_up_genes)
-smoDown_nicUp_genes<-intersect(nic_up_genes, smo_down_genes)
-smoUp_smoDown<-intersect(smo_up_genes, smo_down_genes)
-nicUp_nicDown<-intersect(nic_up_genes, nic_down_genes)
-only_up_nic_genes<-nic_up_genes[which(! (nic_up_genes %in% smo_up_genes | 
-                                           nic_up_genes %in% smo_down_genes | 
-                                           nic_up_genes %in% nic_down_genes))]
-only_up_smo_genes<-smo_up_genes[which(! (smo_up_genes %in% smo_down_genes | 
-                                           smo_up_genes %in% nic_down_genes | 
-                                           smo_up_genes %in% nic_up_genes))]
-only_down_nic_genes<-nic_down_genes[which(! (nic_down_genes %in% smo_up_genes | 
-                                               nic_down_genes %in% smo_down_genes | 
-                                               nic_down_genes %in% nic_up_genes))]
-only_down_smo_genes<-smo_down_genes[which(! (smo_down_genes %in% smo_up_genes | 
-                                               smo_down_genes %in% nic_down_genes | 
-                                               smo_down_genes %in% nic_up_genes))]
+smoUp_nicUp_genes<-merge(nic_up_genes, smo_up_genes)
+smoDown_nicDown_genes<-merge(nic_down_genes, smo_down_genes)
+smoUp_nicDown_genes<-merge(nic_down_genes, smo_up_genes)
+smoDown_nicUp_genes<-merge(nic_up_genes, smo_down_genes)
+smoUp_smoDown<-merge(smo_up_genes, smo_down_genes)
+nicUp_nicDown<-merge(nic_up_genes, nic_down_genes)
+only_up_nic_genes<-merge(merge(nic_up_genes[which(! nic_up_genes$ensemblID %in% nic_down_genes$ensemblID),],
+                               nic_up_genes[which(! nic_up_genes$ensemblID %in% smo_up_genes$ensemblID),]),
+                               nic_up_genes[which(! nic_up_genes$ensemblID %in% smo_down_genes$ensemblID),])
+only_up_smo_genes<-merge(merge(smo_up_genes[which(! smo_up_genes$ensemblID %in% smo_down_genes$ensemblID),],
+                               smo_up_genes[which(! smo_up_genes$ensemblID %in% nic_up_genes$ensemblID),]),
+                               smo_up_genes[which(! smo_up_genes$ensemblID %in% nic_down_genes$ensemblID),])
+only_down_nic_genes<-merge(merge(nic_down_genes[which(! nic_down_genes$ensemblID %in% nic_up_genes$ensemblID),],
+                                 nic_down_genes[which(! nic_down_genes$ensemblID %in% smo_up_genes$ensemblID),]),
+                                 nic_down_genes[which(! nic_down_genes$ensemblID %in% smo_down_genes$ensemblID),])
+only_down_smo_genes<-merge(merge(smo_down_genes[which(! smo_down_genes$ensemblID %in% smo_up_genes$ensemblID),],
+                                 smo_down_genes[which(! smo_down_genes$ensemblID %in% nic_up_genes$ensemblID),]),
+                                 smo_down_genes[which(! smo_down_genes$ensemblID %in% nic_down_genes$ensemblID),])
+
 intersections<-list("only up nic"=only_up_nic_genes, "only up smo"=only_up_smo_genes, 
                     "only down nic"=only_down_nic_genes, "only down smo"=only_down_smo_genes, 
                     "smo Up nic Up"=smoUp_nicUp_genes, "smo Down nic Down"=smoDown_nicDown_genes, 
