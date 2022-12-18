@@ -461,7 +461,7 @@ t_stat_te(expt)
 
 
 
-## 1.2.2 Boxplots of relevant DEG and their exons
+## 1.2.2 Boxplots of relevant genes and their exons
 
 ## Each boxplot
 create_boxplot<- function(counts, y, title, q_value){
