@@ -16,6 +16,8 @@ library(sessioninfo)
 
 load(here("processed-data/04_DEA/Exon_analysis/de_exons_nic.Rdata"))
 load(here("processed-data/04_DEA/Exon_analysis/de_exons_smo.Rdata"))
+load(here("processed-data/04_DEA/Exon_analysis/top_exons_nic.Rdata"))
+load(here("processed-data/04_DEA/Exon_analysis/top_exons_smo.Rdata"))
 
 
 
@@ -72,8 +74,8 @@ GO_KEGG<- function(sigGeneList, geneUniverse, name){
     width=15
   }
   else {
-    height=10
-    width=9
+    height=7
+    width=7
   }
   
   ## Do GO 
@@ -90,9 +92,12 @@ GO_KEGG<- function(sigGeneList, geneUniverse, name){
   )
   
   ## Save
-  pdf(paste("plots/05_GO_KEGG/Exon_analysis/GO_BP_", name, ".pdf", sep=""), height = height, width = width)
-  print(dotplot(goBP_Adj, title="GO Enrichment Analysis: Biological processes"))
-  dev.off()
+  if(!is.null(goBP_Adj)){
+    pdf(paste("plots/05_GO_KEGG/Exon_analysis/GO_BP_", name, ".pdf", sep=""), height = height, width = width)
+    print(dotplot(goBP_Adj, title="GO Enrichment Analysis: Biological processes"))
+    dev.off()
+  }
+
   
   
   ## Obtain molecular functions
@@ -108,9 +113,12 @@ GO_KEGG<- function(sigGeneList, geneUniverse, name){
   )
   
   ## Save
-  pdf(paste("plots/05_GO_KEGG/Exon_analysis/GO_MF_", name, ".pdf", sep=""), height = height, width = width)
-  print(dotplot(goMF_Adj, title="GO Enrichment Analysis: Molecular function"))
-  dev.off()
+  if (!is.null(goMF_Adj)){
+    pdf(paste("plots/05_GO_KEGG/Exon_analysis/GO_MF_", name, ".pdf", sep=""), height = height, width = width)
+    print(dotplot(goMF_Adj, title="GO Enrichment Analysis: Molecular function"))
+    dev.off()
+  }
+
   
   
   ## Obtain cellular components
@@ -126,9 +134,12 @@ GO_KEGG<- function(sigGeneList, geneUniverse, name){
   )
   
   ## Save
-  pdf(paste("plots/05_GO_KEGG/Exon_analysis/GO_CC_", name, ".pdf", sep=""), height = height, width = width)
-  print(dotplot(goCC_Adj, title="GO Enrichment Analysis: Cellular components"))
-  dev.off()
+  if(!is.null(goCC_Adj)){
+    pdf(paste("plots/05_GO_KEGG/Exon_analysis/GO_CC_", name, ".pdf", sep=""), height = height, width = width)
+    print(dotplot(goCC_Adj, title="GO Enrichment Analysis: Cellular components"))
+    dev.off()
+  }
+
   
   
   ## Do KEGG
@@ -142,9 +153,12 @@ GO_KEGG<- function(sigGeneList, geneUniverse, name){
   )
   
   ## Save
-  pdf(paste("plots/05_GO_KEGG/Exon_analysis/KEGG_", name, ".pdf", sep=""), height = height, width = width)
-  print(dotplot(kegg_Adj, title="KEGG Enrichment Analysis"))
-  dev.off()
+  if(!is.null(kegg_Adj)){
+    pdf(paste("plots/05_GO_KEGG/Exon_analysis/KEGG_", name, ".pdf", sep=""), height = height, width = width)
+    print(dotplot(kegg_Adj, title="KEGG Enrichment Analysis"))
+    dev.off()
+  }
+
   
   
   goList <- list(
@@ -165,13 +179,12 @@ GO_KEGG<- function(sigGeneList, geneUniverse, name){
 # Up/Down DE exons' genes
 ###########################
 
-## List of DEG sets
+## List of sets 
 sigGeneList <- list("up"=all_up_genes$EntrezID, "down"=all_down_genes$EntrezID) 
 sigGeneList <-lapply(sigGeneList, function(x) {
   x[!is.na(x)]
 })
 ## Background genes
-## Unique?
 geneUniverse <- as.character(union(top_exons_nic$EntrezID,
                                    top_exons_smo$EntrezID))
 geneUniverse <- geneUniverse[!is.na(geneUniverse)]
@@ -181,7 +194,39 @@ save(goList_global, file="processed-data/05_GO_KEGG/Exon_analysis/goList_global.
 
 
 
-## Compare with gene results
+####################################
+# Nicotine Up/Down DE exons' genes
+####################################
+
+## List of sets
+sigGeneList <- list("up"=nic_up_genes$EntrezID, "down"=nic_down_genes$EntrezID) 
+sigGeneList <-lapply(sigGeneList, function(x) {
+  x[!is.na(x)]
+})
+## Background genes
+geneUniverse <- as.character(unique(top_exons_nic$EntrezID))
+geneUniverse <- geneUniverse[!is.na(geneUniverse)]
+
+goList_nic<-GO_KEGG(sigGeneList, geneUniverse, "nicotine")
+save(goList_nic, file="processed-data/05_GO_KEGG/Gene_analysis/goList_nic.Rdata")
+
+
+
+####################################
+# Smoking Up/Down DE exons' genes
+####################################
+
+## List of sets
+sigGeneList <- list("up"=smo_up_genes$EntrezID, "down"=smo_down_genes$EntrezID) 
+sigGeneList <-lapply(sigGeneList, function(x) {
+  x[!is.na(x)]
+})
+## Background genes
+geneUniverse <- as.character(unique(top_exons_smo$EntrezID))
+geneUniverse <- geneUniverse[!is.na(geneUniverse)]
+
+goList_smo<-GO_KEGG(sigGeneList, geneUniverse, "smoking")
+save(goList_smo, file="processed-data/05_GO_KEGG/Gene_analysis/goList_smo.Rdata")
 
 
 
@@ -210,20 +255,6 @@ save(goList_global, file="processed-data/05_GO_KEGG/Exon_analysis/goList_global.
 
 
 
-
-
-
-
-
-
-## GO and KEGG of Up/Down DE exons' genes 
-
-
-
-## GO and KEGG of Up/Down DE exons' genes in nic
-
-
-## GO and KEGG of Up/Down DE exons' genes in smo
 
 
 ## GO and KEGG of Up/Down nic VS Up/Down smo DE exons' genes
