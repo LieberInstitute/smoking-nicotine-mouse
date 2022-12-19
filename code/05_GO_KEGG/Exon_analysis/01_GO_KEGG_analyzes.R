@@ -18,7 +18,10 @@ load(here("processed-data/04_DEA/Exon_analysis/de_exons_nic.Rdata"))
 load(here("processed-data/04_DEA/Exon_analysis/de_exons_smo.Rdata"))
 load(here("processed-data/04_DEA/Exon_analysis/top_exons_nic.Rdata"))
 load(here("processed-data/04_DEA/Exon_analysis/top_exons_smo.Rdata"))
-
+load(here("processed-data/04_DEA/Gene_analysis/de_genes_pups_nicotine_fitted.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_nicotine_fitted.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/de_genes_pups_smoking_fitted.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_smoking_fitted.Rdata"))
 
 
 ## Groups of DE exons' genes
@@ -74,8 +77,8 @@ GO_KEGG<- function(sigGeneList, geneUniverse, name){
     width=15
   }
   else {
-    height=7
-    width=7
+    height=8.5
+    width=9.5
   }
   
   ## Do GO 
@@ -185,8 +188,8 @@ sigGeneList <-lapply(sigGeneList, function(x) {
   x[!is.na(x)]
 })
 ## Background genes
-geneUniverse <- as.character(union(top_exons_nic$EntrezID,
-                                   top_exons_smo$EntrezID))
+geneUniverse <- union(top_exons_nic$EntrezID,
+                      top_exons_smo$EntrezID)
 geneUniverse <- geneUniverse[!is.na(geneUniverse)]
 
 goList_global<-GO_KEGG(sigGeneList, geneUniverse, "global")
@@ -204,7 +207,7 @@ sigGeneList <-lapply(sigGeneList, function(x) {
   x[!is.na(x)]
 })
 ## Background genes
-geneUniverse <- as.character(unique(top_exons_nic$EntrezID))
+geneUniverse <- unique(top_exons_nic$EntrezID)
 geneUniverse <- geneUniverse[!is.na(geneUniverse)]
 
 goList_nic<-GO_KEGG(sigGeneList, geneUniverse, "nicotine")
@@ -222,7 +225,7 @@ sigGeneList <-lapply(sigGeneList, function(x) {
   x[!is.na(x)]
 })
 ## Background genes
-geneUniverse <- as.character(unique(top_exons_smo$EntrezID))
+geneUniverse <- unique(top_exons_smo$EntrezID)
 geneUniverse <- geneUniverse[!is.na(geneUniverse)]
 
 goList_smo<-GO_KEGG(sigGeneList, geneUniverse, "smoking")
@@ -252,9 +255,71 @@ save(goList_intersections, file="processed-data/05_GO_KEGG/Exon_analysis/goList_
 
 
 
-########################################################
-#
-########################################################
+##################################################################
+# Exons' genes not considered at the gene level or non-DE genes 
+##################################################################
+
+GO_KEGG_no_exons_genes<- function(expt){
+  top_exons<-eval(parse_expr(paste("top_exons_", substr(expt,1,3), sep="")))
+  top_genes<-eval(parse_expr(paste("top_genes_pups_", expt, "_fitted", sep="")))
+  de_genes<-eval(parse_expr(paste("de_genes_pups_", expt, "_fitted", sep="")))
+  de_exons<-eval(parse_expr(paste("de_exons_", substr(expt,1,3), sep="")))
+  
+  ## Exons' genes
+  exons_genes<-unique(top_exons$ensemblID)
+  
+  ## Common genes: considered at the gene and exon level
+  common_genes<-exons_genes[which(exons_genes %in% top_genes$ensemblID)]
+  common_genes<-top_genes[which(top_genes$ensemblID %in% common_genes), c("ensemblID","EntrezID")]
+  ## non-DE genes from the common genes containing DE exons
+  non_DEG<-common_genes[which(common_genes$ensemblID %in% de_exons$ensemblID & ! common_genes$ensemblID %in% de_genes$ensemblID),
+                        "EntrezID"]
+  ## DEG with DE exons
+  DEG<-common_genes[which(common_genes$ensemblID %in% de_exons$ensemblID & common_genes$ensemblID %in% de_genes$ensemblID),
+                    "EntrezID"]
+  ## DE exons' genes not present at the gene level
+  no_present_genes<-unique(de_exons[which(!de_exons$ensemblID %in% top_genes$ensemblID), "EntrezID"])
+  
+  sigGeneList <- list("non-DEG with DEE"=non_DEG, "DEG with DEE"=DEG, "No at gene level"=no_present_genes) 
+  sigGeneList <-lapply(sigGeneList, function(x) {
+    x[!is.na(x)]
+  })
+  ## Background genes
+  geneUniverse <- unique(top_exons$EntrezID)
+  geneUniverse <- geneUniverse[!is.na(geneUniverse)]
+  
+  goList_noDEG<-GO_KEGG(sigGeneList, geneUniverse, paste("noDEG_", substr(expt,1,3), sep=""))
+  save(goList_noDEG, file=paste("processed-data/05_GO_KEGG/Gene_analysis/goList_noDEG_", substr(expt,1,3), ".Rdata", sep=""))
+  
+}
+
+## Analyzes 
+GO_KEGG_no_exons_genes("nicotine")
+GO_KEGG_no_exons_genes("smoking")
+
+
+
+
+
+
+
+## Reproducibility information
+
+options(width = 120)
+session_info()
+
+# setting  value
+# version  R version 4.2.0 (2022-04-22 ucrt)
+# os       Windows 10 x64 (build 19044)
+# system   x86_64, mingw32
+# ui       RStudio
+# language (EN)
+# collate  Spanish_Mexico.utf8
+# ctype    Spanish_Mexico.utf8
+# tz       America/Mexico_City
+# date     2022-12-18
+# rstudio  2022.07.2+576 Spotted Wakerobin (desktop)
+# pandoc   NA
 
 
 
@@ -263,37 +328,3 @@ save(goList_intersections, file="processed-data/05_GO_KEGG/Exon_analysis/goList_
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## GO and KEGG of exons' genes not considered at the gene level or from non-DE genes and compare
-
-
-
-## Boxplots of top 6 genes in each group
-
-## Boxplots of top genes in certain pathways 
-
-
-
-
-## Compare BP, MF, etc of DEG and DE exons' genes
-## Compare DEG and DE exons' genes in certain pathways or processes
