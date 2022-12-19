@@ -230,6 +230,31 @@ save(goList_smo, file="processed-data/05_GO_KEGG/Gene_analysis/goList_smo.Rdata"
 
 
 
+#######################################################
+# Up/Down Nicotine VS Up/Down Smoking DE exons' genes
+#######################################################
+
+sigGeneList <- list("Only up nic"=only_up_nic_genes$EntrezID, "Only up smo"=only_up_smo_genes$EntrezID,
+                    "Only down nic"=only_down_nic_genes$EntrezID, "Only down smo"=only_down_smo_genes$EntrezID,
+                    "Smo up, nic down"=smoUp_nicDown_genes$EntrezID, "Smo down, nic up"=smoDown_nicUp_genes$EntrezID,
+                    "Smo up, nic up"=smoUp_nicUp_genes$EntrezID, "Smo down, nic down"=smoDown_nicDown_genes$EntrezID,
+                    "Smo Up, smo Down"=smoUp_smoDown$EntrezID, "Nic Up, nic Down"=nicUp_nicDown$EntrezID) 
+sigGeneList <-lapply(sigGeneList, function(x) {
+  x[!is.na(x)]
+})
+## Background genes
+geneUniverse <- union(top_exons_nic$EntrezID,
+                      top_exons_smo$EntrezID)
+geneUniverse <- geneUniverse[!is.na(geneUniverse)]
+
+goList_intersections<-GO_KEGG(sigGeneList, geneUniverse, "intersections")
+save(goList_intersections, file="processed-data/05_GO_KEGG/Exon_analysis/goList_intersections.Rdata")
+
+
+
+########################################################
+#
+########################################################
 
 
 
@@ -257,7 +282,6 @@ save(goList_smo, file="processed-data/05_GO_KEGG/Gene_analysis/goList_smo.Rdata"
 
 
 
-## GO and KEGG of Up/Down nic VS Up/Down smo DE exons' genes
 
 
 ## GO and KEGG of exons' genes not considered at the gene level or from non-DE genes and compare
