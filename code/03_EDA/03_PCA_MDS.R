@@ -1,6 +1,5 @@
 
 # 1. Explore sample effects
-## (At the gene level only)
 
 
 ## Load data
