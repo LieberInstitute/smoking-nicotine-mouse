@@ -464,7 +464,7 @@ t_stat_te(expt)
 ## 1.2.2 Boxplots of relevant genes and their exons
 
 ## Each boxplot
-create_boxplot<- function(counts, y, title, q_value){
+create_boxplot<- function(counts, y, title, q_value, FC){
   
   ## Boxplot
   p<-ggplot(data=counts, 
@@ -475,10 +475,12 @@ create_boxplot<- function(counts, y, title, q_value){
     theme_classic() +
     labs(x = "Group", y = "norm counts",
          title = title,
-         subtitle = paste("FDR:", q_value)) +
+         ## Add FDR and FC of genes and exons
+         subtitle=paste(" FDR:", q_value, "\n", "FC:", FC)) +
     theme(plot.margin=unit (c (1,1.5,1,1), 'cm'), legend.position = "none",
           plot.title = element_text(hjust=0.5, size=10, face="bold"), 
           plot.subtitle = element_text(size = 9)) 
+  
   print(p)
 }
 
@@ -592,13 +594,15 @@ gene_exons_boxplots<- function(expt, gene, exon1, exon2){
     if (i==1){
       ## q-value for the gene
       q_value=signif(top_genes[which(top_genes$ensemblID==gene), "adj.P.Val"], digits = 3)
+      FC=signif(2**(top_genes[which(top_genes$ensemblID==gene), "logFC"]), digits = 3)
       y<-gene
       title<-gene_ID
     }
     
     ## Boxplot of the exons
     else {
-      q_value<-signif(top_exons[which(top_exons$exon_libdID==colnames(counts)[i]), "adj.P.Val"], digits = 3)
+      q_value=signif(top_exons[which(top_exons$exon_libdID==colnames(counts)[i]), "adj.P.Val"], digits = 3)
+      FC=signif(2**(top_exons[which(top_exons$exon_libdID==colnames(counts)[i]), "logFC"]), digits = 3)
       y<-colnames(counts)[i]
       ## Exon ID for plot
       title<-paste(top_exons[which(top_exons$exon_libdID==colnames(counts)[i]), "Symbol"], "-",
@@ -608,7 +612,7 @@ gene_exons_boxplots<- function(expt, gene, exon1, exon2){
     }
     
     ## Plots
-    p<-create_boxplot(counts, y, title, q_value)
+    p<-create_boxplot(counts, y, title, q_value, FC)
     plots[[i]]<-p
   }
   
@@ -659,7 +663,7 @@ gene_exons_boxplots("nicotine", "Xkr6", NULL, NULL)
 
 
 
-#### DE exons with high |tg-te| values ####
+#### Exons with high |tg-te| values ####
 
 ## Ttc17: predicted to be involved in actin filament polymerization and cilium organization;
 ## expressed in cerebellum adult 
@@ -773,7 +777,7 @@ gene_exons_boxplots("smoking", "Zfhx2os", NULL, NULL)
 
 
 
-#### DE exons with high |tg-te| values ####
+#### Exons with high |tg-te| values ####
 
 ## Khdrbs1: involved in cell surface receptor signaling pathway and regulation of mRNA splicing;
 ## expressed in CNS, early conceptus and future brain
