@@ -804,7 +804,7 @@ gene_exons_boxplots("smoking", "Kalrn", "Kalrn−chr16:34244114−34244556",
 ## Adgrv1: involved in  detection of mechanical stimulus involved in sensory perception of sound, 
 ## inner ear receptor cell stereocilium organization; active in stereocilium; expressed in brain
 ## eye, neural ectoderm and spinal cord
-gene_exons_boxplots("smoking", "Adgrv1", "Adgrv1−chr13:81579285−81579850", 
+gene_exons_boxplots("smoking", "Adgrv1", "Adgrv1−chr13:81579041−81579850", 
                     "Adgrv1−chr13:81095068−81095501")
 
 ## Ccdc30: expressed in lateral ventricle choroid plexus and CNS
