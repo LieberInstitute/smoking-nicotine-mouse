@@ -1066,19 +1066,6 @@ venn_plot(DE_lists, colors, "smo_VS_nic_DE_exons_genes", NULL)
 
 
 
-## Boxplots of genes with up and down exons in the same condition
-## Nicotine
-results_genes<-eval(parse_expr(paste("results_pups_", expt, "_fitted", sep="")))
-vGene<-results_genes[[1]][[2]]
-gene<-intersect(nic_up_genes, nic_down_genes)
-vGene$genes[which(vGene$genes$ensemblID==gene), "Symbol"]
-
-
-
-
-
-
-
 
 
 ## Compare DE exons' genes with DEG
