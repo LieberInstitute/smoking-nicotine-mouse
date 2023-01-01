@@ -211,7 +211,7 @@ geneUniverse <- unique(top_exons_nic$EntrezID)
 geneUniverse <- geneUniverse[!is.na(geneUniverse)]
 
 goList_nic<-GO_KEGG(sigGeneList, geneUniverse, "nicotine")
-save(goList_nic, file="processed-data/05_GO_KEGG/Gene_analysis/goList_nic.Rdata")
+save(goList_nic, file="processed-data/05_GO_KEGG/Exon_analysis/goList_nic.Rdata")
 
 
 
@@ -229,7 +229,7 @@ geneUniverse <- unique(top_exons_smo$EntrezID)
 geneUniverse <- geneUniverse[!is.na(geneUniverse)]
 
 goList_smo<-GO_KEGG(sigGeneList, geneUniverse, "smoking")
-save(goList_smo, file="processed-data/05_GO_KEGG/Gene_analysis/goList_smo.Rdata")
+save(goList_smo, file="processed-data/05_GO_KEGG/Exon_analysis/goList_smo.Rdata")
 
 
 
@@ -289,13 +289,65 @@ GO_KEGG_no_exons_genes<- function(expt){
   geneUniverse <- geneUniverse[!is.na(geneUniverse)]
   
   goList_noDEG<-GO_KEGG(sigGeneList, geneUniverse, paste("noDEG_", substr(expt,1,3), sep=""))
-  save(goList_noDEG, file=paste("processed-data/05_GO_KEGG/Gene_analysis/goList_noDEG_", substr(expt,1,3), ".Rdata", sep=""))
+  save(goList_noDEG, file=paste("processed-data/05_GO_KEGG/Exon_analysis/goList_noDEG_", substr(expt,1,3), ".Rdata", sep=""))
   
 }
 
 ## Analyzes 
 GO_KEGG_no_exons_genes("nicotine")
 GO_KEGG_no_exons_genes("smoking")
+
+
+
+
+
+## 1.1 Boxplots of exons' genes 
+
+### 1.1.1 Genes in GO and KEGG descriptions
+
+## Extract genes from each BP, CC, MF and KEGG
+GO_KEGG_genes<- function(golist, term, cluster, description){
+  
+  GOdata<-as.data.frame(eval(parse_expr(paste(golist, "$", term, sep=""))))
+  genes<-unique(GOdata[which(GOdata$Description==description & GOdata$Cluster==cluster), "geneID"])
+  genes<-strsplit(genes, "/")
+  genes<-unique(unlist(genes))
+  
+  if (term=="KEGG"){
+    ## KEGG ids (entrez ids) to gene symbols
+    symbols<-biomart(genes  = genes,
+                     mart       = "ENSEMBL_MART_ENSEMBL",
+                     dataset    = "mmusculus_gene_ensembl",
+                     attributes = c("external_gene_name"),
+                     filters    = "entrezgene_id")
+    genes<-symbols$external_gene_name
+  }
+  return(genes)
+  
+}
+
+
+## Boxplots of the first 6 genes involved in a process/pathway
+GO_KEGG_boxplots<-function(DEG_list, description, cluster){
+  plots<-list()
+  i=1
+  for (DEgene in DEG_list){
+    plots[[i]]<-DEG_GO_boxplot(DEgene)
+    i=i+1
+  }
+  if (length(DEG_list)<6){
+    for (i in (length(plots)+1):6){
+      plots[[i]]<-NA
+    }
+  }
+  
+  
+  options(warn = - 1)   
+  plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]], plots[[6]], ncol=3)
+  ggsave(here(paste("plots/05_GO_KEGG/Gene_analysis/Top", length(DEG_list), "_", description,"_boxplots_",cluster, 
+                    ".pdf", sep="")), width = 40, height = 25, units = "cm") 
+  
+}
 
 
 
