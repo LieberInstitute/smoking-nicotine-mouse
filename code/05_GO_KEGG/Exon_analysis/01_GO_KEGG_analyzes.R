@@ -22,6 +22,10 @@ load(here("processed-data/04_DEA/Gene_analysis/de_genes_pups_nicotine_fitted.Rda
 load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_nicotine_fitted.Rdata"))
 load(here("processed-data/04_DEA/Gene_analysis/de_genes_pups_smoking_fitted.Rdata"))
 load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_smoking_fitted.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/results_pups_nicotine_fitted.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/results_pups_smoking_fitted.Rdata"))
+load(here("processed-data/03_EDA/04_Expl_Var_partition/rse_gene_brain_pups_smoking.Rdata"))
+load(here("processed-data/03_EDA/04_Expl_Var_partition/rse_gene_brain_pups_nicotine.Rdata"))
 
 
 ## Groups of DE exons' genes
@@ -305,7 +309,81 @@ GO_KEGG_no_exons_genes("smoking")
 
 ### 1.1.1 Genes in GO and KEGG descriptions
 
-## Extract genes from each BP, CC, MF and KEGG
+vGene_smo<-results_pups_smoking_fitted[[1]][[2]]
+vGene_nic<-results_pups_nicotine_fitted[[1]][[2]]
+## Regress out residuals 
+formula<- ~ Group + Sex + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr + 
+  overallMapRate + mitoRate
+model<- model.matrix(formula, data=colData(rse_gene_brain_pups_smoking))
+vGene_smo$E<-cleaningY(vGene_smo$E, model, P=2)
+rownames(vGene_nic$E)<-vGene_nic$genes$Symbol
+model<- model.matrix(formula, data=colData(rse_gene_brain_pups_nicotine))
+vGene_nic$E<-cleaningY(vGene_nic$E, model, P=2)
+rownames(vGene_smo$E)<-vGene_smo$genes$Symbol
+
+
+## Data frame for a single gene with its nicotine and smoking logcounts 
+get_df_DEG<- function(gene, vGene_nic, vGene_smo) {
+  
+  ## Logcounts for that gene 
+  logcounts_nic<-vGene_nic$E[which(rownames(vGene_nic)==gene),]
+  logcounts_smo<-vGene_smo$E[which(rownames(vGene_smo)==gene),]
+  df_nic<-data.frame("Gene_counts"=logcounts_nic, "Expt"=rep("Nicotine", length(logcounts_nic)),
+                     "Group"=vGene_nic$targets$Group, "SampleID"=vGene_nic$targets$SAMPLE_ID)
+  df_smo<-data.frame("Gene_counts"=logcounts_smo, "Expt"=rep("Smoking", length(logcounts_smo)),
+                     "Group"=vGene_smo$targets$Group, "SampleID"=vGene_smo$targets$SAMPLE_ID)
+  df<-rbind(df_nic, df_smo)
+  return(df)
+  
+}
+
+
+## Boxplot to compare the nicotine vs smoking lognorm counts for a single gene
+DEG_GO_boxplot <- function(DEgene){
+  
+  ## Extract necessary data
+  df<-get_df_DEG(gene = DEgene, vGene_nic, vGene_smo)
+  ## Extract Ensembl ID of the gene
+  ensemblID<-top_genes_pups_nicotine_fitted[which(top_genes_pups_nicotine_fitted$Symbol==DEgene), "ensemblID"]
+  
+  ## q-value for the gene in nicotine and smoking 
+  q_value_nic<-signif(top_genes_pups_nicotine_fitted[which(top_genes_pups_nicotine_fitted$Symbol==DEgene),
+                                                     "adj.P.Val"], digits = 3)
+  q_value_smo<-signif(top_genes_pups_smoking_fitted[which(top_genes_pups_smoking_fitted$Symbol==DEgene),
+                                                    "adj.P.Val"], digits = 3)
+  ## Log FC for the gene in nicotine and smoking 
+  FC_nic<-signif(2**(top_genes_pups_nicotine_fitted[which(top_genes_pups_nicotine_fitted$Symbol==DEgene),
+                                                    "logFC"]), digits = 3)
+  FC_smo<-signif(2**(top_genes_pups_smoking_fitted[which(top_genes_pups_smoking_fitted$Symbol==DEgene),
+                                                   "logFC"]), digits = 3)
+  
+  ## Boxplot for each DE gene
+  p <-ggplot(data=as.data.frame(df), aes(x=Group,y=Gene_counts)) + 
+    geom_boxplot(outlier.color = "#FFFFFFFF") +
+    geom_jitter(aes(color=Group), position=position_jitter(0.2)) +
+    theme_classic() +
+    labs(x = "Experiment", y = "logcounts - covariates",
+         title = paste(DEgene, ensemblID, sep=" - "),
+         subtitle=" ") +
+    theme(plot.margin=unit (c (1,1.5,1,1), 'cm'), legend.position = "none",
+          plot.title = element_text(hjust=0.5, size=10, face="bold"), 
+          plot.subtitle = element_text(size=17)) +
+    scale_color_manual(values = c("orangered", "Dodgerblue")) +
+    facet_wrap(~ Expt, scales = "free") +
+    scale_x_discrete(labels=c("Ctrl", "Expt"))
+  
+  p <-ggdraw(p) + 
+    draw_label(paste("FDR:", q_value_nic), x = 0.35, y = 0.87, size=9, color = "darkslategray") +
+    draw_label(paste("FC:", FC_nic), x = 0.35, y = 0.84, size=9, color = "darkslategray") +
+    draw_label(paste("FDR:", q_value_smo), x = 0.72, y = 0.87, size=9, color = "darkslategray") +
+    draw_label(paste("FC:", FC_smo), x = 0.71, y = 0.84, size=9, color = "darkslategray") 
+  
+  return(p)
+  
+}
+
+
+## Extract genes from each BP, CC, MF and KEGG descriptions
 GO_KEGG_genes<- function(golist, term, cluster, description){
   
   GOdata<-as.data.frame(eval(parse_expr(paste(golist, "$", term, sep=""))))
@@ -327,6 +405,68 @@ GO_KEGG_genes<- function(golist, term, cluster, description){
 }
 
 
+## Extract top 6 genes from a list based on their max q-values 
+## in nicotine and smoking 
+extract_top_genes <- function(DEG_list){
+  
+  ## If the genes are only from smoking 
+  if (length(which(DEG_list %in% de_genes_pups_nicotine_fitted$Symbol))==0){
+    
+    ## q-values for the gene  
+    q_values_smo<-top_genes_pups_smoking_fitted[which(top_genes_pups_smoking_fitted$Symbol %in% DEG_list),
+                                                c("Symbol", "adj.P.Val")]
+    q_values_smo$adj.P.Val<-signif(q_values_smo$adj.P.Val, digits = 3)
+    ## Genes with the lowest q-values
+    genes<-q_values_smo[order(q_values_smo$adj.P.Val),1]
+    
+  }
+  
+  ## If the genes are only from nicotine
+  else if (length(which(DEG_list %in% de_genes_pups_smoking_fitted$Symbol))==0){
+    
+    ## q-values for the gene  
+    q_values_nic<-top_genes_pups_nicotine_fitted[which(top_genes_pups_nicotine_fitted$Symbol %in% DEG_list),
+                                                 c("Symbol", "adj.P.Val")]
+    q_values_nic$adj.P.Val<-signif(q_values_nic$adj.P.Val, digits = 3)
+    ## Genes with the lowest q-values
+    genes<-q_values_nic[order(q_values_nic$adj.P.Val),1]
+    
+  }
+  
+  else {
+    
+    nic_qvals<-vector()
+    smo_qvals<-vector()
+    max_qvals<-vector()
+    
+    for (DEgene in DEG_list){
+      ## q-values for the gene in nicotine and smoking 
+      q_value_nic<-signif(top_genes_pups_nicotine_fitted[which(top_genes_pups_nicotine_fitted$Symbol==DEgene),
+                                                         "adj.P.Val"], digits = 3)
+      q_value_smo<-signif(top_genes_pups_smoking_fitted[which(top_genes_pups_smoking_fitted$Symbol==DEgene),
+                                                        "adj.P.Val"], digits = 3)
+      nic_qvals<-append(nic_qvals, q_value_nic)
+      smo_qvals<-append(smo_qvals, q_value_smo)
+      ## Max q-value
+      max_qvals<-append(max_qvals, max(q_value_nic, q_value_smo))
+    }
+    
+    q_vals<-data.frame(Gene=DEG_list, Nicotine=nic_qvals, Smoking=smo_qvals, Max=max_qvals)
+    
+    ## Genes with the lowest max q-values
+    genes<-q_vals[order(q_vals$Max),1]
+  }
+  
+  
+  if (length(genes)<6){
+    return(genes)
+  }
+  else {
+    return(genes[1:6])
+  }
+}
+
+
 ## Boxplots of the first 6 genes involved in a process/pathway
 GO_KEGG_boxplots<-function(DEG_list, description, cluster){
   plots<-list()
@@ -344,11 +484,54 @@ GO_KEGG_boxplots<-function(DEG_list, description, cluster){
   
   options(warn = - 1)   
   plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]], plots[[6]], ncol=3)
-  ggsave(here(paste("plots/05_GO_KEGG/Gene_analysis/Top", length(DEG_list), "_", description,"_boxplots_",cluster, 
+  ggsave(here(paste("plots/05_GO_KEGG/Exon_analysis/Top", length(DEG_list), "_", description,"_boxplots_",cluster, 
                     ".pdf", sep="")), width = 40, height = 25, units = "cm") 
   
 }
 
+
+
+## Boxplots 
+
+## 1. Biological processes
+
+## Genes involved in regulation of synaptic plasticity
+GO_genes<-GO_KEGG_genes("goList_global", "BP", "up", "regulation of synaptic plasticity")
+top_DEG<-extract_top_genes(GO_genes)
+GO_KEGG_boxplots(top_DEG, "regulation_of_synaptic_plasticity", "up")
+
+GO_genes<-GO_KEGG_genes("goList_smo", "BP", "up", "regulation of synaptic plasticity")
+top_DEG<-extract_top_genes(GO_genes)
+GO_KEGG_boxplots(top_DEG, "regulation_of_synaptic_plasticity", "smo_up")
+
+
+
+## 2. Cellular components
+
+## Genes in secretory vesicles
+GO_genes<-GO_KEGG_genes("goList_global", "CC", "up", "secretory vesicle")
+top_DEG<-extract_top_genes(GO_genes)
+GO_KEGG_boxplots(top_DEG, "secretory_vesicle", "up")
+
+## Genes in transport vesicles
+GO_genes<-GO_KEGG_genes("goList_global", "CC", "up", "transport vesicle")
+top_DEG<-extract_top_genes(GO_genes)
+GO_KEGG_boxplots(top_DEG, "transport_vesicle", "up")
+
+## Genes in postsynaptic specialization
+GO_genes<-GO_KEGG_genes("goList_global", "CC", "up", "postsynaptic specialization")
+top_DEG<-extract_top_genes(GO_genes)
+GO_KEGG_boxplots(top_DEG, "postsynaptic_specialization", "up")
+
+## Genes in asymmetric synapses
+GO_genes<-GO_KEGG_genes("goList_global", "CC", "up", "asymmetric synapse")
+top_DEG<-extract_top_genes(GO_genes)
+GO_KEGG_boxplots(top_DEG, "asymmetric_synapse", "up")
+
+## Genes in exocytic vesicles
+GO_genes<-GO_KEGG_genes("goList_global", "CC", "up", "exocytic vesicle")
+top_DEG<-extract_top_genes(GO_genes)
+GO_KEGG_boxplots(top_DEG, "exocytic_vesicle", "up")
 
 
 
