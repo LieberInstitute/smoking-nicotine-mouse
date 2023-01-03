@@ -25,6 +25,8 @@ load(here("processed-data/03_EDA/02_QC/rse_exon_brain_pups_qc.Rdata"))
 ## Separate samples by Expt
 rse_exon_brain_pups_nicotine<-rse_exon_brain_pups_qc[,rse_exon_brain_pups_qc$Expt=="Nicotine"]
 rse_exon_brain_pups_smoking<-rse_exon_brain_pups_qc[,rse_exon_brain_pups_qc$Expt=="Smoking"]
+save(rse_exon_brain_pups_nicotine, file="processed-data/04_DEA/Exon_analysis/rse_exon_brain_pups_nicotine.Rdata")
+save(rse_exon_brain_pups_smoking, file="processed-data/04_DEA/Exon_analysis/rse_exon_brain_pups_smoking.Rdata")
 
 
 
