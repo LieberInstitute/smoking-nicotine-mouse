@@ -513,25 +513,143 @@ GO_genes<-GO_KEGG_genes("goList_global", "CC", "up", "secretory vesicle")
 top_DEG<-extract_top_genes(GO_genes)
 GO_KEGG_boxplots(top_DEG, "secretory_vesicle", "up")
 
+GO_genes<-GO_KEGG_genes("goList_smo", "CC", "up", "secretory vesicle")
+top_DEG<-extract_top_genes(GO_genes)
+GO_KEGG_boxplots(top_DEG, "secretory_vesicle", "smo_up")
+
+GO_genes<-GO_KEGG_genes("goList_intersections", "CC", "Only up smo", "secretory vesicle")
+top_DEG<-extract_top_genes(GO_genes)
+GO_KEGG_boxplots(top_DEG, "secretory_vesicle", "intersections_smo_up")
+
+
 ## Genes in transport vesicles
 GO_genes<-GO_KEGG_genes("goList_global", "CC", "up", "transport vesicle")
 top_DEG<-extract_top_genes(GO_genes)
 GO_KEGG_boxplots(top_DEG, "transport_vesicle", "up")
+
+GO_genes<-GO_KEGG_genes("goList_smo", "CC", "up", "transport vesicle")
+top_DEG<-extract_top_genes(GO_genes)
+GO_KEGG_boxplots(top_DEG, "transport_vesicle", "smo_up")
+
+GO_genes<-GO_KEGG_genes("goList_intersections", "CC", "Only up smo", "transport vesicle")
+top_DEG<-extract_top_genes(GO_genes)
+GO_KEGG_boxplots(top_DEG, "transport_vesicle", "intersections_smo_up")
+
 
 ## Genes in postsynaptic specialization
 GO_genes<-GO_KEGG_genes("goList_global", "CC", "up", "postsynaptic specialization")
 top_DEG<-extract_top_genes(GO_genes)
 GO_KEGG_boxplots(top_DEG, "postsynaptic_specialization", "up")
 
+GO_genes<-GO_KEGG_genes("goList_smo", "CC", "up", "postsynaptic specialization")
+top_DEG<-extract_top_genes(GO_genes)
+GO_KEGG_boxplots(top_DEG, "postsynaptic_specialization", "smo_up")
+
+
 ## Genes in asymmetric synapses
 GO_genes<-GO_KEGG_genes("goList_global", "CC", "up", "asymmetric synapse")
 top_DEG<-extract_top_genes(GO_genes)
 GO_KEGG_boxplots(top_DEG, "asymmetric_synapse", "up")
 
+GO_genes<-GO_KEGG_genes("goList_smo", "CC", "up", "asymmetric synapse")
+top_DEG<-extract_top_genes(GO_genes)
+GO_KEGG_boxplots(top_DEG, "asymmetric_synapse", "smo_up")
+
+
 ## Genes in exocytic vesicles
 GO_genes<-GO_KEGG_genes("goList_global", "CC", "up", "exocytic vesicle")
 top_DEG<-extract_top_genes(GO_genes)
 GO_KEGG_boxplots(top_DEG, "exocytic_vesicle", "up")
+
+GO_genes<-GO_KEGG_genes("goList_smo", "CC", "up", "exocytic vesicle")
+top_DEG<-extract_top_genes(GO_genes)
+GO_KEGG_boxplots(top_DEG, "exocytic_vesicle", "smo_up")
+
+GO_genes<-GO_KEGG_genes("goList_intersections", "CC", "Only up smo", "exocytic vesicle")
+top_DEG<-extract_top_genes(GO_genes)
+GO_KEGG_boxplots(top_DEG, "exocytic_vesicle", "intersections_smo_up")
+
+
+## Genes in secretory granules
+GO_genes<-GO_KEGG_genes("goList_intersections", "CC", "Only up smo", "secretory granule")
+top_DEG<-extract_top_genes(GO_genes)
+GO_KEGG_boxplots(top_DEG, "secretory_granule", "intersections_smo_up")
+
+
+## Genes in the SNARE complex
+GO_genes<-GO_KEGG_genes("goList_intersections", "CC", "Only up smo", "SNARE complex")
+top_DEG<-extract_top_genes(GO_genes)
+GO_KEGG_boxplots(top_DEG, "SNARE_complex", "intersections_smo_up")
+
+
+## Genes in synaptic membranes
+GO_genes<-GO_KEGG_genes("goList_intersections", "CC", "Smo Up, smo Down", "synaptic membrane")
+top_DEG<-extract_top_genes(GO_genes)
+GO_KEGG_boxplots(top_DEG, "synaptic_membrane", "Smo_up_Smo_down")
+
+
+## Genes in postsynaptic membranes
+GO_genes<-GO_KEGG_genes("goList_intersections", "CC", "Smo Up, smo Down", "postsynaptic membrane")
+top_DEG<-extract_top_genes(GO_genes)
+GO_KEGG_boxplots(top_DEG, "postsynaptic_membrane", "Smo_up_Smo_down")
+
+
+## Genes in postsynaptic density
+GO_genes<-GO_KEGG_genes("goList_intersections", "CC", "Smo Up, smo Down", "postsynaptic density")
+top_DEG<-extract_top_genes(GO_genes)
+GO_KEGG_boxplots(top_DEG, "postsynaptic_density", "Smo_up_Smo_down")
+
+
+## Genes in asymmetric synapse
+GO_genes<-GO_KEGG_genes("goList_intersections", "CC", "Smo Up, smo Down", "asymmetric synapse")
+top_DEG<-extract_top_genes(GO_genes)
+GO_KEGG_boxplots(top_DEG, "asymmetric_synapse", "Smo_up_Smo_down")
+
+
+## Genes in postsynaptic specialization
+GO_genes<-GO_KEGG_genes("goList_intersections", "CC", "Smo Up, smo Down", "postsynaptic specialization")
+top_DEG<-extract_top_genes(GO_genes)
+GO_KEGG_boxplots(top_DEG, "postsynaptic_specialization", "Smo_up_Smo_down")
+
+
+
+## 3. Molecular function
+
+## Genes with voltage−gated ion channel activity
+GO_genes<-GO_KEGG_genes("goList_smo", "MF", "up", "voltage-gated ion channel activity")
+top_DEG<-extract_top_genes(GO_genes)
+GO_KEGG_boxplots(top_DEG, "voltage−gated_ion_channel_activity", "smo_up")
+
+GO_genes<-GO_KEGG_genes("goList_intersections", "MF", "Only up smo", "voltage-gated ion channel activity")
+top_DEG<-extract_top_genes(GO_genes)
+GO_KEGG_boxplots(top_DEG, "voltage−gated_ion_channel_activity", "only_smo_up")
+
+
+## Genes with voltage−gated channel activity
+GO_genes<-GO_KEGG_genes("goList_smo", "MF", "up", "voltage-gated channel activity")
+top_DEG<-extract_top_genes(GO_genes)
+GO_KEGG_boxplots(top_DEG, "voltage−gated_channel_activity", "smo_up")
+
+GO_genes<-GO_KEGG_genes("goList_intersections", "MF", "Only up smo", "voltage-gated channel activity")
+top_DEG<-extract_top_genes(GO_genes)
+GO_KEGG_boxplots(top_DEG, "voltage−gated_channel_activity", "only_smo_up")
+
+
+## Genes with gated channel activity
+GO_genes<-GO_KEGG_genes("goList_smo", "MF", "up", "gated channel activity")
+top_DEG<-extract_top_genes(GO_genes)
+GO_KEGG_boxplots(top_DEG, "gated_channel_activity", "smo_up")
+
+GO_genes<-GO_KEGG_genes("goList_intersections", "MF", "Only up smo", "gated channel activity")
+top_DEG<-extract_top_genes(GO_genes)
+GO_KEGG_boxplots(top_DEG, "gated_channel_activity", "only_smo_up")
+
+
+## Genes with voltage−gated cation channel activity
+GO_genes<-GO_KEGG_genes("goList_intersections", "MF", "Only up smo", "voltage-gated cation channel activity")
+top_DEG<-extract_top_genes(GO_genes)
+GO_KEGG_boxplots(top_DEG, "voltage−gated_cation_channel_activity", "only_smo_up")
+
 
 
 
