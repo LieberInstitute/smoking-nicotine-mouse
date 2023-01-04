@@ -65,7 +65,7 @@ DEA_expt_vs_ctl<- function(RSE, name){
   ## Fit linear model for each exon
   fitExon = lmFit(vExon)
   
-  ## Compute F and t-statistics, p-value and logFC 
+  ## Compute moderated F and t-statistics, and log-odds of DE
   eBExon = eBayes(fitExon)
   
   ## Plot average log expression vs logFC

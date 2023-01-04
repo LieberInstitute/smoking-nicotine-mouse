@@ -62,7 +62,7 @@ DEA_expt_vs_ctl<- function(RSE, formula, name, coef){
   fitGene = lmFit(vGene)
   
   ## Empirical Bayesian calculation to obtain our significant genes:
-  ## compute F and t-statistics, p-value and logFC for DE 
+  ## compute moderated F and t-statistics, and log-odds of DE
   eBGene = eBayes(fitGene)
 
   ## Plot average log expression vs logFC

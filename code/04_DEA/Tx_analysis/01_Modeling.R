@@ -49,7 +49,7 @@ DEA_expt_vs_ctl<- function(RSE, name){
   ## Fit linear model for each transcript
   fitTx = lmFit(assays(RSE)$logcounts, design = model)
   
-  ## Compute F and t-statistics, p-value and logFC 
+  ## Compute moderated F and t-statistics, and log-odds of DE
   eBTx = eBayes(fitTx)
   
   ## Plot average log expression vs logFC
