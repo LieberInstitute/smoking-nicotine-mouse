@@ -27,7 +27,7 @@ load(here("processed-data/03_EDA/04_Expl_Var_partition/rse_gene_brain_pups_smoki
 
 
 
-## 1.1 Modelling
+## 1.1 Modeling
 
 ## Extract previous output from calcNormFactors for all samples
 norm_factors<-calcNormFactors(rse_gene, method = "TMM")
@@ -44,7 +44,7 @@ DEA_expt_vs_ctl<- function(RSE, formula, name, coef){
   stopifnot(all(!is.na(match_samples)))
   factors<-samples_factors[match_samples, ]
   
-  pdf(file = paste("plots/04_DEA/01_Modelling/Gene_analysis/DEA_plots_", name, ".pdf", sep="" ))
+  pdf(file = paste("plots/04_DEA/01_Modeling/Gene_analysis/DEA_plots_", name, ".pdf", sep="" ))
   par(mfrow=c(2,2))
   
   ## Model matrix
@@ -155,7 +155,7 @@ plots_DE<-function(top_genes, vGene, FDR=0.05, name) {
     scale_alpha_manual(values = alphas) 
   
   plot_grid(p1, p2, ncol=2)
-  ggsave(paste("plots/04_DEA/01_Modelling/Gene_analysis/DEG_plots_", name, ".pdf", sep=""), 
+  ggsave(paste("plots/04_DEA/01_Modeling/Gene_analysis/DEG_plots_", name, ".pdf", sep=""), 
          width = 35, height = 15, units = "cm")
 }
 
@@ -210,7 +210,7 @@ DE_boxplots <- function(RSE, vGene, model, de_genes){
     plots[[i]]<-p
   }
   plot_grid(plots[[1]], plots[[2]], plots[[3]], ncol = 3)
-  ggsave(here(paste("plots/04_DEA/01_Modelling/Gene_analysis/DE_boxplots_",name, ".pdf", sep="")), 
+  ggsave(here(paste("plots/04_DEA/01_Modeling/Gene_analysis/DE_boxplots_",name, ".pdf", sep="")), 
          width = 25, height = 10, units = "cm")
 }
 
@@ -485,4 +485,27 @@ save(results_pups_smoking_interaction,
 save(top_genes_pups_smoking_interaction, 
      file="processed-data/04_DEA/Gene_analysis/top_genes_pups_smoking_interaction.Rdata")
 
+
+
+
+
+
+
+## Reproducibility information
+
+options(width = 120)
+session_info()
+
+# setting  value
+# version  R version 4.2.0 (2022-04-22 ucrt)
+# os       Windows 10 x64 (build 19044)
+# system   x86_64, mingw32
+# ui       RStudio
+# language (EN)
+# collate  Spanish_Mexico.utf8
+# ctype    Spanish_Mexico.utf8
+# tz       America/Mexico_City
+# date     2022-11-18
+# rstudio  2022.07.2+576 Spotted Wakerobin (desktop)
+# pandoc   2.19.2 @ C:/Program Files/RStudio/bin/quarto/bin/tools/ (via rmarkdown)
 

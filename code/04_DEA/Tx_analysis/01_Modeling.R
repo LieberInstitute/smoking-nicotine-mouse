@@ -30,12 +30,12 @@ save(rse_tx_brain_pups_smoking, file="processed-data/04_DEA/Tx_analysis/rse_tx_b
 
 
 
-## 1.1 Modelling
+## 1.1 Modeling
 
 ## DEA for experiment vs ctrls
 DEA_expt_vs_ctl<- function(RSE, name){
   
-  pdf(file = paste("plots/04_DEA/01_Modelling/Tx_analysis/DEA_tx_plots_", name, ".pdf", sep="" ))
+  pdf(file = paste("plots/04_DEA/01_Modeling/Tx_analysis/DEA_tx_plots_", name, ".pdf", sep="" ))
   par(mfrow=c(2,2))
   
   ## Model matrix using formula for the fitted model

@@ -30,7 +30,7 @@ save(rse_exon_brain_pups_smoking, file="processed-data/04_DEA/Exon_analysis/rse_
 
 
 
-## 1.1 Modelling
+## 1.1 Modeling
 
 ## Extract previous output from calcNormFactors 
 norm_factors<-calcNormFactors(rse_exon, method = "TMM")
@@ -47,7 +47,7 @@ DEA_expt_vs_ctl<- function(RSE, name){
   stopifnot(all(!is.na(match_samples)))
   factors<-samples_factors[match_samples, ]
   
-  pdf(file = paste("plots/04_DEA/01_Modelling/Exon_analysis/DEA_exon_plots_", name, ".pdf", sep="" ))
+  pdf(file = paste("plots/04_DEA/01_Modeling/Exon_analysis/DEA_exon_plots_", name, ".pdf", sep="" ))
   par(mfrow=c(2,2))
   
   ## Model matrix using formula for the fitted model
@@ -160,7 +160,7 @@ plots_DE<-function(top_exons, vExon, FDR=0.05, logFC=0.25, name) {
     scale_alpha_manual(values = alphas) 
   
   plot_grid(p1, p2, ncol=2)
-  ggsave(paste("plots/04_DEA/01_Modelling/Exon_analysis/DEG_exon_plots_", name, ".pdf", sep=""), 
+  ggsave(paste("plots/04_DEA/01_Modeling/Exon_analysis/DEG_exon_plots_", name, ".pdf", sep=""), 
          width = 35, height = 15, units = "cm")
 }
 
@@ -218,7 +218,7 @@ DE_boxplots <- function(RSE, vExon, de_exons){
     plots[[i]]<-p
   }
   plot_grid(plots[[1]], plots[[2]], plots[[3]], ncol = 3)
-  ggsave(here(paste("plots/04_DEA/01_Modelling/Exon_analysis/DE_boxplots_exons_",name, ".pdf", sep="")), 
+  ggsave(here(paste("plots/04_DEA/01_Modeling/Exon_analysis/DE_boxplots_exons_",name, ".pdf", sep="")), 
          width = 25, height = 10, units = "cm")
 }
 
