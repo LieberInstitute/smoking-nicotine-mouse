@@ -58,7 +58,7 @@ DEA_expt_vs_ctl<- function(RSE, formula, name, coef){
   ## Estimate mean-variance relationship for each gene
   vGene = voom(RSE_scaled, design=model, plot=TRUE)
   
-  ## Fit linear model for each gene 
+  ## Fit linear model for each gene
   fitGene = lmFit(vGene)
   
   ## Empirical Bayesian calculation to obtain our significant genes:
