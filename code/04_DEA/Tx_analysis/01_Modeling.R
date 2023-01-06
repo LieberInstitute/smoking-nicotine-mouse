@@ -125,7 +125,7 @@ plots_DE<-function(top_tx, RSE, FDR=0.05, name) {
     labs(x="Mean of normalized counts")
   
   
-  ## Volcano plot for DE genes
+  ## Volcano plot for DE tx
   p2<-ggplot(data = top_tx, 
              aes(x = logFC,y = -log10(adj.P.Val),
                  fill = DE,    
@@ -153,14 +153,14 @@ plots_DE<-function(top_tx, RSE, FDR=0.05, name) {
 
 
 ## Boxplot of a single transcript
-DE_one_boxplot <- function (de_tx, lognorm_DE, DEtx_symbol, tx_name){
+DE_one_boxplot <- function (de_tx, lognorm_DE, tx_ID, tx_name){
   
   ## q-value for the tx
-  q_value<-signif(de_tx[which(de_tx$transcript_id==transcript_id), "adj.P.Val"], digits = 3)
+  q_value<-signif(de_tx[which(de_tx$transcript_id==tx_ID), "adj.P.Val"], digits = 3)
   
   ## Boxplot for each DE tx
   ggplot(data=as.data.frame(lognorm_DE), 
-         aes(x=Group,y=eval(parse_expr(DEtx)))) + 
+         aes(x=Group,y=eval(parse_expr(tx_ID)))) + 
     ## Hide outliers
     geom_boxplot(outlier.color = "#FFFFFFFF") +
     ## Samples colored by Group + noise
@@ -187,29 +187,86 @@ DE_boxplots <- function(RSE, de_tx){
   logcounts<-cleaningY(assays(RSE)$logcounts, model, P=2)
   ## Order tx by q-value
   de_tx<-de_tx[order(de_tx$adj.P.Val),]
+  ## Lognorm counts of DE tx
   lognorm_DE<-logcounts[rownames(de_tx),]
-  ## Samples as rows and exons as columns
+  ## Samples as rows and tx as columns
   lognorm_DE<-t(lognorm_DE)
-  ## Exons' IDs as colnames
-  colnames(lognorm_DE)<-de_exons$exon_libdID
   ## Add samples' Group information
   lognorm_DE<-data.frame(lognorm_DE, "Group"=colData(RSE)$Group)
   
   
   plots<-list()
   for (i in 1:3){
-    exon_ID<-colnames(lognorm_DE)[i]
-    exon_name<-paste(de_exons$Symbol[i]," - ", de_exons$seqnames[i], ":", de_exons$start[i], "-", de_exons$end[i], sep="")
-    p<-DE_one_boxplot(de_exons, lognorm_DE, exon_ID, exon_name)
+    tx_ID<-colnames(lognorm_DE)[i]
+    tx_name<-paste(de_tx$Symbol[i]," - ", de_tx$transcript_id[i], sep="")
+    p<-DE_one_boxplot(de_tx, lognorm_DE, tx_ID, tx_name)
     plots[[i]]<-p
   }
   plot_grid(plots[[1]], plots[[2]], plots[[3]], ncol = 3)
-  ggsave(here(paste("plots/04_DEA/01_Modeling/Exon_analysis/DE_boxplots_exons_",name, ".pdf", sep="")), 
+  ggsave(here(paste("plots/04_DEA/01_Modeling/Tx_analysis/DE_boxplots_tx_",name, ".pdf", sep="")), 
          width = 25, height = 10, units = "cm")
 }
 
 
 
+## Perform DEA for each group of samples
+apply_DEA<-function(RSE, name){
+  ## DEA
+  results<-DEA_expt_vs_ctl(RSE, name)
+  top_tx<-results[[1]]
+  
+  ## If there are DE tx
+  if (length(which(top_tx$adj.P.Val<0.05))>0){
+    model=model.matrix(formula, data=colData(RSE))
+    de_tx<-top_tx[top_tx$adj.P.Val < 0.05,]
+    ## Plots for DE tx
+    plots_DE(top_tx, RSE, 0.05, name)
+    DE_boxplots(RSE, de_tx)
+    print(paste(length(which(top_tx$adj.P.Val<0.05)), "differentially expressed tx", sep=" "))
+    return(list(results, de_tx))
+  }
+  else {
+    print("No differentially expressed tx")
+    return(results)
+  }
+}
+
+
+
+
+
+##################################
+#         Nicotine DEA 
+#    Nicotine vs ctrls in pups
+##################################
+
+RSE<-rse_tx_brain_pups_nicotine
+name<-"nicotine"
+results_nic<-apply_DEA(RSE, name)
+"232 differentially expressed tx"
+top_tx_nic<-results_nic[[1]][[1]]
+de_tx_nic<-results_nic[[2]]
+save(results_nic, file="processed-data/04_DEA/Tx_analysis/results_nic.Rdata")
+save(top_tx_nic, file="processed-data/04_DEA/Tx_analysis/top_tx_nic.Rdata")
+save(de_tx_nic, file="processed-data/04_DEA/Tx_analysis/de_tx_nic.Rdata")
+
+
+
+
+##################################
+#         Smoking DEA 
+#    Smoking vs ctrls in pups
+##################################
+
+RSE<-rse_tx_brain_pups_smoking
+name<-"smoking"
+results_smo<-apply_DEA(RSE, name)
+"4059 differentially expressed tx"
+top_tx_smo<-results_smo[[1]][[1]]
+de_tx_smo<-results_smo[[2]]
+save(results_smo, file="processed-data/04_DEA/Tx_analysis/results_smo.Rdata")
+save(top_tx_smo, file="processed-data/04_DEA/Tx_analysis/top_tx_smo.Rdata")
+save(de_tx_smo, file="processed-data/04_DEA/Tx_analysis/de_tx_smo.Rdata")
 
 
 
