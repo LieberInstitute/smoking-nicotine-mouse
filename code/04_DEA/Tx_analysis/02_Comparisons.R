@@ -4,18 +4,18 @@
 
 load(here("processed-data/04_DEA/Tx_analysis/top_tx_nic.Rdata"))
 load(here("processed-data/04_DEA/Tx_analysis/de_tx_nic.Rdata"))
-load(here("processed-data/04_DEA/Tx_analysis/results_nic.Rdata"))
+#load(here("processed-data/04_DEA/Tx_analysis/results_nic.Rdata"))
 load(here("processed-data/04_DEA/Tx_analysis/top_tx_smo.Rdata"))
 load(here("processed-data/04_DEA/Tx_analysis/de_tx_smo.Rdata"))
-load(here("processed-data/04_DEA/Tx_analysis/results_smo.Rdata"))
+#load(here("processed-data/04_DEA/Tx_analysis/results_smo.Rdata"))
 
-load(here("processed-data/04_DEA/Gene_analysis/de_genes_pups_nicotine_fitted.Rdata"))
+#load(here("processed-data/04_DEA/Gene_analysis/de_genes_pups_nicotine_fitted.Rdata"))
 load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_nicotine_fitted.Rdata"))
-load(here("processed-data/04_DEA/Gene_analysis/results_pups_nicotine_fitted.Rdata"))
-load(here("processed-data/04_DEA/Gene_analysis/de_genes_pups_smoking_fitted.Rdata"))
+#load(here("processed-data/04_DEA/Gene_analysis/results_pups_nicotine_fitted.Rdata"))
+#load(here("processed-data/04_DEA/Gene_analysis/de_genes_pups_smoking_fitted.Rdata"))
 load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_smoking_fitted.Rdata"))
-load(here("processed-data/04_DEA/Gene_analysis/results_pups_smoking_fitted.Rdata"))
-load(here("processed-data/05_GO_KEGG/Gene_analysis/intersections.Rdata"))     
+#load(here("processed-data/04_DEA/Gene_analysis/results_pups_smoking_fitted.Rdata"))
+#load(here("processed-data/05_GO_KEGG/Gene_analysis/intersections.Rdata"))     
 
 
 
@@ -96,4 +96,174 @@ t_stat_plot <- function(top_tx1, top_tx2, name_1, name_2, title){
 #####################################
 
 t_stat_plot(top_tx_nic, top_tx_smo, "Nicotine pups", "Smoking pups", "Nic vs Smo DE tx")
+
+
+
+
+
+### 1.2.1.2 T-stats of genes vs transcripts
+
+## Function to add DE info of tx and genes
+
+add_DE_info_tx_vs_genes <-function(t_stats) {
+  
+  DE<-vector()
+  for (i in 1:dim(t_stats)[1]) {
+    
+    ## DE tx from DEG 
+    if (t_stats$adj.P.Val_exons[i]<0.05 && t_stats$adj.P.Val_genes[i]<0.05){
+      
+      if(abs(t_stats$logFC_exons[i])>0.25) {
+        DE<-append(DE, "sig Both")
+      }
+      ## DE genes only
+      else {
+        DE<-append(DE, "sig gene")
+      } 
+    }
+    
+    else if(t_stats$adj.P.Val_exons[i]<0.05 && t_stats$adj.P.Val_genes[i]>=0.05){
+      
+      ## DE exons only
+      if(abs(t_stats$logFC_exons[i])>0.25) {
+        DE<-append(DE, "sig tx")
+      }
+      else{
+        DE<-append(DE, "None")
+      }
+    }
+    
+    else if(t_stats$adj.P.Val_exons[i]>=0.05 && t_stats$adj.P.Val_genes[i]<0.05){
+      ## DE genes only
+      DE<-append(DE, "sig gene")
+    }
+    
+    else {
+      ## Neither DE tx nor DE genes
+      DE<-append(DE, "None")      
+    }
+  }
+  return(DE)
+}
+
+
+
+## Create plots of t-stats of tx vs genes
+
+t_stat_tx_vs_genes<- function(expt){
+  
+  top_tx<-eval(parse_expr(paste("top_tx_", substr(expt,1,3), sep="")))
+  top_genes<-eval(parse_expr(paste("top_genes_pups_", expt, "_fitted", sep="")))
+  de_tx<-eval(parse_expr(paste("de_tx_", substr(expt,1,3), sep="")))
+  
+  ## Transcripts' genes
+  tx_genes<-unique(top_tx$ensembl_id)
+  
+  ## Common genes
+  tx_genes<-tx_genes[which(tx_genes %in% top_genes$gencodeID)]
+  
+  ## Extract transcripts' info
+  t_stats<-top_tx[which(top_tx$ensembl_id %in% tx_genes), c("transcript_id", "adj.P.Val", "Symbol", 
+                                                                    "t", "ensembl_id", "logFC")]
+  colnames(t_stats)[2]<-"adj.P.Val_tx"
+  colnames(t_stats)[4]<-"t_tx"
+  colnames(t_stats)[6]<-"logFC_tx"
+  
+  ## Add t-stats and FDRs of transcripts' genes 
+  t_genes<-vector()
+  FDRs<-vector()
+  for (i in 1:dim(t_stats)[1]){
+    t<-top_genes[which(top_genes$gencodeID==t_stats$ensembl_id[i]), "t"]
+    FDR<-top_genes[which(top_genes$gencodeID==t_stats$ensembl_id[i]), "adj.P.Val"]
+    t_genes<-append(t_genes, t)
+    FDRs<-append(FDRs, FDR)
+  }
+  t_stats$t_genes<-t_genes
+  t_stats$adj.P.Val_genes<-FDRs
+  
+  ## Correlation coeff between t-stats of genes and transcripts
+  rho <- cor(t_stats$t_tx, t_stats$t_genes, method = "spearman")
+  rho_anno = paste0("rho = ", format(round(rho, 2), nsmall = 2))
+  
+  ## Add DE info for both groups ### here
+  t_stats$DE<-add_DE_info_tx_vs_genes(t_stats)
+  
+  
+  ## Gene-exon symbols of DE exons with no DEG, 
+  ## DE exons whose DEG have an opposite sign in logFC
+  ## and also label DE exons from genes with up and down exons
+  
+  ## Up and down exons' genes
+  exons_up_genes<-unique(de_exons[which(de_exons$logFC>0),"ensemblID"])
+  exons_down_genes<-unique(de_exons[which(de_exons$logFC<0),"ensemblID"])
+  ## Genes with up and down exons
+  interest_genes<-intersect(exons_up_genes, exons_down_genes)
+  ## Retain only the exons' genes that were considered at the gene level
+  interest_genes<-intersect(interest_genes, exons_genes)
+  
+  exon_symbols<-vector()
+  for (i in 1:dim(t_stats)[1]) {
+    
+    if (t_stats$DE[i]=="sig exon" & (abs(t_stats$t_exons[i])>6 | (t_stats$ensemblID[i] %in% interest_genes))) {
+      exon_symbols<-append(exon_symbols, paste(t_stats$Symbol[i], "-", t_stats$seqname[i], ":", t_stats$start[i], "-",
+                                               t_stats$end[i], sep=""))
+    }
+    else if(t_stats$DE[i]=="sig Both"){
+      if ((t_stats$t_genes[i]< -3.5 & t_stats$t_exons[i]> 4) | (t_stats$t_genes[i]> 3 & t_stats$t_exons[i]< -4)){
+        exon_symbols<-append(exon_symbols, paste(t_stats$Symbol[i], "-", t_stats$seqname[i], ":", t_stats$start[i], "-",
+                                                 t_stats$end[i], sep=""))
+      }
+      else if((t_stats$ensemblID[i] %in% interest_genes) & (t_stats$adj.P.Val_genes[i] <0.01)){
+        exon_symbols<-append(exon_symbols, paste(t_stats$Symbol[i], "-", t_stats$seqname[i], ":", t_stats$start[i], "-",
+                                                 t_stats$end[i], sep=""))        
+      }
+      else{
+        exon_symbols<-append(exon_symbols, NA)
+      }
+    }
+    else {
+      exon_symbols<-append(exon_symbols, NA)
+    }
+  }
+  t_stats$exon_symbols<- exon_symbols
+  
+  ## Plot
+  cols <- c("red", "#ffad73","#26b3ff", "dark grey") 
+  names(cols)<-c("sig Both","sig exon", "sig gene", "None")
+  alphas <- c( 1, 1, 1,0.5)  
+  names(alphas)<-c("sig Both", "sig exon", "sig gene", "None")
+  
+  plot <- ggplot(t_stats, aes(x = t_genes, y = t_exons, color=DE, alpha=DE, label= exon_symbols)) +
+    geom_point(size = 1) +
+    labs(x = "t-stats genes", 
+         y = "t-stats exons",
+         title = paste(capitalize(expt),"genes vs exons", sep=" "), 
+         subtitle = rho_anno, 
+         parse = T) +
+    geom_label_repel(fill="white", size=2, max.overlaps = Inf,  
+                     box.padding = 0.2, 
+                     show.legend=FALSE) +
+    theme_bw() +
+    scale_color_manual(values = cols) + 
+    scale_alpha_manual(values = alphas)
+  
+  plot
+  ggsave(filename=paste("plots/04_DEA/02_Comparisons/Exon_analysis/t_stats_global_", substr(expt,1,3), 
+                        ".pdf", sep=""), height = 20, width = 25, units = "cm")
+  
+}
+
+
+##################################### 
+# Nicotine genes vs nicotine exons
+#####################################
+expt<-"nicotine"
+t_stat_exons_vs_genes(expt)
+
+
+##################################### 
+# Smoking genes vs smoking exons
+#####################################
+expt<-"smoking"
+t_stat_exons_vs_genes(expt)
 
