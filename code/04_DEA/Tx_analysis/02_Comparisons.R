@@ -9,10 +9,10 @@ load(here("processed-data/04_DEA/Tx_analysis/top_tx_smo.Rdata"))
 load(here("processed-data/04_DEA/Tx_analysis/de_tx_smo.Rdata"))
 #load(here("processed-data/04_DEA/Tx_analysis/results_smo.Rdata"))
 
-#load(here("processed-data/04_DEA/Gene_analysis/de_genes_pups_nicotine_fitted.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/de_genes_pups_nicotine_fitted.Rdata"))
 load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_nicotine_fitted.Rdata"))
 #load(here("processed-data/04_DEA/Gene_analysis/results_pups_nicotine_fitted.Rdata"))
-#load(here("processed-data/04_DEA/Gene_analysis/de_genes_pups_smoking_fitted.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/de_genes_pups_smoking_fitted.Rdata"))
 load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_smoking_fitted.Rdata"))
 #load(here("processed-data/04_DEA/Gene_analysis/results_pups_smoking_fitted.Rdata"))
 #load(here("processed-data/05_GO_KEGG/Gene_analysis/intersections.Rdata"))     
@@ -111,35 +111,22 @@ add_DE_info_tx_vs_genes <-function(t_stats) {
   for (i in 1:dim(t_stats)[1]) {
     
     ## DE tx from DEG 
-    if (t_stats$adj.P.Val_exons[i]<0.05 && t_stats$adj.P.Val_genes[i]<0.05){
-      
-      if(abs(t_stats$logFC_exons[i])>0.25) {
-        DE<-append(DE, "sig Both")
-      }
-      ## DE genes only
-      else {
-        DE<-append(DE, "sig gene")
-      } 
+    if (t_stats$adj.P.Val_tx[i]<0.05 && t_stats$adj.P.Val_genes[i]<0.05){
+      DE<-append(DE, "sig Both")
     }
     
-    else if(t_stats$adj.P.Val_exons[i]<0.05 && t_stats$adj.P.Val_genes[i]>=0.05){
-      
-      ## DE exons only
-      if(abs(t_stats$logFC_exons[i])>0.25) {
-        DE<-append(DE, "sig tx")
-      }
-      else{
-        DE<-append(DE, "None")
-      }
+    ## DE tx only
+    else if (t_stats$adj.P.Val_tx[i]<0.05 && t_stats$adj.P.Val_genes[i]>=0.05){
+      DE<-append(DE, "sig tx")
     }
     
-    else if(t_stats$adj.P.Val_exons[i]>=0.05 && t_stats$adj.P.Val_genes[i]<0.05){
-      ## DE genes only
+    ## DE genes only
+    else if(t_stats$adj.P.Val_tx[i]>=0.05 && t_stats$adj.P.Val_genes[i]<0.05){
       DE<-append(DE, "sig gene")
     }
     
+    ## Neither DE tx nor DE genes
     else {
-      ## Neither DE tx nor DE genes
       DE<-append(DE, "None")      
     }
   }
@@ -185,59 +172,56 @@ t_stat_tx_vs_genes<- function(expt){
   rho <- cor(t_stats$t_tx, t_stats$t_genes, method = "spearman")
   rho_anno = paste0("rho = ", format(round(rho, 2), nsmall = 2))
   
-  ## Add DE info for both groups ### here
+  ## Add DE info for both groups 
   t_stats$DE<-add_DE_info_tx_vs_genes(t_stats)
   
   
-  ## Gene-exon symbols of DE exons with no DEG, 
-  ## DE exons whose DEG have an opposite sign in logFC
-  ## and also label DE exons from genes with up and down exons
+  ## Gene-tx symbols of DE tx with no DEG, 
+  ## DE tx whose DEG have an opposite sign in logFC
+  ## and also label DE tx from genes with up and down tx
   
-  ## Up and down exons' genes
-  exons_up_genes<-unique(de_exons[which(de_exons$logFC>0),"ensemblID"])
-  exons_down_genes<-unique(de_exons[which(de_exons$logFC<0),"ensemblID"])
-  ## Genes with up and down exons
-  interest_genes<-intersect(exons_up_genes, exons_down_genes)
-  ## Retain only the exons' genes that were considered at the gene level
-  interest_genes<-intersect(interest_genes, exons_genes)
+  ## Up and down transcripts' genes
+  tx_up_genes<-unique(de_tx[which(de_tx$logFC>0),"ensembl_id"])
+  tx_down_genes<-unique(de_tx[which(de_tx$logFC<0),"ensembl_id"])
+  ## Genes with up and down tx
+  interest_genes<-intersect(tx_up_genes, tx_down_genes)
+  ## Retain only the transcripts' genes that were considered at the gene level
+  interest_genes<-intersect(interest_genes, tx_genes)
   
-  exon_symbols<-vector()
+  tx_symbols<-vector()
   for (i in 1:dim(t_stats)[1]) {
     
-    if (t_stats$DE[i]=="sig exon" & (abs(t_stats$t_exons[i])>6 | (t_stats$ensemblID[i] %in% interest_genes))) {
-      exon_symbols<-append(exon_symbols, paste(t_stats$Symbol[i], "-", t_stats$seqname[i], ":", t_stats$start[i], "-",
-                                               t_stats$end[i], sep=""))
+    if (t_stats$DE[i]=="sig tx" & (abs(t_stats$t_tx[i])>6 | (t_stats$ensembl_id[i] %in% interest_genes))) {
+      tx_symbols<-append(tx_symbols, paste(t_stats$Symbol[i], "-", t_stats$transcript_id[i], sep=""))
     }
     else if(t_stats$DE[i]=="sig Both"){
-      if ((t_stats$t_genes[i]< -3.5 & t_stats$t_exons[i]> 4) | (t_stats$t_genes[i]> 3 & t_stats$t_exons[i]< -4)){
-        exon_symbols<-append(exon_symbols, paste(t_stats$Symbol[i], "-", t_stats$seqname[i], ":", t_stats$start[i], "-",
-                                                 t_stats$end[i], sep=""))
+      if ((t_stats$t_genes[i]> 3 & t_stats$t_tx[i]< -4)){
+        tx_symbols<-append(tx_symbols, paste(t_stats$Symbol[i], "-", t_stats$transcript_id[i], sep=""))
       }
-      else if((t_stats$ensemblID[i] %in% interest_genes) & (t_stats$adj.P.Val_genes[i] <0.01)){
-        exon_symbols<-append(exon_symbols, paste(t_stats$Symbol[i], "-", t_stats$seqname[i], ":", t_stats$start[i], "-",
-                                                 t_stats$end[i], sep=""))        
-      }
+      else if(t_stats$ensembl_id[i] %in% interest_genes){
+        tx_symbols<-append(tx_symbols, paste(t_stats$Symbol[i], "-", t_stats$transcript_id[i], sep=""))
+      }      
       else{
-        exon_symbols<-append(exon_symbols, NA)
+        tx_symbols<-append(tx_symbols, NA)
       }
     }
     else {
-      exon_symbols<-append(exon_symbols, NA)
+      tx_symbols<-append(tx_symbols, NA)
     }
   }
-  t_stats$exon_symbols<- exon_symbols
+  t_stats$tx_symbols<-tx_symbols
   
   ## Plot
   cols <- c("red", "#ffad73","#26b3ff", "dark grey") 
-  names(cols)<-c("sig Both","sig exon", "sig gene", "None")
-  alphas <- c( 1, 1, 1,0.5)  
-  names(alphas)<-c("sig Both", "sig exon", "sig gene", "None")
+  names(cols)<-c("sig Both","sig tx", "sig gene", "None")
+  alphas <- c(1, 1, 1,0.5)  
+  names(alphas)<-c("sig Both", "sig tx", "sig gene", "None")
   
-  plot <- ggplot(t_stats, aes(x = t_genes, y = t_exons, color=DE, alpha=DE, label= exon_symbols)) +
+  plot <- ggplot(t_stats, aes(x = t_genes, y = t_tx, color=DE, alpha=DE, label= tx_symbols)) +
     geom_point(size = 1) +
     labs(x = "t-stats genes", 
-         y = "t-stats exons",
-         title = paste(capitalize(expt),"genes vs exons", sep=" "), 
+         y = "t-stats tx",
+         title = paste(capitalize(expt),"genes vs tx", sep=" "), 
          subtitle = rho_anno, 
          parse = T) +
     geom_label_repel(fill="white", size=2, max.overlaps = Inf,  
@@ -248,7 +232,7 @@ t_stat_tx_vs_genes<- function(expt){
     scale_alpha_manual(values = alphas)
   
   plot
-  ggsave(filename=paste("plots/04_DEA/02_Comparisons/Exon_analysis/t_stats_global_", substr(expt,1,3), 
+  ggsave(filename=paste("plots/04_DEA/02_Comparisons/Tx_analysis/t_stats_global_", substr(expt,1,3), 
                         ".pdf", sep=""), height = 20, width = 25, units = "cm")
   
 }
