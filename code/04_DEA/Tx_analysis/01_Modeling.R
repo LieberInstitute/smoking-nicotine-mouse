@@ -252,7 +252,6 @@ save(de_tx_nic, file="processed-data/04_DEA/Tx_analysis/de_tx_nic.Rdata")
 
 
 
-
 ##################################
 #         Smoking DEA 
 #    Smoking vs ctrls in pups
@@ -268,5 +267,28 @@ save(results_smo, file="processed-data/04_DEA/Tx_analysis/results_smo.Rdata")
 save(top_tx_smo, file="processed-data/04_DEA/Tx_analysis/top_tx_smo.Rdata")
 save(de_tx_smo, file="processed-data/04_DEA/Tx_analysis/de_tx_smo.Rdata")
 
+
+
+
+
+
+
+## Reproducibility information
+
+options(width = 120)
+session_info()
+
+# setting  value
+# version  R version 4.2.0 (2022-04-22 ucrt)
+# os       Windows 10 x64 (build 19044)
+# system   x86_64, mingw32
+# ui       RStudio
+# language (EN)
+# collate  Spanish_Mexico.utf8
+# ctype    Spanish_Mexico.utf8
+# tz       America/Mexico_City
+# date     2023-01-05
+# rstudio  2022.07.2+576 Spotted Wakerobin (desktop)
+# pandoc   2.19.2 @ C:/Program Files/RStudio/bin/quarto/bin/tools/ (via rmarkdown)
 
 
