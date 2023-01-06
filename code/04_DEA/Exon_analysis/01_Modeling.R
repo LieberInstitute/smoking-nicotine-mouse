@@ -160,7 +160,7 @@ plots_DE<-function(top_exons, vExon, FDR=0.05, logFC=0.25, name) {
     scale_alpha_manual(values = alphas) 
   
   plot_grid(p1, p2, ncol=2)
-  ggsave(paste("plots/04_DEA/01_Modeling/Exon_analysis/DEG_exon_plots_", name, ".pdf", sep=""), 
+  ggsave(paste("plots/04_DEA/01_Modeling/Exon_analysis/DE_exons_plots_", name, ".pdf", sep=""), 
          width = 35, height = 15, units = "cm")
 }
 
@@ -235,7 +235,7 @@ apply_DEA<-function(RSE, name){
     vExon<-results[[2]]
     ## Retain only DE exons with |logFC|>0.25
     de_exons<-top_exons[which(top_exons$adj.P.Val < 0.05 & abs(top_exons$logFC)>0.25),]
-    ## Plots for DE genes
+    ## Plots for DE exons
     plots_DE(top_exons, vExon, 0.05, 0.25, name)
     DE_boxplots(RSE, vExon, de_exons)
     print(paste(dim(de_exons)[1], "differentially expressed exons", sep=" "))
