@@ -8,19 +8,21 @@ load(here("processed-data/04_DEA/Tx_analysis/de_tx_nic.Rdata"))
 load(here("processed-data/04_DEA/Tx_analysis/top_tx_smo.Rdata"))
 load(here("processed-data/04_DEA/Tx_analysis/de_tx_smo.Rdata"))
 #load(here("processed-data/04_DEA/Tx_analysis/results_smo.Rdata"))
+load(here("processed-data/04_DEA/Tx_analysis/rse_tx_brain_pups_nicotine.Rdata"))
+load(here("processed-data/04_DEA/Tx_analysis/rse_tx_brain_pups_smoking.Rdata"))
 
 load(here("processed-data/04_DEA/Gene_analysis/de_genes_pups_nicotine_fitted.Rdata"))
 load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_nicotine_fitted.Rdata"))
-#load(here("processed-data/04_DEA/Gene_analysis/results_pups_nicotine_fitted.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/results_pups_nicotine_fitted.Rdata"))
 load(here("processed-data/04_DEA/Gene_analysis/de_genes_pups_smoking_fitted.Rdata"))
 load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_smoking_fitted.Rdata"))
-#load(here("processed-data/04_DEA/Gene_analysis/results_pups_smoking_fitted.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/results_pups_smoking_fitted.Rdata"))
 #load(here("processed-data/05_GO_KEGG/Gene_analysis/intersections.Rdata"))     
 
-load(here("processed-data/04_DEA/Exon_analysis/top_exons_nic.Rdata"))
-load(here("processed-data/04_DEA/Exon_analysis/de_exons_nic.Rdata"))
-load(here("processed-data/04_DEA/Exon_analysis/top_exons_smo.Rdata"))
-load(here("processed-data/04_DEA/Exon_analysis/de_exons_smo.Rdata"))
+# load(here("processed-data/04_DEA/Exon_analysis/top_exons_nic.Rdata"))
+# load(here("processed-data/04_DEA/Exon_analysis/de_exons_nic.Rdata"))
+# load(here("processed-data/04_DEA/Exon_analysis/top_exons_smo.Rdata"))
+# load(here("processed-data/04_DEA/Exon_analysis/de_exons_smo.Rdata"))
 
 
 ### 1.2.1 T-stats plots
@@ -435,6 +437,157 @@ t_stat_tx_vs_genes(expt)
 #####################################
 expt<-"smoking"
 t_stat_tx_vs_genes(expt)
+
+
+
+
+
+
+
+## 1.2.2 Boxplots of relevant genes and their tx
+
+## Each boxplot
+create_boxplot<- function(counts, y, title, q_value){
+  
+  ## Boxplot
+  p<-ggplot(data=counts, 
+            aes(x=Group,y=eval(parse_expr(y)))) + 
+    geom_boxplot(outlier.color = "#FFFFFFFF") +
+    geom_jitter(aes(colour=Group),shape=16, 
+                position=position_jitter(0.2)) +
+    theme_classic() +
+    labs(x = "Group", y = "norm counts",
+         title = title,
+         ## Add FDR and FC of genes and exons
+         subtitle=paste(" FDR:", q_value, "\n", "FC:", FC)) +
+    theme(plot.margin=unit (c (1,1.5,1,1), 'cm'), legend.position = "none",
+          plot.title = element_text(hjust=0.5, size=10, face="bold"), 
+          plot.subtitle = element_text(size = 9)) 
+  
+  print(p)
+}
+
+
+
+## Boxplots
+gene_tx_boxplots<- function(expt, gene, tx1, tx2){
+  
+  top_tx<-eval(parse_expr(paste("top_tx_", substr(expt,1,3), sep="")))
+  top_genes<-eval(parse_expr(paste("top_genes_pups_", expt, "_fitted", sep="")))
+  results_genes<-eval(parse_expr(paste("results_pups_", expt, "_fitted", sep="")))
+  
+  ## Expression values of all genes
+  vGene<-results_genes[[1]][[2]]
+  
+  ## Regress out residuals
+  formula<- ~ Group + Sex + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr + overallMapRate + mitoRate
+  model=model.matrix(formula, data=vGene$targets)
+  vGene$E<-cleaningY(vGene$E, model, P=2)
+  
+  ## Get ensembl ID and symbol of the gene
+  if(! gene %in% rownames(vGene)){
+    gene_symbol<-gene
+    gene<-vGene$genes[which(vGene$genes$Symbol==gene), "gencodeID"]
+  }
+  else {
+    gene_symbol<-vGene$genes[which(vGene$genes$ensemblID==gene), "Symbol"]
+  }
+  
+  ## Gene ID for plot: Symbol-ensemblID
+  gene_ID<-paste(gene_symbol, "-", gene, sep="")
+  
+  ## Extract expression values of the gene
+  counts_gene<-vGene$E[rownames(vGene)==gene,]
+  
+  ## Gene's transcripts 
+  gene_txs<-top_tx[which(top_tx$ensembl_id==gene),]
+  ## Order tx by FDR and extract the top 3
+  top_gene_txs<-gene_txs[order(gene_txs$adj.P.Val),"transcript_id"][1:3]
+  
+  ## Add specific transcripts
+  if (!is.null(tx1) | !is.null(tx2)){
+    
+    if (!is.null(tx1) &  is.null(tx2)){
+      tx<-tx1
+      ## Extract tx ID 
+      tx_ID<-strsplit(tx, "−")[[1]][2]
+      if (! tx_ID %in% top_gene_txs[1:3]){
+        top_gene_txs<-append(tx_ID, top_gene_txs) 
+      }
+    }
+    else if(!is.null(tx2) & is.null(tx1)){
+      tx<-tx2
+      tx_ID<-strsplit(tx, "−")[[1]][2]
+      if (! tx_ID %in% top_gene_txs[1:3]){
+        top_gene_txs<-append(tx_ID, top_gene_txs) 
+      }
+    }
+    
+    ## Add two txs
+    else {
+      ## Tx IDs
+      for (i in 1:2){
+        tx<-eval(parse_expr(paste("tx", i, sep="")))
+        tx_ID<-strsplit(tx, "−")[[1]][2]
+        if (! tx_ID %in% top_gene_txs[1:3]){
+          top_gene_txs<-append(tx_ID, top_gene_txs) 
+        }
+      }
+    }
+  }
+  
+  ## Log-expression values of that txs
+  ## Regress out residuals
+  formula<- ~ Group + Sex + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr + overallMapRate + mitoRate
+  model=model.matrix(formula, data=colData(RSE))
+  logcounts<-cleaningY(assays(RSE)$logcounts, model, P=2)
+  
+  counts_txs<-vExon$E[which(rownames(vExon) %in% top_gene_exons[1:3]),]
+  counts_txs<-t(counts_txs)
+  
+  ## Data frame with all expression values and samples' group
+  counts<-cbind(counts_gene, counts_exons, "Group"=vGene$targets$Group)
+  counts<-as.data.frame(counts)
+  counts$counts_gene<-as.numeric(counts$counts_gene)
+  colnames(counts)[1]<-gene
+  counts[,2]<-as.numeric(counts[,2])
+  counts[,3]<-as.numeric(counts[,3])
+  counts[,4]<-as.numeric(counts[,4])
+  
+  plots<-list()
+  for (i in 1:(dim(counts)[2]-1)){
+    
+    ## Boxplot of the gene
+    if (i==1){
+      ## q-value for the gene
+      q_value=signif(top_genes[which(top_genes$ensemblID==gene), "adj.P.Val"], digits = 3)
+      FC=signif(2**(top_genes[which(top_genes$ensemblID==gene), "logFC"]), digits = 3)
+      y<-gene
+      title<-gene_ID
+    }
+    
+    ## Boxplot of the exons
+    else {
+      q_value=signif(top_exons[which(top_exons$exon_libdID==colnames(counts)[i]), "adj.P.Val"], digits = 3)
+      FC=signif(2**(top_exons[which(top_exons$exon_libdID==colnames(counts)[i]), "logFC"]), digits = 3)
+      y<-colnames(counts)[i]
+      ## Exon ID for plot
+      title<-paste(top_exons[which(top_exons$exon_libdID==colnames(counts)[i]), "Symbol"], "-",
+                   top_exons[which(top_exons$exon_libdID==colnames(counts)[i]), "seqnames"], ":", 
+                   top_exons[which(top_exons$exon_libdID==colnames(counts)[i]), "start"], "-", 
+                   top_exons[which(top_exons$exon_libdID==colnames(counts)[i]), "end"], sep="")
+    }
+    
+    ## Plots
+    p<-create_boxplot(counts, y, title, q_value, FC)
+    plots[[i]]<-p
+  }
+  
+  plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], ncol = 4)
+  ggsave(here(paste("plots/04_DEA/02_Comparisons/Exon_analysis/Boxplots_", gene_symbol, ".pdf", sep="")), 
+         width = 35, height = 10, units = "cm")
+  
+}
 
 
 
