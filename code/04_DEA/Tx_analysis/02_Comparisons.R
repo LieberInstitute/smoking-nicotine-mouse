@@ -447,7 +447,7 @@ t_stat_tx_vs_genes(expt)
 ## 1.2.2 Boxplots of relevant genes and their tx
 
 ## Each boxplot
-create_boxplot<- function(counts, y, title, q_value){
+create_boxplot<- function(counts, y, title, q_value, FC){
   
   ## Boxplot
   p<-ggplot(data=counts, 
@@ -458,7 +458,7 @@ create_boxplot<- function(counts, y, title, q_value){
     theme_classic() +
     labs(x = "Group", y = "norm counts",
          title = title,
-         ## Add FDR and FC of genes and exons
+         ## Add FDR and FC of genes and txs
          subtitle=paste(" FDR:", q_value, "\n", "FC:", FC)) +
     theme(plot.margin=unit (c (1,1.5,1,1), 'cm'), legend.position = "none",
           plot.title = element_text(hjust=0.5, size=10, face="bold"), 
@@ -475,6 +475,7 @@ gene_tx_boxplots<- function(expt, gene, tx1, tx2){
   top_tx<-eval(parse_expr(paste("top_tx_", substr(expt,1,3), sep="")))
   top_genes<-eval(parse_expr(paste("top_genes_pups_", expt, "_fitted", sep="")))
   results_genes<-eval(parse_expr(paste("results_pups_", expt, "_fitted", sep="")))
+  RSE<-eval(parse_expr((paste("rse_tx_brain_pups_", expt, sep=""))))
   
   ## Expression values of all genes
   vGene<-results_genes[[1]][[2]]
@@ -542,11 +543,11 @@ gene_tx_boxplots<- function(expt, gene, tx1, tx2){
   model=model.matrix(formula, data=colData(RSE))
   logcounts<-cleaningY(assays(RSE)$logcounts, model, P=2)
   
-  counts_txs<-vExon$E[which(rownames(vExon) %in% top_gene_exons[1:3]),]
+  counts_txs<-logcounts[which(rownames(logcounts) %in% top_gene_txs[1:3]),]
   counts_txs<-t(counts_txs)
   
   ## Data frame with all expression values and samples' group
-  counts<-cbind(counts_gene, counts_exons, "Group"=vGene$targets$Group)
+  counts<-cbind(counts_gene, counts_txs, "Group"=vGene$targets$Group)
   counts<-as.data.frame(counts)
   counts$counts_gene<-as.numeric(counts$counts_gene)
   colnames(counts)[1]<-gene
@@ -560,22 +561,19 @@ gene_tx_boxplots<- function(expt, gene, tx1, tx2){
     ## Boxplot of the gene
     if (i==1){
       ## q-value for the gene
-      q_value=signif(top_genes[which(top_genes$ensemblID==gene), "adj.P.Val"], digits = 3)
-      FC=signif(2**(top_genes[which(top_genes$ensemblID==gene), "logFC"]), digits = 3)
+      q_value=signif(top_genes[which(top_genes$gencodeID==gene), "adj.P.Val"], digits = 3)
+      FC=signif(2**(top_genes[which(top_genes$gencodeID==gene), "logFC"]), digits = 3)
       y<-gene
       title<-gene_ID
     }
     
-    ## Boxplot of the exons
+    ## Boxplot of the txs
     else {
-      q_value=signif(top_exons[which(top_exons$exon_libdID==colnames(counts)[i]), "adj.P.Val"], digits = 3)
-      FC=signif(2**(top_exons[which(top_exons$exon_libdID==colnames(counts)[i]), "logFC"]), digits = 3)
+      q_value=signif(top_tx[which(top_tx$transcript_id==colnames(counts)[i]), "adj.P.Val"], digits = 3)
+      FC=signif(2**(top_tx[which(top_tx$transcript_id==colnames(counts)[i]), "logFC"]), digits = 3)
       y<-colnames(counts)[i]
-      ## Exon ID for plot
-      title<-paste(top_exons[which(top_exons$exon_libdID==colnames(counts)[i]), "Symbol"], "-",
-                   top_exons[which(top_exons$exon_libdID==colnames(counts)[i]), "seqnames"], ":", 
-                   top_exons[which(top_exons$exon_libdID==colnames(counts)[i]), "start"], "-", 
-                   top_exons[which(top_exons$exon_libdID==colnames(counts)[i]), "end"], sep="")
+      ## Tx name for plot
+      title<-paste(gene_symbol, "-", y, sep="")
     }
     
     ## Plots
@@ -584,12 +582,65 @@ gene_tx_boxplots<- function(expt, gene, tx1, tx2){
   }
   
   plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], ncol = 4)
-  ggsave(here(paste("plots/04_DEA/02_Comparisons/Exon_analysis/Boxplots_", gene_symbol, ".pdf", sep="")), 
+  ggsave(here(paste("plots/04_DEA/02_Comparisons/Tx_analysis/Boxplots_", gene_symbol, ".pdf", sep="")), 
          width = 35, height = 10, units = "cm")
   
 }
 
 
+
+#########################################
+## Boxplots of nicotine genes and txs
+#########################################
+
+#### Non-DE genes but with DE txs ####
+
+## Ankrd11: acts in head morphogenesis; expressed in cerebral cortex
+gene_tx_boxplots("nicotine", "Ankrd11", "Ankrd11−ENSMUST00000212937.1", NULL)
+
+## Trpc4: acts upstream of or within gamma-aminobutyric acid secretion and 
+## oligodendrocyte differentiation; expressed in brain
+gene_tx_boxplots("nicotine", "Trpc4", "Trpc4−ENSMUST00000199359.1", NULL)
+
+## Scaf11: predicted to be involved in spliceosomal complex assembly;
+## expressed in diencephalon lateral wall ventricular layer; heart ventricle; 
+## midbrain ventricular layer; and telencephalon ventricular layer
+gene_tx_boxplots("nicotine", "Scaf11", "Scaf11−ENSMUST00000227133.1", NULL)
+
+## Bcl11a: expressed in NS and sensoty organ; human ortholog(s) of this gene 
+## are implicated in autism spectrum disorder and schizophrenia
+gene_tx_boxplots("nicotine", "Bcl11a", "Bcl11a−ENSMUST00000124148.1", NULL)
+
+
+
+#### DE tx whose DEG have opposite direction of regulation ####
+
+## Dgcr8: enables primary miRNA binding activity; located in postsynaptic density;
+## expressed in CNS, brain, branchial arch and facial prominence
+gene_tx_boxplots("nicotine", "Dgcr8", "Dgcr8−ENSMUST00000115633.2", NULL)
+
+
+
+#### DEG with Up and Down DE tx ####
+
+## Pnisr: predicted to be active in presynaptic active zone; expressed in NS
+gene_tx_boxplots("nicotine", "Pnisr", "Pnisr−ENSMUST00000029911.11", 
+                 "Pnisr−ENSMUST00000148561.1")
+
+## Dcun1d5: predicted to be involved in protein modification by small protein 
+## conjugation or removal, protein neddylation, and regulation of cell growth;
+## expressed in NS
+gene_tx_boxplots("nicotine", "Dcun1d5", "Dcun1d5−ENSMUST00000215683.1", 
+                 "Dcun1d5−ENSMUST00000216770.1")
+
+
+
+#### Non-DE genes with Up and Down DE tx ####
+
+## Phf3: predicted to be involved in transcription, DNA-templated;
+## expressed in CNS
+gene_tx_boxplots("nicotine", "Phf3", "Phf3−ENSMUST00000185521.1", 
+                 "Phf3−ENSMUST00000191329.1")
 
 
 
