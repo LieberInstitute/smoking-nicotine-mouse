@@ -245,22 +245,28 @@ t_stat_tx_vs_genes<- function(expt){
     scale_alpha_manual(values = alphas)
   
   plot
-  ggsave(filename=paste("plots/04_DEA/02_Comparisons/Tx_analysis/t_stats_global_", substr(expt,1,3), 
+  ggsave(filename=paste("plots/04_DEA/02_Comparisons/Tx_analysis/t_stats_tx_vs_genes_", substr(expt,1,3), 
                         ".pdf", sep=""), height = 20, width = 25, units = "cm")
   
 }
 
 
 ##################################### 
-# Nicotine genes vs nicotine exons
+# Nicotine genes vs nicotine tx
 #####################################
 expt<-"nicotine"
 t_stat_tx_vs_genes(expt)
 
 
 ##################################### 
-# Smoking genes vs smoking exons
+# Smoking genes vs smoking tx
 #####################################
 expt<-"smoking"
 t_stat_tx_vs_genes(expt)
+
+
+
+
+
+
 
