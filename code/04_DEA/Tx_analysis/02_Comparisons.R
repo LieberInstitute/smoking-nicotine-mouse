@@ -306,13 +306,14 @@ add_DE_info_tx_vs_exons <-function(t_stats) {
 
 
 
-## Create plots of t-stats of tx vs genes
+## Create plots of t-stats of tx vs exons
 
 t_stat_tx_vs_exons<- function(expt){
   
   top_tx<-eval(parse_expr(paste("top_tx_", substr(expt,1,3), sep="")))
-  top_exons<-eval(parse_expr(paste("top_exons_pups_", expt, "_fitted", sep="")))
+  top_exons<-eval(parse_expr(paste("top_exons_", substr(expt,1,3), sep="")))
   de_tx<-eval(parse_expr(paste("de_tx_", substr(expt,1,3), sep="")))
+  de_exons<-eval(parse_expr(paste("de_exons_", substr(expt,1,3), sep="")))
   
   if (expt=="nicotine"){
     abs_t_tx=6
@@ -325,7 +326,7 @@ t_stat_tx_vs_exons<- function(expt){
     FDR=0.001
   }
   
-  ## Transcripts' genes
+  ## Transcripts' 
   tx_genes<-unique(top_tx$ensembl_id)
   
   ## Common genes
