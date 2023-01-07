@@ -143,6 +143,17 @@ t_stat_tx_vs_genes<- function(expt){
   top_genes<-eval(parse_expr(paste("top_genes_pups_", expt, "_fitted", sep="")))
   de_tx<-eval(parse_expr(paste("de_tx_", substr(expt,1,3), sep="")))
   
+  if (expt=="nicotine"){
+    abs_t_tx=6
+    both_t=c(3,-4)
+    FDR=1
+  }
+  else{
+    abs_t_tx=7
+    both_t=c(4,-5)
+    FDR=0.001
+  }
+  
   ## Transcripts' genes
   tx_genes<-unique(top_tx$ensembl_id)
   
@@ -191,14 +202,16 @@ t_stat_tx_vs_genes<- function(expt){
   tx_symbols<-vector()
   for (i in 1:dim(t_stats)[1]) {
     
-    if (t_stats$DE[i]=="sig tx" & (abs(t_stats$t_tx[i])>6 | (t_stats$ensembl_id[i] %in% interest_genes))) {
+    if (t_stats$DE[i]=="sig tx" & (abs(t_stats$t_tx[i])>abs_t_tx | 
+       ((t_stats$ensembl_id[i] %in% interest_genes) & (t_stats$adj.P.Val_tx[i]< FDR)))) {
       tx_symbols<-append(tx_symbols, paste(t_stats$Symbol[i], "-", t_stats$transcript_id[i], sep=""))
     }
     else if(t_stats$DE[i]=="sig Both"){
-      if ((t_stats$t_genes[i]> 3 & t_stats$t_tx[i]< -4)){
+      if ((t_stats$t_genes[i]> both_t[1] & t_stats$t_tx[i]< both_t[2]) | 
+          (t_stats$t_genes[i]< -both_t[1] & t_stats$t_tx[i]> -both_t[2])){
         tx_symbols<-append(tx_symbols, paste(t_stats$Symbol[i], "-", t_stats$transcript_id[i], sep=""))
       }
-      else if(t_stats$ensembl_id[i] %in% interest_genes){
+      else if((t_stats$ensembl_id[i] %in% interest_genes) & (t_stats$adj.P.Val_tx[i]< FDR)){
         tx_symbols<-append(tx_symbols, paste(t_stats$Symbol[i], "-", t_stats$transcript_id[i], sep=""))
       }      
       else{
@@ -242,12 +255,12 @@ t_stat_tx_vs_genes<- function(expt){
 # Nicotine genes vs nicotine exons
 #####################################
 expt<-"nicotine"
-t_stat_exons_vs_genes(expt)
+t_stat_tx_vs_genes(expt)
 
 
 ##################################### 
 # Smoking genes vs smoking exons
 #####################################
 expt<-"smoking"
-t_stat_exons_vs_genes(expt)
+t_stat_tx_vs_genes(expt)
 
