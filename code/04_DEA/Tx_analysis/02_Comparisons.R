@@ -644,4 +644,64 @@ gene_tx_boxplots("nicotine", "Phf3", "Phf3−ENSMUST00000185521.1",
 
 
 
+#########################################
+## Boxplots of smoking genes and txs
+#########################################
 
+#### Non-DE genes but with DE txs ####
+
+## Btf3: acts upstream of or within in utero embryonic development; expressed in brain
+gene_tx_boxplots("smoking", "Btf3", "Btf3−ENSMUST00000022163.14", NULL)
+
+## Srsf6: critical for mRNA splicing, involved in mRNA export from the nucleus; 
+## expressed in CNS
+gene_tx_boxplots("smoking", "Srsf6", "Srsf6−ENSMUST00000017065.14", NULL)
+
+
+
+#### DE tx whose DEG have opposite direction of regulation ####
+
+## Meaf6: predicted to act upstream of or within chromatin organization;
+## expressed in CNS and whole brain
+gene_tx_boxplots("smoking", "Meaf6", "Meaf6−ENSMUST00000184205.7", NULL)
+
+
+
+#### DEG with Up and Down DE tx ####
+
+## Ivns1abp: acts upstream of or within negative regulation of intrinsic apoptotic 
+## signaling pathway; expressed in NS
+gene_tx_boxplots("smoking", "Ivns1abp", "Ivns1abp−ENSMUST00000111887.9", 
+                 "Ivns1abp−ENSMUST00000023918.12")
+
+## Morf4l2: predicted to act upstream of or within DNA repair and regulation of growth
+## biased expression in placenta adult and CNS
+gene_tx_boxplots("smoking", "Morf4l2", "Morf4l2−ENSMUST00000169418.7", 
+                 "Morf4l2−ENSMUST00000080411.12")
+
+## Sin3b: involved in skeletal muscle tissue development; expressed in CNS
+gene_tx_boxplots("smoking", "Sin3b", "Sin3b−ENSMUST00000109950.4", 
+                 "Sin3b−ENSMUST00000004494.15")
+
+## Ppp2r5c: predicted to be involved in negative regulation of cell population 
+## proliferation, protein dephosphorylation, and signal transduction by p53 class mediator;
+## expressed in CNS
+gene_tx_boxplots("smoking", "Ppp2r5c", "Ppp2r5c−ENSMUST00000221715.1", 
+                 "Ppp2r5c−ENSMUST00000109832.2")
+
+
+
+#### Non-DE genes with Up and Down DE tx ####
+
+## Cyhr1: predicted to enable zinc ion binding activity; located in cytoplasm and nuclear envelope
+gene_tx_boxplots("smoking", "Cyhr1", "Cyhr1−ENSMUST00000176274.1", 
+                 "Cyhr1−ENSMUST00000081291.12")
+
+## H13: acts upstream of or within in utero embryonic development; expressed in  brain, 
+## embryo ectoderm, extraembryonic component, hemolymphoid system and intervertebral disc
+gene_tx_boxplots("smoking", "H13", "H13−ENSMUST00000089059.8", 
+                 "H13−ENSMUST00000125366.7")
+
+
+
+#### Genes of interest based on previous results at gene and exon levels ####
