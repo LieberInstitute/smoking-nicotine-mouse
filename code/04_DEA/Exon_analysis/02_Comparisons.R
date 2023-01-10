@@ -1102,26 +1102,26 @@ DEG_down_vs_Exons_down <-list(
 
 ## Nic up DEGs vs nic up exons' genes
 DEG_nicUp_vs_Exons_nicUp <-list(
-  "DEG"=nic_up_genes,
-  "DE exons' genes"=nic_DEG_up
+  "DEG"= nic_DEG_up,
+  "DE exons' genes"= nic_up_genes
 )
 
 ## Nic down DEGs vs nic down exons' genes
 DEG_nicDown_vs_Exons_nicDown <-list(
-  "DEG"=nic_down_genes,
-  "DE exons' genes"=nic_DEG_down
+  "DEG"= nic_DEG_down,
+  "DE exons' genes"= nic_down_genes
 )
 
 ## Smo up DEGs vs smo up exons' genes
 DEG_smoUp_vs_Exons_smoUp <-list(
-  "DEG"=smo_up_genes,
-  "DE exons' genes"=smo_DEG_up
+  "DEG"=smo_DEG_up,
+  "DE exons' genes"= smo_up_genes
 )
 
 ## Smo down DEGs vs smo down exons' genes
 DEG_smoDown_vs_Exons_smoDown <-list(
-  "DEG"=smo_down_genes,
-  "DE exons' genes"=smo_DEG_down
+  "DEG"=smo_DEG_down,
+  "DE exons' genes"=smo_down_genes
 )
 
 
@@ -1170,25 +1170,25 @@ DEG_vs_Exons_only_down_smo <-list(
 ## Smo and nic up DEGs vs exons' genes
 DEG_vs_Exons_smoUp_nicUp <-list(
   "DEG"=smoUp_nicUp_DEG,
-  "DE exon's genes"=smoUp_nicUp_genes
+  "DE exons' genes"=smoUp_nicUp_genes
 )
 
 ## Smo and nic down DEGs vs exons' genes
 DEG_vs_Exons_smoDown_nicDown <-list(
   "DEG"=smoDown_nicDown_DEG,
-  "DE exon's genes"=smoDown_nicDown_genes
+  "DE exons' genes"=smoDown_nicDown_genes
 )
 
 ## Smo up and nic down DEGs vs exons' genes
 DEG_vs_Exons_smoUp_nicDown <-list(
   "DEG"=smoUp_nicDown_DEG,
-  "DE exon's genes"=smoUp_nicDown_genes
+  "DE exons' genes"=smoUp_nicDown_genes
 )
 
 ## Smo down and nic up DEGs vs exons' genes
 DEG_vs_Exons_smoDown_nicUp <-list(
   "DEG"=smoDown_nicUp_DEG,
-  "DE exon's genes"=smoDown_nicUp_genes
+  "DE exons' genes"=smoDown_nicUp_genes
 )
 
 
