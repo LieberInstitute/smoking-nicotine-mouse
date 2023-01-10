@@ -712,3 +712,77 @@ gene_tx_boxplots("smoking", "H13", "H13−ENSMUST00000089059.8",
                  "H13−ENSMUST00000125366.7")
 
 
+
+
+
+
+
+### 1.2.2 Venn diagrams
+
+## Function to create multiple Venn diagrams
+venn_plot<-function(DE_lists, colors, name, titles){
+  
+  if (name=="smo_VS_nic_DE_exons"){
+    height=10
+    width=15
+    margin=0.2
+    dist=0.1
+    cat=0.75
+    cex=0.8
+  }
+  
+  else if (name=="DEG_VS_exons_genes"){
+    height=12
+    width=16
+    margin=5
+    dist=0.07
+    cat=0.75
+    cex=0.8
+  }
+  
+  else if (name=="smo_VS_nic_DE_exons_genes"){
+    height=12
+    width=16
+    margin=0.2
+    dist=0.09
+    cat=0.75
+    cex=0.8
+  }
+  
+  else if (name=="intersections_DEG_VS_exons_genes"){
+    height=10
+    width=20
+    margin=5
+    dist=0.06
+    cat=0.9
+    cex=1
+  }
+  
+  plots<-list()
+  pdf(file = paste("plots/04_DEA/02_Comparisons/Exon_analysis/Venn_", name, ".pdf", sep=""), 
+      height = height, width = width)
+  for (i in 1:length(DE_lists)){
+    v<-venn.diagram(DE_lists[[i]], fill=colors[[i]], alpha = rep(0.5, length(DE_lists[[i]])), 
+                    lwd =0, margin=margin, cat.cex=cat, cex=cex, height = 10, width = 12.5, units = "cm", 
+                    cat.dist=rep(dist, length(DE_lists[[i]])), filename=NULL, main = titles[i], 
+                    main.pos = c(0.5,0.476), disable.logging=TRUE)
+    plots[[i]]<-v
+  }
+  
+  if (i==6){
+    gridExtra::grid.arrange(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]], 
+                            plots[[6]], ncol=3)
+    dev.off()
+  }
+  else if (i==9) {
+    gridExtra::grid.arrange(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]],
+                            plots[[6]], plots[[7]], plots[[8]], plots[[9]], ncol=4)
+    dev.off()
+  }
+  else {
+    gridExtra::grid.arrange(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]],
+                            plots[[6]], plots[[7]], plots[[8]], ncol=4)
+    dev.off()    
+  }
+}
+
