@@ -505,6 +505,9 @@ gene_tx_boxplots<- function(expt, gene, tx1, tx2){
   ## Order tx by FDR and extract the top 3
   top_gene_txs<-gene_txs[order(gene_txs$adj.P.Val),"transcript_id"][1:3]
   
+  ## Obtain total tpm of the gene's transcripts
+  gene_tpm<-
+  
   ## Add specific transcripts
   if (!is.null(tx1) | !is.null(tx2)){
     
