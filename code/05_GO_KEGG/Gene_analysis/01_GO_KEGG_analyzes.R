@@ -31,12 +31,12 @@ load(here("processed-data/03_EDA/04_Expl_Var_partition/rse_gene_brain_pups_nicot
 ## GO and KEGG analyzes for DEG from fitted model only
 
 ## Groups of DEG
-up_nic<-de_genes_pups_nicotine_fitted[de_genes_pups_nicotine_fitted$logFC>0, c("EntrezID", "Symbol", "ensemblID")]
-up_smo<-de_genes_pups_smoking_fitted[de_genes_pups_smoking_fitted$logFC>0, c("EntrezID", "Symbol", "ensemblID")]
+up_nic<-de_genes_pups_nicotine_fitted[de_genes_pups_nicotine_fitted$logFC>0, c("EntrezID", "Symbol", "ensemblID", "gencodeID")]
+up_smo<-de_genes_pups_smoking_fitted[de_genes_pups_smoking_fitted$logFC>0, c("EntrezID", "Symbol", "ensemblID", "gencodeID")]
 all_up<-unique(rbind(up_nic, up_smo))
 
-down_nic<-de_genes_pups_nicotine_fitted[de_genes_pups_nicotine_fitted$logFC<0, c("EntrezID", "Symbol", "ensemblID")]
-down_smo<-de_genes_pups_smoking_fitted[de_genes_pups_smoking_fitted$logFC<0, c("EntrezID", "Symbol", "ensemblID")]
+down_nic<-de_genes_pups_nicotine_fitted[de_genes_pups_nicotine_fitted$logFC<0, c("EntrezID", "Symbol", "ensemblID", "gencodeID")]
+down_smo<-de_genes_pups_smoking_fitted[de_genes_pups_smoking_fitted$logFC<0, c("EntrezID", "Symbol", "ensemblID", "gencodeID")]
 all_down<-unique(rbind(down_nic, down_smo))
 
 all_nic<-unique(rbind(up_nic, down_nic))
