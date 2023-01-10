@@ -447,7 +447,7 @@ t_stat_tx_vs_genes(expt)
 ## 1.2.2 Boxplots of relevant genes and their tx
 
 ## Each boxplot
-create_boxplot<- function(counts, y, title, q_value, FC){
+create_boxplot<- function(counts, y, title, q_value, FC, tx_tpm){
   
   ## Boxplot
   p<-ggplot(data=counts, 
@@ -459,7 +459,8 @@ create_boxplot<- function(counts, y, title, q_value, FC){
     labs(x = "Group", y = "norm counts",
          title = title,
          ## Add FDR and FC of genes and txs
-         subtitle=paste(" FDR:", q_value, "\n", "FC:", FC)) +
+         subtitle=paste(" FDR:", q_value, "       ", " tpm prop:", tx_tpm, "%",  
+                        "\n", "FC:", FC)) +
     theme(plot.margin=unit (c (1,1.5,1,1), 'cm'), legend.position = "none",
           plot.title = element_text(hjust=0.5, size=10, face="bold"), 
           plot.subtitle = element_text(size = 9)) 
@@ -506,7 +507,8 @@ gene_tx_boxplots<- function(expt, gene, tx1, tx2){
   top_gene_txs<-gene_txs[order(gene_txs$adj.P.Val),"transcript_id"][1:3]
   
   ## Obtain total tpm of the gene's transcripts
-  gene_tpm<-
+  gene_txs_tpm<-assays(RSE)$tpm[which(rowData(RSE)$gene_name==gene),]
+  gene_txs_tpm<-sum(apply(gene_txs_tpm, 1, sum))
   
   ## Add specific transcripts
   if (!is.null(tx1) | !is.null(tx2)){
@@ -568,6 +570,7 @@ gene_tx_boxplots<- function(expt, gene, tx1, tx2){
       FC=signif(2**(top_genes[which(top_genes$gencodeID==gene), "logFC"]), digits = 3)
       y<-gene
       title<-gene_ID
+      tx_tpm<-NULL
     }
     
     ## Boxplot of the txs
@@ -577,10 +580,13 @@ gene_tx_boxplots<- function(expt, gene, tx1, tx2){
       y<-colnames(counts)[i]
       ## Tx name for plot
       title<-paste(gene_symbol, "-", y, sep="")
+      tx_tpm<-sum(assays(RSE)$tpm[which(rowData(RSE)$transcript_id==colnames(counts)[i]),])
+      tx_tpm<-signif(100*(tx_tpm)/gene_txs_tpm, digits=4)
+      
     }
     
     ## Plots
-    p<-create_boxplot(counts, y, title, q_value, FC)
+    p<-create_boxplot(counts, y, title, q_value, FC, tx_tpm)
     plots[[i]]<-p
   }
   
