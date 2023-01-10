@@ -17,7 +17,7 @@ load(here("processed-data/04_DEA/Gene_analysis/results_pups_nicotine_fitted.Rdat
 load(here("processed-data/04_DEA/Gene_analysis/de_genes_pups_smoking_fitted.Rdata"))
 load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_smoking_fitted.Rdata"))
 load(here("processed-data/04_DEA/Gene_analysis/results_pups_smoking_fitted.Rdata"))
-#load(here("processed-data/05_GO_KEGG/Gene_analysis/intersections.Rdata"))     
+load(here("processed-data/05_GO_KEGG/Gene_analysis/intersections.Rdata"))     
 
 # load(here("processed-data/04_DEA/Exon_analysis/top_exons_nic.Rdata"))
 # load(here("processed-data/04_DEA/Exon_analysis/de_exons_nic.Rdata"))
@@ -722,7 +722,7 @@ gene_tx_boxplots("smoking", "H13", "H13−ENSMUST00000089059.8",
 ## Function to create multiple Venn diagrams
 venn_plot<-function(DE_lists, colors, name, titles){
   
-  if (name=="smo_VS_nic_DE_exons"){
+  if (name=="smo_VS_nic_DE_txs"){
     height=10
     width=15
     margin=0.2
@@ -731,7 +731,7 @@ venn_plot<-function(DE_lists, colors, name, titles){
     cex=0.8
   }
   
-  else if (name=="DEG_VS_exons_genes"){
+  else if (name=="DEG_VS_txs_genes"){
     height=12
     width=16
     margin=5
@@ -740,7 +740,7 @@ venn_plot<-function(DE_lists, colors, name, titles){
     cex=0.8
   }
   
-  else if (name=="smo_VS_nic_DE_exons_genes"){
+  else if (name=="smo_VS_nic_DE_txs_genes"){
     height=12
     width=16
     margin=0.2
@@ -749,7 +749,7 @@ venn_plot<-function(DE_lists, colors, name, titles){
     cex=0.8
   }
   
-  else if (name=="intersections_DEG_VS_exons_genes"){
+  else if (name=="intersections_DEG_VS_txs_genes"){
     height=10
     width=20
     margin=5
@@ -759,7 +759,7 @@ venn_plot<-function(DE_lists, colors, name, titles){
   }
   
   plots<-list()
-  pdf(file = paste("plots/04_DEA/02_Comparisons/Exon_analysis/Venn_", name, ".pdf", sep=""), 
+  pdf(file = paste("plots/04_DEA/02_Comparisons/Tx_analysis/Venn_", name, ".pdf", sep=""), 
       height = height, width = width)
   for (i in 1:length(DE_lists)){
     v<-venn.diagram(DE_lists[[i]], fill=colors[[i]], alpha = rep(0.5, length(DE_lists[[i]])), 
@@ -785,4 +785,99 @@ venn_plot<-function(DE_lists, colors, name, titles){
     dev.off()    
   }
 }
+
+
+
+## Define groups of DE txs
+nic_up<-de_tx_nic[which(de_tx_nic$logFC>0),"transcript_id"]
+smo_up<-de_tx_smo[which(de_tx_smo$logFC>0),"transcript_id"]
+nic_down<-de_tx_nic[which(de_tx_nic$logFC<0),"transcript_id"]
+smo_down<-de_tx_smo[which(de_tx_smo$logFC<0),"transcript_id"]
+
+
+## Define groups of DE txs' genes
+nic_up_genes<-unique(de_tx_nic[which(de_tx_nic$logFC>0),"ensembl_id"])
+smo_up_genes<-unique(de_tx_smo[which(de_tx_smo$logFC>0),"ensembl_id"])
+nic_down_genes<-unique(de_tx_nic[which(de_tx_nic$logFC<0),"ensembl_id"])
+smo_down_genes<-unique(de_tx_smo[which(de_tx_smo$logFC<0),"ensembl_id"])
+
+smoUp_nicUp_genes<-intersect(nic_up_genes, smo_up_genes)
+smoDown_nicDown_genes<-intersect(nic_down_genes, smo_down_genes)
+smoUp_nicDown_genes<-intersect(nic_down_genes, smo_up_genes)
+smoDown_nicUp_genes<-intersect(nic_up_genes, smo_down_genes)
+only_up_nic_genes<-nic_up_genes[which(! (nic_up_genes %in% smo_up_genes | 
+                                           nic_up_genes %in% smo_down_genes | 
+                                           nic_up_genes %in% nic_down_genes))]
+only_up_smo_genes<-smo_up_genes[which(! (smo_up_genes %in% smo_down_genes | 
+                                           smo_up_genes %in% nic_down_genes | 
+                                           smo_up_genes %in% nic_up_genes))]
+only_down_nic_genes<-nic_down_genes[which(! (nic_down_genes %in% smo_up_genes | 
+                                               nic_down_genes %in% smo_down_genes | 
+                                               nic_down_genes %in% nic_up_genes))]
+only_down_smo_genes<-smo_down_genes[which(! (smo_down_genes %in% smo_up_genes | 
+                                               smo_down_genes %in% nic_down_genes | 
+                                               smo_down_genes %in% nic_up_genes))]
+
+
+## Define groups of DEG
+nic_DEG_up<-de_genes_pups_nicotine_fitted[which(de_genes_pups_nicotine_fitted$logFC>0),"gencodeID"]
+nic_DEG_down<-de_genes_pups_nicotine_fitted[which(de_genes_pups_nicotine_fitted$logFC<0),"gencodeID"]
+smo_DEG_up<-de_genes_pups_smoking_fitted[which(de_genes_pups_smoking_fitted$logFC>0),"gencodeID"]
+smo_DEG_down<-de_genes_pups_smoking_fitted[which(de_genes_pups_smoking_fitted$logFC<0),"gencodeID"]
+
+only_up_nic_DEG<-intersections[[1]]$ensemblID
+only_up_smo_DEG<-intersections[[2]]$ensemblID
+only_down_nic_DEG<-intersections[[3]]$ensemblID
+only_down_smo_DEG<-intersections[[4]]$ensemblID
+smoUp_nicUp_DEG<-intersections[[5]]$ensemblID
+smoDown_nicDown_DEG<-intersections[[6]]$ensemblID
+smoUp_nicDown_DEG<-intersections[[7]]$ensemblID
+smoDown_nicUp_DEG<-intersections[[8]]$ensemblID
+
+
+
+
+
+## Compare smoking VS nicotine DE txs
+
+## Smo vs nic DE txs
+DE_txs_smo_vs_nic <-list(
+  "Nicotine"=de_tx_nic$transcript_id,
+  "Smoking"=de_tx_smo$transcript_id)
+
+## Smo vs nic Up DE txs
+DE_txs_smo_vs_nic_Up <-list(
+  "Nicotine up"=nic_up,
+  "Smoking up"=smo_up)
+
+## Smo vs nic Down DE txs
+DE_txs_smo_vs_nic_Down <-list(
+  "Nicotine down"=nic_down,
+  "Smoking down"=smo_down)
+
+## Smo Up vs nic Down DE txs
+DE_txs_smoUp_vs_nicDown <-list(
+  "Nicotine down"=nic_down,
+  "Smoking up"=smo_up)
+
+## Smo Down vs nic Up DE txs
+DE_txs_smoDown_vs_nicUp <-list(
+  "Nicotine up"=nic_up,
+  "Smoking down"=smo_down)
+
+## All DE txs
+DE_txs_all<-list(
+  "Nicotine up"=nic_up,
+  "Nicotine down"=nic_down,
+  "Smoking up"=smo_up, 
+  "Smoking down"=smo_down)
+
+
+
+## Venn diagrams
+DE_lists<-list(DE_txs_smo_vs_nic, DE_txs_smo_vs_nic_Up, DE_txs_smo_vs_nic_Down, 
+               DE_txs_smoUp_vs_nicDown, DE_txs_smoDown_vs_nicUp, DE_txs_all)
+colors<-list(c("olivedrab1", "rosybrown2"), c("brown3", "coral"), c("cyan3", "cyan4"), 
+             c("cyan3", "coral"), c("brown3", "cyan4"), c("brown3", "cyan3", "coral", "cyan4"))
+venn_plot(DE_lists, colors, "smo_VS_nic_DE_txs", NULL)
 
