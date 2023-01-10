@@ -459,7 +459,7 @@ create_boxplot<- function(counts, y, title, q_value, FC, tx_tpm){
     labs(x = "Group", y = "norm counts",
          title = title,
          ## Add FDR and FC of genes and txs
-         subtitle=paste(" FDR:", q_value, "       ", " tpm prop:", tx_tpm, "%",  
+         subtitle=paste(" FDR:", q_value, "       ", tx_tpm,  
                         "\n", "FC:", FC)) +
     theme(plot.margin=unit (c (1,1.5,1,1), 'cm'), legend.position = "none",
           plot.title = element_text(hjust=0.5, size=10, face="bold"), 
@@ -507,7 +507,7 @@ gene_tx_boxplots<- function(expt, gene, tx1, tx2){
   top_gene_txs<-gene_txs[order(gene_txs$adj.P.Val),"transcript_id"][1:3]
   
   ## Obtain total tpm of the gene's transcripts
-  gene_txs_tpm<-assays(RSE)$tpm[which(rowData(RSE)$gene_name==gene),]
+  gene_txs_tpm<-assays(RSE)$tpm[which(rowData(RSE)$gene_id==gene),]
   gene_txs_tpm<-sum(apply(gene_txs_tpm, 1, sum))
   
   ## Add specific transcripts
@@ -581,7 +581,7 @@ gene_tx_boxplots<- function(expt, gene, tx1, tx2){
       ## Tx name for plot
       title<-paste(gene_symbol, "-", y, sep="")
       tx_tpm<-sum(assays(RSE)$tpm[which(rowData(RSE)$transcript_id==colnames(counts)[i]),])
-      tx_tpm<-signif(100*(tx_tpm)/gene_txs_tpm, digits=4)
+      tx_tpm<-paste("tpm prop: ", signif(100*tx_tpm/gene_txs_tpm, 4), "%", sep="")
       
     }
     
@@ -712,5 +712,3 @@ gene_tx_boxplots("smoking", "H13", "H13−ENSMUST00000089059.8",
                  "H13−ENSMUST00000125366.7")
 
 
-
-#### Genes of interest based on previous results at gene and exon levels ####
