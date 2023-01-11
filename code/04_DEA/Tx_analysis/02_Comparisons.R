@@ -4,10 +4,8 @@
 
 load(here("processed-data/04_DEA/Tx_analysis/top_tx_nic.Rdata"))
 load(here("processed-data/04_DEA/Tx_analysis/de_tx_nic.Rdata"))
-#load(here("processed-data/04_DEA/Tx_analysis/results_nic.Rdata"))
 load(here("processed-data/04_DEA/Tx_analysis/top_tx_smo.Rdata"))
 load(here("processed-data/04_DEA/Tx_analysis/de_tx_smo.Rdata"))
-#load(here("processed-data/04_DEA/Tx_analysis/results_smo.Rdata"))
 load(here("processed-data/04_DEA/Tx_analysis/rse_tx_brain_pups_nicotine.Rdata"))
 load(here("processed-data/04_DEA/Tx_analysis/rse_tx_brain_pups_smoking.Rdata"))
 
@@ -20,9 +18,9 @@ load(here("processed-data/04_DEA/Gene_analysis/results_pups_smoking_fitted.Rdata
 load(here("processed-data/05_GO_KEGG/Gene_analysis/intersections.Rdata"))     
 
 # load(here("processed-data/04_DEA/Exon_analysis/top_exons_nic.Rdata"))
-# load(here("processed-data/04_DEA/Exon_analysis/de_exons_nic.Rdata"))
+load(here("processed-data/04_DEA/Exon_analysis/de_exons_nic.Rdata"))
 # load(here("processed-data/04_DEA/Exon_analysis/top_exons_smo.Rdata"))
-# load(here("processed-data/04_DEA/Exon_analysis/de_exons_smo.Rdata"))
+load(here("processed-data/04_DEA/Exon_analysis/de_exons_smo.Rdata"))
 
 
 ### 1.2.1 T-stats plots
@@ -752,10 +750,20 @@ venn_plot<-function(DE_lists, colors, name, titles){
   else if (name=="intersections_DEG_VS_txs_genes"){
     height=10
     width=20
-    margin=5
+    margin=7
     dist=0.06
     cat=0.9
     cex=1
+  }
+  
+  else if (name=="DEG_VS_txs_VS_exons"){
+    height=15
+    width=20
+    margin=7
+    dist=0.08
+    cat=0.9
+    cex=1
+    
   }
   
   plots<-list()
@@ -825,14 +833,38 @@ nic_DEG_down<-de_genes_pups_nicotine_fitted[which(de_genes_pups_nicotine_fitted$
 smo_DEG_up<-de_genes_pups_smoking_fitted[which(de_genes_pups_smoking_fitted$logFC>0),"gencodeID"]
 smo_DEG_down<-de_genes_pups_smoking_fitted[which(de_genes_pups_smoking_fitted$logFC<0),"gencodeID"]
 
-only_up_nic_DEG<-intersections[[1]]$ensemblID
-only_up_smo_DEG<-intersections[[2]]$ensemblID
-only_down_nic_DEG<-intersections[[3]]$ensemblID
-only_down_smo_DEG<-intersections[[4]]$ensemblID
-smoUp_nicUp_DEG<-intersections[[5]]$ensemblID
-smoDown_nicDown_DEG<-intersections[[6]]$ensemblID
-smoUp_nicDown_DEG<-intersections[[7]]$ensemblID
-smoDown_nicUp_DEG<-intersections[[8]]$ensemblID
+only_up_nic_DEG<-intersections[[1]]$gencodeID
+only_up_smo_DEG<-intersections[[2]]$gencodeID
+only_down_nic_DEG<-intersections[[3]]$gencodeID
+only_down_smo_DEG<-intersections[[4]]$gencodeID
+smoUp_nicUp_DEG<-intersections[[5]]$gencodeID
+smoDown_nicDown_DEG<-intersections[[6]]$gencodeID
+smoUp_nicDown_DEG<-intersections[[7]]$gencodeID
+smoDown_nicUp_DEG<-intersections[[8]]$gencodeID
+
+
+## Define groups of DE exons' genes
+nic_up_exons_genes<-unique(de_exons_nic[which(de_exons_nic$logFC>0),"gencodeID"])
+smo_up_exons_genes<-unique(de_exons_smo[which(de_exons_smo$logFC>0),"gencodeID"])
+nic_down_exons_genes<-unique(de_exons_nic[which(de_exons_nic$logFC<0),"gencodeID"])
+smo_down_exons_genes<-unique(de_exons_smo[which(de_exons_smo$logFC<0),"gencodeID"])
+
+smoUp_nicUp_exons_genes<-intersect(nic_up_exons_genes, smo_up_exons_genes)
+smoDown_nicDown_exons_genes<-intersect(nic_down_exons_genes, smo_down_exons_genes)
+smoUp_nicDown_exons_genes<-intersect(nic_down_exons_genes, smo_up_exons_genes)
+smoDown_nicUp_exons_genes<-intersect(nic_up_exons_genes, smo_down_exons_genes)
+only_up_nic_exons_genes<-nic_up_exons_genes[which(! (nic_up_exons_genes %in% smo_up_exons_genes | 
+                                           nic_up_exons_genes %in% smo_down_exons_genes | 
+                                           nic_up_exons_genes %in% nic_down_exons_genes))]
+only_up_smo_exons_genes<-smo_up_exons_genes[which(! (smo_up_exons_genes %in% smo_down_exons_genes | 
+                                           smo_up_exons_genes %in% nic_down_exons_genes | 
+                                           smo_up_exons_genes %in% nic_up_exons_genes))]
+only_down_nic_exons_genes<-nic_down_exons_genes[which(! (nic_down_exons_genes %in% smo_up_exons_genes | 
+                                               nic_down_exons_genes %in% smo_down_exons_genes | 
+                                               nic_down_exons_genes %in% nic_up_exons_genes))]
+only_down_smo_exons_genes<-smo_down_exons_genes[which(! (smo_down_exons_genes %in% smo_up_exons_genes | 
+                                               smo_down_exons_genes %in% nic_down_exons_genes | 
+                                               smo_down_exons_genes %in% nic_up_exons_genes))]
 
 
 
@@ -880,4 +912,301 @@ DE_lists<-list(DE_txs_smo_vs_nic, DE_txs_smo_vs_nic_Up, DE_txs_smo_vs_nic_Down,
 colors<-list(c("olivedrab1", "rosybrown2"), c("brown3", "coral"), c("cyan3", "cyan4"), 
              c("cyan3", "coral"), c("brown3", "cyan4"), c("brown3", "cyan3", "coral", "cyan4"))
 venn_plot(DE_lists, colors, "smo_VS_nic_DE_txs", NULL)
+
+
+
+
+
+## Compare DE txs' genes 
+
+## Smo vs nic genes
+DE_txs_genes_smo_vs_nic <-list(
+  "Nicotine"=unique(de_tx_nic$ensembl_id),
+  "Smoking"=unique(de_tx_smo$ensembl_id))
+
+## Smo vs nic Up genes
+DE_txs_genes_smo_vs_nic_Up <-list(
+  "Nicotine up"=nic_up_genes,
+  "Smoking up"=smo_up_genes)
+
+## Smo vs nic Down genes
+DE_txs_genes_smo_vs_nic_Down <-list(
+  "Nicotine down"=nic_down_genes,
+  "Smoking down"=smo_down_genes)
+
+## Smo Up vs nic Down genes
+DE_txs_genes_smoUp_vs_nicDown <-list(
+  "Nicotine down"=nic_down_genes,
+  "Smoking up"=smo_up_genes)
+
+## Smo Down vs nic Up genes
+DE_txs_genes_smoDown_vs_nicUp <-list(
+  "Nicotine up"=nic_up_genes,
+  "Smoking down"=smo_down_genes)
+
+## Up vs Down genes
+DE_txs_genes_Up_vs_Down <-list(
+  "Up"=union(nic_up_genes, smo_up_genes),
+  "Down"=union(nic_down_genes, smo_down_genes))
+
+## Nic Up vs nic Down genes
+DE_txs_genes_nicUp_vs_nicDown <-list(
+  "Nicotine up"=nic_up_genes,
+  "Nicotine down"=nic_down_genes)
+
+## Smo Up vs smo Down genes
+DE_txs_genes_smoUp_vs_smoDown <-list(
+  "Smoking up"=smo_up_genes,
+  "Smoking down"=smo_down_genes)
+
+## All DE exons
+DE_txs_genes_all<-list(
+  "Nicotine up"=nic_up_genes,
+  "Nicotine down"=nic_down_genes,
+  "Smoking up"=smo_up_genes, 
+  "Smoking down"=smo_down_genes)
+
+
+
+## Venn diagrams
+DE_lists<-list(DE_txs_genes_smo_vs_nic, DE_txs_genes_smo_vs_nic_Up, 
+               DE_txs_genes_smo_vs_nic_Down, DE_txs_genes_smoUp_vs_nicDown, 
+               DE_txs_genes_smoDown_vs_nicUp, DE_txs_genes_Up_vs_Down,
+               DE_txs_genes_nicUp_vs_nicDown, DE_txs_genes_smoUp_vs_smoDown, 
+               DE_txs_genes_all)
+colors<-list(c("olivedrab1", "rosybrown2"), c("brown3", "coral"), 
+             c("cyan3", "cyan4"), c("cyan3", "coral"), c("brown3", "cyan4"), 
+             c("firebrick", "dodgerblue"),c("brown3", "cyan3"), c("coral", "cyan4"),
+             c("brown3", "cyan3", "coral", "cyan4"))
+venn_plot(DE_lists, colors, "smo_VS_nic_DE_txs_genes", NULL)
+
+
+
+
+
+## Compare DE txs' genes with DEG
+
+## All DEG vs all txs' genes
+DEG_vs_Txs_all <-list(
+  "DEG"= union(union(nic_DEG_down, nic_DEG_up), union(smo_DEG_down, smo_DEG_up)),
+  "DE txs' genes"=union(union(nic_down_genes, nic_up_genes), union(smo_down_genes, smo_up_genes))
+)
+
+## Nic DEGs vs nic txs' genes 
+DEG_nic_vs_Txs_nic <-list(
+  "DEG"= union(nic_DEG_down, nic_DEG_up),
+  "DE txs' genes"=union(nic_down_genes, nic_up_genes)
+)
+
+## Smo DEGs vs smo txs' genes
+DEG_smo_vs_Txs_smo <-list(
+  "DEG"= union(smo_DEG_down, smo_DEG_up),
+  "DE txs' genes"=union(smo_down_genes, smo_up_genes)
+)
+
+## Up DEGs vs up txs' genes
+DEG_up_vs_Txs_up <-list(
+  "DEG"= union(nic_DEG_up, smo_DEG_up),
+  "DE txs' genes"=union(nic_up_genes, smo_up_genes)
+)
+
+## Down DEGs vs down txs' genes
+DEG_down_vs_Txs_down <-list(
+  "DEG"= union(nic_DEG_down, smo_DEG_down),
+  "DE txs' genes"=union(nic_down_genes, smo_down_genes)
+)
+
+## Nic up DEGs vs nic up txs' genes
+DEG_nicUp_vs_Txs_nicUp <-list(
+  "DEG"= nic_DEG_up,
+  "DE txs' genes"= nic_up_genes
+)
+
+## Nic down DEGs vs nic down txs' genes
+DEG_nicDown_vs_Txs_nicDown <-list(
+  "DEG"= nic_DEG_down,
+  "DE txs' genes"= nic_down_genes
+)
+
+## Smo up DEGs vs smo up txs' genes
+DEG_smoUp_vs_Txs_smoUp <-list(
+  "DEG"= smo_DEG_up,
+  "DE txs' genes"= smo_up_genes
+)
+
+## Smo down DEGs vs smo down txs' genes
+DEG_smoDown_vs_Txs_smoDown <-list(
+  "DEG"= smo_DEG_down,
+  "DE txs' genes"= smo_down_genes
+)
+
+
+
+## Venn diagrams
+DE_lists<-list(DEG_vs_Txs_all, DEG_nic_vs_Txs_nic, DEG_smo_vs_Txs_smo,
+               DEG_up_vs_Txs_up, DEG_down_vs_Txs_down, DEG_nicUp_vs_Txs_nicUp,
+               DEG_nicDown_vs_Txs_nicDown, DEG_smoUp_vs_Txs_smoUp, DEG_smoDown_vs_Txs_smoDown)
+colors<-list(c("rosybrown2", "navajowhite2"), c("plum", "lightgoldenrod2"), 
+             c("pink1", "khaki2"), c("rosybrown4", "navajowhite4"), c("rosybrown1", "navajowhite1"), 
+             c("plum3", "lightgoldenrod4"),c("plum1", "lightgoldenrod1"), c("pink3", "khaki3"),
+             c("pink", "khaki1"))
+venn_plot(DE_lists, colors, "DEG_VS_txs_genes", c("All", "Nicotine", "Smoking", "Up", "Down", 
+                                                    "Nicotine Up", "Nicotine Down", "Smoking Up", "Smoking Down"))
+
+
+
+
+
+## Compare DEG intersections with those of txs' genes
+
+## Only up nic DEGs vs txs' genes 
+DEG_vs_Txs_only_up_nic <-list(
+  "DEG"= only_up_nic_DEG,
+  "DE txs' genes"= only_up_nic_genes
+)
+
+## Only down nic DEGs vs txs' genes 
+DEG_vs_Txs_only_down_nic <-list(
+  "DEG"= only_down_nic_DEG,
+  "DE txs' genes"= only_down_nic_genes
+)
+
+## Only up smo DEGs vs txs' genes 
+DEG_vs_Txs_only_up_smo <-list(
+  "DEG"= only_up_smo_DEG,
+  "DE txs' genes"= only_up_smo_genes
+)
+
+## Only down smo DEGs vs txs' genes 
+DEG_vs_Txs_only_down_smo <-list(
+  "DEG"= only_down_smo_DEG,
+  "DE txs' genes"= only_down_smo_genes
+)
+
+## Smo and nic up DEGs vs txs' genes
+DEG_vs_Txs_smoUp_nicUp <-list(
+  "DEG"=smoUp_nicUp_DEG,
+  "DE txs' genes"=smoUp_nicUp_genes
+)
+
+## Smo and nic down DEGs vs txs' genes
+DEG_vs_Txs_smoDown_nicDown <-list(
+  "DEG"=smoDown_nicDown_DEG,
+  "DE txs' genes"=smoDown_nicDown_genes
+)
+
+## Smo up and nic down DEGs vs txs' genes
+DEG_vs_Txs_smoUp_nicDown <-list(
+  "DEG"=smoUp_nicDown_DEG,
+  "DE txs' genes"=smoUp_nicDown_genes
+)
+
+## Smo down and nic up DEGs vs txs' genes
+DEG_vs_Txs_smoDown_nicUp <-list(
+  "DEG"=smoDown_nicUp_DEG,
+  "DE txs' genes"=smoDown_nicUp_genes
+)
+
+
+
+## Venn diagrams
+DE_lists<-list(DEG_vs_Txs_only_up_nic, DEG_vs_Txs_only_down_nic, DEG_vs_Txs_only_up_smo,
+               DEG_vs_Txs_only_down_smo, DEG_vs_Txs_smoUp_nicUp, DEG_vs_Txs_smoDown_nicDown,
+               DEG_vs_Txs_smoUp_nicDown, DEG_vs_Txs_smoDown_nicUp)
+colors<-list(c("darkslategray3", "lightgoldenrod3"), c("darkslategray1", "lightgoldenrod1"), 
+             c("lightpink3", "olivedrab3"), c("pink", "olivedrab1"), c("palegreen3", "navajowhite3"),
+             c("palegreen", "navajowhite"), c("palegreen","navajowhite3"), c("palegreen3", "navajowhite"))
+venn_plot(DE_lists, colors, "intersections_DEG_VS_txs_genes", c("Only up in nic", "Only down in nic",
+                                                                  "Only up in smo", "Only down in smo", 
+                                                                  "Smo up, nic up", "Smo down, nic down",
+                                                                  "Smo up, nic down", "Smo down, nic up"))
+
+
+
+
+
+## Compare DE txs' genes vs DE exons' genes vs DEG
+
+## All genes
+DEG_vs_Txs_vs_Exons_all <-list(
+  "DEG"= union(union(nic_DEG_down, nic_DEG_up), union(smo_DEG_down, smo_DEG_up)),
+  "DE txs' genes"=union(union(nic_down_genes, nic_up_genes), union(smo_down_genes, smo_up_genes)),
+  "DE exons' genes"=union(union(nic_down_exons_genes, nic_up_exons_genes), union(smo_down_exons_genes, smo_up_exons_genes))
+)
+
+## Nic genes
+DEG_vs_Txs_vs_Exons_nic <-list(
+  "DEG"= union(nic_DEG_down, nic_DEG_up),
+  "DE txs' genes"=union(nic_down_genes, nic_up_genes),
+  "DE exons' genes"=union(nic_down_exons_genes, nic_up_exons_genes)
+)
+
+## Smo genes
+DEG_vs_Txs_vs_Exons_smo <-list(
+  "DEG"= union(smo_DEG_down, smo_DEG_up),
+  "DE txs' genes"=union(smo_down_genes, smo_up_genes),
+  "DE exons' genes"=union(smo_down_exons_genes, smo_up_exons_genes)
+)
+
+## Up genes
+DEG_vs_Txs_vs_Exons_up <-list(
+  "DEG"= union(nic_DEG_up, smo_DEG_up),
+  "DE txs' genes"=union(nic_up_genes, smo_up_genes),
+  "DE exons' genes"=union(nic_up_exons_genes, smo_up_exons_genes)
+)
+
+## Down genes
+DEG_vs_Txs_vs_Exons_down <-list(
+  "DEG"= union(nic_DEG_down, smo_DEG_down),
+  "DE txs' genes"=union(nic_down_genes, smo_down_genes),
+  "DE exons' genes"=union(nic_down_exons_genes, smo_down_exons_genes)
+)
+
+## Nic up genes
+DEG_vs_Txs_vs_Exons_nicUp <-list(
+  "DEG"= nic_DEG_up,
+  "DE txs' genes"= nic_up_genes,
+  "DE exons' genes"= nic_up_exons_genes
+)
+
+## Nic down genes
+DEG_vs_Txs_vs_Exons_nicDown <-list(
+  "DEG"= nic_DEG_down,
+  "DE txs' genes"= nic_down_genes,
+  "DE exons' genes"= nic_down_exons_genes
+)
+
+## Smo up genes
+DEG_vs_Txs_vs_Exons_smoUp <-list(
+  "DEG"= smo_DEG_up,
+  "DE txs' genes"= smo_up_genes,
+  "DE exons' genes"= smo_up_exons_genes
+)
+
+## Smo down genes
+DEG_vs_Txs_vs_Exons_smoDown <-list(
+  "DEG"= smo_DEG_down,
+  "DE txs' genes"= smo_down_genes,
+  "DE exons' genes"=smo_down_exons_genes
+)
+
+
+
+## Venn diagrams
+DE_lists<-list(DEG_vs_Txs_vs_Exons_all, DEG_vs_Txs_vs_Exons_nic, DEG_vs_Txs_vs_Exons_smo,
+               DEG_vs_Txs_vs_Exons_up, DEG_vs_Txs_vs_Exons_down, DEG_vs_Txs_vs_Exons_nicUp,
+               DEG_vs_Txs_vs_Exons_nicDown, DEG_vs_Txs_vs_Exons_smoUp, DEG_vs_Txs_vs_Exons_smoDown)
+colors<-list(c("rosybrown2", "navajowhite2", "lightblue3"), c("plum", "lightgoldenrod2", "lightcyan3"), 
+             c("pink1", "khaki2", "lightsteelblue3"), c("rosybrown4", "navajowhite4", "lightblue4"), 
+             c("rosybrown1", "navajowhite1", "lightblue1"), c("plum3", "lightgoldenrod4", "lightcyan4"),
+             c("plum1", "lightgoldenrod1", "lightcyan1"), c("pink3", "khaki3", "lightsteelblue4"),
+             c("pink", "khaki1", "lightsteelblue1"))
+venn_plot(DE_lists, colors, "DEG_VS_txs_VS_exons", c("All", "Nicotine", "Smoking", "Up", "Down", 
+                                                  "Nicotine Up", "Nicotine Down", "Smoking Up", "Smoking Down"))
+
+
+
+
+
+## Compare intersections of txs' genes vs DE exons' genes vs DEG
 
