@@ -45,7 +45,7 @@ extract_entrez <- function(gene_list){
 }
 
 ## Add entrez ID of all txs' genes
-all_genes_EntrezID<-extract_entrez(top_tx_nic$ensemblID)$entrezgene_id
+all_genes_EntrezID<-as.character(extract_entrez(unique(top_tx_nic$ensemblID))$entrezgene_id)
 
 
 ## Groups of DE txs' genes
@@ -294,45 +294,105 @@ save(goList_intersections, file="processed-data/05_GO_KEGG/Tx_analysis/goList_in
 
 
 
-##################################################################
-# Txs' genes not considered at the gene or exon levels or non-DE genes or DE  
-##################################################################
+##############################################################
+# Txs' genes not considered or non-DE at gene level 
+##############################################################
 
-GO_KEGG_no_exons_genes<- function(expt){
-  top_exons<-eval(parse_expr(paste("top_exons_", substr(expt,1,3), sep="")))
+GO_KEGG_no_txs_genes<- function(expt){
   top_genes<-eval(parse_expr(paste("top_genes_pups_", expt, "_fitted", sep="")))
+  top_tx<-eval(parse_expr(paste("top_tx", substr(expt,1,3), sep="")))
   de_genes<-eval(parse_expr(paste("de_genes_pups_", expt, "_fitted", sep="")))
-  de_exons<-eval(parse_expr(paste("de_exons_", substr(expt,1,3), sep="")))
+  de_tx<-eval(parse_expr(paste("de_tx", substr(expt,1,3), sep="")))
   
-  ## Exons' genes
-  exons_genes<-unique(top_exons$ensemblID)
+  ## Txs' genes
+  tx_genes<-unique(top_tx$ensemblID)
   
-  ## Common genes: considered at the gene and exon level
-  common_genes<-exons_genes[which(exons_genes %in% top_genes$ensemblID)]
+  ## Common genes: considered at the gene and tx level
+  common_genes<-tx_genes[which(tx_genes %in% top_genes$ensemblID)]
   common_genes<-top_genes[which(top_genes$ensemblID %in% common_genes), c("ensemblID","EntrezID")]
-  ## non-DE genes from the common genes containing DE exons
-  non_DEG<-common_genes[which(common_genes$ensemblID %in% de_exons$ensemblID & ! common_genes$ensemblID %in% de_genes$ensemblID),
-                        "EntrezID"]
-  ## DEG with DE exons
-  DEG<-common_genes[which(common_genes$ensemblID %in% de_exons$ensemblID & common_genes$ensemblID %in% de_genes$ensemblID),
-                    "EntrezID"]
-  ## DE exons' genes not present at the gene level
-  no_present_genes<-unique(de_exons[which(!de_exons$ensemblID %in% top_genes$ensemblID), "EntrezID"])
+  ## non-DE genes from the common genes containing DE txs
+  non_DEG<-unique(common_genes[which(common_genes$ensemblID %in% de_tx$ensemblID & ! common_genes$ensemblID %in% de_genes$ensemblID),
+                        "EntrezID"])
+  ## DEG with DE txs
+  DEG<-unique(common_genes[which(common_genes$ensemblID %in% de_tx$ensemblID & common_genes$ensemblID %in% de_genes$ensemblID),
+                    "EntrezID"])
+  ## DE txs' genes not present at the gene level
+  no_present_genes<-unique(de_tx[which(!de_tx$ensemblID %in% top_genes$ensemblID), "ensemblID"])
+  no_present_genes<-extract_entrez(no_present_genes)$entrezgene_id
   
-  sigGeneList <- list("non-DEG with DEE"=non_DEG, "DEG with DEE"=DEG, "No at gene level"=no_present_genes) 
+  sigGeneList <- list("non-DEG with DEtxs"=non_DEG, "DEG with DEtxs"=DEG, "No at gene level"=no_present_genes) 
   sigGeneList <-lapply(sigGeneList, function(x) {
     x[!is.na(x)]
   })
   ## Background genes
-  geneUniverse <- unique(top_exons$EntrezID)
+  geneUniverse <- all_genes_EntrezID
   geneUniverse <- geneUniverse[!is.na(geneUniverse)]
   
   goList_noDEG<-GO_KEGG(sigGeneList, geneUniverse, paste("noDEG_", substr(expt,1,3), sep=""))
-  save(goList_noDEG, file=paste("processed-data/05_GO_KEGG/Exon_analysis/goList_noDEG_", substr(expt,1,3), ".Rdata", sep=""))
+  save(goList_noDEG, file=paste("processed-data/05_GO_KEGG/Tx_analysis/goList_noDEG_", substr(expt,1,3), ".Rdata", sep=""))
   
 }
 
 ## Analyses 
 GO_KEGG_no_exons_genes("nicotine")
 GO_KEGG_no_exons_genes("smoking")
+
+
+
+###########################################################
+# GO and KEGG of DEG vs DE exons' genes vs DE txs' genes
+###########################################################
+
+compare_DE <- function(expt){
+  
+  top_exons<-eval(parse_expr(paste("top_exons_", substr(expt,1,3), sep="")))
+  top_genes<-eval(parse_expr(paste("top_genes_pups_", expt, "_fitted", sep="")))
+  top_tx<-eval(parse_expr(paste("top_tx", substr(expt,1,3), sep="")))
+  de_genes<-eval(parse_expr(paste("de_genes_pups_", expt, "_fitted", sep="")))
+  de_exons<-eval(parse_expr(paste("de_exons_", substr(expt,1,3), sep="")))
+  de_tx<-eval(parse_expr(paste("de_tx", substr(expt,1,3), sep="")))
+  
+  de_tx_Entrez <- extract_entrez(de_tx$ensemblID)$entrezgene_id
+  
+  ## Define groups of genes
+  
+  ## DEG with DE txs and exons
+  DE_all <- intersect(de_genes$EntrezID, de_exons$EntrezID, de_tx_Entrez)
+  ## DEG with DE exons but no DE txs
+  DE_genes_exons <- intersect(de_genes$EntrezID, de_exons$EntrezID)
+  DE_genes_exons <- DE_genes_exons[which(! DE_genes_exons %in% de_tx_Entrez)]
+  ## DEG with DE txs but no DE exons
+  DE_genes_txs <- intersect(de_genes$EntrezID, de_tx_Entrez)
+  DE_genes_txs <- DE_genes_txs[which(! DE_genes_txs %in% de_exons$EntrezID)]
+  ## Non-DE genes with DE exons and txs
+  DE_exons_txs <- intersect(de_exons$EntrezID, de_tx_Entrez)
+  DE_exons_txs <- DE_exons_txs[which(! DE_exons_txs %in% de_genes$EntrezID)]
+  ## DEG without DE exons or txs
+  DE_genes <- union(de_genes[which(! de_genes$EntrezID %in% de_exons$EntrezID), "EntrezID"],
+                    de_genes[which(! de_genes$EntrezID %in% de_tx_Entrez)])
+  ## DEE from non-DE genes without DE txs
+  DE_exons <- union(de_exons[which(! de_exons$EntrezID %in% de_genes$EntrezID), "EntrezID"],
+                    de_exons[which(! de_exons$EntrezID %in% de_tx_Entrez)])
+  ## DEtxs from non-DE genes without DE exons
+  DE_txs <- union(de_tx[which(! de_tx_Entrez %in% de_genes$EntrezID), "EntrezID"],
+                  de_tx[which(! de_tx_Entrez %in% de_exons$EntrezID)])
+  
+  sigGeneList <- list("3 levels"= DE_all, "DEG & DEE"=DE_genes_exons, 
+                      "DEG & DEtxs"= DE_genes_txs, "DEE & DEtxs"= DE_exons_txs, 
+                      "DEG only"= DE_genes, "DEE only"= DE_exons, "DEtxs only"= DE_txs) 
+  sigGeneList <-lapply(sigGeneList, function(x) {
+    x[!is.na(x)]
+  })
+  ## Background genes
+  geneUniverse <- all_genes_EntrezID
+  geneUniverse <- geneUniverse[!is.na(geneUniverse)]
+  
+  goList_DE_comparisons<-GO_KEGG(sigGeneList, geneUniverse, paste("DE_comparisons_", substr(expt,1,3), sep=""))
+  save(goList_DE_comparisons, file=paste("processed-data/05_GO_KEGG/Tx_analysis/goList_DE_comparisons", substr(expt,1,3), ".Rdata", sep=""))
+    
+}
+
+
+
+
 
