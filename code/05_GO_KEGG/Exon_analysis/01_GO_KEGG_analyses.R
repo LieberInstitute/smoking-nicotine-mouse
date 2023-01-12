@@ -1,5 +1,5 @@
 
-# 1. Gene Ontology and KEGG analyzes of DE exons' genes
+# 1. Gene Ontology and KEGG analyses of DE exons' genes
 
 
 library(here)
@@ -72,7 +72,7 @@ save(intersections, file="processed-data/05_GO_KEGG/Exon_analysis/intersections_
 
 
 
-## Function to do GO and KEGG analyzes
+## Function to do GO and KEGG analyses
 
 GO_KEGG<- function(sigGeneList, geneUniverse, name){
   
@@ -297,7 +297,7 @@ GO_KEGG_no_exons_genes<- function(expt){
   
 }
 
-## Analyzes 
+## Analyses 
 GO_KEGG_no_exons_genes("nicotine")
 GO_KEGG_no_exons_genes("smoking")
 

@@ -1,5 +1,5 @@
 
-# 1. Gene Ontology and KEGG analyzes of DEG 
+# 1. Gene Ontology and KEGG analyses of DEG 
 
 
 library(here)
@@ -28,7 +28,7 @@ load(here("processed-data/03_EDA/04_Expl_Var_partition/rse_gene_brain_pups_smoki
 load(here("processed-data/03_EDA/04_Expl_Var_partition/rse_gene_brain_pups_nicotine.Rdata"))
 
 
-## GO and KEGG analyzes for DEG from fitted model only
+## GO and KEGG analyses for DEG from fitted model only
 
 ## Groups of DEG
 up_nic<-de_genes_pups_nicotine_fitted[de_genes_pups_nicotine_fitted$logFC>0, c("EntrezID", "Symbol", "ensemblID", "gencodeID")]
@@ -65,7 +65,7 @@ intersections<-list("only up nic"=only_up_nic, "only up smo"=only_up_smo,
 save(intersections, file="processed-data/05_GO_KEGG/Gene_analysis/intersections.Rdata")
 
 
-## Function to do GO and KEGG analyzes
+## Function to do GO and KEGG analyses
 
 GO_KEGG<- function(sigGeneList, geneUniverse, name){
   
