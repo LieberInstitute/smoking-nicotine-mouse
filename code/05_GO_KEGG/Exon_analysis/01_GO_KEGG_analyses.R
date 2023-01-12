@@ -10,7 +10,6 @@ library(jaffelab)
 library(ggplot2)
 library(cowplot)
 library(rlang)
-library(biomartr)
 library(sessioninfo)
 
 
