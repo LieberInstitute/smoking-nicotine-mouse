@@ -240,3 +240,99 @@ geneUniverse <- geneUniverse[!is.na(geneUniverse)]
 goList_nic<-GO_KEGG(sigGeneList, geneUniverse, "nicotine")
 save(goList_nic, file="processed-data/05_GO_KEGG/Tx_analysis/goList_nic.Rdata")
 
+
+
+####################################
+# Smoking Up/Down DE txs' genes
+####################################
+
+## List of sets
+smo_up_genes_Entrez<-extract_entrez(smo_up_genes$ensemblID)$entrezgene_id
+smo_down_genes_Entrez <-extract_entrez(smo_down_genes$ensemblID)$entrezgene_id
+sigGeneList <- list("up"=smo_up_genes_Entrez, "down"=smo_down_genes_Entrez) 
+sigGeneList <-lapply(sigGeneList, function(x) {
+  x[!is.na(x)]
+})
+## Background genes
+geneUniverse <- all_genes_EntrezID
+geneUniverse <- geneUniverse[!is.na(geneUniverse)]
+
+goList_smo<-GO_KEGG(sigGeneList, geneUniverse, "smoking")
+save(goList_smo, file="processed-data/05_GO_KEGG/Tx_analysis/goList_smo.Rdata")
+
+
+
+#######################################################
+# Up/Down Nicotine VS Up/Down Smoking DE txs' genes
+#######################################################
+
+only_up_nic_genes_Entrez <-extract_entrez(only_up_nic_genes$ensemblID)$entrezgene_id
+only_up_smo_genes_Entrez <-extract_entrez(only_up_smo_genes$ensemblID)$entrezgene_id
+only_down_nic_genes_Entrez <-extract_entrez(only_down_nic_genes$ensemblID)$entrezgene_id
+only_down_smo_genes_Entrez <-extract_entrez(only_down_smo_genes$ensemblID)$entrezgene_id
+smoUp_nicDown_genes_Entrez <-extract_entrez(smoUp_nicDown_genes$ensemblID)$entrezgene_id
+smoDown_nicUp_genes_Entrez <-extract_entrez(smoDown_nicUp_genes$ensemblID)$entrezgene_id
+smoUp_nicUp_genes_Entrez <-extract_entrez(smoUp_nicUp_genes$ensemblID)$entrezgene_id
+smoDown_nicDown_genes_Entrez <-extract_entrez(smoDown_nicDown_genes$ensemblID)$entrezgene_id
+smoUp_smoDown_genes_Entrez <-extract_entrez(smoUp_smoDown_genes$ensemblID)$entrezgene_id
+nicUp_nicDown_genes_Entrez <-extract_entrez(nicUp_nicDown_genes$ensemblID)$entrezgene_id
+
+sigGeneList <- list("Only up nic"=only_up_nic_genes_Entrez, "Only up smo"=only_up_smo_genes_Entrez,
+                    "Only down nic"=only_down_nic_genes_Entrez, "Only down smo"=only_down_smo_genes_Entrez,
+                    "Smo up, nic down"=smoUp_nicDown_genes_Entrez, "Smo down, nic up"=smoDown_nicUp_genes_Entrez,
+                    "Smo up, nic up"=smoUp_nicUp_genes_Entrez, "Smo down, nic down"=smoDown_nicDown_genes_Entrez,
+                    "Smo Up, smo Down"=smoUp_smoDown_Entrez, "Nic Up, nic Down"=nicUp_nicDown_Entrez) 
+sigGeneList <-lapply(sigGeneList, function(x) {
+  x[!is.na(x)]
+})
+## Background genes
+geneUniverse <- all_genes_EntrezID
+geneUniverse <- geneUniverse[!is.na(geneUniverse)]
+
+goList_intersections<-GO_KEGG(sigGeneList, geneUniverse, "intersections")
+save(goList_intersections, file="processed-data/05_GO_KEGG/Tx_analysis/goList_intersections.Rdata")
+
+
+
+##################################################################
+# Txs' genes not considered at the gene or exon levels or non-DE genes or DE  
+##################################################################
+
+GO_KEGG_no_exons_genes<- function(expt){
+  top_exons<-eval(parse_expr(paste("top_exons_", substr(expt,1,3), sep="")))
+  top_genes<-eval(parse_expr(paste("top_genes_pups_", expt, "_fitted", sep="")))
+  de_genes<-eval(parse_expr(paste("de_genes_pups_", expt, "_fitted", sep="")))
+  de_exons<-eval(parse_expr(paste("de_exons_", substr(expt,1,3), sep="")))
+  
+  ## Exons' genes
+  exons_genes<-unique(top_exons$ensemblID)
+  
+  ## Common genes: considered at the gene and exon level
+  common_genes<-exons_genes[which(exons_genes %in% top_genes$ensemblID)]
+  common_genes<-top_genes[which(top_genes$ensemblID %in% common_genes), c("ensemblID","EntrezID")]
+  ## non-DE genes from the common genes containing DE exons
+  non_DEG<-common_genes[which(common_genes$ensemblID %in% de_exons$ensemblID & ! common_genes$ensemblID %in% de_genes$ensemblID),
+                        "EntrezID"]
+  ## DEG with DE exons
+  DEG<-common_genes[which(common_genes$ensemblID %in% de_exons$ensemblID & common_genes$ensemblID %in% de_genes$ensemblID),
+                    "EntrezID"]
+  ## DE exons' genes not present at the gene level
+  no_present_genes<-unique(de_exons[which(!de_exons$ensemblID %in% top_genes$ensemblID), "EntrezID"])
+  
+  sigGeneList <- list("non-DEG with DEE"=non_DEG, "DEG with DEE"=DEG, "No at gene level"=no_present_genes) 
+  sigGeneList <-lapply(sigGeneList, function(x) {
+    x[!is.na(x)]
+  })
+  ## Background genes
+  geneUniverse <- unique(top_exons$EntrezID)
+  geneUniverse <- geneUniverse[!is.na(geneUniverse)]
+  
+  goList_noDEG<-GO_KEGG(sigGeneList, geneUniverse, paste("noDEG_", substr(expt,1,3), sep=""))
+  save(goList_noDEG, file=paste("processed-data/05_GO_KEGG/Exon_analysis/goList_noDEG_", substr(expt,1,3), ".Rdata", sep=""))
+  
+}
+
+## Analyses 
+GO_KEGG_no_exons_genes("nicotine")
+GO_KEGG_no_exons_genes("smoking")
+
