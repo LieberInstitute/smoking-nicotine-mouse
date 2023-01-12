@@ -272,174 +272,6 @@ t_stat_tx_vs_genes(expt)
 
 
 
-### 1.2.1.3 T-stats of exons vs transcripts
-
-## Function to add DE info of tx and exons
-
-add_DE_info_tx_vs_exons <-function(t_stats) {
-  
-  DE<-vector()
-  for (i in 1:dim(t_stats)[1]) {
-    
-    ## DE tx with DE exons
-    if (t_stats$adj.P.Val_tx[i]<0.05 && t_stats$adj.P.Val_genes[i]<0.05){
-      DE<-append(DE, "sig Both")
-    }
-    
-    ## DE tx only
-    else if (t_stats$adj.P.Val_tx[i]<0.05 && t_stats$adj.P.Val_genes[i]>=0.05){
-      DE<-append(DE, "sig tx")
-    }
-    
-    ## DE genes only
-    else if(t_stats$adj.P.Val_tx[i]>=0.05 && t_stats$adj.P.Val_genes[i]<0.05){
-      DE<-append(DE, "sig gene")
-    }
-    
-    ## Neither DE tx nor DE genes
-    else {
-      DE<-append(DE, "None")      
-    }
-  }
-  return(DE)
-}
-
-
-
-## Create plots of t-stats of tx vs exons
-
-t_stat_tx_vs_exons<- function(expt){
-  
-  top_tx<-eval(parse_expr(paste("top_tx_", substr(expt,1,3), sep="")))
-  top_exons<-eval(parse_expr(paste("top_exons_", substr(expt,1,3), sep="")))
-  de_tx<-eval(parse_expr(paste("de_tx_", substr(expt,1,3), sep="")))
-  de_exons<-eval(parse_expr(paste("de_exons_", substr(expt,1,3), sep="")))
-  
-  if (expt=="nicotine"){
-    abs_t_tx=6
-    both_t=c(3,-4)
-    FDR=1
-  }
-  else{
-    abs_t_tx=7
-    both_t=c(4,-5)
-    FDR=0.001
-  }
-  
-  ## Transcripts' 
-  tx_genes<-unique(top_tx$ensembl_id)
-  
-  ## Common genes
-  tx_genes<-tx_genes[which(tx_genes %in% top_genes$gencodeID)]
-  
-  ## Extract transcripts' info
-  t_stats<-top_tx[which(top_tx$ensembl_id %in% tx_genes), c("transcript_id", "adj.P.Val", "Symbol", 
-                                                            "t", "ensembl_id", "logFC")]
-  colnames(t_stats)[2]<-"adj.P.Val_tx"
-  colnames(t_stats)[4]<-"t_tx"
-  colnames(t_stats)[6]<-"logFC_tx"
-  
-  ## Add t-stats and FDRs of transcripts' genes 
-  t_genes<-vector()
-  FDRs<-vector()
-  for (i in 1:dim(t_stats)[1]){
-    t<-top_genes[which(top_genes$gencodeID==t_stats$ensembl_id[i]), "t"]
-    FDR<-top_genes[which(top_genes$gencodeID==t_stats$ensembl_id[i]), "adj.P.Val"]
-    t_genes<-append(t_genes, t)
-    FDRs<-append(FDRs, FDR)
-  }
-  t_stats$t_genes<-t_genes
-  t_stats$adj.P.Val_genes<-FDRs
-  
-  ## Correlation coeff between t-stats of genes and transcripts
-  rho <- cor(t_stats$t_tx, t_stats$t_genes, method = "spearman")
-  rho_anno = paste0("rho = ", format(round(rho, 2), nsmall = 2))
-  
-  ## Add DE info for both groups 
-  t_stats$DE<-add_DE_info_tx_vs_genes(t_stats)
-  
-  
-  ## Gene-tx symbols of DE tx with no DEG, 
-  ## DE tx whose DEG have an opposite sign in logFC
-  ## and also label DE tx from genes with up and down tx
-  
-  ## Up and down transcripts' genes
-  tx_up_genes<-unique(de_tx[which(de_tx$logFC>0),"ensembl_id"])
-  tx_down_genes<-unique(de_tx[which(de_tx$logFC<0),"ensembl_id"])
-  ## Genes with up and down tx
-  interest_genes<-intersect(tx_up_genes, tx_down_genes)
-  ## Retain only the transcripts' genes that were considered at the gene level
-  interest_genes<-intersect(interest_genes, tx_genes)
-  
-  tx_symbols<-vector()
-  for (i in 1:dim(t_stats)[1]) {
-    
-    if (t_stats$DE[i]=="sig tx" & (abs(t_stats$t_tx[i])>abs_t_tx | 
-                                   ((t_stats$ensembl_id[i] %in% interest_genes) & (t_stats$adj.P.Val_tx[i]< FDR)))) {
-      tx_symbols<-append(tx_symbols, paste(t_stats$Symbol[i], "-", t_stats$transcript_id[i], sep=""))
-    }
-    else if(t_stats$DE[i]=="sig Both"){
-      if ((t_stats$t_genes[i]> both_t[1] & t_stats$t_tx[i]< both_t[2]) | 
-          (t_stats$t_genes[i]< -both_t[1] & t_stats$t_tx[i]> -both_t[2])){
-        tx_symbols<-append(tx_symbols, paste(t_stats$Symbol[i], "-", t_stats$transcript_id[i], sep=""))
-      }
-      else if((t_stats$ensembl_id[i] %in% interest_genes) & (t_stats$adj.P.Val_tx[i]< FDR)){
-        tx_symbols<-append(tx_symbols, paste(t_stats$Symbol[i], "-", t_stats$transcript_id[i], sep=""))
-      }      
-      else{
-        tx_symbols<-append(tx_symbols, NA)
-      }
-    }
-    else {
-      tx_symbols<-append(tx_symbols, NA)
-    }
-  }
-  t_stats$tx_symbols<-tx_symbols
-  
-  ## Plot
-  cols <- c("red", "#ffad73","#26b3ff", "dark grey") 
-  names(cols)<-c("sig Both","sig tx", "sig gene", "None")
-  alphas <- c(1, 1, 1,0.5)  
-  names(alphas)<-c("sig Both", "sig tx", "sig gene", "None")
-  
-  plot <- ggplot(t_stats, aes(x = t_genes, y = t_tx, color=DE, alpha=DE, label= tx_symbols)) +
-    geom_point(size = 1) +
-    labs(x = "t-stats genes", 
-         y = "t-stats tx",
-         title = paste(capitalize(expt),"genes vs tx", sep=" "), 
-         subtitle = rho_anno, 
-         parse = T) +
-    geom_label_repel(fill="white", size=2, max.overlaps = Inf,  
-                     box.padding = 0.2, 
-                     show.legend=FALSE) +
-    theme_bw() +
-    scale_color_manual(values = cols) + 
-    scale_alpha_manual(values = alphas)
-  
-  plot
-  ggsave(filename=paste("plots/04_DEA/02_Comparisons/Tx_analysis/t_stats_tx_vs_genes_", substr(expt,1,3), 
-                        ".pdf", sep=""), height = 20, width = 25, units = "cm")
-  
-}
-
-
-##################################### 
-# Nicotine genes vs nicotine tx
-#####################################
-expt<-"nicotine"
-t_stat_tx_vs_genes(expt)
-
-
-##################################### 
-# Smoking genes vs smoking tx
-#####################################
-expt<-"smoking"
-t_stat_tx_vs_genes(expt)
-
-
-
-
-
 
 
 ## 1.2.2 Boxplots of relevant genes and their tx
@@ -727,6 +559,7 @@ venn_plot<-function(DE_lists, colors, name, titles){
     dist=0.1
     cat=0.75
     cex=0.8
+    main_pos = c(0.5,0.476)
   }
   
   else if (name=="DEG_VS_txs_genes"){
@@ -736,6 +569,7 @@ venn_plot<-function(DE_lists, colors, name, titles){
     dist=0.07
     cat=0.75
     cex=0.8
+    main_pos = c(0.5,0.476)
   }
   
   else if (name=="smo_VS_nic_DE_txs_genes"){
@@ -745,6 +579,7 @@ venn_plot<-function(DE_lists, colors, name, titles){
     dist=0.09
     cat=0.75
     cex=0.8
+    main_pos = c(0.5,0.476)
   }
   
   else if (name=="intersections_DEG_VS_txs_genes"){
@@ -754,6 +589,7 @@ venn_plot<-function(DE_lists, colors, name, titles){
     dist=0.06
     cat=0.9
     cex=1
+    main_pos = c(0.5,0.476)
   }
   
   else if (name=="DEG_VS_txs_VS_exons"){
@@ -763,7 +599,18 @@ venn_plot<-function(DE_lists, colors, name, titles){
     dist=0.08
     cat=0.9
     cex=1
-    
+    main_pos = c(0.5,0.476)
+  }
+  
+  else if (name=="intersections_DEG_VS_txs_VS_exons"){
+    height=15
+    width=30
+    margin=1.15
+    dist=0.09
+    cat=1.3
+    cex=1.3
+    main_pos = c(0.5,0.375)
+    main_cex =1.5
   }
   
   plots<-list()
@@ -773,7 +620,7 @@ venn_plot<-function(DE_lists, colors, name, titles){
     v<-venn.diagram(DE_lists[[i]], fill=colors[[i]], alpha = rep(0.5, length(DE_lists[[i]])), 
                     lwd =0, margin=margin, cat.cex=cat, cex=cex, height = 10, width = 12.5, units = "cm", 
                     cat.dist=rep(dist, length(DE_lists[[i]])), filename=NULL, main = titles[i], 
-                    main.pos = c(0.5,0.476), disable.logging=TRUE)
+                    main.pos = main_pos, main.cex = main_cex, disable.logging=TRUE)
     plots[[i]]<-v
   }
   
@@ -1209,4 +1056,75 @@ venn_plot(DE_lists, colors, "DEG_VS_txs_VS_exons", c("All", "Nicotine", "Smoking
 
 
 ## Compare intersections of txs' genes vs DE exons' genes vs DEG
+
+## Only up nic genes 
+DEG_vs_Txs_vs_Exons_only_up_nic <-list(
+  "DEG"= only_up_nic_DEG,
+  "DE txs' genes"= only_up_nic_genes,
+  "DE exons' genes"= only_up_nic_exons_genes
+)
+
+## Only down nic genes 
+DEG_vs_Txs_vs_Exons_only_down_nic <-list(
+  "DEG"= only_down_nic_DEG,
+  "DE txs' genes"= only_down_nic_genes,
+  "DE exons' genes"= only_down_nic_exons_genes
+)
+
+## Only up smo DEGs vs txs' genes 
+DEG_vs_Txs_vs_Exons_only_up_smo <-list(
+  "DEG"= only_up_smo_DEG,
+  "DE txs' genes"= only_up_smo_genes,
+  "DE exons' genes"= only_up_smo_exons_genes
+)
+
+## Only down smo genes 
+DEG_vs_Txs_vs_Exons_only_down_smo <-list(
+  "DEG"= only_down_smo_DEG,
+  "DE txs' genes"= only_down_smo_genes,
+  "DE exons' genes"= only_down_smo_exons_genes
+)
+
+## Smo and nic up genes
+DEG_vs_Txs_vs_Exons_smoUp_nicUp <-list(
+  "DEG"=smoUp_nicUp_DEG,
+  "DE txs' genes"=smoUp_nicUp_genes,
+  "DE exons' genes"= smoUp_nicUp_exons_genes
+)
+
+## Smo and nic down genes
+DEG_vs_Txs_vs_Exons_smoDown_nicDown <-list(
+  "DEG"=smoDown_nicDown_DEG,
+  "DE txs' genes"=smoDown_nicDown_genes,
+  "DE exons' genes"= smoDown_nicDown_exons_genes
+)
+
+## Smo up and nic down genes
+DEG_vs_Txs_vs_Exons_smoUp_nicDown <-list(
+  "DEG"=smoUp_nicDown_DEG,
+  "DE txs' genes"=smoUp_nicDown_genes,
+  "DE exons' genes"= smoUp_nicDown_exons_genes
+)
+
+## Smo down and nic up genes
+DEG_vs_Txs_vs_Exons_smoDown_nicUp <-list(
+  "DEG"=smoDown_nicUp_DEG,
+  "DE txs' genes"=smoDown_nicUp_genes,
+  "DE exons' genes"= smoDown_nicUp_exons_genes
+)
+
+
+
+## Venn diagrams
+DE_lists<-list(DEG_vs_Txs_vs_Exons_only_up_nic, DEG_vs_Txs_vs_Exons_only_down_nic, DEG_vs_Txs_vs_Exons_only_up_smo,
+               DEG_vs_Txs_vs_Exons_only_down_smo, DEG_vs_Txs_vs_Exons_smoUp_nicUp, DEG_vs_Txs_vs_Exons_smoDown_nicDown,
+               DEG_vs_Txs_vs_Exons_smoUp_nicDown, DEG_vs_Txs_vs_Exons_smoDown_nicUp)
+colors<-list(c("darkslategray3", "lightgoldenrod3", "orangered"), c("darkslategray1", "lightgoldenrod1", "sienna1"), 
+             c("lightpink3", "olivedrab3", "indianred"), c("pink", "olivedrab1", "indianred1"), 
+             c("palegreen3", "navajowhite3", "orange3"), c("palegreen", "navajowhite", "orange1"), 
+             c("palegreen2","navajowhite2", "orange2"), c("palegreen2", "navajowhite2", "orange2"))
+venn_plot(DE_lists, colors, "intersections_DEG_VS_txs_VS_exons", c("Only up in nic", "Only down in nic",
+                                                                "Only up in smo", "Only down in smo", 
+                                                                "Smo up, nic up", "Smo down, nic down",
+                                                                "Smo up, nic down", "Smo down, nic up"))
 
