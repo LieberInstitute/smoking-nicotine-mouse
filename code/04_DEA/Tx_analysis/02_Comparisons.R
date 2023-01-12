@@ -560,6 +560,7 @@ venn_plot<-function(DE_lists, colors, name, titles){
     cat=0.75
     cex=0.8
     main_pos = c(0.5,0.476)
+    main_cex =1
   }
   
   else if (name=="DEG_VS_txs_genes"){
@@ -570,6 +571,7 @@ venn_plot<-function(DE_lists, colors, name, titles){
     cat=0.75
     cex=0.8
     main_pos = c(0.5,0.476)
+    main_cex =1
   }
   
   else if (name=="smo_VS_nic_DE_txs_genes"){
@@ -580,6 +582,7 @@ venn_plot<-function(DE_lists, colors, name, titles){
     cat=0.75
     cex=0.8
     main_pos = c(0.5,0.476)
+    main_cex =1
   }
   
   else if (name=="intersections_DEG_VS_txs_genes"){
@@ -590,6 +593,7 @@ venn_plot<-function(DE_lists, colors, name, titles){
     cat=0.9
     cex=1
     main_pos = c(0.5,0.476)
+    main_cex =1
   }
   
   else if (name=="DEG_VS_txs_VS_exons"){
@@ -600,6 +604,7 @@ venn_plot<-function(DE_lists, colors, name, titles){
     cat=0.9
     cex=1
     main_pos = c(0.5,0.476)
+    main_cex =1
   }
   
   else if (name=="intersections_DEG_VS_txs_VS_exons"){
@@ -1128,3 +1133,26 @@ venn_plot(DE_lists, colors, "intersections_DEG_VS_txs_VS_exons", c("Only up in n
                                                                 "Smo up, nic up", "Smo down, nic down",
                                                                 "Smo up, nic down", "Smo down, nic up"))
 
+
+
+
+
+
+
+## Reproducibility information
+
+options(width = 120)
+session_info()
+
+# setting  value
+# version  R version 4.2.0 (2022-04-22 ucrt)
+# os       Windows 10 x64 (build 19044)
+# system   x86_64, mingw32
+# ui       RStudio
+# language (EN)
+# collate  Spanish_Mexico.utf8
+# ctype    Spanish_Mexico.utf8
+# tz       America/Mexico_City
+# date     2023-01-11
+# rstudio  2022.07.2+576 Spotted Wakerobin (desktop)
+# pandoc   NA
