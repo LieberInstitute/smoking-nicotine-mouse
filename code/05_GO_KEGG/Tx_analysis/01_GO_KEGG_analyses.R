@@ -299,10 +299,11 @@ save(goList_intersections, file="processed-data/05_GO_KEGG/Tx_analysis/goList_in
 ##############################################################
 
 GO_KEGG_no_txs_genes<- function(expt){
+  
   top_genes<-eval(parse_expr(paste("top_genes_pups_", expt, "_fitted", sep="")))
-  top_tx<-eval(parse_expr(paste("top_tx", substr(expt,1,3), sep="")))
+  top_tx<-eval(parse_expr(paste("top_tx_", substr(expt,1,3), sep="")))
   de_genes<-eval(parse_expr(paste("de_genes_pups_", expt, "_fitted", sep="")))
-  de_tx<-eval(parse_expr(paste("de_tx", substr(expt,1,3), sep="")))
+  de_tx<-eval(parse_expr(paste("de_tx_", substr(expt,1,3), sep="")))
   
   ## Txs' genes
   tx_genes<-unique(top_tx$ensemblID)
@@ -334,8 +335,8 @@ GO_KEGG_no_txs_genes<- function(expt){
 }
 
 ## Analyses 
-GO_KEGG_no_exons_genes("nicotine")
-GO_KEGG_no_exons_genes("smoking")
+GO_KEGG_no_txs_genes("nicotine")
+GO_KEGG_no_txs_genes("smoking")
 
 
 
