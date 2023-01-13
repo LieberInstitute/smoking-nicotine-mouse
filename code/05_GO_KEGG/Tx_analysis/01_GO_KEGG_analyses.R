@@ -68,8 +68,8 @@ smoUp_nicUp_genes<-merge(nic_up_genes, smo_up_genes)
 smoDown_nicDown_genes<-merge(nic_down_genes, smo_down_genes)
 smoUp_nicDown_genes<-merge(nic_down_genes, smo_up_genes)
 smoDown_nicUp_genes<-merge(nic_up_genes, smo_down_genes)
-smoUp_smoDown<-merge(smo_up_genes, smo_down_genes)
-nicUp_nicDown<-merge(nic_up_genes, nic_down_genes)
+smoUp_smoDown_genes<-merge(smo_up_genes, smo_down_genes)
+nicUp_nicDown_genes<-merge(nic_up_genes, nic_down_genes)
 only_up_nic_genes<-merge(merge(nic_up_genes[which(! nic_up_genes$ensemblID %in% nic_down_genes$ensemblID),],
                                nic_up_genes[which(! nic_up_genes$ensemblID %in% smo_up_genes$ensemblID),]),
                          nic_up_genes[which(! nic_up_genes$ensemblID %in% smo_down_genes$ensemblID),])
@@ -281,7 +281,7 @@ sigGeneList <- list("Only up nic"=only_up_nic_genes_Entrez, "Only up smo"=only_u
                     "Only down nic"=only_down_nic_genes_Entrez, "Only down smo"=only_down_smo_genes_Entrez,
                     "Smo up, nic down"=smoUp_nicDown_genes_Entrez, "Smo down, nic up"=smoDown_nicUp_genes_Entrez,
                     "Smo up, nic up"=smoUp_nicUp_genes_Entrez, "Smo down, nic down"=smoDown_nicDown_genes_Entrez,
-                    "Smo Up, smo Down"=smoUp_smoDown_Entrez, "Nic Up, nic Down"=nicUp_nicDown_Entrez) 
+                    "Smo Up, smo Down"=smoUp_smoDown_genes_Entrez, "Nic Up, nic Down"=nicUp_nicDown_genes_Entrez) 
 sigGeneList <-lapply(sigGeneList, function(x) {
   x[!is.na(x)]
 })
@@ -391,6 +391,30 @@ compare_DE <- function(expt){
   save(goList_DE_comparisons, file=paste("processed-data/05_GO_KEGG/Tx_analysis/goList_DE_comparisons", substr(expt,1,3), ".Rdata", sep=""))
     
 }
+
+## Analyses 
+compare_DE("nicotine")
+compare_DE("smoking")
+
+
+
+
+
+## 1.1 Boxplots of txs' genes 
+
+### 1.1.1 Genes in GO and KEGG descriptions
+
+vGene_smo<-results_pups_smoking_fitted[[1]][[2]]
+vGene_nic<-results_pups_nicotine_fitted[[1]][[2]]
+## Regress out residuals 
+formula<- ~ Group + Sex + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr + 
+  overallMapRate + mitoRate
+model<- model.matrix(formula, data=colData(rse_gene_brain_pups_smoking))
+vGene_smo$E<-cleaningY(vGene_smo$E, model, P=2)
+rownames(vGene_nic$E)<-vGene_nic$genes$Symbol
+model<- model.matrix(formula, data=colData(rse_gene_brain_pups_nicotine))
+vGene_nic$E<-cleaningY(vGene_nic$E, model, P=2)
+rownames(vGene_smo$E)<-vGene_smo$genes$Symbol
 
 
 
