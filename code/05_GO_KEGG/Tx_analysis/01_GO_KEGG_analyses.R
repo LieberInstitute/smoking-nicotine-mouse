@@ -400,7 +400,7 @@ compare_DE <- function(expt){
   geneUniverse <- geneUniverse[!is.na(geneUniverse)]
   
   goList_DE_comparisons<-GO_KEGG(sigGeneList, geneUniverse, paste("DE_comparisons_", substr(expt,1,3), sep=""))
-  save(goList_DE_comparisons, file=paste("processed-data/05_GO_KEGG/Tx_analysis/goList_DE_comparisons", substr(expt,1,3), ".Rdata", sep=""))
+  save(goList_DE_comparisons, file=paste("processed-data/05_GO_KEGG/Tx_analysis/goList_DE_comparisons_", substr(expt,1,3), ".Rdata", sep=""))
     
 }
 
@@ -497,8 +497,13 @@ GO_KEGG_genes<- function(golist, term, cluster, description){
   genes<-unique(GOdata[which(GOdata$Description==description & GOdata$Cluster==cluster), "geneID"])
   genes<-strsplit(genes, "/")
   genes<-unique(unlist(genes))
+  ## Retain only genes considered at the gene level
+  if (! term=="KEGG"){
+    genes<-genes[which(genes %in% top_genes_pups_nicotine_fitted$Symbol)]
+  }
   
-  if (term=="KEGG"){
+  else if (term=="KEGG"){
+    genes<-genes[which(genes %in% top_genes_pups_nicotine_fitted$EntrezID)]
     ## KEGG ids (entrez ids) to gene symbols
     symbols<-biomart(genes  = genes,
                      mart       = "ENSEMBL_MART_ENSEMBL",
@@ -615,10 +620,6 @@ GO_genes<-GO_KEGG_genes("goList_intersections", "CC", "Only up smo", "glutamater
 top_DEG<-extract_top_genes(GO_genes)
 GO_KEGG_boxplots(top_DEG, "glutamatergic_synapse", "Only_up_smo")
 
-GO_genes<-GO_KEGG_genes("goList_noDEG_smo", "CC", "non−DEG with DEtxs", "glutamatergic synapse")
-top_DEG<-extract_top_genes(GO_genes)
-GO_KEGG_boxplots(top_DEG, "glutamatergic_synapse", "noDEG_smo")
-
 
 ## Genes in SNARE complex
 GO_genes<-GO_KEGG_genes("goList_global", "CC", "up", "SNARE complex")
@@ -647,38 +648,16 @@ GO_genes<-GO_KEGG_genes("goList_intersections", "CC", "Only up smo", "transport 
 top_DEG<-extract_top_genes(GO_genes)
 GO_KEGG_boxplots(top_DEG, "transport_vesicle", "Only_up_smo")
 
-GO_genes<-GO_KEGG_genes("goList_noDEG_smo", "CC", "non−DEG with DEtxs", "transport vesicle")
-top_DEG<-extract_top_genes(GO_genes)
-GO_KEGG_boxplots(top_DEG, "transport_vesicle", "noDEG_smo")
-
-
-## Genes in synaptic membrane
-GO_genes<-GO_KEGG_genes("goList_noDEG_smo", "CC", "non−DEG with DEtxs", "synaptic membrane")
-top_DEG<-extract_top_genes(GO_genes)
-GO_KEGG_boxplots(top_DEG, "synaptic_membrane", "noDEG_smo")
-
-
-## Genes in presynapses
-GO_genes<-GO_KEGG_genes("goList_noDEG_smo", "CC", "non−DEG with DEtxs", "presynapse")
-top_DEG<-extract_top_genes(GO_genes)
-GO_KEGG_boxplots(top_DEG, "presynapse", "noDEG_smo")
-
-
-## Genes in retromer complex (See PMID: 26199408)
-GO_genes<-GO_KEGG_genes("goList_noDEG_smo", "CC", "non−DEG with DEtxs", "retromer complex")
-top_DEG<-extract_top_genes(GO_genes)
-GO_KEGG_boxplots(top_DEG, "retromer_complex", "noDEG_smo")
-
 
 
 ## 2. Pathways
 
 ## Genes involved in Pathways of neurodegeneration − multiple diseases
-GO_genes<-GO_KEGG_genes("goList_global", "KEGG", "up", "Pathways of neurodegeneration − multiple diseases")
+GO_genes<-GO_KEGG_genes("goList_global", "KEGG", "up", "Pathways of neurodegeneration - multiple diseases")
 top_DEG<-extract_top_genes(GO_genes)
 GO_KEGG_boxplots(top_DEG, "Neurodegeneration", "up")
 
-GO_genes<-GO_KEGG_genes("goList_smo", "KEGG", "up", "Pathways of neurodegeneration − multiple diseases")
+GO_genes<-GO_KEGG_genes("goList_smo", "KEGG", "up", "Pathways of neurodegeneration - multiple diseases")
 top_DEG<-extract_top_genes(GO_genes)
 GO_KEGG_boxplots(top_DEG, "Neurodegeneration", "smo_up")
 
