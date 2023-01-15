@@ -16,7 +16,9 @@ library(sessioninfo)
 
 load(here("processed-data/04_DEA/Tx_analysis/de_tx_nic.Rdata"))
 load(here("processed-data/04_DEA/Tx_analysis/de_tx_smo.Rdata"))
+load(here("processed-data/04_DEA/Exon_analysis/top_exons_nic.Rdata"))
 load(here("processed-data/04_DEA/Exon_analysis/de_exons_nic.Rdata"))
+load(here("processed-data/04_DEA/Exon_analysis/top_exons_smo.Rdata"))
 load(here("processed-data/04_DEA/Exon_analysis/de_exons_smo.Rdata"))
 load(here("processed-data/04_DEA/Tx_analysis/top_tx_nic.Rdata"))
 load(here("processed-data/04_DEA/Tx_analysis/top_tx_smo.Rdata"))
@@ -89,7 +91,7 @@ intersections<-list("only up nic"=only_up_nic_genes, "only up smo"=only_up_smo_g
                     "only down nic"=only_down_nic_genes, "only down smo"=only_down_smo_genes, 
                     "smo Up nic Up"=smoUp_nicUp_genes, "smo Down nic Down"=smoDown_nicDown_genes, 
                     "smo Up nic Down"=smoUp_nicDown_genes, "smo Down nic Up"=smoDown_nicUp_genes,
-                    "smo Up smo Down"=smoUp_smoDown, "nic Up nic Down"=nicUp_nicDown)
+                    "smo Up smo Down"=smoUp_smoDown_genes, "nic Up nic Down"=nicUp_nicDown_genes)
 save(intersections, file="processed-data/05_GO_KEGG/Tx_analysis/intersections_txs_genes.Rdata")
 
 
@@ -389,7 +391,8 @@ compare_DE <- function(expt){
     x[!is.na(x)]
   })
   ## Background genes
-  geneUniverse <- all_genes_EntrezID
+  geneUniverse <- union(union(top_exons_nic$EntrezID, top_genes_pups_nicotine_fitted$EntrezID),
+                        all_genes_EntrezID)
   geneUniverse <- geneUniverse[!is.na(geneUniverse)]
   
   goList_DE_comparisons<-GO_KEGG(sigGeneList, geneUniverse, paste("DE_comparisons_", substr(expt,1,3), sep=""))
