@@ -711,3 +711,17 @@ GO_KEGG_boxplots(top_DEG, "SNARE_interactions", "smoUp_nicDown")
 
 options(width = 120)
 session_info()
+
+# setting  value
+# version  R version 4.2.0 (2022-04-22 ucrt)
+# os       Windows 10 x64 (build 19044)
+# system   x86_64, mingw32
+# ui       RStudio
+# language (EN)
+# collate  Spanish_Mexico.utf8
+# ctype    Spanish_Mexico.utf8
+# tz       America/Mexico_City
+# date     2023-01-15
+# rstudio  2022.07.2+576 Spotted Wakerobin (desktop)
+# pandoc   NA
+
