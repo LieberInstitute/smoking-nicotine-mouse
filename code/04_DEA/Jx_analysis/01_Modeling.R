@@ -132,15 +132,15 @@ save(de_jxns_nic, file="processed-data/04_DEA/Jx_analysis/de_jxns_nic.Rdata")
 #    Smoking vs ctrls in pups
 ##################################
 
-RSE<-rse_exon_brain_pups_smoking
+RSE<-rse_jx_brain_pups_smoking
 name<-"smoking"
 results_smo<-apply_DEA(RSE, name)
-"5983 differentially expressed exons"
-top_exons_smo<-results_smo[[1]][[1]]
-de_exons_smo<-results_smo[[2]]
-save(results_smo, file="processed-data/04_DEA/Exon_analysis/results_smo.Rdata")
-save(top_exons_smo, file="processed-data/04_DEA/Exon_analysis/top_exons_smo.Rdata")
-save(de_exons_smo, file="processed-data/04_DEA/Exon_analysis/de_exons_smo.Rdata")
+"9515 differentially expressed jxns"
+top_jxns_smo<-results_smo[[1]][[1]]
+de_jxns_smo<-results_smo[[2]]
+save(results_smo, file="processed-data/04_DEA/Jx_analysis/results_smo.Rdata")
+save(top_jxns_smo, file="processed-data/04_DEA/Jx_analysis/top_jxns_smo.Rdata")
+save(de_jxns_smo, file="processed-data/04_DEA/Jx_analysis/de_jxns_smo.Rdata")
 
 
 
