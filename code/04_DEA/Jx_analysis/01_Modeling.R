@@ -46,7 +46,7 @@ DEA_expt_vs_ctl<- function(RSE, name){
   stopifnot(all(!is.na(match_samples)))
   factors<-samples_factors[match_samples, ]
   
-  pdf(file = paste("plots/04_DEA/01_Modeling/Exon_analysis/DEA_exon_plots_", name, ".pdf", sep="" ))
+  pdf(file = paste("plots/04_DEA/01_Modeling/Jx_analysis/DEA_jx_plots_", name, ".pdf", sep="" ))
   par(mfrow=c(2,2))
   
   ## Model matrix using formula for the fitted model
@@ -58,30 +58,94 @@ DEA_expt_vs_ctl<- function(RSE, name){
   RSE_scaled$samples$norm.factors<-factors$norm.factors
   
   ## Transform counts to log2(CPM) 
-  ## Estimate mean-variance relationship for each exon
-  vExon = voom(RSE_scaled, design=model, plot=TRUE)
+  ## Estimate mean-variance relationship for each jxn 
+  vJxn = voom(RSE_scaled, design=model, plot=TRUE)
   
-  ## Fit linear model for each exon
-  fitExon = lmFit(vExon)
+  ## Fit linear model for each jxn 
+  fitJxn = lmFit(vJxn)
   
   ## Compute moderated F and t-statistics, and log-odds of DE
-  eBExon = eBayes(fitExon)
+  eBJxn = eBayes(fitJxn)
   
   ## Plot average log expression vs logFC
-  limma::plotMA(eBExon, coef = "GroupExperimental", xlab = "Mean of normalized counts", 
+  limma::plotMA(eBJxn, coef = "GroupExperimental", xlab = "Mean of normalized counts", 
                 ylab="logFC")
   
   ## Plot -log(p-value) vs logFC
-  volcanoplot(eBExon, coef = "GroupExperimental")
+  volcanoplot(eBJxn, coef = "GroupExperimental")
   
-  ## Select top-ranked exons for Group 
-  top_exons = topTable(eBExon, coef="GroupExperimental", p.value = 1, number=nrow(RSE), sort.by="none")
+  ## Select top-ranked jxns for Group 
+  top_jxns = topTable(eBJxn, coef="GroupExperimental", p.value = 1, number=nrow(RSE), sort.by="none")
   ## Histogram of adjusted p values
-  hist(top_exons$adj.P.Val, xlab="FDR", main="")
+  hist(top_jxns$adj.P.Val, xlab="FDR", main="")
   
   dev.off()
   
-  return(list(top_exons, vExon, eBExon))
+  return(list(top_jxns, vJxn, eBJxn))
   
-}  
+} 
+
+
+
+## Perform DEA for each group of samples
+apply_DEA<-function(RSE, name){
+  ## DEA
+  results<-DEA_expt_vs_ctl(RSE, name)
+  top_jxns<-results[[1]]
+  
+  ## If there are DE jxns
+  if (length(which(top_jxns$adj.P.Val<0.05))>0){
+    ## Signif jxns
+    de_jxns<-top_jxns[which(top_jxns$adj.P.Val < 0.05),]
+    print(paste(dim(de_jxns)[1], "differentially expressed jxns", sep=" "))
+    return(list(results, de_jxns))
+  }
+  else {
+    print("No differentially expressed jxns")
+    return(results)
+  }
+}
+
+
+
+
+
+##################################
+#         Nicotine DEA 
+#    Nicotine vs ctrls in pups
+##################################
+
+RSE<-rse_jx_brain_pups_nicotine
+name<-"nicotine"
+results_nic<-apply_DEA(RSE, name)
+"1115 differentially expressed exons"
+top_jxns_nic<-results_nic[[1]][[1]]
+de_jxns_nic<-results_nic[[2]]
+save(results_nic, file="processed-data/04_DEA/Jx_analysis/results_nic.Rdata")
+save(top_jxns_nic, file="processed-data/04_DEA/Jx_analysis/top_jxns_nic.Rdata")
+save(de_jxns_nic, file="processed-data/04_DEA/Jx_analysis/de_jxns_nic.Rdata")
+
+
+
+##################################
+#          Smoking DEA 
+#    Smoking vs ctrls in pups
+##################################
+
+RSE<-rse_exon_brain_pups_smoking
+name<-"smoking"
+results_smo<-apply_DEA(RSE, name)
+"5983 differentially expressed exons"
+top_exons_smo<-results_smo[[1]][[1]]
+de_exons_smo<-results_smo[[2]]
+save(results_smo, file="processed-data/04_DEA/Exon_analysis/results_smo.Rdata")
+save(top_exons_smo, file="processed-data/04_DEA/Exon_analysis/top_exons_smo.Rdata")
+save(de_exons_smo, file="processed-data/04_DEA/Exon_analysis/de_exons_smo.Rdata")
+
+
+
+
+
+
+
 
