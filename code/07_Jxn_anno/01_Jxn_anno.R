@@ -19,7 +19,7 @@ table(rowData(rse_jx)[which(rowData(rse_jx)$Class=="Novel"), c("inGencodeStart",
 #   inGencodeStart FALSE
 #            FALSE 847606
 
-## "AltStartEnd" jxns only have one known site
+## "AltStartEnd" jxns have only one known site
 table(rowData(rse_jx)[which(rowData(rse_jx)$Class=="AltStartEnd"), c("inGencodeStart", "inGencodeEnd")])
 #                   inGencodeEnd
 #   inGencodeStart  FALSE   TRUE
@@ -48,7 +48,7 @@ table(rowData(rse_jx)[which(rowData(rse_jx)$isFusion=="TRUE"), c("inGencodeStart
 
 
 
-## 1.1 Extract exons and genes from novel jxns
+## 1.1 Extract exons and genes from novel jxns??
 
 ## Novel DE introns/jxns
 ## Nicotine
