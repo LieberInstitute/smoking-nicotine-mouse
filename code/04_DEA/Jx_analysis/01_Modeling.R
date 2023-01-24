@@ -118,7 +118,7 @@ apply_DEA<-function(RSE, name){
 RSE<-rse_jx_brain_pups_nicotine
 name<-"nicotine"
 results_nic<-apply_DEA(RSE, name)
-"1115 differentially expressed exons"
+"205 differentially expressed jxns"
 top_jxns_nic<-results_nic[[1]][[1]]
 de_jxns_nic<-results_nic[[2]]
 save(results_nic, file="processed-data/04_DEA/Jx_analysis/results_nic.Rdata")
