@@ -48,6 +48,15 @@ table(rowData(rse_jx)[which(rowData(rse_jx)$isFusion=="TRUE"), c("inGencodeStart
 
 
 
-## 1.1 Extract exons and genes from jxns
+## 1.1 Extract exons and genes from novel jxns
 
-## Novel introns
+## Novel DE introns/jxns
+## Nicotine
+novel_jxns_nic <- de_jxns_nic[which(! (de_jxns_nic$Class=="InGen" | de_jxns_nic$Class=="ExonSkip")),]
+## Smoking
+novel_jxns_smo <- de_jxns_smo[which(! (de_jxns_smo$Class=="InGen" | de_jxns_smo$Class=="ExonSkip")),]
+
+
+
+
+
