@@ -25,6 +25,9 @@ load(here("processed-data/04_DEA/Gene_analysis/de_genes_pups_smoking_fitted.Rdat
 load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_smoking_fitted.Rdata"))
 load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_smoking_interaction.Rdata"))
 
+## Data from human fetal brain 
+load(here("raw-data/Genes_DE_sva.rda"))
+
 
 
 ### 1.2.1 T-stats plots
@@ -177,6 +180,11 @@ t<-t_stat_plot(top_genes_pups_smoking_naive, top_genes_pups_smoking_fitted,
 ggsave("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_Naive_VS_Fitted_Smoking.pdf", t, 
        height = 10, width = 12, units = "cm")
 
+
+
+
+
+## Compare mice vs human data
 
 
 
