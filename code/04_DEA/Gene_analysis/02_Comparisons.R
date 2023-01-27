@@ -188,7 +188,8 @@ ggsave("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_Naive_VS_Fitted_Smokin
 
 ## " " to NA 
 fetalGene[fetalGene == ""] <- NA
-## Add ensembl ID of human genes 
+
+## Add ensembl ID to human genes 
 human_ensembl_ids<-biomart(genes  = fetalGene$EntrezID,
                  mart       = "ENSEMBL_MART_ENSEMBL",
                  dataset    = "hsapiens_gene_ensembl",
@@ -202,12 +203,16 @@ human_mouse_ids<-biomart(genes  = human_ensembl_ids$ensembl_gene_id,
                  filters    = "ensembl_gene_id")
 ## Merge IDs
 gene_ids <- unique(merge(human_ensembl_ids, human_mouse_ids, by="ensembl_gene_id"))
+## Check that all genes are in the original dataset
+which(! gene_ids$entrezgene_id %in% fetalGene$EntrezID)
+# integer(0)
 
-
-## Common genes in human homologs and mouse 
-
-
-
+## Common genes between human homologous and mouse 
+common_genes <- intersect(top_genes_pups_nicotine_fitted$ensemblID, gene_ids$mmusculus_homolog_ensembl_gene)
+top_genes_mouse <- top_genes_pups_nicotine_fitted[match(common_genes, top_genes_pups_nicotine_fitted$ensemblID ),]
+top_genes_human <- gene_ids[match(common_genes, gene_ids$mmusculus_homolog_ensembl_gene),]
+top_genes_human <- fetalGene[match(top_genes_human$entrezgene_id, fetalGene$EntrezID),]
+top_genes_human$human_id <- gene_ids[]
 
 
 
