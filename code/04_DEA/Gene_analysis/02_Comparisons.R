@@ -181,7 +181,6 @@ ggsave("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_Naive_VS_Fitted_Smokin
        height = 10, width = 12, units = "cm")
 
 
-
 #################################################
 # Compare mouse pup brain vs human fetal brain 
 #################################################
@@ -189,30 +188,25 @@ ggsave("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_Naive_VS_Fitted_Smokin
 ## " " to NA 
 fetalGene[fetalGene == ""] <- NA
 
-## Add ensembl ID to human genes 
-human_ensembl_ids<-biomart(genes  = fetalGene$EntrezID,
+## Ensembl IDs of human genes
+fetalGene$ensemblID <- rownames(fetalGene)
+
+## Find the homologous genes of human in mouse
+human_mouse_ids<-biomart(genes  = fetalGene$ensemblID,
                  mart       = "ENSEMBL_MART_ENSEMBL",
                  dataset    = "hsapiens_gene_ensembl",
-                 attributes = "ensembl_gene_id",
-                 filters    = "entrezgene_id")
-## Find the homolog genes of human in mouse
-human_mouse_ids<-biomart(genes  = human_ensembl_ids$ensembl_gene_id,
-                 mart       = "ENSEMBL_MART_ENSEMBL",
-                 dataset    = "hsapiens_gene_ensembl",
-                 attributes = "mmusculus_homolog_ensembl_gene",
+                 attributes = c("mmusculus_homolog_ensembl_gene", "mmusculus_homolog_associated_gene_name"),
                  filters    = "ensembl_gene_id")
-## Merge IDs
-gene_ids <- unique(merge(human_ensembl_ids, human_mouse_ids, by="ensembl_gene_id"))
-## Check that all genes are in the original dataset
-which(! gene_ids$entrezgene_id %in% fetalGene$EntrezID)
-# integer(0)
+
+## Add IDs and names of mouse genes
+fetalGene$mmusculus_homolog_ensembl_gene <- human_mouse_ids[match(fetalGene$ensemblID, human_mouse_ids$ensembl_gene_id), "mmusculus_homolog_ensembl_gene"]
+fetalGene$mmusculus_homolog_associated_gene_name<- human_mouse_ids[match(fetalGene$ensemblID, human_mouse_ids$ensembl_gene_id), "mmusculus_homolog_associated_gene_name"]
+
 
 ## Common genes between human homologous and mouse 
-common_genes <- intersect(top_genes_pups_nicotine_fitted$ensemblID, gene_ids$mmusculus_homolog_ensembl_gene)
+common_genes <- intersect(top_genes_pups_nicotine_fitted$ensemblID, fetalGene$mmusculus_homolog_ensembl_gene)
 top_genes_mouse <- top_genes_pups_nicotine_fitted[match(common_genes, top_genes_pups_nicotine_fitted$ensemblID ),]
-top_genes_human <- gene_ids[match(common_genes, gene_ids$mmusculus_homolog_ensembl_gene),]
-top_genes_human <- fetalGene[match(top_genes_human$entrezgene_id, fetalGene$EntrezID),]
-top_genes_human$human_id <- gene_ids[]
+top_genes_human <- fetalGene[match(common_genes, fetalGene$ensemblID),]
 
 
 
