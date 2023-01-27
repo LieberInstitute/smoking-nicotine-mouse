@@ -182,11 +182,29 @@ ggsave("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_Naive_VS_Fitted_Smokin
 
 
 
+#################################################
+# Compare mouse pup brain vs human fetal brain 
+#################################################
+
+## " " to NA 
+fetalGene[fetalGene == ""] <- NA
+## Add ensembl ID of human genes 
+human_ensembl_ids<-biomart(genes  = fetalGene$EntrezID,
+                 mart       = "ENSEMBL_MART_ENSEMBL",
+                 dataset    = "hsapiens_gene_ensembl",
+                 attributes = "ensembl_gene_id",
+                 filters    = "entrezgene_id")
+## Find the homolog genes of human in mouse
+human_mouse_ids<-biomart(genes  = human_ensembl_ids$ensembl_gene_id,
+                 mart       = "ENSEMBL_MART_ENSEMBL",
+                 dataset    = "hsapiens_gene_ensembl",
+                 attributes = "mmusculus_homolog_ensembl_gene",
+                 filters    = "ensembl_gene_id")
+## Merge IDs
+gene_ids <- unique(merge(human_ensembl_ids, human_mouse_ids, by="ensembl_gene_id"))
 
 
-## Compare mice vs human data
-
-
+## Common genes in human homologs and mouse 
 
 
 
