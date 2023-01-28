@@ -198,15 +198,38 @@ human_mouse_ids<-biomart(genes  = fetalGene$ensemblID,
                  attributes = c("mmusculus_homolog_ensembl_gene", "mmusculus_homolog_associated_gene_name"),
                  filters    = "ensembl_gene_id")
 
-## Add IDs and names of mouse genes
+## Add IDs and names of mouse genes (first ocurrences)
 fetalGene$mmusculus_homolog_ensembl_gene <- human_mouse_ids[match(fetalGene$ensemblID, human_mouse_ids$ensembl_gene_id), "mmusculus_homolog_ensembl_gene"]
 fetalGene$mmusculus_homolog_associated_gene_name<- human_mouse_ids[match(fetalGene$ensemblID, human_mouse_ids$ensembl_gene_id), "mmusculus_homolog_associated_gene_name"]
 
-
 ## Common genes between human homologous and mouse 
 common_genes <- intersect(top_genes_pups_nicotine_fitted$ensemblID, fetalGene$mmusculus_homolog_ensembl_gene)
+top_genes_human <- fetalGene[match(common_genes, fetalGene$mmusculus_homolog_ensembl_gene),]
+
+#############
+## Nicotine
+#############
+
+## Retain common genes only
 top_genes_mouse <- top_genes_pups_nicotine_fitted[match(common_genes, top_genes_pups_nicotine_fitted$ensemblID ),]
-top_genes_human <- fetalGene[match(common_genes, fetalGene$ensemblID),]
+
+## Plot
+t<-t_stat_plot(top_genes_human, top_genes_mouse,  "Human", "Mouse", "Nicotine fetus/pups")
+ggsave("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_Human_VS_Mouse_Nicotine.pdf", t, 
+       height = 10, width = 12, units = "cm")
+
+#############
+## Smoking
+#############
+
+top_genes_mouse <- top_genes_pups_smoking_fitted[match(common_genes, top_genes_pups_smoking_fitted$ensemblID ),]
+
+## Plot
+t<-t_stat_plot(top_genes_human, top_genes_mouse,  "Human", "Mouse", "Smoking fetus/pups")
+ggsave("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_Human_VS_Mouse_Smoking.pdf", t, 
+       height = 10, width = 12, units = "cm")
+
+
 
 
 
