@@ -214,7 +214,7 @@ top_genes_human <- fetalGene[match(common_genes, fetalGene$mmusculus_homolog_ens
 top_genes_mouse <- top_genes_pups_nicotine_fitted[match(common_genes, top_genes_pups_nicotine_fitted$ensemblID ),]
 
 ## Plot
-t<-t_stat_plot(top_genes_human, top_genes_mouse,  "Human", "Mouse", "Nicotine fetus/pups")
+t<-t_stat_plot(top_genes_human, top_genes_mouse,  "Human", "Mouse", "Nicotine pups vs fetus")
 ggsave("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_Human_VS_Mouse_Nicotine.pdf", t, 
        height = 10, width = 12, units = "cm")
 
@@ -225,7 +225,7 @@ ggsave("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_Human_VS_Mouse_Nicotin
 top_genes_mouse <- top_genes_pups_smoking_fitted[match(common_genes, top_genes_pups_smoking_fitted$ensemblID ),]
 
 ## Plot
-t<-t_stat_plot(top_genes_human, top_genes_mouse,  "Human", "Mouse", "Smoking fetus/pups")
+t<-t_stat_plot(top_genes_human, top_genes_mouse,  "Human", "Mouse", "Smoking pups vs fetus")
 ggsave("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_Human_VS_Mouse_Smoking.pdf", t, 
        height = 10, width = 12, units = "cm")
 
