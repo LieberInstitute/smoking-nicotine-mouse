@@ -191,43 +191,99 @@ fetalGene[fetalGene == ""] <- NA
 ## Ensembl IDs of human genes
 fetalGene$ensemblID <- rownames(fetalGene)
 
-## Find the homologous genes of human in mouse
+## Find the homologous genes for human in mouse
 human_mouse_ids<-biomart(genes  = fetalGene$ensemblID,
                  mart       = "ENSEMBL_MART_ENSEMBL",
                  dataset    = "hsapiens_gene_ensembl",
                  attributes = c("mmusculus_homolog_ensembl_gene", "mmusculus_homolog_associated_gene_name"),
                  filters    = "ensembl_gene_id")
 
-## Add IDs and names of mouse genes (first ocurrences)
-fetalGene$mmusculus_homolog_ensembl_gene <- human_mouse_ids[match(fetalGene$ensemblID, human_mouse_ids$ensembl_gene_id), "mmusculus_homolog_ensembl_gene"]
-fetalGene$mmusculus_homolog_associated_gene_name<- human_mouse_ids[match(fetalGene$ensemblID, human_mouse_ids$ensembl_gene_id), "mmusculus_homolog_associated_gene_name"]
+## Common genes between human homologous and mouse datasets
+common_genes <- human_mouse_ids[which(human_mouse_ids$mmusculus_homolog_ensembl_gene %in% top_genes_pups_nicotine_fitted$ensemblID),]
+common_genes$human_ensembl_gene_id <- common_genes$ensembl_gene_id
+common_genes$ensembl_gene_id <- NULL
 
-## Common genes between human homologous and mouse 
-common_genes <- intersect(top_genes_pups_nicotine_fitted$ensemblID, fetalGene$mmusculus_homolog_ensembl_gene)
-top_genes_human <- fetalGene[match(common_genes, fetalGene$mmusculus_homolog_ensembl_gene),]
+## Function to create plot
+t_stat_plot_human_mouse <- function(expt){
+  
+  top_genes<-eval(parse_expr(paste("top_genes_pups_", expt, "_fitted", sep="")))
+  
+  ## Extract mouse and human data of those common genes
+  human_mouse_data <- data.frame(matrix(nrow = nrow(common_genes), ncol = 11))
+  colnames(human_mouse_data) <- c("mmusculus_homolog_ensembl_gene", "mmusculus_homolog_associated_gene_name", "human_ensembl_gene_id",
+                                  "t_mouse", "adj.P.Val_mouse", "logFC_mouse", "gene_symbol_human", "t_human", "adj.P.Val_human", "P.Value_human", "logFC_human")
+  for (i in 1:nrow(common_genes)){
+    mouse_data <-top_genes[which(top_genes$ensemblID==common_genes[i,1]), c("t", "adj.P.Val", "logFC")]
+    human_data <-fetalGene[which(fetalGene$ensemblID==common_genes[i, 3]), c("Symbol", "t", "adj.P.Val", "P.Value", "logFC")]
+    human_mouse_data[i,] <- cbind(common_genes[i,], mouse_data, human_data)
+    
+  }
+  
+  ## Add DE info for genes in human and mouse
+  DE<-vector()
+  for (i in 1:dim(human_mouse_data)[1]) {
+    
+    ## DEG in both human and mouse 
+    if (human_mouse_data$adj.P.Val_mouse[i]<0.05 && human_mouse_data$adj.P.Val_human[i]<0.05){
+      DE<-append(DE, "sig Both")
+    }
+    
+    ## DEG in human only
+    else if (human_mouse_data$adj.P.Val_human[i]<0.05 && human_mouse_data$adj.P.Val_mouse[i]>=0.05){
+      DE<-append(DE, "sig Human")
+    }
+    
+    ## DEG in mouse only
+    else if(human_mouse_data$adj.P.Val_human[i]>=0.05 && human_mouse_data$adj.P.Val_mouse[i]<0.05){
+      DE<-append(DE, "sig Mouse")
+    }
+    
+    ## DEG neither in human nor mouse
+    else {
+      DE<-append(DE, "None")      
+    }
+  }
+  human_mouse_data$DE <- DE
+  
+  ## Correlation coeff between t-stats of genes in human and mouse
+  rho <- cor(human_mouse_data$t_human, human_mouse_data$t_mouse, method = "spearman")
+  rho_anno = paste0("rho = ", format(round(rho, 2), nsmall = 2))
+  
+  ## Plot
+  cols <- c("red", "#ffad73","#26b3ff", "dark grey") 
+  names(cols)<-c("sig Both","sig Human", "sig Mouse", "None")
+  alphas <- c(1, 1, 1,0.5)  
+  names(alphas)<-c("sig Both", "sig Human", "sig Mouse", "None")
+  
+  plot <- ggplot(human_mouse_data, aes(x = t_human, y = t_mouse, color=DE, alpha=DE)) +
+    geom_point(size = 1) +
+    labs(x = "t-stats Human", 
+         y = "t-stats Mouse",
+         title = paste(capitalize(expt),"mouse genes vs human genes", sep=" "), 
+         subtitle = rho_anno, 
+         parse = T) +
+    theme_bw() +
+    scale_color_manual(values = cols) + 
+    scale_alpha_manual(values = alphas)
+  
+  plot
+  ggsave(filename=paste("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_Human_vs_Mouse_", substr(expt,1,3), 
+                        ".pdf", sep=""), height = 10, width = 12, units = "cm")
+}
+
+
 
 #############
 ## Nicotine
 #############
-
-## Retain common genes only
-top_genes_mouse <- top_genes_pups_nicotine_fitted[match(common_genes, top_genes_pups_nicotine_fitted$ensemblID ),]
-
-## Plot
-t<-t_stat_plot(top_genes_human, top_genes_mouse,  "Human", "Mouse", "Nicotine pups vs fetus")
-ggsave("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_Human_VS_Mouse_Nicotine.pdf", t, 
-       height = 10, width = 12, units = "cm")
+expt <- "nicotine"
+t_stat_plot_human_mouse(expt)
 
 #############
 ## Smoking
 #############
 
-top_genes_mouse <- top_genes_pups_smoking_fitted[match(common_genes, top_genes_pups_smoking_fitted$ensemblID ),]
 
-## Plot
-t<-t_stat_plot(top_genes_human, top_genes_mouse,  "Human", "Mouse", "Smoking pups vs fetus")
-ggsave("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_Human_VS_Mouse_Smoking.pdf", t, 
-       height = 10, width = 12, units = "cm")
 
 
 
