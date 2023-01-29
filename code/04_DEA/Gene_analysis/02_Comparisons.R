@@ -184,6 +184,7 @@ ggsave("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_Naive_VS_Fitted_Smokin
 #################################################
 # Compare mouse pup brain vs human fetal brain 
 #################################################
+## Samples from human fetus brain were exposed to smoking 
 
 ## " " to NA 
 fetalGene[fetalGene == ""] <- NA
@@ -270,7 +271,6 @@ t_stat_plot_human_mouse <- function(expt){
   ggsave(filename=paste("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_Human_vs_Mouse_", substr(expt,1,3), 
                         ".pdf", sep=""), height = 10, width = 12, units = "cm")
 }
-
 
 
 #############
