@@ -259,7 +259,7 @@ t_stat_plot_human_mouse <- function(expt){
     geom_point(size = 1) +
     labs(x = "t-stats Human", 
          y = "t-stats Mouse",
-         title = paste(capitalize(expt),"mouse genes vs human genes", sep=" "), 
+         title = paste(capitalize(expt),"pups vs fetus", sep=" "), 
          subtitle = rho_anno, 
          parse = T) +
     theme_bw() +
@@ -282,7 +282,8 @@ t_stat_plot_human_mouse(expt)
 #############
 ## Smoking
 #############
-
+expt <- "smoking"
+t_stat_plot_human_mouse(expt)
 
 
 
