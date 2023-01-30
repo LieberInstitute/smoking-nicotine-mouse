@@ -25,7 +25,8 @@ load(here("processed-data/04_DEA/Gene_analysis/de_genes_pups_smoking_fitted.Rdat
 load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_smoking_fitted.Rdata"))
 load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_smoking_interaction.Rdata"))
 
-## Data from human fetal brain 
+## Data from prenatal and adult human postmortem prefrontal cortices 
+## (from Steve's paper https://github.com/LieberInstitute/Smoking_DLPFC_Devel/blob/master/README.md)
 load(here("raw-data/Genes_DE_sva.rda"))
 
 
@@ -182,9 +183,9 @@ ggsave("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_Naive_VS_Fitted_Smokin
 
 
 #################################################
-# Compare mouse pup brain vs human fetal brain 
+# Compare mouse pup brain vs human prenatal brain 
 #################################################
-## Samples from human fetus brain were exposed to smoking 
+## Samples from prenatal and adult human brain were exposed to smoking 
 
 ## " " to NA 
 fetalGene[fetalGene == ""] <- NA
@@ -258,9 +259,9 @@ t_stat_plot_human_mouse <- function(expt){
   
   plot <- ggplot(human_mouse_data, aes(x = t_human, y = t_mouse, color=DE, alpha=DE)) +
     geom_point(size = 1) +
-    labs(x = "t-stats Human", 
-         y = "t-stats Mouse",
-         title = paste(capitalize(expt),"pups vs fetus", sep=" "), 
+    labs(x = "t-stats Human age brain", 
+         y = "t-stats Mouse age tissue",
+         title = paste(capitalize(expt),"mouse vs Smoking human", sep=" "), 
          subtitle = rho_anno, 
          parse = T) +
     theme_bw() +
@@ -268,7 +269,7 @@ t_stat_plot_human_mouse <- function(expt){
     scale_alpha_manual(values = alphas)
   
   plot
-  ggsave(filename=paste("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_Human_vs_Mouse_", substr(expt,1,3), 
+  ggsave(filename=paste("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_Human_vs_Mouse_age_expt_tissue", substr(expt,1,3), 
                         ".pdf", sep=""), height = 10, width = 12, units = "cm")
 }
 
