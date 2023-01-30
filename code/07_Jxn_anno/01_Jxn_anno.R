@@ -26,7 +26,7 @@ table(rowData(rse_jx)[which(rowData(rse_jx)$Class=="AltStartEnd"), c("inGencodeS
 #       FALSE        0    579436
 #       TRUE        8342     0
 
-## "ExonSkip" jxns have sites from non-successive exons, both known
+## "ExonSkip" jxns have sites from non-successive exons, both known individually but not together 
 table(rowData(rse_jx)[which(rowData(rse_jx)$Class=="ExonSkip"), c("inGencodeStart", "inGencodeEnd")])
 #                  inGencodeEnd
 #   inGencodeStart TRUE
@@ -47,14 +47,12 @@ table(rowData(rse_jx)[which(rowData(rse_jx)$isFusion=="TRUE"), c("inGencodeStart
 
 
 
+## Obtain novel DE introns/jxns
 
-## 1.1 Extract exons and genes from novel jxns??
-
-## Novel DE introns/jxns
 ## Nicotine
-novel_jxns_nic <- de_jxns_nic[which(! (de_jxns_nic$Class=="InGen" | de_jxns_nic$Class=="ExonSkip")),]
+novel_jxns_nic <- de_jxns_nic[which(! (de_jxns_nic$Class=="InGen")),]
 ## Smoking
-novel_jxns_smo <- de_jxns_smo[which(! (de_jxns_smo$Class=="InGen" | de_jxns_smo$Class=="ExonSkip")),]
+novel_jxns_smo <- de_jxns_smo[which(! (de_jxns_smo$Class=="InGen")),]
 
 
 
