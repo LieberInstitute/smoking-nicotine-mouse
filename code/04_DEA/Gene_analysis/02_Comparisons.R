@@ -186,7 +186,7 @@ ggsave("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_Naive_VS_Fitted_Smokin
 #         Compare human vs mouse brains
 #################################################
 ## Samples from prenatal and adult human brain were exposed to smoking 
-## Compare mouse fitted models only
+## Compare mouse genes from fitted models only
 
 ## Genes in prenatal and adult human brain are the same
 setdiff(rownames(fetalGene), rownames(adultGene))
