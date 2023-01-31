@@ -18,8 +18,10 @@ rse_gene_brain_qc<-rse_gene_brain
 
 
 
-## 1.1 Dimensionality Reduction (PCA)
-### 1.1.1 Explore Samples' expression variation
+## 1.1 Dimensionality Reduction 
+
+### 1.1.1 Principal Component Analysis (PCA)
+### 1.1.1.1 Explore samples' expression variation
 
 ## Generate PCA data
 PCA<-function(tissue, type, age){
@@ -323,7 +325,7 @@ plot_PCAs("jx", "brain", "pups")
 
 
 
-### 1.1.2 Explore nicotine and smoking samples' separation by Group
+### 1.1.1.2 Explore nicotine and smoking samples' separation by Group
 
 ## PCA plots for Group and Expt
 PCA_Expt_Group<- function(type, tissue, age){
@@ -382,7 +384,7 @@ PCA_Expt_Group("jx", "brain", "pups")
 
 
 
-### 1.1.3 Explore samples' gene expression variation across phenotypes by Group
+### 1.1.1.3 Explore samples' gene expression variation across phenotypes by Group
 
 ## PC boxplots 
 PC_boxplots <- function (PCx, pheno_var1, pheno_var2, pca_data, pca_vars) {
@@ -461,7 +463,7 @@ plot_PC_boxplots("PC2", "gene", "brain", "pups")
 
 
 
-## 1.2  Multidimensional scaling (MDS)
+## 1.1.2  Multidimensional scaling (MDS)
 
 ## MDS plot
 MDS<- function(pheno_var, MDS){
