@@ -324,10 +324,28 @@ t_stat_plot_human_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_hum
                         tissue_mouse, ".pdf", sep=""), height = 11.5, width = 15, units = "cm")
   
   ## Quantify human genes that recapitulate in mouse
-  
-  
-  
+  ## Total unique human genes 
+  total_human_genes=length(unique(human_mouse_data$human_ensembl_gene_id))
+  ## Unique recapitulating human genes 
+  recap_human_genes=length(unique(human_mouse_data[which(human_mouse_data$Recapitulation=="Recapitulating genes"),"human_ensembl_gene_id"]))
+  ## Percentage 
+  percentage=signif(recap_human_genes / total_human_genes *100, 3)
+  print(paste(recap_human_genes, "out of", total_human_genes, "genes in smoking human", age_human, "brain recapitulate in", 
+              expt_mouse, "mouse", substr(age_mouse, 1, nchar(age_mouse)-1), tissue_mouse, "(with p<0.05 and same logFC direction) -", 
+              paste(percentage, "%", sep="")))
 }
+
+
+
+################################################################
+##  Nicotine mouse pup brain vs Smoking human prenatal brain 
+################################################################
+t_stat_plot_human_mouse(age_mouse = "pups", tissue_mouse = "brain", expt_mouse = "nicotine", age_human = "prenatal")
+
+################################################################
+##  Nicotine mouse pup brain vs Smoking human prenatal brain 
+################################################################
+
 
 
 
@@ -335,12 +353,16 @@ t_stat_plot_human_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_hum
 ##  Smoking adult mouse blood vs Smoking human prenatal brain 
 ################################################################
 t_stat_plot_human_mouse(age_mouse = "adults", tissue_mouse = "blood", expt_mouse = "smoking", age_human = "prenatal")
-
+## "102 out of 13460 genes in smoking human prenatal brain recapitulate in smoking mouse adult blood (with p<0.05 and same logFC direction) - 0.758%"
 
 ################################################################
 ##  Smoking mouse pup brain vs Smoking human prenatal brain 
 ################################################################
 t_stat_plot_human_mouse(age_mouse = "pups", tissue_mouse = "brain", expt_mouse = "smoking", age_human = "prenatal")
+## "268 out of 13460 genes in smoking human prenatal brain recapitulate in smoking mouse pup brain (with p<0.05 and same logFC direction) - 1.99%"
+
+
+
 
 
 
