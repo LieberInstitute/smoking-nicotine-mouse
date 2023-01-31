@@ -217,9 +217,16 @@ t_stat_plot_human_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_hum
   ## Define mouse dataset
   if (tissue_mouse=="blood"){
     top_genes <-eval(parse_expr(paste("top_genes", tissue_mouse, expt_mouse, "fitted", sep="_")))
+    signif_measure_mouse="p-value"
   }
   else {
     top_genes <-eval(parse_expr(paste("top_genes", age_mouse, expt_mouse, "fitted", sep="_")))
+    if (age_mouse=="pups"){
+      signif_measure_mouse="FDR"
+    }
+    else {
+      signif_measure_mouse="p-value"
+    }
   }
   
   ## Define human dataset
@@ -231,58 +238,78 @@ t_stat_plot_human_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_hum
   }
   
   ## Extract mouse and human data of those common genes
-  human_mouse_data <- data.frame(matrix(nrow = nrow(common_genes), ncol = 11))
+  human_mouse_data <- data.frame(matrix(nrow = nrow(common_genes), ncol = 12))
   colnames(human_mouse_data) <- c("mmusculus_homolog_ensembl_gene", "mmusculus_homolog_associated_gene_name", "human_ensembl_gene_id",
-                                  "t_mouse", "adj.P.Val_mouse", "logFC_mouse", "gene_symbol_human", "t_human", "adj.P.Val_human", "P.Value_human", "logFC_human")
+                                  "t_mouse", "adj.P.Val_mouse", "P.Value_mouse", "logFC_mouse", "gene_symbol_human", "t_human", "adj.P.Val_human", 
+                                  "P.Value_human", "logFC_human")
   for (i in 1:nrow(common_genes)){
     ## Find and extract info of mouse gene in mouse dataset
-    mouse_data <-top_genes[which(top_genes$ensemblID==common_genes[i,1]), c("t", "adj.P.Val", "logFC")]
+    mouse_data <-top_genes[which(top_genes$ensemblID==common_genes[i,1]), c("t", "adj.P.Val", "P.Value", "logFC")]
     ## Find and extract info of human gene in human dataset
     human_data <-humanGene[which(humanGene$ensemblID==common_genes[i, 3]), c("Symbol", "t", "adj.P.Val", "P.Value", "logFC")]
     human_mouse_data[i,] <- cbind(common_genes[i,], mouse_data, human_data)
     
   }
   
-  ## Add DE info for genes in human and mouse
-  DE<-vector()
+  ## Add recapitulation info for human genes
+  Recapitulation<-vector()
   for (i in 1:dim(human_mouse_data)[1]) {
     
-    ## DEG in both human and mouse 
-    if (human_mouse_data$adj.P.Val_mouse[i]<0.05 && human_mouse_data$adj.P.Val_human[i]<0.05){
-      DE<-append(DE, "sig Both")
+    ## Pup mouse genes with FDR<5% and human genes with p-value<5%
+    if (age_mouse=="pups"){
+
+      ## Recapitulating human genes 
+      if ((human_mouse_data$adj.P.Val_mouse[i]<0.05 && human_mouse_data$P.Value_human[i]<0.05) &&
+          (sign(human_mouse_data$logFC_mouse[i])==sign(human_mouse_data$logFC_human[i]))) {
+        Recapitulation<-append(Recapitulation, "Recapitulating genes")
+      }
+      
+      else if (human_mouse_data$adj.P.Val_mouse[i]<0.05){
+        Recapitulation<-append(Recapitulation, "Signif in mouse")
+      }
+  
+      ## Non-Recapitulating human genes 
+      else {
+        Recapitulation<-append(Recapitulation, "Non-Recapitulating genes")      
+      }
     }
     
-    ## DEG in human only
-    else if (human_mouse_data$adj.P.Val_human[i]<0.05 && human_mouse_data$adj.P.Val_mouse[i]>=0.05){
-      DE<-append(DE, "sig Human")
-    }
-    
-    ## DEG in mouse only
-    else if(human_mouse_data$adj.P.Val_human[i]>=0.05 && human_mouse_data$adj.P.Val_mouse[i]<0.05){
-      DE<-append(DE, "sig Mouse")
-    }
-    
-    ## DEG neither in human nor mouse
+    ## Adult mouse genes with p-value<5% and human genes with p-value<5%
     else {
-      DE<-append(DE, "None")      
+      if ((human_mouse_data$P.Value_mouse[i]<0.05 && human_mouse_data$P.Value_human[i]<0.05) &&
+          (sign(human_mouse_data$logFC_mouse[i])==sign(human_mouse_data$logFC_human[i]))) {
+        Recapitulation<-append(Recapitulation, "Recapitulating genes")
+      }
+      else {
+        Recapitulation<-append(Recapitulation, "Non-Recapitulating genes")      
+      }
     }
   }
-  human_mouse_data$DE <- DE
+  
+  human_mouse_data$Recapitulation <- Recapitulation
   
   ## Correlation coeff between t-stats of genes in human and mouse
   rho <- cor(human_mouse_data$t_human, human_mouse_data$t_mouse, method = "spearman")
   rho_anno = paste0("rho = ", format(round(rho, 2), nsmall = 2))
   
   ## Plot
-  cols <- c("red", "#ffad73","#26b3ff", "dark grey") 
-  names(cols)<-c("sig Both","sig Human", "sig Mouse", "None")
-  alphas <- c(1, 1, 1,0.5)  
-  names(alphas)<-c("sig Both", "sig Human", "sig Mouse", "None")
+  if (age_mouse=="pups"){
+    cols <- c("red", "#26b3ff","dark grey") 
+    names(cols)<-c("Recapitulating genes","Signif in mouse", "Non-Recapitulating genes")
+    alphas <- c(1, 1, 0.5)  
+    names(alphas)<-c("Recapitulating genes","Signif in mouse", "Non-Recapitulating genes")
+  }
+  else {
+    cols <- c("red","dark grey") 
+    names(cols)<-c("Recapitulating genes","Non-Recapitulating genes")
+    alphas <- c(1, 0.5)  
+    names(alphas)<-c("Recapitulating genes","Non-Recapitulating genes")
+  }
   
-  plot <- ggplot(human_mouse_data, aes(x = t_human, y = t_mouse, color=DE, alpha=DE)) +
+  plot <- ggplot(human_mouse_data, aes(x = t_mouse, y = t_human, color=Recapitulation, alpha=Recapitulation)) +
     geom_point(size = 1) +
-    labs(x = paste("t-stats in", age_human, "human brain"), 
-         y = paste("t-stats in", age_mouse, "mice", tissue_mouse),
+    labs(x = paste("t-stats in", substr(age_mouse, 1, nchar(age_mouse)-1), "mouse", tissue_mouse), 
+         y = paste("t-stats in", age_human, "human brain"),
          title = paste(capitalize(expt_mouse),"mouse vs Smoking human", sep=" "), 
          subtitle = rho_anno, 
          parse = T) +
@@ -290,9 +317,11 @@ t_stat_plot_human_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_hum
     scale_color_manual(values = cols) + 
     scale_alpha_manual(values = alphas)
   
+  plot <-ggdraw(plot) + 
+    draw_label(paste(signif_measure_mouse, "<5% in mouse, p-value<5% in human", sep=""), x = 0.29, y = 0.85, size=7.5, color = "darkslategray")
   plot
-  ggsave(filename=paste("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_", age_human, "Human_vs_Mouse_", age_mouse, "_", substr(expt_mouse,1,3), "_", 
-                        tissue_mouse, ".pdf", sep=""), height = 10, width = 12, units = "cm")
+  ggsave(filename=paste("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_", age_human, "_Human_vs_Mouse_", age_mouse, "_", substr(expt_mouse,1,3), "_", 
+                        tissue_mouse, ".pdf", sep=""), height = 11.5, width = 15, units = "cm")
   
   ## Quantify human genes that recapitulate in mouse
   
@@ -302,18 +331,16 @@ t_stat_plot_human_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_hum
 
 
 
+################################################################
+##  Smoking adult mouse blood vs Smoking human prenatal brain 
+################################################################
+t_stat_plot_human_mouse(age_mouse = "adults", tissue_mouse = "blood", expt_mouse = "smoking", age_human = "prenatal")
 
-#############
-## Nicotine
-#############
-expt <- "nicotine"
-t_stat_plot_human_mouse(expt)
 
-#############
-## Smoking
-#############
-expt <- "smoking"
-t_stat_plot_human_mouse(expt)
+################################################################
+##  Smoking mouse pup brain vs Smoking human prenatal brain 
+################################################################
+t_stat_plot_human_mouse(age_mouse = "pups", tissue_mouse = "brain", expt_mouse = "smoking", age_human = "prenatal")
 
 
 
