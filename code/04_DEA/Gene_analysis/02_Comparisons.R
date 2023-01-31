@@ -183,14 +183,20 @@ ggsave("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_Naive_VS_Fitted_Smokin
 
 
 #################################################
-# Compare mouse pup brain vs human prenatal brain 
+#         Compare human vs mouse brains
 #################################################
 ## Samples from prenatal and adult human brain were exposed to smoking 
+## Compare mouse fitted models only
+
+## Genes in prenatal and adult human brain are the same
+setdiff(rownames(fetalGene), rownames(adultGene))
+# character(0)
 
 ## " " to NA 
 fetalGene[fetalGene == ""] <- NA
+adultGene[addultGene == ""] <- NA
 
-## Ensembl IDs of human genes
+## Ensembl IDs of human genes 
 fetalGene$ensemblID <- rownames(fetalGene)
 
 ## Find the homologous genes for human in mouse
@@ -205,18 +211,34 @@ common_genes <- human_mouse_ids[which(human_mouse_ids$mmusculus_homolog_ensembl_
 common_genes$human_ensembl_gene_id <- common_genes$ensembl_gene_id
 common_genes$ensembl_gene_id <- NULL
 
-## Function to create plot
-t_stat_plot_human_mouse <- function(expt){
+## Create plots to check if human genes recapitulate (with p-value<5% and same logFC sign) in mouse genes (FDR<5% for pups and p-value<5% for adults)
+t_stat_plot_human_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_human){
   
-  top_genes<-eval(parse_expr(paste("top_genes_pups_", expt, "_fitted", sep="")))
+  ## Define mouse dataset
+  if (tissue_mouse=="blood"){
+    top_genes <-eval(parse_expr(paste("top_genes", tissue_mouse, expt_mouse, "fitted", sep="_")))
+  }
+  else {
+    top_genes <-eval(parse_expr(paste("top_genes", age_mouse, expt_mouse, "fitted", sep="_")))
+  }
+  
+  ## Define human dataset
+  if (age_human=="prenatal"){
+    humanGene <-fetalGene
+  }
+  else {
+    humanGene <-adultGene
+  }
   
   ## Extract mouse and human data of those common genes
   human_mouse_data <- data.frame(matrix(nrow = nrow(common_genes), ncol = 11))
   colnames(human_mouse_data) <- c("mmusculus_homolog_ensembl_gene", "mmusculus_homolog_associated_gene_name", "human_ensembl_gene_id",
                                   "t_mouse", "adj.P.Val_mouse", "logFC_mouse", "gene_symbol_human", "t_human", "adj.P.Val_human", "P.Value_human", "logFC_human")
   for (i in 1:nrow(common_genes)){
+    ## Find and extract info of mouse gene in mouse dataset
     mouse_data <-top_genes[which(top_genes$ensemblID==common_genes[i,1]), c("t", "adj.P.Val", "logFC")]
-    human_data <-fetalGene[which(fetalGene$ensemblID==common_genes[i, 3]), c("Symbol", "t", "adj.P.Val", "P.Value", "logFC")]
+    ## Find and extract info of human gene in human dataset
+    human_data <-humanGene[which(humanGene$ensemblID==common_genes[i, 3]), c("Symbol", "t", "adj.P.Val", "P.Value", "logFC")]
     human_mouse_data[i,] <- cbind(common_genes[i,], mouse_data, human_data)
     
   }
@@ -259,9 +281,9 @@ t_stat_plot_human_mouse <- function(expt){
   
   plot <- ggplot(human_mouse_data, aes(x = t_human, y = t_mouse, color=DE, alpha=DE)) +
     geom_point(size = 1) +
-    labs(x = "t-stats Human age brain", 
-         y = "t-stats Mouse age tissue",
-         title = paste(capitalize(expt),"mouse vs Smoking human", sep=" "), 
+    labs(x = paste("t-stats in", age_human, "human brain"), 
+         y = paste("t-stats in", age_mouse, "mice", tissue_mouse),
+         title = paste(capitalize(expt_mouse),"mouse vs Smoking human", sep=" "), 
          subtitle = rho_anno, 
          parse = T) +
     theme_bw() +
@@ -269,9 +291,16 @@ t_stat_plot_human_mouse <- function(expt){
     scale_alpha_manual(values = alphas)
   
   plot
-  ggsave(filename=paste("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_Human_vs_Mouse_age_expt_tissue", substr(expt,1,3), 
-                        ".pdf", sep=""), height = 10, width = 12, units = "cm")
+  ggsave(filename=paste("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_", age_human, "Human_vs_Mouse_", age_mouse, "_", substr(expt_mouse,1,3), "_", 
+                        tissue_mouse, ".pdf", sep=""), height = 10, width = 12, units = "cm")
+  
+  ## Quantify human genes that recapitulate in mouse
+  
+  
+  
 }
+
+
 
 
 #############
