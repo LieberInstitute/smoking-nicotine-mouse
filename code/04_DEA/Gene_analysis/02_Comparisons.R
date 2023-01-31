@@ -194,7 +194,7 @@ setdiff(rownames(fetalGene), rownames(adultGene))
 
 ## " " to NA 
 fetalGene[fetalGene == ""] <- NA
-adultGene[addultGene == ""] <- NA
+adultGene[adultGene == ""] <- NA
 
 ## Ensembl IDs of human genes 
 fetalGene$ensemblID <- rownames(fetalGene)
@@ -251,42 +251,51 @@ t_stat_plot_human_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_hum
     
   }
   
-  ## Add recapitulation info for human genes
-  Recapitulation<-vector()
+  ## Add DE and recapitulation info of human genes
+  DE<-vector()
   for (i in 1:dim(human_mouse_data)[1]) {
     
     ## Pup mouse genes with FDR<5% and human genes with p-value<5%
     if (age_mouse=="pups"){
+      
+      ## DEG in human 
+      if (human_mouse_data$adj.P.Val_human[i]<0.1){
+        DE<-append(DE, "Signif in human (FDR<0.1)")
+      }
 
       ## Recapitulating human genes 
-      if ((human_mouse_data$adj.P.Val_mouse[i]<0.05 && human_mouse_data$P.Value_human[i]<0.05) &&
+      else if ((human_mouse_data$adj.P.Val_mouse[i]<0.05 && human_mouse_data$P.Value_human[i]<0.05) &&
           (sign(human_mouse_data$logFC_mouse[i])==sign(human_mouse_data$logFC_human[i]))) {
-        Recapitulation<-append(Recapitulation, "Recapitulating genes")
+        DE<-append(DE, "Recapitulating genes (p<0.05 in human, FDR<0.05 in mouse)")
       }
       
+      ## DEG in mouse
       else if (human_mouse_data$adj.P.Val_mouse[i]<0.05){
-        Recapitulation<-append(Recapitulation, "Signif in mouse")
+        DE<-append(DE, "Signif in mouse (FDR<0.05)")
       }
   
-      ## Non-Recapitulating human genes 
+      ## Non-significant genes 
       else {
-        Recapitulation<-append(Recapitulation, "Non-Recapitulating genes")      
+        DE<-append(DE, "n.s. genes")      
       }
     }
     
     ## Adult mouse genes with p-value<5% and human genes with p-value<5%
     else {
-      if ((human_mouse_data$P.Value_mouse[i]<0.05 && human_mouse_data$P.Value_human[i]<0.05) &&
+      if (human_mouse_data$adj.P.Val_human[i]<0.1){
+        DE<-append(DE, "Signif in human (FDR<0.1)")
+      }
+      else if ((human_mouse_data$P.Value_mouse[i]<0.05 && human_mouse_data$P.Value_human[i]<0.05) &&
           (sign(human_mouse_data$logFC_mouse[i])==sign(human_mouse_data$logFC_human[i]))) {
-        Recapitulation<-append(Recapitulation, "Recapitulating genes")
+        DE<-append(DE, "Recapitulating genes (p<0.05 in human and mouse)")
       }
       else {
-        Recapitulation<-append(Recapitulation, "Non-Recapitulating genes")      
+        DE<-append(DE, "n.s. genes")      
       }
     }
   }
   
-  human_mouse_data$Recapitulation <- Recapitulation
+  human_mouse_data$DE<- DE
   
   ## Correlation coeff between t-stats of genes in human and mouse
   rho <- cor(human_mouse_data$t_human, human_mouse_data$t_mouse, method = "spearman")
@@ -294,19 +303,19 @@ t_stat_plot_human_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_hum
   
   ## Plot
   if (age_mouse=="pups"){
-    cols <- c("red", "#26b3ff","dark grey") 
-    names(cols)<-c("Recapitulating genes","Signif in mouse", "Non-Recapitulating genes")
-    alphas <- c(1, 1, 0.5)  
-    names(alphas)<-c("Recapitulating genes","Signif in mouse", "Non-Recapitulating genes")
+    cols <- c("#ffad73", "red", "#26b3ff","dark grey") 
+    names(cols)<-c("Signif in human (FDR<0.1)", "Recapitulating genes (p<0.05 in human, FDR<0.05 in mouse)","Signif in mouse (FDR<0.05)", "n.s. genes")
+    alphas <- c(1, 1, 1, 0.5)  
+    names(alphas)<-c("Signif in human (FDR<0.1)", "Recapitulating genes (p<0.05 in human, FDR<0.05 in mouse)","Signif in mouse (FDR<0.05)", "n.s. genes")
   }
   else {
-    cols <- c("red","dark grey") 
-    names(cols)<-c("Recapitulating genes","Non-Recapitulating genes")
-    alphas <- c(1, 0.5)  
-    names(alphas)<-c("Recapitulating genes","Non-Recapitulating genes")
+    cols <- c("#ffad73", "red","dark grey") 
+    names(cols)<-c("Signif in human (FDR<0.1)", "Recapitulating genes (p<0.05 in human and mouse)","n.s. genes")
+    alphas <- c(1, 1, 0.5)  
+    names(alphas)<-c("Signif in human (FDR<0.1)", "Recapitulating genes (p<0.05 in human and mouse)","n.s. genes")
   }
   
-  plot <- ggplot(human_mouse_data, aes(x = t_mouse, y = t_human, color=Recapitulation, alpha=Recapitulation)) +
+  plot <- ggplot(human_mouse_data, aes(x = t_mouse, y = t_human, color=DE, alpha=DE)) +
     geom_point(size = 1) +
     labs(x = paste("t-stats in", substr(age_mouse, 1, nchar(age_mouse)-1), "mouse", tissue_mouse), 
          y = paste("t-stats in", age_human, "human brain"),
@@ -317,17 +326,17 @@ t_stat_plot_human_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_hum
     scale_color_manual(values = cols) + 
     scale_alpha_manual(values = alphas)
   
-  plot <-ggdraw(plot) + 
-    draw_label(paste(signif_measure_mouse, "<5% in mouse, p-value<5% in human", sep=""), x = 0.29, y = 0.85, size=7.5, color = "darkslategray")
+  plot + theme(legend.text = element_text(size=8))
   plot
   ggsave(filename=paste("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_", age_human, "_Human_vs_Mouse_", age_mouse, "_", substr(expt_mouse,1,3), "_", 
-                        tissue_mouse, ".pdf", sep=""), height = 11.5, width = 15, units = "cm")
+                        tissue_mouse, ".pdf", sep=""), height = 12, width = 20, units = "cm")
   
   ## Quantify human genes that recapitulate in mouse
+  print(table(human_mouse_data$DE))
   ## Total unique human genes 
   total_human_genes=length(unique(human_mouse_data$human_ensembl_gene_id))
   ## Unique recapitulating human genes 
-  recap_human_genes=length(unique(human_mouse_data[which(human_mouse_data$Recapitulation=="Recapitulating genes"),"human_ensembl_gene_id"]))
+  recap_human_genes=length(unique(human_mouse_data[which(human_mouse_data$DE==names(alphas)[2]),"human_ensembl_gene_id"]))
   ## Percentage 
   percentage=signif(recap_human_genes / total_human_genes *100, 3)
   print(paste(recap_human_genes, "out of", total_human_genes, "genes in smoking human", age_human, "brain recapitulate in", 
@@ -341,25 +350,40 @@ t_stat_plot_human_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_hum
 ##  Nicotine mouse pup brain vs Smoking human prenatal brain 
 ################################################################
 t_stat_plot_human_mouse(age_mouse = "pups", tissue_mouse = "brain", expt_mouse = "nicotine", age_human = "prenatal")
-
-################################################################
-##  Nicotine mouse pup brain vs Smoking human prenatal brain 
-################################################################
-
-
-
-
-################################################################
-##  Smoking adult mouse blood vs Smoking human prenatal brain 
-################################################################
-t_stat_plot_human_mouse(age_mouse = "adults", tissue_mouse = "blood", expt_mouse = "smoking", age_human = "prenatal")
-## "102 out of 13460 genes in smoking human prenatal brain recapitulate in smoking mouse adult blood (with p<0.05 and same logFC direction) - 0.758%"
+## "78 out of 13460 genes in smoking human prenatal brain recapitulate in nicotine mouse pup brain (with p<0.05 and same logFC direction) - 0.579%"
 
 ################################################################
 ##  Smoking mouse pup brain vs Smoking human prenatal brain 
 ################################################################
 t_stat_plot_human_mouse(age_mouse = "pups", tissue_mouse = "brain", expt_mouse = "smoking", age_human = "prenatal")
-## "268 out of 13460 genes in smoking human prenatal brain recapitulate in smoking mouse pup brain (with p<0.05 and same logFC direction) - 1.99%"
+## "267 out of 13460 genes in smoking human prenatal brain recapitulate in smoking mouse pup brain (with p<0.05 and same logFC direction) - 1.98%"
+
+################################################################
+##  Nicotine adult mouse brain vs Smoking human prenatal brain 
+################################################################
+t_stat_plot_human_mouse(age_mouse = "adults", tissue_mouse = "brain", expt_mouse = "nicotine", age_human = "prenatal")
+## "30 out of 13460 genes in smoking human prenatal brain recapitulate in nicotine mouse adult brain (with p<0.05 and same logFC direction) - 0.223%"
+
+################################################################
+##  Smoking adult mouse brain vs Smoking human prenatal brain 
+################################################################
+t_stat_plot_human_mouse(age_mouse = "adults", tissue_mouse = "brain", expt_mouse = "smoking", age_human = "prenatal")
+## "40 out of 13460 genes in smoking human prenatal brain recapitulate in smoking mouse adult brain (with p<0.05 and same logFC direction) - 0.297%"
+
+################################################################
+##  Smoking adult mouse blood vs Smoking human prenatal brain 
+################################################################
+t_stat_plot_human_mouse(age_mouse = "adults", tissue_mouse = "blood", expt_mouse = "smoking", age_human = "prenatal")
+## "101 out of 13460 genes in smoking human prenatal brain recapitulate in smoking mouse adult blood (with p<0.05 and same logFC direction) - 0.75%"
+
+################################################################
+##  Nicotine mouse pup brain vs Smoking human adult brain 
+################################################################
+t_stat_plot_human_mouse(age_mouse = "pups", tissue_mouse = "brain", expt_mouse = "nicotine", age_human = "adult")
+## "78 out of 13460 genes in smoking human prenatal brain recapitulate in nicotine mouse pup brain (with p<0.05 and same logFC direction) - 0.579%"
+
+
+
 
 
 
