@@ -480,8 +480,12 @@ venn_plot<-function(DEG_lists, colors, filename){
     gridExtra::grid.arrange(plots[[1]], plots[[2]], plots[[3]], plots[[4]], ncol=2)
     dev.off()
   }
-  else{
+  else if (i==3){
     gridExtra::grid.arrange(plots[[1]], plots[[2]], plots[[3]], ncol=2)
+    dev.off()
+  }
+  else {
+    gridExtra::grid.arrange(plots[[1]], plots[[2]], ncol=2)
     dev.off()
   }
 }
@@ -669,13 +673,111 @@ venn_plot(DEG_lists, colors, "all_DEG")
 # Venn diagrams of human recapitulating genes in mouse
 
 ## Note: each circle represents the number of unique gene pairs (mouse-human homologs), with p<0.05 in adult mouse / FDR<0.05 in mouse pups, 
-## p<0.05 in fetal/adult human brain and the same logFC sign in both species. Therefore, the intersection contains the recapitulating genes. 
+## p<0.05 in prenatal/adult human brain and the same logFC sign in both species. Therefore, the intersection contains the recapitulating genes. 
+## (Consider that some human genes could be associated with >1 mouse homolog gene and the other way around)
 
-## Compare DEG in pup mouse vs DEG in human
+## Compare genes from different mouse and human datasets
+
+venn_human_vs_mouse <- function(dataset, age_mouse, expt_mouse, tissue_mouse, age_human){
+  
+  data <- eval(parse_expr(dataset))
+  
+  if (age_mouse=="pup"){
+    signif_measure <- "adj.P.Val_mouse"
+    signif_measure_name <- "FDR"
+  }
+  else{
+    signif_measure <- "P.Value_mouse"
+    signif_measure_name <- "p"
+  }
+
+  
+  ## 1. Up mouse and human genes
+  
+  ## Extract ensembl IDs of interest genes in mouse (FDR<0.05 in pups and p<0.05 in adults, with logFC>0) and their counterparts in human
+  up_interest_genes_mouse <- data[which(eval(parse_expr(paste(dataset, signif_measure, sep="$")))<0.05 & data$logFC_mouse>0), 
+                                 c("mmusculus_homolog_ensembl_gene", "human_ensembl_gene_id")]
+  up_interest_genes_mouse_human <- apply(up_interest_genes_mouse, 1, function(x){paste(x[1], x[2], sep="-")})
+  
+  ## Extract ensembl IDs of interest genes in human (p<0.05 and logFC>0) and their counterparts in mouse
+  up_interest_genes_human <- data[which(data$P.Value_human<0.05 & data$logFC_human>0), c("mmusculus_homolog_ensembl_gene", "human_ensembl_gene_id")]
+  up_interest_genes_human_mouse <- apply(up_interest_genes_human, 1, function(x){paste(x[1], x[2], sep="-")})
+  
+  ## Define category names of the diagram
+  mouse_cat_name <- paste("Up in", capitalize(expt_mouse), age_mouse, tissue_mouse, paste("(", signif_measure_name, "<0.05)", sep=""))
+  human_cat_name <- paste("Up in Smoking", age_human, "human brain (p<0.05)")
+  
+  up_mouse_human_genes<-list(up_interest_genes_mouse_human, up_interest_genes_human_mouse)
+  names(up_mouse_human_genes) <- c(mouse_cat_name, human_cat_name)
+  
+  
+  ## 2. Down mouse and human genes
+  down_interest_genes_mouse <- data[which(eval(parse_expr(paste(dataset, signif_measure, sep="$")))<0.05 & data$logFC_mouse<0), 
+                                  c("mmusculus_homolog_ensembl_gene", "human_ensembl_gene_id")]
+  down_interest_genes_mouse_human <- apply(down_interest_genes_mouse, 1, function(x){paste(x[1], x[2], sep="-")})
+  
+  down_interest_genes_human <- data[which(data$P.Value_human<0.05 & data$logFC_human<0), c("mmusculus_homolog_ensembl_gene", "human_ensembl_gene_id")]
+  down_interest_genes_human_mouse <- apply(down_interest_genes_human, 1, function(x){paste(x[1], x[2], sep="-")})
+  
+  ## Define category names of the diagram
+  mouse_cat_name <- paste("Down in", capitalize(expt_mouse), age_mouse, tissue_mouse, paste("(", signif_measure_name, "<0.05)", sep=""))
+  human_cat_name <- paste("Down in Smoking", age_human, "human brain (p<0.05)")
+  
+  down_mouse_human_genes<-list(down_interest_genes_mouse_human, down_interest_genes_human_mouse)
+  names(down_mouse_human_genes) <- c(mouse_cat_name, human_cat_name)
+  
+  gene_pairs_list<-list(up_mouse_human_genes, down_mouse_human_genes)
+  colors<-list(c("coral2", "firebrick2"), c("dodgerblue2", "deepskyblue3" ))
+  
+  ## Diagrams
+  plots<-list()
+  pdf(file = paste("plots/04_DEA/02_Comparisons/Gene_analysis/Venn_", dataset, ".pdf", sep=""), height = 8, width = 15)
+  for (i in 1:length(gene_pairs_list)){
+    v<-venn.diagram(gene_pairs_list[[i]], fill=colors[[i]], alpha = rep(0.5, length(gene_pairs_list[[i]])), 
+                    lwd =0, margin=0.3, cat.cex=0.9, cex=1, height = 20, width = 50, units = "cm", 
+                    cat.dist=rep(0.15, length(gene_pairs_list[[i]])),filename=NULL)
+    plots[[i]]<-v
+  }
+  gridExtra::grid.arrange(plots[[1]], plots[[2]], ncol=2)
+  dev.off()
+}
 
 
 
-## DEG in mouse
+## Plots
+
+## Nicotine mouse pup brain vs Smoking human prenatal brain 
+venn_human_vs_mouse("prenatalHuman_pupNicMouse_data", "pup", "nicotine", "brain", "prenatal")
+
+## Smoking mouse pup brain vs Smoking human prenatal brain 
+venn_human_vs_mouse("prenatalHuman_pupSmoMouse_data", "pup", "smoking", "brain", "prenatal")
+
+## Nicotine adult mouse brain vs Smoking human prenatal brain 
+venn_human_vs_mouse("prenatalHuman_adultNicMouse_data", "adult", "nicotine", "brain", "prenatal")
+
+## Smoking adult mouse brain vs Smoking human prenatal brain
+venn_human_vs_mouse("prenatalHuman_adultSmoMouse_data", "adult", "smoking", "brain", "prenatal")
+
+## Smoking adult mouse blood vs Smoking human prenatal brain
+venn_human_vs_mouse("prenatalHuman_bloodMouse_data", "adult", "smoking", "blood", "prenatal")
+
+## Nicotine mouse pup brain vs Smoking human adult brain 
+venn_human_vs_mouse("adultHuman_pupNicMouse_data", "pup", "nicotine", "brain", "adult")
+
+## Smoking mouse pup brain vs Smoking human adult brain 
+venn_human_vs_mouse("adultHuman_pupSmoMouse_data", "pup", "smoking", "brain", "adult")
+
+## Nicotine adult mouse brain vs Smoking human adult brain 
+venn_human_vs_mouse("adultHuman_adultNicMouse_data", "adult", "nicotine", "brain", "adult")
+
+## Smoking adult mouse brain vs Smoking human adult brain
+venn_human_vs_mouse("adultHuman_adultSmoMouse_data", "adult", "smoking", "brain", "adult")
+
+## Smoking adult mouse blood vs Smoking human adult brain
+venn_human_vs_mouse("adultHuman_bloodMouse_data", "adult", "smoking", "blood", "adult")
+
+
+
 
 
 
