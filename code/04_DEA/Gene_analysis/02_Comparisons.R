@@ -311,7 +311,7 @@ t_stat_plot_human_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_hum
   rho <- cor(human_mouse_data$t_human, human_mouse_data$t_mouse, method = "spearman")
   rho_anno = paste0("rho = ", format(round(rho, 2), nsmall = 2))
   
-  ## Plot
+  ## Colors and alphas for plot
   if (age_mouse=="pups"){
     cols <- c("yellow3", "#ffad73", "red", "#26b3ff", "dark grey") 
     names(cols)<-c("Signif in both", "Signif in human (FDR<0.1)", "Recapitulating genes (p<0.05 in human, FDR<0.05 in mouse)","Signif in mouse (FDR<0.05)", "n.s. genes")
@@ -325,13 +325,42 @@ t_stat_plot_human_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_hum
     names(alphas)<-c("Signif in both", "Signif in human (FDR<0.1)", "Recapitulating genes (p<0.05 in human and mouse)","n.s. genes")
   }
   
-  plot <- ggplot(human_mouse_data, aes(x = t_mouse, y = t_human, color=DE, alpha=DE)) +
+  
+  ## Add labels of interesting genes 
+
+  ## 3 most significant human recapitulating genes
+  recap_genes <- human_mouse_data[which(human_mouse_data$DE==names(alphas)[3]),]
+  top_recap_genes <- recap_genes[order(recap_genes$adj.P.Val_human),"gene_symbol_human"][1:3]
+  
+  label <- vector()
+  for (i in 1:dim(human_mouse_data)[1]){
+    ## DEG in both human and mouse
+    if (human_mouse_data$DE[i]=="Signif in both"){
+      ## Label of the form: [gene name in mouse]-[gene name in human]
+      label <- append(label, paste(human_mouse_data$mmusculus_homolog_associated_gene_name[i], "-", human_mouse_data$gene_symbol_human[i], sep=""))
+    }
+    ## Labels of the top 3 recapitulating genes
+    else if (human_mouse_data$gene_symbol_human[i] %in% top_recap_genes){
+      label <- append(label, paste(human_mouse_data$mmusculus_homolog_associated_gene_name[i], "-", human_mouse_data$gene_symbol_human[i], sep=""))
+    }
+    else{
+      label <- append(label, NA)
+    }
+  }
+  
+  human_mouse_data$label <- label
+  
+  ## Plot
+  plot <- ggplot(human_mouse_data, aes(x = t_mouse, y = t_human, color=DE, alpha=DE, label=label)) +
     geom_point(size = 1) +
     labs(x = paste("t-stats in", substr(age_mouse, 1, nchar(age_mouse)-1), "mouse", tissue_mouse), 
          y = paste("t-stats in", age_human, "human brain"),
          title = paste(capitalize(expt_mouse),"mouse vs Smoking human", sep=" "), 
          subtitle = rho_anno, 
          parse = T) +
+    geom_label_repel(fill="white", size=2, max.overlaps = Inf,  
+                     box.padding = 0.2, 
+                     show.legend=FALSE) +
     theme_bw() +
     scale_color_manual(values = cols) + 
     scale_alpha_manual(values = alphas)
