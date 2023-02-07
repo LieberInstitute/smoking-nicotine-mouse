@@ -258,8 +258,13 @@ t_stat_plot_human_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_hum
     ## Pup mouse genes with FDR<5% and human genes with p-value<5%
     if (age_mouse=="pups"){
       
+      ## DEG in human (FDR<0.1) and mouse (FDR<0.05)
+      if(human_mouse_data$adj.P.Val_human[i]<0.1 && human_mouse_data$adj.P.Val_mouse[i]<0.05) {
+        DE<-append(DE, "Signif in both")
+      }
+      
       ## DEG in human 
-      if (human_mouse_data$adj.P.Val_human[i]<0.1){
+      else if (human_mouse_data$adj.P.Val_human[i]<0.1){
         DE<-append(DE, "Signif in human (FDR<0.1)")
       }
 
@@ -282,7 +287,12 @@ t_stat_plot_human_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_hum
     
     ## Adult mouse genes with p-value<5% and human genes with p-value<5%
     else {
-      if (human_mouse_data$adj.P.Val_human[i]<0.1){
+      
+      ## DEG in human (FDR<0.1) and mouse (FDR<0.05) <- there weren't DEG in adults
+      if(human_mouse_data$adj.P.Val_human[i]<0.1 && human_mouse_data$adj.P.Val_mouse[i]<0.05) {
+        DE<-append(DE, "Signif in both")
+      }
+      else if (human_mouse_data$adj.P.Val_human[i]<0.1){
         DE<-append(DE, "Signif in human (FDR<0.1)")
       }
       else if ((human_mouse_data$P.Value_mouse[i]<0.05 && human_mouse_data$P.Value_human[i]<0.05) &&
@@ -303,16 +313,16 @@ t_stat_plot_human_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_hum
   
   ## Plot
   if (age_mouse=="pups"){
-    cols <- c("#ffad73", "red", "#26b3ff","dark grey") 
-    names(cols)<-c("Signif in human (FDR<0.1)", "Recapitulating genes (p<0.05 in human, FDR<0.05 in mouse)","Signif in mouse (FDR<0.05)", "n.s. genes")
-    alphas <- c(1, 1, 1, 0.5)  
-    names(alphas)<-c("Signif in human (FDR<0.1)", "Recapitulating genes (p<0.05 in human, FDR<0.05 in mouse)","Signif in mouse (FDR<0.05)", "n.s. genes")
+    cols <- c("yellow3", "#ffad73", "red", "#26b3ff", "dark grey") 
+    names(cols)<-c("Signif in both", "Signif in human (FDR<0.1)", "Recapitulating genes (p<0.05 in human, FDR<0.05 in mouse)","Signif in mouse (FDR<0.05)", "n.s. genes")
+    alphas <- c(1, 1, 1, 1, 0.5)  
+    names(alphas)<-c("Signif in both", "Signif in human (FDR<0.1)", "Recapitulating genes (p<0.05 in human, FDR<0.05 in mouse)","Signif in mouse (FDR<0.05)", "n.s. genes")
   }
   else {
-    cols <- c("#ffad73", "red","dark grey") 
-    names(cols)<-c("Signif in human (FDR<0.1)", "Recapitulating genes (p<0.05 in human and mouse)","n.s. genes")
-    alphas <- c(1, 1, 0.5)  
-    names(alphas)<-c("Signif in human (FDR<0.1)", "Recapitulating genes (p<0.05 in human and mouse)","n.s. genes")
+    cols <- c("yellow3", "#ffad73", "red","dark grey") 
+    names(cols)<-c("Signif in both", "Signif in human (FDR<0.1)", "Recapitulating genes (p<0.05 in human and mouse)","n.s. genes")
+    alphas <- c(1, 1, 1, 0.5)  
+    names(alphas)<-c("Signif in both", "Signif in human (FDR<0.1)", "Recapitulating genes (p<0.05 in human and mouse)","n.s. genes")
   }
   
   plot <- ggplot(human_mouse_data, aes(x = t_mouse, y = t_human, color=DE, alpha=DE)) +
@@ -336,7 +346,7 @@ t_stat_plot_human_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_hum
   ## Total unique human genes 
   total_human_genes=length(unique(human_mouse_data$human_ensembl_gene_id))
   ## Unique recapitulating human genes 
-  recap_human_genes=length(unique(human_mouse_data[which(human_mouse_data$DE==names(alphas)[2]),"human_ensembl_gene_id"]))
+  recap_human_genes=length(unique(human_mouse_data[which(human_mouse_data$DE==names(alphas)[3]),"human_ensembl_gene_id"]))
   ## Percentage 
   percentage=signif(recap_human_genes / total_human_genes *100, 3)
   print(paste(recap_human_genes, "out of", total_human_genes, "genes in smoking human", age_human, "brain recapitulate in", 
@@ -632,7 +642,7 @@ venn_plot(DEG_lists, colors, "all_DEG")
 ## Note: each circle represents the number of unique gene pairs (mouse-human homologs), with p<0.05 in adult mouse / FDR<0.05 in mouse pups, 
 ## p<0.05 in fetal/adult human brain and the same logFC sign in both species. Therefore, the intersection contains the recapitulating genes. 
 
-## DEG in human
+## Compare DEG in pup mouse vs DEG in human
 
 
 
