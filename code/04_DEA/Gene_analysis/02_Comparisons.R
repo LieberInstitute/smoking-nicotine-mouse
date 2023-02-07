@@ -118,6 +118,12 @@ models<-c("Naive model", "Fitted model", "Interaction model")
 tstats_plots(top_genes_pairs,  "Smoking blood", "Smoking brain", models)
 
 
+## Add here code for recapitulating blood genes in adult, pup brain 
+
+
+
+
+
 #########################################
 # Smoking adults vs nicotine adults 
 #########################################
