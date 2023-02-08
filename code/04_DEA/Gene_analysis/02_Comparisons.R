@@ -84,8 +84,7 @@ t_stat_plot <- function(top_genes1, top_genes2, name_1, name_2, model_name){
           parse = T) +
      theme_bw() +
      scale_color_manual(values = cols) + 
-     scale_alpha_manual(values = alphas)
-
+     scale_alpha_manual(values = alphas) 
  return(plot)
 }
 
@@ -106,19 +105,53 @@ tstats_plots<-function(top_genes_pairs, name_1, name_2, models){
 
 
 
+#############################################################
+## Compare tissues - Analysis of blood and brain biomarkers
+#############################################################
 
-####################################
-# Blood vs brain adults (smoking)
-####################################
+## 1. Compare t-stats in the 3 models
 
-top_genes_pairs<-list(list(top_genes_blood_smoking_naive, top_genes_adults_smoking_naive), 
-                      list(top_genes_blood_smoking_fitted, top_genes_adults_smoking_fitted),
-                      list(top_genes_blood_smoking_interaction, top_genes_adults_smoking_interaction))
+####### Smoking blood vs Smoking adult brain #######
+top_genes_pairs<-list(list(top_genes_adults_smoking_naive, top_genes_blood_smoking_naive), 
+                      list(top_genes_adults_smoking_fitted, top_genes_blood_smoking_fitted),
+                      list(top_genes_adults_smoking_interaction, top_genes_blood_smoking_interaction))
 models<-c("Naive model", "Fitted model", "Interaction model")
-tstats_plots(top_genes_pairs,  "Smoking blood", "Smoking brain", models)
+tstats_plots(top_genes_pairs,  "Smoking adult brain", "Smoking blood", models)
 
 
-## Add here code for recapitulating blood genes in adult, pup brain 
+####### Smoking blood vs Nicotine adult brain #######
+top_genes_pairs<-list(list(top_genes_adults_nicotine_naive, top_genes_blood_smoking_naive), 
+                      list(top_genes_adults_nicotine_fitted, top_genes_blood_smoking_fitted),
+                      list(top_genes_adults_nicotine_interaction, top_genes_blood_smoking_interaction))
+models<-c("Naive model", "Fitted model", "Interaction model")
+tstats_plots(top_genes_pairs,  "Nicotine adult brain", "Smoking blood", models)
+
+
+####### Smoking blood vs Smoking pup brain #######
+top_genes_pairs<-list(list(top_genes_pups_smoking_naive, top_genes_blood_smoking_naive), 
+                      list(top_genes_pups_smoking_fitted, top_genes_blood_smoking_fitted),
+                      list(top_genes_pups_smoking_interaction, top_genes_blood_smoking_interaction))
+models<-c("Naive model", "Fitted model", "Interaction model")
+tstats_plots(top_genes_pairs,  "Smoking pup brain", "Smoking blood", models)
+
+
+####### Smoking blood vs Nicotine pup brain #######
+top_genes_pairs<-list(list(top_genes_pups_nicotine_naive, top_genes_blood_smoking_naive), 
+                      list(top_genes_pups_nicotine_fitted, top_genes_blood_smoking_fitted),
+                      list(top_genes_pups_nicotine_interaction, top_genes_blood_smoking_interaction))
+models<-c("Naive model", "Fitted model", "Interaction model")
+tstats_plots(top_genes_pairs,  "Nicotine pup brain", "Smoking blood", models)
+
+
+
+## 2. Find recapitulating genes of mouse blood (p<0.05 and same logFC sign) in mouse brain (with FDR<0.05 for pups, p<0.05 for adults)
+## Use mouse genes from fitted models only
+
+
+
+
+
+
 
 
 
@@ -213,7 +246,7 @@ human_mouse_ids<-biomart(genes  = fetalGene$ensemblID,
                  attributes = c("mmusculus_homolog_ensembl_gene", "mmusculus_homolog_associated_gene_name"),
                  filters    = "ensembl_gene_id")
 
-## Common genes between human homologous and mouse datasets
+## Common genes in human homologous and mouse datasets
 common_genes <- human_mouse_ids[which(human_mouse_ids$mmusculus_homolog_ensembl_gene %in% top_genes_pups_nicotine_fitted$ensemblID),]
 common_genes$human_ensembl_gene_id <- common_genes$ensembl_gene_id
 common_genes$ensembl_gene_id <- NULL
