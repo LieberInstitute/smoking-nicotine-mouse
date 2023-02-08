@@ -31,7 +31,7 @@ This initial part of the code builds the necessary objects to analyze in the EDA
 ### 3. Differential Expression Analysis
 Separated in gene, tx, exon and jx level analyses
 * *01_Modeling.R*: Perform DEA 
-* *02_Comparisons.R*: Create plots comparing t-stats of different groups of features and Venn diagrams to quantify the number of common DE features between different experiments and/or regulation direction. Analysis of blood vs brain biomarkers can be found within gene and tx analyses. Comparisons of human vs mouse genes are within gene analysis. 
+* *02_Comparisons.R*: Create plots comparing t-stats of different groups of features and Venn diagrams to quantify the number of common DE features between different experiments and/or regulation direction. Analysis of blood vs brain biomarkers and comparisons of human vs mouse genes are within the gene analysis. 
 
 ### 4. GO & KEGG analyses
 Separated in gene, tx and exon level analyses
