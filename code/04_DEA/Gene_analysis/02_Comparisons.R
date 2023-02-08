@@ -111,41 +111,172 @@ tstats_plots<-function(top_genes_pairs, name_1, name_2, models){
 
 ## 1. Compare t-stats in the 3 models
 
-####### Smoking blood vs Smoking adult brain #######
+####### Smoking adult blood vs Smoking adult brain #######
 top_genes_pairs<-list(list(top_genes_adults_smoking_naive, top_genes_blood_smoking_naive), 
                       list(top_genes_adults_smoking_fitted, top_genes_blood_smoking_fitted),
                       list(top_genes_adults_smoking_interaction, top_genes_blood_smoking_interaction))
 models<-c("Naive model", "Fitted model", "Interaction model")
-tstats_plots(top_genes_pairs,  "Smoking adult brain", "Smoking blood", models)
+tstats_plots(top_genes_pairs,  "Smoking adult brain", "Smoking adult blood", models)
 
 
-####### Smoking blood vs Nicotine adult brain #######
+####### Smoking adult blood vs Nicotine adult brain #######
 top_genes_pairs<-list(list(top_genes_adults_nicotine_naive, top_genes_blood_smoking_naive), 
                       list(top_genes_adults_nicotine_fitted, top_genes_blood_smoking_fitted),
                       list(top_genes_adults_nicotine_interaction, top_genes_blood_smoking_interaction))
 models<-c("Naive model", "Fitted model", "Interaction model")
-tstats_plots(top_genes_pairs,  "Nicotine adult brain", "Smoking blood", models)
+tstats_plots(top_genes_pairs,  "Nicotine adult brain", "Smoking adult blood", models)
 
 
-####### Smoking blood vs Smoking pup brain #######
+####### Smoking adult blood vs Smoking pup brain #######
 top_genes_pairs<-list(list(top_genes_pups_smoking_naive, top_genes_blood_smoking_naive), 
                       list(top_genes_pups_smoking_fitted, top_genes_blood_smoking_fitted),
                       list(top_genes_pups_smoking_interaction, top_genes_blood_smoking_interaction))
 models<-c("Naive model", "Fitted model", "Interaction model")
-tstats_plots(top_genes_pairs,  "Smoking pup brain", "Smoking blood", models)
+tstats_plots(top_genes_pairs,  "Smoking pup brain", "Smoking adult blood", models)
 
 
-####### Smoking blood vs Nicotine pup brain #######
+####### Smoking adult blood vs Nicotine pup brain #######
 top_genes_pairs<-list(list(top_genes_pups_nicotine_naive, top_genes_blood_smoking_naive), 
                       list(top_genes_pups_nicotine_fitted, top_genes_blood_smoking_fitted),
                       list(top_genes_pups_nicotine_interaction, top_genes_blood_smoking_interaction))
 models<-c("Naive model", "Fitted model", "Interaction model")
-tstats_plots(top_genes_pairs,  "Nicotine pup brain", "Smoking blood", models)
+tstats_plots(top_genes_pairs,  "Nicotine pup brain", "Smoking adult blood", models)
 
 
 
-## 2. Find recapitulating genes of mouse blood (p<0.05 and same logFC sign) in mouse brain (with FDR<0.05 for pups, p<0.05 for adults)
+## 2. Search recapitulating genes of mouse blood (p<0.05 and same logFC sign) in mouse brain (with FDR<0.05 for pups, p<0.05 for adults)
 ## Use mouse genes from fitted models only
+
+t_stat_plot_brain_blood_recap <- function(age_mouse, expt_mouse){
+  
+  ## Define blood dataset
+  top_genes_blood <- top_genes_blood_smoking_fitted
+  ## Define brain dataset
+  top_genes_brain <-eval(parse_expr(paste("top_genes", age_mouse, expt_mouse, "fitted", sep="_")))
+  
+  ## Merge data
+  ## (Genes in brain and blood datasets are the same)
+  t_stats<-data.frame(ensemblID= rownames(top_genes_brain), gene_symbol=top_genes_brain$Symbol, t_blood=top_genes_blood$t, t_brain=top_genes_brain$t,
+                      FDR_blood=top_genes_blood$adj.P.Val, FDR_brain=top_genes_brain$adj.P.Val)
+  
+  ## Measure of significance for pups and adults
+  if (age_mouse=="pups"){
+    signif_measure_mouse="FDR"
+  }
+  else {
+    signif_measure_mouse="p-value"
+  }
+  
+  ## Add DE and recapitulation info for each gene
+  for (i in 1:dim(t_stats)[1]) {
+    
+    ## Pup brain genes
+    if (age_mouse=="pups"){
+      
+      ## Recapitulating blood genes (p<0.05) in pup brain (FDR<0.05) 
+      if ((top_gene_blood$P.Val[i]<0.05 && top_genes_brain$adj.P.Val[i]<0.05) &&
+               (sign(top_genes_blood$logFC[i])==sign(top_genes_brain$logFC[i]))) {
+        DE<-append(DE, "Recapitulating genes (p<0.05 in blood, FDR<0.05 in brain)")
+      }
+      
+      ## DEG in brain
+      else if (top_genes_brain$adj.P.Val[i]<0.05){
+        DE<-append(DE, "Signif in brain (FDR<0.05)")
+      }
+      
+      ## Non-significant genes 
+      else {
+        DE<-append(DE, "n.s. genes")      
+      }
+    }
+    
+    ## Adult brain genes 
+    else {
+      
+      ## Recapitulating blood genes (p<0.05) in adult brain (p<0.05)
+      if ((top_genes_blood$P.Value[i]<0.05 && top_genes_brain$P.Value[i]<0.05) &&
+               (sign(top_genes_blood$logFC[i])==sign(top_genes_brain$logFC[i]))) {
+        DE<-append(DE, "Recapitulating genes (p<0.05 in blood and brain)")
+      }
+      else {
+        DE<-append(DE, "n.s. genes")      
+      }
+    }
+  }
+  
+  t_stats$DE<- DE
+  
+  ## Correlation coeff between t-stats of genes in human and mouse
+  rho <- cor(t_stats$t_blood, t_stats$t_brain, method = "spearman")
+  rho_anno = paste0("rho = ", format(round(rho, 2), nsmall = 2))
+  
+  ## Colors and alphas for plot
+  if (age_mouse=="pups"){
+    cols <- c("red",   "#26b3ff", "dark grey") 
+    names(cols)<-c("Recapitulating genes (p<0.05 in blood, FDR<0.05 in brain)", "Signif in brain (FDR<0.05)", "n.s. genes")
+    alphas <- c(1, 1, 0.5)  
+    names(alphas)<-c("Recapitulating genes (p<0.05 in blood, FDR<0.05 in brain)", "Signif in brain (FDR<0.05)", "n.s. genes")
+  }
+  else {
+    cols <- c("red","dark grey") 
+    names(cols)<-c("Recapitulating genes (p<0.05 in blood and brain)", "n.s. genes")
+    alphas <- c(1, 0.5)  
+    names(alphas)<-c("Recapitulating genes (p<0.05 in blood and brain)", "n.s. genes")
+  }
+  
+  
+  ## Add labels of interesting genes 
+  
+  ## 3 most significant recapitulating genes
+  recap_genes <- t_stats[which(t_stats$DE==names(alphas)[1]),]
+  top_recap_genes <- recap_genes[order(recap_genes$FDR_blood),"gene_symbol"][1:3]
+  
+  label <- vector()
+  for (i in 1:dim(t_stats)[1]){
+    ## Labels of the top 3 recapitulating genes
+    if (t_stats$gene_symbol[i] %in% top_recap_genes){
+      label <- append(label, paste(t_stats$ensemblID[i], t_stats$gene_symbol[i], sep="-"))
+    }
+    else{
+      label <- append(label, NA)
+    }
+  }
+  
+  t_stats$label <- label
+  
+  ## Plot
+  plot <- ggplot(t_stats, aes(x = t_blood, y = t_brain, color=DE, alpha=DE, label=label)) +
+    geom_point(size = 1) +
+    labs(x = paste("t-stats in", substr(age_mouse, 1, nchar(age_mouse)-1), "mouse brain"), 
+         y = "t-stats in Smoking adult blood",
+         title = paste(capitalize(expt_mouse),"mouse vs Smoking blood", sep=" "), 
+         subtitle = rho_anno, 
+         parse = T) +
+    geom_label_repel(fill="white", size=2, max.overlaps = Inf,  
+                     box.padding = 0.2, 
+                     show.legend=FALSE) +
+    theme_bw() +
+    scale_color_manual(values = cols) + 
+    scale_alpha_manual(values = alphas)
+  
+  plot + theme(legend.text = element_text(size=8))
+  plot
+  ggsave(filename=paste("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_", age_human, "_Human_vs_Mouse_", age_mouse, "_", substr(expt_mouse,1,3), "_", 
+                        tissue_mouse, ".pdf", sep=""), height = 12, width = 20, units = "cm")
+  
+  ## Quantify human genes that recapitulate in mouse
+  print(table(human_mouse_data$DE))
+  ## Total unique human genes 
+  total_human_genes=length(unique(human_mouse_data$human_ensembl_gene_id))
+  ## Unique recapitulating human genes 
+  recap_human_genes=length(unique(human_mouse_data[which(human_mouse_data$DE==names(alphas)[3]),"human_ensembl_gene_id"]))
+  ## Percentage 
+  percentage=signif(recap_human_genes / total_human_genes *100, 3)
+  print(paste(recap_human_genes, "out of", total_human_genes, "genes in smoking human", age_human, "brain recapitulate in", 
+              expt_mouse, "mouse", substr(age_mouse, 1, nchar(age_mouse)-1), tissue_mouse, "(with p<0.05 and same logFC direction) -", 
+              paste(percentage, "%", sep="")))
+  return(human_mouse_data)
+}
 
 
 
