@@ -25,6 +25,10 @@ load(here("processed-data/04_DEA/Gene_analysis/de_genes_pups_smoking_fitted.Rdat
 load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_smoking_fitted.Rdata"))
 load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_smoking_interaction.Rdata"))
 
+## Pup brain Tx data 
+load(here("processed-data/04_DEA/Tx_analysis/top_tx_nic.Rdata"))
+load(here("processed-data/04_DEA/Tx_analysis/top_tx_smo.Rdata"))
+
 ## Data from prenatal and adult human postmortem prefrontal cortices 
 ## (from Steve's paper https://github.com/LieberInstitute/Smoking_DLPFC_Devel/blob/master/README.md)
 load(here("raw-data/Genes_DE_sva.rda"))
@@ -106,7 +110,7 @@ tstats_plots<-function(top_genes_pairs, name_1, name_2, models){
 
 
 #############################################################
-## Compare tissues - Analysis of blood and brain biomarkers
+## Compare tissues - Analysis of blood vs brain biomarkers
 #############################################################
 
 ## 1. Compare t-stats in the 3 models
@@ -144,159 +148,305 @@ tstats_plots(top_genes_pairs,  "Nicotine pup brain", "Smoking adult blood", mode
 
 
 
-## 2. Search for mouse blood genes that recapitulate in mouse brain (with p<0.05 in blood, FDR<0.05 in pup brain/p<0.05 in adult brain, 
-## and the same logFC sign in both tissues)
-## Use mouse genes from fitted models only
+## 2. Search mouse brain genes/txs that recapitulate in mouse blood (with p<0.05 in blood, FDR<0.05 in pup brain/p<0.05 in adult brain, and the same logFC sign in both tissues)
+## Use mouse genes and txs from fitted models only
 
-t_stat_plot_brain_blood_recap <- function(age_mouse, expt_mouse){
+t_stat_plot_brain_blood_recap <- function(age_mouse, expt_mouse, feature){
   
   ## Define blood dataset
   top_genes_blood <- top_genes_blood_smoking_fitted
-  ## Define brain dataset
-  top_genes_brain <-eval(parse_expr(paste("top_genes", age_mouse, expt_mouse, "fitted", sep="_")))
   
-  ## Merge data
-  ## (Brain and blood datasets contain the same genes in the same order)
-  t_stats<-data.frame(ensemblID=rownames(top_genes_brain), gene_symbol=top_genes_brain$Symbol, t_blood=top_genes_blood$t, t_brain=top_genes_brain$t,
-                      FDR_blood=top_genes_blood$adj.P.Val, FDR_brain=top_genes_brain$adj.P.Val, P.Val_blood=top_genes_blood$P.Value, P.Val_brain=top_genes_brain$P.Value,
-                      logFC_blood=top_genes_blood$logFC, logFC_brain=top_genes_brain$logFC)
-  
-  ## Add DE and recapitulation info for each gene
-  DE <-vector()
-  for (i in 1:dim(t_stats)[1]) {
+  ## Compare blood genes vs brain genes
+  if (feature=="genes"){
     
-    ## Pup brain genes
+    ## Define brain dataset
+    top_genes_brain <-eval(parse_expr(paste("top_genes", age_mouse, expt_mouse, "fitted", sep="_")))
+    
+    ## Merge brain and blood data
+    ## (Brain and blood datasets contain the same genes in the same order)
+    t_stats<-data.frame(ensemblID=rownames(top_genes_brain), gene_symbol=top_genes_brain$Symbol, t_blood=top_genes_blood$t, t_brain=top_genes_brain$t,
+                        FDR_blood=top_genes_blood$adj.P.Val, FDR_brain=top_genes_brain$adj.P.Val, P.Val_blood=top_genes_blood$P.Value, P.Val_brain=top_genes_brain$P.Value,
+                        logFC_blood=top_genes_blood$logFC, logFC_brain=top_genes_brain$logFC)
+   
+    ## Add DE and recapitulation info for each gene
+    DE <-vector()
+    for (i in 1:dim(t_stats)[1]) {
+      
+      ## Pup brain genes
+      if (age_mouse=="pups"){
+        
+        ## Pup brain genes (FDR<0.05) that recapitulate in blood (p<0.05) 
+        if ((t_stats$P.Val_blood[i]<0.05 && t_stats$FDR_brain[i]<0.05) &&
+            (sign(t_stats$logFC_blood[i])==sign(t_stats$logFC_brain[i]))) {
+          DE<-append(DE, "Recapitulating genes (p<0.05 in blood, FDR<0.05 in brain)")
+        }
+        
+        ## DEG in brain
+        ## (Note that all recapitulating genes of pup brain are also significant (FDR<0.05))
+        else if (t_stats$FDR_brain[i]<0.05){
+          DE<-append(DE, "Signif in brain (FDR<0.05)")
+        }
+        
+        ## Non-significant genes 
+        else {
+          DE<-append(DE, "n.s. genes")      
+        }
+      }
+      
+      ## Adult brain genes 
+      else {
+        
+        ## Adult brain genes (p<0.05) that recapitulate in blood (p<0.05) 
+        if ((t_stats$P.Val_blood[i]<0.05 && t_stats$P.Val_brain[i]<0.05) &&
+            (sign(t_stats$logFC_blood[i])==sign(t_stats$logFC_brain[i]))) {
+          DE<-append(DE, "Recapitulating genes (p<0.05 in blood and brain)")
+        }
+        else {
+          DE<-append(DE, "n.s. genes")      
+        }
+      }
+    }
+    
+    t_stats$DE<- DE
+    
+    ## Correlation coeff between t-stats of genes in blood and genes/txs in brain
+    rho <- cor(t_stats$t_blood, t_stats$t_brain, method = "spearman")
+    rho_anno = paste0("rho = ", format(round(rho, 2), nsmall = 2))
+    
+    ## Colors and alphas for plot
     if (age_mouse=="pups"){
-      
-      ## Recapitulating blood genes (p<0.05) in pup brain (FDR<0.05) 
-      if ((t_stats$P.Val_blood[i]<0.05 && t_stats$FDR_brain[i]<0.05) &&
-               (sign(t_stats$logFC_blood[i])==sign(t_stats$logFC_brain[i]))) {
-        DE<-append(DE, "Recapitulating genes (p<0.05 in blood, FDR<0.05 in brain)")
+      cols <- c("red",   "#26b3ff", "dark grey") 
+      names(cols)<-c("Recapitulating genes (p<0.05 in blood, FDR<0.05 in brain)", "Signif in brain (FDR<0.05)", "n.s. genes")
+      alphas <- c(1, 1, 0.5)  
+      names(alphas)<-c("Recapitulating genes (p<0.05 in blood, FDR<0.05 in brain)", "Signif in brain (FDR<0.05)", "n.s. genes")
+    }
+    else {
+      cols <- c("red","dark grey") 
+      names(cols)<-c("Recapitulating genes (p<0.05 in blood and brain)", "n.s. genes")
+      alphas <- c(1, 0.5)  
+      names(alphas)<-c("Recapitulating genes (p<0.05 in blood and brain)", "n.s. genes")
+    }
+    
+    ## Add labels of interesting genes 
+    
+    ## 3 most significant recapitulating blood genes
+    recap_genes <- t_stats[which(t_stats$DE==names(alphas)[1]),]
+    top_recap_genes <- recap_genes[order(recap_genes$FDR_blood),"gene_symbol"][1:3]
+    
+    label <- vector()
+    for (i in 1:dim(t_stats)[1]){
+      ## Labels of the top 3 recapitulating genes
+      if (t_stats$gene_symbol[i] %in% top_recap_genes){
+        label <- append(label, paste(t_stats$ensemblID[i], t_stats$gene_symbol[i], sep="-"))
       }
-      
-      ## DEG in brain
-      else if (t_stats$FDR_brain[i]<0.05){
-        DE<-append(DE, "Signif in brain (FDR<0.05)")
-      }
-      
-      ## Non-significant genes 
-      else {
-        DE<-append(DE, "n.s. genes")      
+      else{
+        label <- append(label, NA)
       }
     }
     
-    ## Adult brain genes 
+    t_stats$label <- label
+    
+    ## Plot
+    plot <- ggplot(t_stats, aes(x = t_brain, y = t_blood, color=DE, alpha=DE, label=label)) +
+      geom_point(size = 1) +
+      labs(x = paste("t-stats in", capitalize(expt_mouse), substr(age_mouse, 1, nchar(age_mouse)-1), "brain"), 
+           y = "t-stats in Smoking adult blood",
+           title = paste(capitalize(expt_mouse), "mouse brain vs Smoking mouse blood", sep=" "), 
+           subtitle = rho_anno, 
+           parse = T) +
+      geom_label_repel(fill="white", size=2, max.overlaps = Inf,  
+                       box.padding = 0.2, 
+                       show.legend=FALSE) +
+      theme_bw() +
+      scale_color_manual(values = cols) + 
+      scale_alpha_manual(values = alphas)
+    
+    plot + theme(legend.text = element_text(size=8))
+    plot
+    ggsave(filename=paste("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_recap_", capitalize(expt_mouse), "_", substr(age_mouse, 1, nchar(age_mouse)-1),
+                          "_Brain_vs_Smoking_adult_Blood.pdf", sep=""), height = 12, width = 20, units = "cm")
+    
+    
+    ## Quantify the number of brain genes that recapitulate in blood
+    
+    ## Total unique pup brain DEG (FDR<0.05)
+    total_pups_DEG=length(unique(t_stats[which(t_stats$FDR_brain<0.05), "ensemblID"]))
+    ## Total unique adult brain genes with p<0.05
+    total_adults_P_val_genes=length(unique(t_stats[which(t_stats$P.Val_brain<0.05), "ensemblID"]))
+    ## Unique recapitulating genes 
+    recap_genes=length(unique(t_stats[which(t_stats$DE==names(alphas)[1]),"ensemblID"]))
+  
+    if (age_mouse=="pups"){
+      ## Percentage 
+      percentage=signif(recap_genes / total_pups_DEG *100, 3)
+      print(paste(recap_genes, "out of", total_pups_DEG, "DEG in", expt_mouse, "pup brain (FDR<0.05) recapitulate in smoking adult blood (with p<0.05 and same logFC direction) -", 
+                  paste(percentage, "%", sep="")))
+    }
     else {
-      
-      ## Recapitulating blood genes (p<0.05) in adult brain (p<0.05)
-      if ((t_stats$P.Val_blood[i]<0.05 && t_stats$P.Val_brain[i]<0.05) &&
-               (sign(t_stats$logFC_blood[i])==sign(t_stats$logFC_brain[i]))) {
-        DE<-append(DE, "Recapitulating genes (p<0.05 in blood and brain)")
-      }
-      else {
-        DE<-append(DE, "n.s. genes")      
-      }
+      ## Percentage 
+      percentage=signif(recap_genes / total_adults_P_val_genes *100, 3)
+      print(paste(recap_genes, "out of", total_adults_P_val_genes, "genes in", expt_mouse, "adult brain (p<0.05) recapitulate in smoking adult blood (also p<0.05 and same logFC direction) -", 
+                  paste(percentage, "%", sep="")))
     }
+
   }
   
-  t_stats$DE<- DE
-  
-  ## Correlation coeff between t-stats of genes in human and mouse
-  rho <- cor(t_stats$t_blood, t_stats$t_brain, method = "spearman")
-  rho_anno = paste0("rho = ", format(round(rho, 2), nsmall = 2))
-  
-  ## Colors and alphas for plot
-  if (age_mouse=="pups"){
-    cols <- c("red",   "#26b3ff", "dark grey") 
-    names(cols)<-c("Recapitulating genes (p<0.05 in blood, FDR<0.05 in brain)", "Signif in brain (FDR<0.05)", "n.s. genes")
-    alphas <- c(1, 1, 0.5)  
-    names(alphas)<-c("Recapitulating genes (p<0.05 in blood, FDR<0.05 in brain)", "Signif in brain (FDR<0.05)", "n.s. genes")
-  }
+  ## Compare blood genes vs brain txs
   else {
-    cols <- c("red","dark grey") 
-    names(cols)<-c("Recapitulating genes (p<0.05 in blood and brain)", "n.s. genes")
-    alphas <- c(1, 0.5)  
-    names(alphas)<-c("Recapitulating genes (p<0.05 in blood and brain)", "n.s. genes")
-  }
-  
-  
-  ## Add labels of interesting genes 
-  
-  ## 3 most significant recapitulating blood genes
-  recap_genes <- t_stats[which(t_stats$DE==names(alphas)[1]),]
-  top_recap_genes <- recap_genes[order(recap_genes$FDR_blood),"gene_symbol"][1:3]
-  
-  label <- vector()
-  for (i in 1:dim(t_stats)[1]){
-    ## Labels of the top 3 recapitulating genes
-    if (t_stats$gene_symbol[i] %in% top_recap_genes){
-      label <- append(label, paste(t_stats$ensemblID[i], t_stats$gene_symbol[i], sep="-"))
+    
+    top_tx_brain <-eval(parse_expr(paste("top_tx", substr(expt_mouse, 1, 3), sep="_")))
+    
+    ## Common genes in gene and tx datasets
+    tx_genes<-unique(top_tx_brain$ensembl_id)
+    common_tx_genes<-tx_genes[which(tx_genes %in% top_genes_blood$gencodeID)]
+    ## Txs info
+    t_stats<-top_tx_brain[which(top_tx_brain$ensembl_id %in% common_tx_genes), c("transcript_id", "P.Value", "adj.P.Val", "Symbol", 
+                                                              "t", "ensembl_id", "logFC")]
+    colnames(t_stats)[c(2,3,5,7)] <- paste(colnames(t_stats[c(2,3,5,7)]), "tx", sep="_")
+    
+    ## Add t-stats and FDRs of transcripts' genes 
+    t_tx_genes<-vector()
+    P_val_tx_genes<-vector()
+    logFC_tx_genes<-vector()
+    for (i in 1:dim(t_stats)[1]){
+      t<-top_genes_blood[which(top_genes_blood$gencodeID==t_stats$ensembl_id[i]), "t"]
+      P_val<-top_genes_blood[which(top_genes_blood$gencodeID==t_stats$ensembl_id[i]), "P.Value"]
+      logFC<-top_genes_blood[which(top_genes_blood$gencodeID==t_stats$ensembl_id[i]), "logFC"]
+      t_tx_genes<-append(t_tx_genes, t)
+      P_val_tx_genes<-append(P_val_tx_genes, P_val)
+      logFC_tx_genes<-append(logFC_tx_genes, logFC)
     }
-    else{
-      label <- append(label, NA)
+    t_stats$t_gene<-t_tx_genes
+    t_stats$P.Val_gene<-P_val_tx_genes
+    t_stats$logFC_gene<-logFC_tx_genes
+  
+  
+    ## Add DE and recapitulation info for each tx
+    DE <-vector()
+    for (i in 1:dim(t_stats)[1]) {
+      
+      ## Pup brain txs (FDR<0.05) that recapitulate in mouse blood genes (p<0.05) 
+      if ((t_stats$P.Val_gene[i]<0.05 && t_stats$adj.P.Val_tx[i]<0.05) &&
+               (sign(t_stats$logFC_tx[i])==sign(t_stats$logFC_gene[i]))) {
+        DE<-append(DE, "Recapitulating txs (blood gene with p<0.05, brain tx with FDR<0.05)")
+      }
+      
+      ## DE txs in brain
+      ## (Note that all recapitulating txs of pup brain are also significant (FDR<0.05))
+      else if (t_stats$adj.P.Val_tx[i]<0.05){
+        DE<-append(DE, "Signif txs in brain (FDR<0.05)")
+      }
+      
+      ## Non-significant txs
+      else {
+        DE<-append(DE, "n.s. txs")      
+      }
     }
+    
+    t_stats$DE<- DE
+    
+    ## Correlation coeff between t-stats of blood genes and brain txs 
+    rho <- cor(t_stats$t_gene, t_stats$t_tx, method = "spearman")
+    rho_anno = paste0("rho = ", format(round(rho, 2), nsmall = 2))
+    
+    ## Colors and alphas for plot
+    cols <- c("red", "#26b3ff", "dark grey") 
+    names(cols)<-c("Recapitulating txs (blood gene with p<0.05, brain tx with FDR<0.05)", "Signif txs in brain (FDR<0.05)", "n.s. txs")
+    alphas <- c(1, 1, 0.5)  
+    names(alphas)<-c("Recapitulating txs (blood gene with p<0.05, brain tx with FDR<0.05)", "Signif txs in brain (FDR<0.05)", "n.s. txs")
+    
+    
+    ## Add labels of interesting txs and their genes
+    
+    ## 3 most significant recapitulating txs 
+    recap_txs <- t_stats[which(t_stats$DE==names(alphas)[1]),]
+    top_recap_txs <- recap_txs[order(recap_txs$adj.P.Val_tx), "transcript_id"][1:3]
+    
+    label <- vector()
+    for (i in 1:dim(t_stats)[1]){
+      ## Labels of the top 3 recapitulating txs
+      if (t_stats$transcript_id[i] %in% top_recap_txs) {
+        label <- append(label, paste(t_stats$Symbol[i], t_stats$transcript_id[i], sep="-"))
+      }
+      else{
+        label <- append(label, NA)
+      }
+    }
+    
+    t_stats$label <- label
+    
+    ## Plot
+    plot <- ggplot(t_stats, aes(x = t_gene, y = t_tx, color=DE, alpha=DE, label=label)) +
+      geom_point(size = 1) +
+      labs(x = "t-stats of genes from Smoking adult blood", 
+           y = paste("t-stats of txs from", capitalize(expt_mouse), "pup brain"),
+           title = paste(capitalize(expt_mouse), "mouse brain vs Smoking mouse blood", sep=" "), 
+           subtitle = rho_anno, 
+           parse = T) +
+      geom_label_repel(fill="white", size=2, max.overlaps = Inf,  
+                       box.padding = 0.2, 
+                       show.legend=FALSE) +
+      theme_bw() +
+      scale_color_manual(values = cols) + 
+      scale_alpha_manual(values = alphas)
+    
+    plot + theme(legend.text = element_text(size=8))
+    plot
+    ggsave(filename=paste("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_recap_", capitalize(substr(expt_mouse, 1, 3)), 
+                          "pupBrain_Tx_vs_SmoAdultBlood_Genes.pdf", sep=""), height = 12, width = 20, units = "cm")
+    
+    
+    ## Quantify the number of brain txs that recapitulate in blood
+
+    ## Total unique brain DE txs
+    total_pups_DEtxs=length(unique(t_stats[which(t_stats$adj.P.Val_tx<0.05), "transcript_id"]))
+    ## Unique recapitulating txs
+    recap_txs=length(unique(t_stats[which(t_stats$DE==names(alphas)[1]),"transcript_id"]))
+    ## Percentage 
+    percentage=signif(recap_txs / total_pups_DEtxs *100, 3)
+    print(paste(recap_txs, "out of", total_pups_DEtxs, "DE txs in", expt_mouse, 
+                "pup brain (FDR<0.05) recapitulate in smoking adult blood genes (with p<0.05 and same logFC direction) -", paste(percentage, "%", sep="")))
+
   }
-  
-  t_stats$label <- label
-  
-  ## Plot
-  plot <- ggplot(t_stats, aes(x = t_brain, y = t_blood, color=DE, alpha=DE, label=label)) +
-    geom_point(size = 1) +
-    labs(x = paste("t-stats in", capitalize(expt_mouse), substr(age_mouse, 1, nchar(age_mouse)-1), "brain"), 
-         y = "t-stats in Smoking adult blood",
-         title = paste(capitalize(expt_mouse), "mouse brain vs Smoking mouse blood", sep=" "), 
-         subtitle = rho_anno, 
-         parse = T) +
-    geom_label_repel(fill="white", size=2, max.overlaps = Inf,  
-                     box.padding = 0.2, 
-                     show.legend=FALSE) +
-    theme_bw() +
-    scale_color_manual(values = cols) + 
-    scale_alpha_manual(values = alphas)
-  
-  plot + theme(legend.text = element_text(size=8))
-  plot
-  ggsave(filename=paste("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_recap_", capitalize(expt_mouse), "_", substr(age_mouse, 1, nchar(age_mouse)-1),
-                        "_Brain_vs_Smoking_adult_Blood.pdf", sep=""), height = 12, width = 20, units = "cm")
-  
-  ## Quantify the number of blood genes that recapitulate in brain
-  print(table(t_stats$DE))
-  ## Total unique mouse genes 
-  total_mouse_genes=length(unique(t_stats$ensemblID))
-  ## Unique recapitulating genes 
-  recap_genes=length(unique(t_stats[which(t_stats$DE==names(alphas)[1]),"ensemblID"]))
-  ## Percentage 
-  percentage=signif(recap_genes / total_mouse_genes *100, 3)
-  print(paste(recap_genes, "out of", total_mouse_genes, "genes in smoking adult blood recapitulate in", 
-              expt_mouse, substr(age_mouse, 1, nchar(age_mouse)-1), "brain (with p<0.05 and same logFC direction) -", 
-              paste(percentage, "%", sep="")))
+ 
   return(t_stats)
 }
 
 
 
 ####### Smoking adult blood vs Smoking adult brain #######
-Blood_vs_SmoAdultBrain_data <- t_stat_plot_brain_blood_recap(age_mouse = "adults", expt_mouse = "smoking")
+Blood_vs_SmoAdultBrain_data <- t_stat_plot_brain_blood_recap(age_mouse = "adults", expt_mouse = "smoking", feature = "genes")
 save(Blood_vs_SmoAdultBrain_data, file="processed-data/04_DEA/Gene_analysis/Blood_vs_SmoAdultBrain_data.Rdata")
-## "37 out of 19974 genes in smoking adult blood recapitulate in smoking adult brain (with p<0.05 and same logFC direction) - 0.185%"
+## "37 out of 772 genes in smoking adult brain (p<0.05) recapitulate in smoking adult blood (also p<0.05 and same logFC direction) - 4.79%"
 
 
 ####### Smoking adult blood vs Nicotine adult brain #######
-Blood_vs_NicAdultBrain_data <- t_stat_plot_brain_blood_recap(age_mouse = "adults", expt_mouse = "nicotine")
+Blood_vs_NicAdultBrain_data <- t_stat_plot_brain_blood_recap(age_mouse = "adults", expt_mouse = "nicotine", feature = "genes")
 save(Blood_vs_NicAdultBrain_data, file="processed-data/04_DEA/Gene_analysis/Blood_vs_NicAdultBrain_data.Rdata")
-## "33 out of 19974 genes in smoking adult blood recapitulate in nicotine adult brain (with p<0.05 and same logFC direction) - 0.165%"
+## "33 out of 679 genes in nicotine adult brain (p<0.05) recapitulate in smoking adult blood (also p<0.05 and same logFC direction) - 4.86%"
 
 
 ####### Smoking adult blood vs Smoking pup brain #######
-Blood_vs_SmoPupBrain_data <- t_stat_plot_brain_blood_recap(age_mouse = "pups", expt_mouse = "smoking")
+Blood_vs_SmoPupBrain_data <- t_stat_plot_brain_blood_recap(age_mouse = "pups", expt_mouse = "smoking", feature = "genes")
 save(Blood_vs_SmoPupBrain_data, file="processed-data/04_DEA/Gene_analysis/Blood_vs_SmoPupBrain_data.Rdata")
-## "126 out of 19974 genes in smoking adult blood recapitulate in smoking pup brain (with p<0.05 and same logFC direction) - 0.631%"
+## "126 out of 4165 DEG in smoking pup brain (FDR<0.05) recapitulate in smoking adult blood (with p<0.05 and same logFC direction) - 3.03%"
 
 
 ####### Smoking adult blood vs Nicotine pup brain #######
-Blood_vs_NicPupBrain_data <- t_stat_plot_brain_blood_recap(age_mouse = "pups", expt_mouse = "nicotine")
+Blood_vs_NicPupBrain_data <- t_stat_plot_brain_blood_recap(age_mouse = "pups", expt_mouse = "nicotine", feature = "genes")
 save(Blood_vs_NicPupBrain_data, file="processed-data/04_DEA/Gene_analysis/Blood_vs_NicPupBrain_data.Rdata")
-## "15 out of 19974 genes in smoking adult blood recapitulate in nicotine pup brain (with p<0.05 and same logFC direction) - 0.0751%"
+## "15 out of 1010 DEG in nicotine pup brain (FDR<0.05) recapitulate in smoking adult blood (with p<0.05 and same logFC direction) - 1.49%"
+
+
+
+
+
+
+
+
+
+
+
 
 
 ## (See code below to search for recapitulating genes of mouse blood in human brain)
