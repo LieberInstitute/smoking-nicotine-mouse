@@ -182,7 +182,7 @@ t_stat_plot_brain_blood_recap <- function(age_mouse, expt_mouse, feature){
         }
         
         ## DEG in brain
-        ## (Note that all recapitulating genes of pup brain are also significant (FDR<0.05))
+        ## (Note that all recapitulating genes of pup brain are also DEG (FDR<0.05))
         else if (t_stats$FDR_brain[i]<0.05){
           DE<-append(DE, "Signif in brain (FDR<0.05)")
         }
@@ -229,7 +229,7 @@ t_stat_plot_brain_blood_recap <- function(age_mouse, expt_mouse, feature){
     
     ## Add labels of interesting genes 
     
-    ## 3 most significant recapitulating blood genes
+    ## 3 most significant recapitulating genes in blood
     recap_genes <- t_stats[which(t_stats$DE==names(alphas)[1]),]
     top_recap_genes <- recap_genes[order(recap_genes$FDR_blood),"gene_symbol"][1:3]
     
@@ -376,10 +376,10 @@ t_stat_plot_brain_blood_recap <- function(age_mouse, expt_mouse, feature){
     t_stats$label <- label
     
     ## Plot
-    plot <- ggplot(t_stats, aes(x = t_gene, y = t_tx, color=DE, alpha=DE, label=label)) +
+    plot <- ggplot(t_stats, aes(x = t_tx, y = t_gene, color=DE, alpha=DE, label=label)) +
       geom_point(size = 1) +
-      labs(x = "t-stats of genes from Smoking adult blood", 
-           y = paste("t-stats of txs from", capitalize(expt_mouse), "pup brain"),
+      labs(x = paste("t-stats of txs from", capitalize(expt_mouse), "pup brain"), 
+           y = "t-stats of genes from Smoking adult blood",
            title = paste(capitalize(expt_mouse), "mouse brain vs Smoking mouse blood", sep=" "), 
            subtitle = rho_anno, 
            parse = T) +
@@ -393,13 +393,13 @@ t_stat_plot_brain_blood_recap <- function(age_mouse, expt_mouse, feature){
     plot + theme(legend.text = element_text(size=8))
     plot
     ggsave(filename=paste("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_recap_", capitalize(substr(expt_mouse, 1, 3)), 
-                          "pupBrain_Tx_vs_SmoAdultBlood_Genes.pdf", sep=""), height = 12, width = 20, units = "cm")
+                          "PupBrain_Tx_vs_SmoAdultBlood_Genes.pdf", sep=""), height = 12, width = 20, units = "cm")
     
     
     ## Quantify the number of brain txs that recapitulate in blood
 
     ## Total unique brain DE txs
-    total_pups_DEtxs=length(unique(t_stats[which(t_stats$adj.P.Val_tx<0.05), "transcript_id"]))
+    total_pups_DEtxs=length(top_tx_brain[which(top_tx_brain$adj.P.Val<0.05), "transcript_id"])
     ## Unique recapitulating txs
     recap_txs=length(unique(t_stats[which(t_stats$DE==names(alphas)[1]),"transcript_id"]))
     ## Percentage 
@@ -413,6 +413,7 @@ t_stat_plot_brain_blood_recap <- function(age_mouse, expt_mouse, feature){
 }
 
 
+################### Brain genes vs blood genes ###################
 
 ####### Smoking adult blood vs Smoking adult brain #######
 Blood_vs_SmoAdultBrain_data <- t_stat_plot_brain_blood_recap(age_mouse = "adults", expt_mouse = "smoking", feature = "genes")
@@ -439,17 +440,23 @@ save(Blood_vs_NicPupBrain_data, file="processed-data/04_DEA/Gene_analysis/Blood_
 
 
 
+################### Brain txs vs blood genes ###################
+
+####### Smoking adult blood (genes) vs Smoking pup brain Txs #######
+Blood_vs_SmoPupBrainTx_data <- t_stat_plot_brain_blood_recap(age_mouse = NULL, expt_mouse = "smoking", feature = "txs")
+save(Blood_vs_SmoPupBrainTx_data, file="processed-data/04_DEA/Gene_analysis/Blood_vs_SmoPupBrainTx_data.Rdata")
+## "112 out of 4059 DE txs in smoking pup brain (FDR<0.05) recapitulate in smoking adult blood genes (with p<0.05 and same logFC direction) - 2.76%"
+
+
+####### Smoking adult blood (genes) vs Nicotine pup brain Txs #######
+Blood_vs_NicPupBrainTx_data <- t_stat_plot_brain_blood_recap(age_mouse = NULL, expt_mouse = "nicotine", feature = "txs")
+save(Blood_vs_NicPupBrainTx_data, file="processed-data/04_DEA/Gene_analysis/Blood_vs_NicPupBrainTx_data.Rdata")
+## "9 out of 232 DE txs in nicotine pup brain (FDR<0.05) recapitulate in smoking adult blood genes (with p<0.05 and same logFC direction) - 3.88%"
 
 
 
+## (See code below to search for recapitulating genes of human brain in mouse blood)
 
-
-
-
-
-
-
-## (See code below to search for recapitulating genes of mouse blood in human brain)
 
 
 
