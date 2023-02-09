@@ -840,7 +840,7 @@ venn_plot<-function(DEG_lists, colors, filename){
 
 
 ################################################################################
-## Compare naive VS fitted models DEG 
+##                   Compare naive VS fitted models DEG 
 
 ## Nicotine DEG
 DEG_nic_naive_vs_fitted <-list(
@@ -871,7 +871,7 @@ venn_plot(DEG_lists, colors, "model_smo_and_nic")
 
 
 ################################################################################
-## Venn diagrams for Up and Down regulated DEG
+##                Venn diagrams for Up and Down regulated DEG
 
 ## Genes of each group
 nic_naive_up<-de_genes_pups_nicotine_naive[which(de_genes_pups_nicotine_naive$logFC>0),"Symbol"]
@@ -986,8 +986,8 @@ venn_plot(DEG_lists, colors, "Fitted_smo_VS_nic_Up_and_Down")
 
 
 
-###############################################################################
-## Compare all 4 groups of DEG (by expt and model)
+################################################################################
+##                Compare all 4 groups of DEG (by expt and model)
 
 DEG_all<-list(
   "Nicotine naive"=de_genes_pups_nicotine_naive$Symbol,
@@ -1016,8 +1016,8 @@ venn_plot(DEG_lists, colors, "all_DEG")
 
 
 
-########################################################
-# Venn diagrams of mouse recapitulating genes in human
+################################################################################
+#            Venn diagrams of mouse recapitulating genes in human
 
 ## Note: each circle represents the number of unique gene pairs (mouse-human homologs), with p<0.05 in adult mouse / FDR<0.05 in mouse pups, 
 ## p<0.05 in prenatal/adult human brain and the same logFC sign in both species. Therefore, the intersection contains the recapitulating genes. 
@@ -1090,7 +1090,6 @@ venn_human_vs_mouse <- function(dataset, age_mouse, expt_mouse, tissue_mouse, ag
 }
 
 
-
 ## Plots
 
 ## Nicotine mouse pup brain vs Smoking human prenatal brain 
@@ -1122,6 +1121,20 @@ venn_human_vs_mouse("adultHuman_adultSmoMouse_data", "adult", "smoking", "brain"
 
 ## Smoking adult mouse blood vs Smoking human adult brain
 venn_human_vs_mouse("adultHuman_bloodMouse_data", "adult", "smoking", "blood", "adult")
+
+
+
+################################################################################
+#           Venn diagrams of brain recapitulating genes in blood
+
+
+
+
+
+################################################################################
+#       Venn diagrams of mouse recapitulating genes in blood vs in human
+
+
 
 
 
