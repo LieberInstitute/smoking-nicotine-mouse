@@ -454,16 +454,15 @@ save(Blood_vs_NicPupBrainTx_data, file="processed-data/04_DEA/Gene_analysis/Bloo
 ## "9 out of 232 DE txs in nicotine pup brain (FDR<0.05) recapitulate in smoking adult blood genes (with p<0.05 and same logFC direction) - 3.88%"
 
 
-
 ## (See code below to search for recapitulating genes of human brain in mouse blood)
 
 
 
+####################################################
+# Compare experiments - Smoking vs Nicotine genes
+####################################################
 
-#########################################
-# Smoking adults vs nicotine adults 
-#########################################
-
+####### Smoking adults vs nicotine adults #######
 top_genes_pairs<-list(list(top_genes_adults_smoking_naive, top_genes_adults_nicotine_naive), 
                       list(top_genes_adults_smoking_fitted, top_genes_adults_nicotine_fitted),
                       list(top_genes_adults_smoking_interaction, top_genes_adults_nicotine_interaction))
@@ -471,10 +470,7 @@ models<-c("Naive model", "Fitted model", "Interaction model")
 tstats_plots(top_genes_pairs,  "Smoking adults", "Nicotine adults", models)
 
 
-#####################################
-# Smoking pups vs nicotine pups 
-#####################################
-
+####### Smoking pups vs nicotine pups #######
 top_genes_pairs<-list(list(top_genes_pups_smoking_naive, top_genes_pups_nicotine_naive), 
                       list(top_genes_pups_smoking_fitted, top_genes_pups_nicotine_fitted),
                       list(top_genes_pups_smoking_interaction, top_genes_pups_nicotine_interaction))
@@ -482,10 +478,11 @@ models<-c("Naive model", "Fitted model", "Interaction model")
 tstats_plots(top_genes_pairs,  "Smoking pups", "Nicotine pups", models)
 
 
-#####################################
-# Smoking pups vs smoking adults
-#####################################
+######################################
+# Compare ages - Pup vs adult genes
+######################################
 
+####### Smoking pups vs smoking adults #######
 top_genes_pairs<-list(list(top_genes_pups_smoking_naive, top_genes_adults_smoking_naive), 
                       list(top_genes_pups_smoking_fitted, top_genes_adults_smoking_fitted),
                       list(top_genes_pups_smoking_interaction, top_genes_adults_smoking_interaction))
@@ -493,10 +490,7 @@ models<-c("Naive model", "Fitted model", "Interaction model")
 tstats_plots(top_genes_pairs,  "Smoking pups", "Smoking adults", models)
 
 
-#####################################
-# Nicotine pups vs nicotine adults
-#####################################
-
+####### Nicotine pups vs nicotine adults #######
 top_genes_pairs<-list(list(top_genes_pups_nicotine_naive, top_genes_adults_nicotine_naive), 
                       list(top_genes_pups_nicotine_fitted, top_genes_adults_nicotine_fitted),
                       list(top_genes_pups_nicotine_interaction, top_genes_adults_nicotine_interaction))
@@ -504,29 +498,27 @@ models<-c("Naive model", "Fitted model", "Interaction model")
 tstats_plots(top_genes_pairs,  "Nicotine pups", "Nicotine adults", models)
 
 
-############################################
-# Naive vs fitted models for nicotine pups
-############################################
+################################################
+# Compare models - Naive vs fitted model genes
+################################################
 
+####### Naive vs fitted models for nicotine pups #######
 t<-t_stat_plot(top_genes_pups_nicotine_naive, top_genes_pups_nicotine_fitted, 
                "Naive model", "Fitted model", "Nicotine pups")
 ggsave("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_Naive_VS_Fitted_Nicotine.pdf", t, 
        height = 10, width = 12, units = "cm")
 
 
-###########################################
-# Naive vs fitted models for smoking pups
-###########################################
-
+####### Naive vs fitted models for smoking pups #######
 t<-t_stat_plot(top_genes_pups_smoking_naive, top_genes_pups_smoking_fitted, 
                "Naive model", "Fitted model", "Smoking pups")
 ggsave("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_Naive_VS_Fitted_Smoking.pdf", t, 
        height = 10, width = 12, units = "cm")
 
 
-#########################################################
-#       Compare human brain vs mouse brain/blood
-#########################################################
+############################################################
+#       Compare human brain vs mouse brain/blood genes
+############################################################
 ## Samples from prenatal and adult human brain were exposed to smoking 
 ## Compare mouse genes from fitted models only
 
@@ -549,12 +541,13 @@ human_mouse_ids<-biomart(genes  = fetalGene$ensemblID,
                  attributes = c("mmusculus_homolog_ensembl_gene", "mmusculus_homolog_associated_gene_name"),
                  filters    = "ensembl_gene_id")
 
-## Common genes in human homologous and mouse datasets
+## Common genes in human homologs and mouse datasets
+## (All mouse datasets contain the same genes in the same order)
 common_genes <- human_mouse_ids[which(human_mouse_ids$mmusculus_homolog_ensembl_gene %in% top_genes_pups_nicotine_fitted$ensemblID),]
 common_genes$human_ensembl_gene_id <- common_genes$ensembl_gene_id
 common_genes$ensembl_gene_id <- NULL
 
-## Create plots to check if human genes recapitulate (with p-value<5% and same logFC sign) in mouse genes (FDR<5% for pups and p-value<5% for adults)
+## Create plots to check if mouse genes recapitulate (FDR<5% for pups and p-value<5% for adults) in human brain (with p-value<5% and same logFC sign)
 t_stat_plot_human_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_human){
   
   ## Define mouse dataset
@@ -593,7 +586,7 @@ t_stat_plot_human_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_hum
     human_mouse_data[i,] <- cbind(common_genes[i,], mouse_data, human_data)
   }
   
-  ## Add DE and recapitulation info of human genes
+  ## Add DE and recapitulation info of each gene
   DE<-vector()
   for (i in 1:dim(human_mouse_data)[1]) {
     
@@ -670,7 +663,7 @@ t_stat_plot_human_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_hum
   
   ## Add labels of interesting genes 
 
-  ## 3 most significant human recapitulating genes
+  ## 3 most significant recapitulating genes in human
   recap_genes <- human_mouse_data[which(human_mouse_data$DE==names(alphas)[3]),]
   top_recap_genes <- recap_genes[order(recap_genes$adj.P.Val_human),"gene_symbol_human"][1:3]
   
@@ -712,17 +705,29 @@ t_stat_plot_human_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_hum
   ggsave(filename=paste("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_", age_human, "_Human_vs_Mouse_", age_mouse, "_", substr(expt_mouse,1,3), "_", 
                         tissue_mouse, ".pdf", sep=""), height = 12, width = 20, units = "cm")
   
-  ## Quantify human genes that recapitulate in mouse
-  print(table(human_mouse_data$DE))
-  ## Total unique human genes 
-  total_human_genes=length(unique(human_mouse_data$human_ensembl_gene_id))
-  ## Unique recapitulating human genes 
-  recap_human_genes=length(unique(human_mouse_data[which(human_mouse_data$DE==names(alphas)[3]),"human_ensembl_gene_id"]))
-  ## Percentage 
-  percentage=signif(recap_human_genes / total_human_genes *100, 3)
-  print(paste(recap_human_genes, "out of", total_human_genes, "genes in smoking human", age_human, "brain recapitulate in", 
-              expt_mouse, "mouse", substr(age_mouse, 1, nchar(age_mouse)-1), tissue_mouse, "(with p<0.05 and same logFC direction) -", 
-              paste(percentage, "%", sep="")))
+  
+  ## Quantify mouse genes that recapitulate in human
+  
+  ## Total unique DEG in pup brain (FDR<0.05)
+  total_pups_DEG=length(unique(top_genes[which(top_genes$adj.P.Val<0.05),"ensemblID"]))
+  ## Total unique adult brain genes with p<0.05
+  total_adults_P_val_genes=length(unique(top_genes[which(top_genes$P.Val<0.05),"ensemblID"]))
+  ## Unique recapitulating genes 
+  recap_genes=length(unique(human_mouse_data[which(human_mouse_data$DE==names(alphas)[3]),"mmusculus_homolog_ensembl_gene"]))
+  
+  if (age_mouse=="pups"){
+    ## Percentage 
+    percentage=signif(recap_genes / total_pups_DEG *100, 3)
+    print(paste(recap_genes, "out of", total_pups_DEG, "DEG in", expt_mouse, "mouse pup", tissue_mouse, "(FDR<0.05) recapitulate in smoking human", age_human, 
+                "brain (with p<0.05 and same logFC direction) -", paste(percentage, "%", sep="")))
+  }
+  else {
+    ## Percentage 
+    percentage=signif(recap_genes / total_adults_P_val_genes *100, 3)
+    print(paste(recap_genes, "out of", total_adults_P_val_genes, "genes in", expt_mouse, "adult mouse", tissue_mouse, "(p<0.05) recapitulate in smoking human",
+                age_human, "brain (also p<0.05 and same logFC direction) -", paste(percentage, "%", sep="")))
+  }
+  
   return(human_mouse_data)
 }
 
@@ -733,70 +738,70 @@ t_stat_plot_human_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_hum
 ################################################################
 prenatalHuman_pupNicMouse_data <- t_stat_plot_human_mouse(age_mouse = "pups", tissue_mouse = "brain", expt_mouse = "nicotine", age_human = "prenatal")
 save(prenatalHuman_pupNicMouse_data, file="processed-data/04_DEA/Gene_analysis/prenatalHuman_pupNicMouse_data.Rdata")
-## "78 out of 13460 genes in smoking human prenatal brain recapitulate in nicotine mouse pup brain (with p<0.05 and same logFC direction) - 0.579%"
+## "78 out of 1010 DEG in nicotine mouse pup brain (FDR<0.05) recapitulate in smoking human prenatal brain (with p<0.05 and same logFC direction) - 7.72%"
 
 ################################################################
 ##  Smoking mouse pup brain vs Smoking human prenatal brain 
 ################################################################
 prenatalHuman_pupSmoMouse_data <- t_stat_plot_human_mouse(age_mouse = "pups", tissue_mouse = "brain", expt_mouse = "smoking", age_human = "prenatal")
 save(prenatalHuman_pupSmoMouse_data, file="processed-data/04_DEA/Gene_analysis/prenatalHuman_pupSmoMouse_data.Rdata")
-## "267 out of 13460 genes in smoking human prenatal brain recapitulate in smoking mouse pup brain (with p<0.05 and same logFC direction) - 1.98%"
+## "267 out of 4165 DEG in smoking mouse pup brain (FDR<0.05) recapitulate in smoking human prenatal brain (with p<0.05 and same logFC direction) - 6.41%"
 
 ################################################################
 ##  Nicotine adult mouse brain vs Smoking human prenatal brain 
 ################################################################
 prenatalHuman_adultNicMouse_data <- t_stat_plot_human_mouse(age_mouse = "adults", tissue_mouse = "brain", expt_mouse = "nicotine", age_human = "prenatal")
 save(prenatalHuman_adultNicMouse_data, file="processed-data/04_DEA/Gene_analysis/prenatalHuman_adultNicMouse_data.Rdata")
-## "30 out of 13460 genes in smoking human prenatal brain recapitulate in nicotine mouse adult brain (with p<0.05 and same logFC direction) - 0.223%"
+## "30 out of 679 genes in nicotine adult mouse brain (p<0.05) recapitulate in smoking human prenatal brain (also p<0.05 and same logFC direction) - 4.42%"
 
 ################################################################
 ##  Smoking adult mouse brain vs Smoking human prenatal brain 
 ################################################################
 prenatalHuman_adultSmoMouse_data <- t_stat_plot_human_mouse(age_mouse = "adults", tissue_mouse = "brain", expt_mouse = "smoking", age_human = "prenatal")
 save(prenatalHuman_adultSmoMouse_data, file="processed-data/04_DEA/Gene_analysis/prenatalHuman_adultSmoMouse_data.Rdata")
-## "40 out of 13460 genes in smoking human prenatal brain recapitulate in smoking mouse adult brain (with p<0.05 and same logFC direction) - 0.297%"
+## "40 out of 772 genes in smoking adult mouse brain (p<0.05) recapitulate in smoking human prenatal brain (also p<0.05 and same logFC direction) - 5.18%"
 
 ################################################################
 ##  Smoking adult mouse blood vs Smoking human prenatal brain 
 ################################################################
 prenatalHuman_bloodMouse_data <- t_stat_plot_human_mouse(age_mouse = "adults", tissue_mouse = "blood", expt_mouse = "smoking", age_human = "prenatal")
 save(prenatalHuman_bloodMouse_data, file="processed-data/04_DEA/Gene_analysis/prenatalHuman_bloodMouse_data.Rdata")
-## "101 out of 13460 genes in smoking human prenatal brain recapitulate in smoking mouse adult blood (with p<0.05 and same logFC direction) - 0.75%"
+## "101 out of 1499 genes in smoking adult mouse blood (p<0.05) recapitulate in smoking human prenatal brain (also p<0.05 and same logFC direction) - 6.74%"
 
 ################################################################
 ##  Nicotine mouse pup brain vs Smoking human adult brain 
 ################################################################
 adultHuman_pupNicMouse_data <- t_stat_plot_human_mouse(age_mouse = "pups", tissue_mouse = "brain", expt_mouse = "nicotine", age_human = "adult")
 save(adultHuman_pupNicMouse_data, file="processed-data/04_DEA/Gene_analysis/adultHuman_pupNicMouse_data.Rdata")
-## "18 out of 13460 genes in smoking human adult brain recapitulate in nicotine mouse pup brain (with p<0.05 and same logFC direction) - 0.134%"
+## "18 out of 1010 DEG in nicotine mouse pup brain (FDR<0.05) recapitulate in smoking human adult brain (with p<0.05 and same logFC direction) - 1.78%"
 
 ################################################################
 ##  Smoking mouse pup brain vs Smoking human adult brain 
 ################################################################
 adultHuman_pupSmoMouse_data<- t_stat_plot_human_mouse(age_mouse = "pups", tissue_mouse = "brain", expt_mouse = "smoking", age_human = "adult")
 save(adultHuman_pupSmoMouse_data, file="processed-data/04_DEA/Gene_analysis/adultHuman_pupSmoMouse_data.Rdata")
-## "74 out of 13460 genes in smoking human adult brain recapitulate in smoking mouse pup brain (with p<0.05 and same logFC direction) - 0.55%"
+## "74 out of 4165 DEG in smoking mouse pup brain (FDR<0.05) recapitulate in smoking human adult brain (with p<0.05 and same logFC direction) - 1.78%"
 
 ################################################################
 ##  Nicotine adult mouse brain vs Smoking human adult brain 
 ################################################################
 adultHuman_adultNicMouse_data <- t_stat_plot_human_mouse(age_mouse = "adults", tissue_mouse = "brain", expt_mouse = "nicotine", age_human = "adult")
 save(adultHuman_adultNicMouse_data, file="processed-data/04_DEA/Gene_analysis/adultHuman_adultNicMouse_data.Rdata")
-## "13 out of 13460 genes in smoking human adult brain recapitulate in nicotine mouse adult brain (with p<0.05 and same logFC direction) - 0.0966%"
+## "13 out of 679 genes in nicotine adult mouse brain (p<0.05) recapitulate in smoking human adult brain (also p<0.05 and same logFC direction) - 1.91%"
 
 ################################################################
 ##  Smoking adult mouse brain vs Smoking human adult brain 
 ################################################################
 adultHuman_adultSmoMouse_data <- t_stat_plot_human_mouse(age_mouse = "adults", tissue_mouse = "brain", expt_mouse = "smoking", age_human = "adult")
 save(adultHuman_adultSmoMouse_data, file="processed-data/04_DEA/Gene_analysis/adultHuman_adultSmoMouse_data.Rdata")
-## "9 out of 13460 genes in smoking human adult brain recapitulate in smoking mouse adult brain (with p<0.05 and same logFC direction) - 0.0669%"
+## "9 out of 772 genes in smoking adult mouse brain (p<0.05) recapitulate in smoking human adult brain (also p<0.05 and same logFC direction) - 1.17%"
 
 ################################################################
 ##  Smoking adult mouse blood vs Smoking human adult brain 
 ################################################################
 adultHuman_bloodMouse_data <- t_stat_plot_human_mouse(age_mouse = "adults", tissue_mouse = "blood", expt_mouse = "smoking", age_human = "adult")
 save(adultHuman_bloodMouse_data, file="processed-data/04_DEA/Gene_analysis/adultHuman_bloodMouse_data.Rdata")
-## "16 out of 13460 genes in smoking human adult brain recapitulate in smoking mouse adult blood (with p<0.05 and same logFC direction) - 0.119%"
+## "16 out of 1499 genes in smoking adult mouse blood (p<0.05) recapitulate in smoking human adult brain (also p<0.05 and same logFC direction) - 1.07%"
 
 
 
@@ -1011,8 +1016,8 @@ venn_plot(DEG_lists, colors, "all_DEG")
 
 
 
-#######################################################
-# Venn diagrams of human recapitulating genes in mouse
+########################################################
+# Venn diagrams of mouse recapitulating genes in human
 
 ## Note: each circle represents the number of unique gene pairs (mouse-human homologs), with p<0.05 in adult mouse / FDR<0.05 in mouse pups, 
 ## p<0.05 in prenatal/adult human brain and the same logFC sign in both species. Therefore, the intersection contains the recapitulating genes. 
