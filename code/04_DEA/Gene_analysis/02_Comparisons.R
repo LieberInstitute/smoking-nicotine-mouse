@@ -421,26 +421,44 @@ Blood_vs_SmoAdultBrain_data <- t_stat_plot_brain_blood_replication(age_mouse = "
 save(Blood_vs_SmoAdultBrain_data, file="processed-data/04_DEA/Gene_analysis/Blood_vs_SmoAdultBrain_data.Rdata")
 ## Add replication info to top_table data
 top_genes_adults_smoking_fitted$replication_in_blood <- replace(Blood_vs_SmoAdultBrain_data$DE, 
-                                                                list = c(" n.s. genes", "Replicating genes (p<0.05 in blood and brain) "), 
-                                                                c("ns_gene", "replicates_in_blood"))
+                                                                Blood_vs_SmoAdultBrain_data$DE =="Replicating genes (p<0.05 in blood and brain)",  "yes")
+top_genes_adults_smoking_fitted$replication_in_blood <- replace(top_genes_adults_smoking_fitted$replication_in_blood, 
+                                                                top_genes_adults_smoking_fitted$replication_in_blood=="n.s. genes", "no" )
+save(top_genes_adults_smoking_fitted, file="processed-data/04_DEA/Gene_analysis/top_genes_adults_smoking_fitted.Rdata")
 
 
 ####### Smoking adult blood vs Nicotine adult brain #######
 Blood_vs_NicAdultBrain_data <- t_stat_plot_brain_blood_replication(age_mouse = "adults", expt_mouse = "nicotine", feature = "genes")
-save(Blood_vs_NicAdultBrain_data, file="processed-data/04_DEA/Gene_analysis/Blood_vs_NicAdultBrain_data.Rdata")
 ## "33 out of 679 genes in nicotine adult brain (p<0.05) replicate in smoking adult blood (also p<0.05 and same logFC direction) - 4.86%"
+save(Blood_vs_NicAdultBrain_data, file="processed-data/04_DEA/Gene_analysis/Blood_vs_NicAdultBrain_data.Rdata")
+top_genes_adults_nicotine_fitted$replication_in_blood <- replace(Blood_vs_NicAdultBrain_data$DE, 
+                                                                 Blood_vs_NicAdultBrain_data$DE =="Replicating genes (p<0.05 in blood and brain)",  "yes")
+top_genes_adults_nicotine_fitted$replication_in_blood <- replace(top_genes_adults_nicotine_fitted$replication_in_blood, 
+                                                                 top_genes_adults_nicotine_fitted$replication_in_blood=="n.s. genes", "no" )
+save(top_genes_adults_nicotine_fitted, file="processed-data/04_DEA/Gene_analysis/top_genes_adults_nicotine_fitted.Rdata")
 
 
 ####### Smoking adult blood vs Smoking pup brain #######
 Blood_vs_SmoPupBrain_data <- t_stat_plot_brain_blood_replication(age_mouse = "pups", expt_mouse = "smoking", feature = "genes")
-save(Blood_vs_SmoPupBrain_data, file="processed-data/04_DEA/Gene_analysis/Blood_vs_SmoPupBrain_data.Rdata")
 ## "126 out of 4165 DEG in smoking pup brain (FDR<0.05) replicate in smoking adult blood (with p<0.05 and same logFC direction) - 3.03%"
+save(Blood_vs_SmoPupBrain_data, file="processed-data/04_DEA/Gene_analysis/Blood_vs_SmoPupBrain_data.Rdata")
+top_genes_pups_smoking_fitted$replication_in_blood <- replace(Blood_vs_SmoPupBrain_data$DE, 
+                                                              Blood_vs_SmoPupBrain_data$DE =="Replicating genes (p<0.05 in blood, FDR<0.05 in brain)",  "yes")
+top_genes_pups_smoking_fitted$replication_in_blood <- replace(top_genes_pups_smoking_fitted$replication_in_blood, 
+                                                              ! top_genes_pups_smoking_fitted$replication_in_blood=="yes", "no" )
+save(top_genes_pups_smoking_fitted, file="processed-data/04_DEA/Gene_analysis/top_genes_pups_smoking_fitted.Rdata")
 
 
 ####### Smoking adult blood vs Nicotine pup brain #######
 Blood_vs_NicPupBrain_data <- t_stat_plot_brain_blood_replication(age_mouse = "pups", expt_mouse = "nicotine", feature = "genes")
-save(Blood_vs_NicPupBrain_data, file="processed-data/04_DEA/Gene_analysis/Blood_vs_NicPupBrain_data.Rdata")
 ## "15 out of 1010 DEG in nicotine pup brain (FDR<0.05) replicate in smoking adult blood (with p<0.05 and same logFC direction) - 1.49%"
+save(Blood_vs_NicPupBrain_data, file="processed-data/04_DEA/Gene_analysis/Blood_vs_NicPupBrain_data.Rdata")
+top_genes_pups_nicotine_fitted$replication_in_blood <- replace(Blood_vs_NicPupBrain_data$DE, 
+                                                               Blood_vs_NicPupBrain_data$DE =="Replicating genes (p<0.05 in blood, FDR<0.05 in brain)",  "yes")
+top_genes_pups_nicotine_fitted$replication_in_blood <- replace(top_genes_pups_nicotine_fitted$replication_in_blood, 
+                                                               ! top_genes_pups_nicotine_fitted$replication_in_blood=="yes", "no" )
+save(top_genes_pups_nicotine_fitted, file="processed-data/04_DEA/Gene_analysis/top_genes_pups_nicotine_fitted.Rdata")
+
 
 
 
