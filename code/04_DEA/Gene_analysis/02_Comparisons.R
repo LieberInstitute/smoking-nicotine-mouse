@@ -478,7 +478,7 @@ save(Blood_vs_NicPupBrainTx_data, file="processed-data/04_DEA/Gene_analysis/Bloo
 
 
 
-## (See code below to search for replicating genes of human brain in mouse blood)
+## (See code below to search for mouse blood genes that replicate in human brain and human brain genes that replicate in mouse blood)
 
 
 
