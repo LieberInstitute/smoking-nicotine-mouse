@@ -466,14 +466,16 @@ save(top_genes_pups_nicotine_fitted, file="processed-data/04_DEA/Gene_analysis/t
 
 ####### Smoking adult blood (genes) vs Smoking pup brain Txs #######
 Blood_vs_SmoPupBrainTx_data <- t_stat_plot_brain_blood_replication(age_mouse = NULL, expt_mouse = "smoking", feature = "txs")
-save(Blood_vs_SmoPupBrainTx_data, file="processed-data/04_DEA/Gene_analysis/Blood_vs_SmoPupBrainTx_data.Rdata")
 ## "112 out of 4059 DE txs in smoking pup brain (FDR<0.05) replicate in smoking adult blood genes (with p<0.05 and same logFC direction) - 2.76%"
-
+save(Blood_vs_SmoPupBrainTx_data, file="processed-data/04_DEA/Gene_analysis/Blood_vs_SmoPupBrainTx_data.Rdata")
+top_tx_smo$replication_in_blood_genes <- replace(Blood_vs_NicPupBrain_data$DE, 
+                                                               Blood_vs_NicPupBrain_data$DE =="Replicating genes (p<0.05 in blood, FDR<0.05 in brain)",  "yes")
 
 ####### Smoking adult blood (genes) vs Nicotine pup brain Txs #######
 Blood_vs_NicPupBrainTx_data <- t_stat_plot_brain_blood_replication(age_mouse = NULL, expt_mouse = "nicotine", feature = "txs")
-save(Blood_vs_NicPupBrainTx_data, file="processed-data/04_DEA/Gene_analysis/Blood_vs_NicPupBrainTx_data.Rdata")
 ## "9 out of 232 DE txs in nicotine pup brain (FDR<0.05) replicate in smoking adult blood genes (with p<0.05 and same logFC direction) - 3.88%"
+save(Blood_vs_NicPupBrainTx_data, file="processed-data/04_DEA/Gene_analysis/Blood_vs_NicPupBrainTx_data.Rdata")
+
 
 
 ## (See code below to search for replicating genes of human brain in mouse blood)
@@ -570,7 +572,7 @@ common_genes <- human_mouse_ids[which(human_mouse_ids$mmusculus_homolog_ensembl_
 common_genes$human_ensembl_gene_id <- common_genes$ensembl_gene_id
 common_genes$ensembl_gene_id <- NULL
 
-## Create plots to check if mouse genes recapitulate (FDR<5% for pups and p-value<5% for adults) in human brain (with p-value<5% and same logFC sign)
+## Create plots to check if mouse genes replicate (FDR<5% for pups and p-value<5% for adults) in human brain (with p-value<5% and same logFC sign)
 t_stat_plot_human_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_human){
   
   ## Define mouse dataset
@@ -609,7 +611,7 @@ t_stat_plot_human_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_hum
     human_mouse_data[i,] <- cbind(common_genes[i,], mouse_data, human_data)
   }
   
-  ## Add DE and recapitulation info of each gene
+  ## Add DE and replication info of each gene
   DE<-vector()
   for (i in 1:dim(human_mouse_data)[1]) {
     
@@ -626,10 +628,10 @@ t_stat_plot_human_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_hum
         DE<-append(DE, "Signif in human (FDR<0.1)")
       }
 
-      ## Recapitulating human genes 
+      ## Replicating mouse genes
       else if ((human_mouse_data$adj.P.Val_mouse[i]<0.05 && human_mouse_data$P.Value_human[i]<0.05) &&
           (sign(human_mouse_data$logFC_mouse[i])==sign(human_mouse_data$logFC_human[i]))) {
-        DE<-append(DE, "Recapitulating genes (p<0.05 in human, FDR<0.05 in mouse)")
+        DE<-append(DE, "Replicating genes (p<0.05 in human, FDR<0.05 in mouse)")
       }
       
       ## DEG in mouse
@@ -646,7 +648,7 @@ t_stat_plot_human_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_hum
     ## Adult mouse genes with p-value<5% and human genes with p-value<5%
     else {
       
-      ## DEG in human (FDR<0.1) and mouse (FDR<0.05) <- there weren't DEG in adults
+      ## DEG in human (FDR<0.1) and mouse (FDR<0.05) <- there weren't DEG in adult mice
       if(human_mouse_data$adj.P.Val_human[i]<0.1 && human_mouse_data$adj.P.Val_mouse[i]<0.05) {
         DE<-append(DE, "Signif in both")
       }
@@ -655,7 +657,7 @@ t_stat_plot_human_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_hum
       }
       else if ((human_mouse_data$P.Value_mouse[i]<0.05 && human_mouse_data$P.Value_human[i]<0.05) &&
           (sign(human_mouse_data$logFC_mouse[i])==sign(human_mouse_data$logFC_human[i]))) {
-        DE<-append(DE, "Recapitulating genes (p<0.05 in human and mouse)")
+        DE<-append(DE, "Replicating genes (p<0.05 in human and mouse)")
       }
       else {
         DE<-append(DE, "n.s. genes")      
@@ -672,23 +674,23 @@ t_stat_plot_human_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_hum
   ## Colors and alphas for plot
   if (age_mouse=="pups"){
     cols <- c("yellow3", "#ffad73", "red", "#26b3ff", "dark grey") 
-    names(cols)<-c("Signif in both", "Signif in human (FDR<0.1)", "Recapitulating genes (p<0.05 in human, FDR<0.05 in mouse)","Signif in mouse (FDR<0.05)", "n.s. genes")
+    names(cols)<-c("Signif in both", "Signif in human (FDR<0.1)", "Replicating genes (p<0.05 in human, FDR<0.05 in mouse)","Signif in mouse (FDR<0.05)", "n.s. genes")
     alphas <- c(1, 1, 1, 1, 0.5)  
-    names(alphas)<-c("Signif in both", "Signif in human (FDR<0.1)", "Recapitulating genes (p<0.05 in human, FDR<0.05 in mouse)","Signif in mouse (FDR<0.05)", "n.s. genes")
+    names(alphas)<-c("Signif in both", "Signif in human (FDR<0.1)", "Replicating genes (p<0.05 in human, FDR<0.05 in mouse)","Signif in mouse (FDR<0.05)", "n.s. genes")
   }
   else {
     cols <- c("yellow3", "#ffad73", "red","dark grey") 
-    names(cols)<-c("Signif in both", "Signif in human (FDR<0.1)", "Recapitulating genes (p<0.05 in human and mouse)","n.s. genes")
+    names(cols)<-c("Signif in both", "Signif in human (FDR<0.1)", "Replicating genes (p<0.05 in human and mouse)","n.s. genes")
     alphas <- c(1, 1, 1, 0.5)  
-    names(alphas)<-c("Signif in both", "Signif in human (FDR<0.1)", "Recapitulating genes (p<0.05 in human and mouse)","n.s. genes")
+    names(alphas)<-c("Signif in both", "Signif in human (FDR<0.1)", "Replicating genes (p<0.05 in human and mouse)","n.s. genes")
   }
   
   
   ## Add labels of interesting genes 
 
-  ## 3 most significant recapitulating genes in human
-  recap_genes <- human_mouse_data[which(human_mouse_data$DE==names(alphas)[3]),]
-  top_recap_genes <- recap_genes[order(recap_genes$adj.P.Val_human),"gene_symbol_human"][1:3]
+  ## 3 most significant replicating genes in human
+  rep_genes <- human_mouse_data[which(human_mouse_data$DE==names(alphas)[3]),]
+  top_rep_genes <- rep_genes[order(rep_genes$adj.P.Val_human),"gene_symbol_human"][1:3]
   
   label <- vector()
   for (i in 1:dim(human_mouse_data)[1]){
@@ -697,8 +699,8 @@ t_stat_plot_human_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_hum
       ## Label of the form: [gene name in mouse]-[gene name in human]
       label <- append(label, paste(human_mouse_data$mmusculus_homolog_associated_gene_name[i], "-", human_mouse_data$gene_symbol_human[i], sep=""))
     }
-    ## Labels of the top 3 recapitulating genes
-    else if (human_mouse_data$gene_symbol_human[i] %in% top_recap_genes){
+    ## Labels of the top 3 replicating genes
+    else if (human_mouse_data$gene_symbol_human[i] %in% top_rep_genes){
       label <- append(label, paste(human_mouse_data$mmusculus_homolog_associated_gene_name[i], "-", human_mouse_data$gene_symbol_human[i], sep=""))
     }
     else{
@@ -735,19 +737,19 @@ t_stat_plot_human_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_hum
   total_pups_DEG=length(unique(top_genes[which(top_genes$adj.P.Val<0.05),"ensemblID"]))
   ## Total unique adult brain genes with p<0.05
   total_adults_P_val_genes=length(unique(top_genes[which(top_genes$P.Val<0.05),"ensemblID"]))
-  ## Unique recapitulating genes 
-  recap_genes=length(unique(human_mouse_data[which(human_mouse_data$DE==names(alphas)[3]),"mmusculus_homolog_ensembl_gene"]))
+  ## Unique replicating genes 
+  rep_genes=length(unique(human_mouse_data[which(human_mouse_data$DE==names(alphas)[3]),"mmusculus_homolog_ensembl_gene"]))
   
   if (age_mouse=="pups"){
     ## Percentage 
-    percentage=signif(recap_genes / total_pups_DEG *100, 3)
-    print(paste(recap_genes, "out of", total_pups_DEG, "DEG in", expt_mouse, "mouse pup", tissue_mouse, "(FDR<0.05) recapitulate in smoking human", age_human, 
+    percentage=signif(rep_genes / total_pups_DEG *100, 3)
+    print(paste(recap_genes, "out of", total_pups_DEG, "DEG in", expt_mouse, "mouse pup", tissue_mouse, "(FDR<0.05) replicate in smoking human", age_human, 
                 "brain (with p<0.05 and same logFC direction) -", paste(percentage, "%", sep="")))
   }
   else {
     ## Percentage 
-    percentage=signif(recap_genes / total_adults_P_val_genes *100, 3)
-    print(paste(recap_genes, "out of", total_adults_P_val_genes, "genes in", expt_mouse, "adult mouse", tissue_mouse, "(p<0.05) recapitulate in smoking human",
+    percentage=signif(rep_genes / total_adults_P_val_genes *100, 3)
+    print(paste(recap_genes, "out of", total_adults_P_val_genes, "genes in", expt_mouse, "adult mouse", tissue_mouse, "(p<0.05) replicate in smoking human",
                 age_human, "brain (also p<0.05 and same logFC direction) -", paste(percentage, "%", sep="")))
   }
   
