@@ -109,11 +109,13 @@ tstats_plots<-function(top_genes_pairs, name_1, name_2, models){
 
 
 
+## Analyses
+
 #############################################################
-## Compare tissues - Analysis of blood vs brain biomarkers
+## 1. Compare tissues - Analysis of blood vs brain biomarkers
 #############################################################
 
-## 1. Compare t-stats in the 3 models
+## 1.1 Compare t-stats in the 3 models
 
 ####### Smoking adult blood vs Smoking adult brain #######
 top_genes_pairs<-list(list(top_genes_adults_smoking_naive, top_genes_blood_smoking_naive), 
@@ -148,7 +150,7 @@ tstats_plots(top_genes_pairs,  "Nicotine pup brain", "Smoking adult blood", mode
 
 
 
-## 2. Search mouse brain genes/txs that replicate in mouse blood (with p<0.05 in blood, FDR<0.05 in pup brain/p<0.05 in adult brain, and the same logFC sign in both tissues)
+## 1.2 Search mouse brain genes/txs that replicate in mouse blood (with p<0.05 in blood, FDR<0.05 in pup brain/p<0.05 in adult brain, and the same logFC sign in both tissues)
 ## Use mouse genes and txs from fitted models only
 
 t_stat_plot_brain_blood_replication <- function(age_mouse, expt_mouse, feature){
@@ -413,7 +415,7 @@ t_stat_plot_brain_blood_replication <- function(age_mouse, expt_mouse, feature){
 }
 
 
-################### Brain genes vs blood genes ###################
+################### 1.2.1 Brain genes vs blood genes ###################
 
 ####### Smoking adult blood vs Smoking adult brain #######
 Blood_vs_SmoAdultBrain_data <- t_stat_plot_brain_blood_replication(age_mouse = "adults", expt_mouse = "smoking", feature = "genes")
@@ -462,7 +464,7 @@ save(top_genes_pups_nicotine_fitted, file="processed-data/04_DEA/Gene_analysis/t
 
 
 
-################### Brain txs vs blood genes ###################
+################### 1.2.2 Brain txs vs blood genes ###################
 
 ####### Smoking adult blood (genes) vs Smoking pup brain Txs #######
 Blood_vs_SmoPupBrainTx_data <- t_stat_plot_brain_blood_replication(age_mouse = NULL, expt_mouse = "smoking", feature = "txs")
@@ -482,9 +484,10 @@ save(Blood_vs_NicPupBrainTx_data, file="processed-data/04_DEA/Gene_analysis/Bloo
 
 
 
-####################################################
-# Compare experiments - Smoking vs Nicotine genes
-####################################################
+
+######################################################
+# 2. Compare experiments - Smoking vs Nicotine genes
+######################################################
 
 ####### Smoking adults vs nicotine adults #######
 top_genes_pairs<-list(list(top_genes_adults_smoking_naive, top_genes_adults_nicotine_naive), 
@@ -502,9 +505,9 @@ models<-c("Naive model", "Fitted model", "Interaction model")
 tstats_plots(top_genes_pairs,  "Smoking pups", "Nicotine pups", models)
 
 
-######################################
-# Compare ages - Pup vs adult genes
-######################################
+########################################
+# 3. Compare ages - Pup vs adult genes
+########################################
 
 ####### Smoking pups vs smoking adults #######
 top_genes_pairs<-list(list(top_genes_pups_smoking_naive, top_genes_adults_smoking_naive), 
@@ -522,9 +525,9 @@ models<-c("Naive model", "Fitted model", "Interaction model")
 tstats_plots(top_genes_pairs,  "Nicotine pups", "Nicotine adults", models)
 
 
-################################################
-# Compare models - Naive vs fitted model genes
-################################################
+####################################################
+# 4. Compare models - Naive vs fitted model genes
+####################################################
 
 ####### Naive vs fitted models for nicotine pups #######
 t<-t_stat_plot(top_genes_pups_nicotine_naive, top_genes_pups_nicotine_fitted, 
@@ -540,9 +543,9 @@ ggsave("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_Naive_VS_Fitted_Smokin
        height = 10, width = 12, units = "cm")
 
 
-############################################################
-#       Compare human brain vs mouse brain/blood genes
-############################################################
+###############################################################
+#      5. Compare human brain vs mouse brain/blood genes
+###############################################################
 ## Samples from prenatal and adult human brain were exposed to smoking 
 ## Compare mouse genes from fitted models only
 
@@ -857,6 +860,9 @@ adultHuman_bloodMouse_data <- t_stat_plot_human_mouse(age_mouse = "adults", tiss
 save(adultHuman_bloodMouse_data, file="processed-data/04_DEA/Gene_analysis/adultHuman_bloodMouse_data.Rdata")
 top_genes_blood_smoking_fitted$replication_in_adultHumanBrain <- apply(top_genes_blood_smoking_fitted, 1, function(x){adultHuman_bloodMouse_data[match(x["ensemblID"], adultHuman_bloodMouse_data$mmusculus_homolog_ensembl_gene), "DE"]})
 save(top_genes_blood_smoking_fitted, file="processed-data/04_DEA/Gene_analysis/top_genes_blood_smoking_fitted.Rdata")
+
+
+
 
 
 
