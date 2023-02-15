@@ -924,8 +924,8 @@ replication_human_in_mouse<- function(age_mouse, expt_mouse, tissue_mouse, age_h
   
   ## Total DEG in human brain (FDR<0.1)
   total_human_DEG=nrow(de_genes_human)
+  ## Replicating genes 
   rep_genes_ids <- human_mouse_data[which(human_mouse_data$replication_in_mouse=="Replicating gene (FDR<0.1 in human, p<0.05 in mouse)"),"Symbol_human"]
-  ## Unique replicating genes 
   rep_genes=length(rep_genes_ids)
   ## Percentage 
   percentage=signif(rep_genes / total_human_DEG *100, 3)
@@ -1018,7 +1018,6 @@ t_stat_plot_human_in_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_
   
   
   ## Add labels of replicating human genes 
-  
   rep_genes <- human_mouse_data[which(human_mouse_data$DE==names(alphas)[2]), "gene_symbol_human"]
   
   label <- vector()
