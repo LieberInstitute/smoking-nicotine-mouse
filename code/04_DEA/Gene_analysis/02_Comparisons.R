@@ -938,89 +938,6 @@ replication_human_in_mouse<- function(age_mouse, expt_mouse, tissue_mouse, age_h
 
 
 
-################################################################
-##  Smoking human prenatal brain vs Nicotine mouse pup brain   
-################################################################
-prenatalHuman_in_NicPupMouse <- replication_human_in_mouse(age_mouse = "pups", tissue_mouse = "brain", expt_mouse = "nicotine", age_human = "prenatal")
-## "2 out of 13 DEG in smoking human prenatal brain (FDR<0.1) replicate in nicotine pup mouse brain (with p<0.05 and same logFC direction) - 15.4%. Genes:"
-## [1] "MPPED1" "SDC1" 
-
-################################################################
-##  Smoking human prenatal brain vs Smoking mouse pup brain   
-################################################################
-prenatalHuman_in_SmoPupMouse <- replication_human_in_mouse(age_mouse = "pups", tissue_mouse = "brain", expt_mouse = "smoking", age_human = "prenatal")
-## "1 out of 13 DEG in smoking human prenatal brain (FDR<0.1) replicate in smoking pup mouse brain (with p<0.05 and same logFC direction) - 7.69%. Genes:"
-## [1] "NRCAM"
-
-################################################################
-##  Smoking human prenatal brain vs Nicotine adult mouse brain   
-################################################################
-prenatalHuman_in_NicAdultMouse <- replication_human_in_mouse(age_mouse = "adults", tissue_mouse = "brain", expt_mouse = "nicotine", age_human = "prenatal")
-## "0 out of 13 DEG in smoking human prenatal brain (FDR<0.1) replicate in nicotine adult mouse brain (with p<0.05 and same logFC direction) - 0%. Genes:"
-## character(0)
-
-################################################################
-##  Smoking human prenatal brain vs Smoking adult mouse brain   
-################################################################
-prenatalHuman_in_SmoAdultMouse <- replication_human_in_mouse(age_mouse = "adults", tissue_mouse = "brain", expt_mouse = "smoking", age_human = "prenatal")
-## "0 out of 13 DEG in smoking human prenatal brain (FDR<0.1) replicate in smoking adult mouse brain (with p<0.05 and same logFC direction) - 0%. Genes:"
-## character(0)
-
-################################################################
-##  Smoking human prenatal brain vs Smoking adult mouse blood   
-################################################################
-prenatalHuman_in_BloodMouse<- replication_human_in_mouse(age_mouse = "adults", tissue_mouse = "blood", expt_mouse = "smoking", age_human = "prenatal")
-## "1 out of 13 DEG in smoking human prenatal brain (FDR<0.1) replicate in smoking adult mouse blood (with p<0.05 and same logFC direction) - 7.69%. Genes:"
-## [1] "KCNN2"
-
-################################################################
-##  Smoking human adult brain vs Nicotine mouse pup brain   
-################################################################
-adultHuman_in_NicPupMouse <- replication_human_in_mouse(age_mouse = "pups", tissue_mouse = "brain", expt_mouse = "nicotine", age_human = "adult")
-## "1 out of 1 DEG in smoking human adult brain (FDR<0.1) replicate in nicotine pup mouse brain (with p<0.05 and same logFC direction) - 100%. Genes:"
-## [1] "MARCO"
-
-################################################################
-##  Smoking human adult brain vs Smoking mouse pup brain   
-################################################################
-adultHuman_in_SmoPupMouse <- replication_human_in_mouse(age_mouse = "pups", tissue_mouse = "brain", expt_mouse = "smoking", age_human = "adult")
-## "0 out of 1 DEG in smoking human adult brain (FDR<0.1) replicate in smoking pup mouse brain (with p<0.05 and same logFC direction) - 0%. Genes:"
-## character(0)
-
-################################################################
-##  Smoking human adult brain vs Nicotine adult mouse brain   
-################################################################
-adultHuman_in_NicAdultMouse <- replication_human_in_mouse(age_mouse = "adults", tissue_mouse = "brain", expt_mouse = "nicotine", age_human = "adult")
-## "0 out of 1 DEG in smoking human adult brain (FDR<0.1) replicate in nicotine adult mouse brain (with p<0.05 and same logFC direction) - 0%. Genes:"
-## character(0)
-
-################################################################
-##  Smoking human adult brain vs Smoking adult mouse brain   
-################################################################
-adultHuman_in_SmoAdultMouse <- replication_human_in_mouse(age_mouse = "adults", tissue_mouse = "brain", expt_mouse = "smoking", age_human = "adult")
-## "0 out of 1 DEG in smoking human adult brain (FDR<0.1) replicate in smoking adult mouse brain (with p<0.05 and same logFC direction) - 0%. Genes:"
-## character(0)
-
-################################################################
-##  Smoking human adult brain vs Smoking adult mouse blood   
-################################################################
-adultHuman_in_BloodMouse<- replication_human_in_mouse(age_mouse = "adults", tissue_mouse = "blood", expt_mouse = "smoking", age_human = "adult")
-## "0 out of 1 DEG in smoking human adult brain (FDR<0.1) replicate in smoking adult mouse blood (with p<0.05 and same logFC direction) - 0%. Genes:"
-## character(0)
-
-
-## Create table with the results 
-
-human_genes <- rbind(cbind(fetalGene[which(fetalGene$adj.P.Val<0.1), c("Symbol", "ensemblID")], Age="Prenatal"), 
-                     cbind(adultGene[which(adultGene$adj.P.Val<0.1), c("Symbol", "ensemblID")], Age="Adult"))
-human_genes_in_mouse <- cbind(human_genes, Replicate_in_NicPupMouseBrain=c("No","No","No","No","Yes","No","No","Yes","No","No","No","No","No","Yes"))
-human_genes_in_mouse <- cbind(human_genes_in_mouse, Replicate_in_SmoPupMouseBrain=c("No","No","No","No","No","No","No","No","No","No","No","No","Yes","No"))
-human_genes_in_mouse <- cbind(human_genes_in_mouse, Replicate_in_NicAdultMouseBrain=c("No","No","No","No","No","No","No","No","No","No","No","No","No","No"))
-human_genes_in_mouse <- cbind(human_genes_in_mouse, Replicate_in_SmoAdultMouseBrain=c("No","No","No","No","No","No","No","No","No","No","No","No","No","No"))
-human_genes_in_mouse <- cbind(human_genes_in_mouse, Replicate_in_SmoAdultMouseBlood=c("Yes","No","No","No","No","No","No","No","No","No","No","No","No","No"))
-save(human_genes_in_mouse, file="processed-data/04_DEA/Gene_analysis/human_genes_in_mouse.Rdata")
-
-
 ## Plots
 ## Create plots to verify which human genes replicate in mouse 
 t_stat_plot_human_in_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_human){
@@ -1028,16 +945,9 @@ t_stat_plot_human_in_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_
   ## Define mouse dataset
   if (tissue_mouse=="blood"){
     top_genes <-eval(parse_expr(paste("top_genes", tissue_mouse, expt_mouse, "fitted", sep="_")))
-    signif_measure_mouse="p-value"
   }
   else {
     top_genes <-eval(parse_expr(paste("top_genes", age_mouse, expt_mouse, "fitted", sep="_")))
-    if (age_mouse=="pups"){
-      signif_measure_mouse="FDR"
-    }
-    else {
-      signif_measure_mouse="p-value"
-    }
   }
   
   ## Define human dataset
@@ -1048,7 +958,7 @@ t_stat_plot_human_in_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_
     humanGene <-adultGene
   }
   
-  ## Extract mouse and human data of those common genes
+  ## Extract mouse and human data of common genes
   human_mouse_data <- data.frame(matrix(nrow = nrow(common_genes), ncol = 12))
   colnames(human_mouse_data) <- c("mmusculus_homolog_ensembl_gene", "mmusculus_homolog_associated_gene_name", "human_ensembl_gene_id",
                                   "t_mouse", "adj.P.Val_mouse", "P.Value_mouse", "logFC_mouse", "gene_symbol_human", "t_human", "adj.P.Val_human", 
@@ -1065,35 +975,31 @@ t_stat_plot_human_in_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_
   DE<-vector()
   for (i in 1:dim(human_mouse_data)[1]) {
     
-    ## Human genes with FDR<10% and mouse genes with p-value<5%
-      
-      ## DEG in human (FDR<0.1) and mouse (FDR<0.05)
-      if(human_mouse_data$adj.P.Val_human[i]<0.1 && human_mouse_data$adj.P.Val_mouse[i]<0.05) {
-        DE<-append(DE, "Signif in both")
-      }
-      
-      ## Replicating human genes
-      else if ((human_mouse_data$adj.P.Val_mouse[i]<0.05 && human_mouse_data$P.Value_human[i]<0.05) &&
-               (sign(human_mouse_data$logFC_mouse[i])==sign(human_mouse_data$logFC_human[i]))) {
-        DE<-append(DE, "Replicating genes (p<0.05 in human, FDR<0.05 in mouse)")
-      }
-    
-      ## DEG in human 
-      else if (human_mouse_data$adj.P.Val_human[i]<0.1){
-        DE<-append(DE, "Signif in human (FDR<0.1)")
-      }
-      
-      ## DEG in mouse
-      else if (human_mouse_data$adj.P.Val_mouse[i]<0.05){
-        DE<-append(DE, "Signif in mouse (FDR<0.05)")
-      }
-      
-      ## Non-significant genes 
-      else {
-        DE<-append(DE, "n.s. genes")      
-      }
+    ## DEG in human (FDR<0.1) and mouse (FDR<0.05)
+    if(human_mouse_data$adj.P.Val_human[i]<0.1 && human_mouse_data$adj.P.Val_mouse[i]<0.05) {
+      DE<-append(DE, "Signif in both")
     }
     
+    ## Replicating human genes (with FDR<10% and p-value<5% in mouse)
+    else if ((human_mouse_data$adj.P.Val_human[i]<0.1 && human_mouse_data$P.Value_mouse[i]<0.05) &&
+             (sign(human_mouse_data$logFC_mouse[i])==sign(human_mouse_data$logFC_human[i]))) {
+      DE<-append(DE, "Replicating genes (FDR<0.1 in human, p<0.05 in mouse)")
+    }
+    
+    ## DEG in human 
+    else if (human_mouse_data$adj.P.Val_human[i]<0.1){
+      DE<-append(DE, "Signif in human (FDR<0.1)")
+    }
+    
+    ## DEG in mouse
+    else if (human_mouse_data$adj.P.Val_mouse[i]<0.05){
+      DE<-append(DE, "Signif in mouse (FDR<0.05)")
+    }
+    
+    ## Non-significant genes 
+    else {
+      DE<-append(DE, "n.s. genes")      
+    }
   }
   
   human_mouse_data$DE<- DE
@@ -1103,25 +1009,17 @@ t_stat_plot_human_in_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_
   rho_anno = paste0("rho = ", format(round(rho, 2), nsmall = 2))
   
   ## Colors and alphas for plot
-  if (age_mouse=="pups"){
-    cols <- c("yellow3", "#ffad73", "red", "#26b3ff", "dark grey") 
-    names(cols)<-c("Signif in both", "Signif in human (FDR<0.1)", "Replicating genes (p<0.05 in human, FDR<0.05 in mouse)","Signif in mouse (FDR<0.05)", "n.s. genes")
-    alphas <- c(1, 1, 1, 1, 0.5)  
-    names(alphas)<-c("Signif in both", "Signif in human (FDR<0.1)", "Replicating genes (p<0.05 in human, FDR<0.05 in mouse)","Signif in mouse (FDR<0.05)", "n.s. genes")
-  }
-  else {
-    cols <- c("yellow3", "#ffad73", "red","dark grey") 
-    names(cols)<-c("Signif in both", "Signif in human (FDR<0.1)", "Replicating genes (p<0.05 in human and mouse)","n.s. genes")
-    alphas <- c(1, 1, 1, 0.5)  
-    names(alphas)<-c("Signif in both", "Signif in human (FDR<0.1)", "Replicating genes (p<0.05 in human and mouse)","n.s. genes")
-  }
+  cols <- c("yellow3", "red", "#ffad73", "#26b3ff", "dark grey") 
+  names(cols)<-c("Signif in both", "Replicating genes (FDR<0.1 in human, p<0.05 in mouse)", "Signif in human (FDR<0.1)", 
+                 "Signif in mouse (FDR<0.05)", "n.s. genes")
+  alphas <- c(1, 1, 1, 1, 0.5)  
+  names(alphas)<-c("Signif in both", "Replicating genes (FDR<0.1 in human, p<0.05 in mouse)", "Signif in human (FDR<0.1)", 
+                   "Signif in mouse (FDR<0.05)", "n.s. genes")
   
   
-  ## Add labels of interesting genes 
+  ## Add labels of replicating human genes 
   
-  ## 3 most significant replicating genes in human
-  rep_genes <- human_mouse_data[which(human_mouse_data$DE==names(alphas)[3]),]
-  top_rep_genes <- rep_genes[order(rep_genes$adj.P.Val_human),"gene_symbol_human"][1:3]
+  rep_genes <- human_mouse_data[which(human_mouse_data$DE==names(alphas)[2]), "gene_symbol_human"]
   
   label <- vector()
   for (i in 1:dim(human_mouse_data)[1]){
@@ -1130,8 +1028,8 @@ t_stat_plot_human_in_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_
       ## Label of the form: [gene name in mouse]-[gene name in human]
       label <- append(label, paste(human_mouse_data$mmusculus_homolog_associated_gene_name[i], "-", human_mouse_data$gene_symbol_human[i], sep=""))
     }
-    ## Labels of the top 3 replicating genes
-    else if (human_mouse_data$gene_symbol_human[i] %in% top_rep_genes){
+    ## Labels of replicating genes
+    else if (human_mouse_data$gene_symbol_human[i] %in% rep_genes){
       label <- append(label, paste(human_mouse_data$mmusculus_homolog_associated_gene_name[i], "-", human_mouse_data$gene_symbol_human[i], sep=""))
     }
     else{
@@ -1142,11 +1040,11 @@ t_stat_plot_human_in_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_
   human_mouse_data$label <- label
   
   ## Plot
-  plot <- ggplot(human_mouse_data, aes(x = t_mouse, y = t_human, color=DE, alpha=DE, label=label)) +
+  plot <- ggplot(human_mouse_data, aes(x = t_human, y = t_mouse, color=DE, alpha=DE, label=label)) +
     geom_point(size = 1) +
-    labs(x = paste("t-stats in", substr(age_mouse, 1, nchar(age_mouse)-1), "mouse", tissue_mouse), 
-         y = paste("t-stats in", age_human, "human brain"),
-         title = paste(capitalize(expt_mouse),"mouse vs Smoking human", sep=" "), 
+    labs(x = paste("t-stats in", age_human, "human brain"), 
+         y = paste("t-stats in", substr(age_mouse, 1, nchar(age_mouse)-1), "mouse", tissue_mouse),
+         title = paste("Smoking human vs", capitalize(expt_mouse), "mouse", sep=" "), 
          subtitle = rho_anno, 
          parse = T) +
     geom_label_repel(fill="white", size=2, max.overlaps = Inf,  
@@ -1158,39 +1056,103 @@ t_stat_plot_human_in_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_
   
   plot + theme(legend.text = element_text(size=8))
   plot
-  ggsave(filename=paste("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_", age_human, "_Human_vs_Mouse_", age_mouse, "_", substr(expt_mouse,1,3), "_", 
+  ggsave(filename=paste("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_replication_", age_human, "_Human_in_Mouse_", age_mouse, "_", substr(expt_mouse,1,3), "_", 
                         tissue_mouse, ".pdf", sep=""), height = 12, width = 20, units = "cm")
   
-  
-  ## Quantify mouse genes that replicate in human
-  
-  ## Total unique DEG in pup brain (FDR<0.05)
-  total_pups_DEG=length(unique(top_genes[which(top_genes$adj.P.Val<0.05),"ensemblID"]))
-  ## Total unique adult brain genes with p<0.05
-  total_adults_P_val_genes=length(unique(top_genes[which(top_genes$P.Val<0.05),"ensemblID"]))
-  ## Unique replicating genes 
-  rep_genes=length(unique(human_mouse_data[which(human_mouse_data$DE==names(alphas)[3]),"mmusculus_homolog_ensembl_gene"]))
-  
-  if (age_mouse=="pups"){
-    ## Percentage 
-    percentage=signif(rep_genes / total_pups_DEG *100, 3)
-    print(paste(rep_genes, "out of", total_pups_DEG, "DEG in", expt_mouse, "mouse pup", tissue_mouse, "(FDR<0.05) replicate in smoking human", age_human, 
-                "brain (with p<0.05 and same logFC direction) -", paste(percentage, "%", sep="")))
-  }
-  else {
-    ## Percentage 
-    percentage=signif(rep_genes / total_adults_P_val_genes *100, 3)
-    print(paste(rep_genes, "out of", total_adults_P_val_genes, "genes in", expt_mouse, "adult mouse", tissue_mouse, "(p<0.05) replicate in smoking human",
-                age_human, "brain (also p<0.05 and same logFC direction) -", paste(percentage, "%", sep="")))
-  }
-  
-  return(human_mouse_data)
 }
 
 
+################################################################
+##  Smoking human prenatal brain vs Nicotine mouse pup brain   
+################################################################
+t_stat_plot_human_in_mouse(age_mouse = "pups", tissue_mouse = "brain", expt_mouse = "nicotine", age_human = "prenatal")
+prenatalHuman_in_NicPupMouse <- replication_human_in_mouse(age_mouse = "pups", tissue_mouse = "brain", expt_mouse = "nicotine", age_human = "prenatal")
+## "2 out of 13 DEG in smoking human prenatal brain (FDR<0.1) replicate in nicotine pup mouse brain (with p<0.05 and same logFC direction) - 15.4%. Genes:"
+## [1] "MPPED1" "SDC1" 
+
+################################################################
+##  Smoking human prenatal brain vs Smoking mouse pup brain   
+################################################################
+t_stat_plot_human_in_mouse(age_mouse = "pups", tissue_mouse = "brain", expt_mouse = "smoking", age_human = "prenatal")
+prenatalHuman_in_SmoPupMouse <- replication_human_in_mouse(age_mouse = "pups", tissue_mouse = "brain", expt_mouse = "smoking", age_human = "prenatal")
+## "1 out of 13 DEG in smoking human prenatal brain (FDR<0.1) replicate in smoking pup mouse brain (with p<0.05 and same logFC direction) - 7.69%. Genes:"
+## [1] "NRCAM"
+
+################################################################
+##  Smoking human prenatal brain vs Nicotine adult mouse brain   
+################################################################
+t_stat_plot_human_in_mouse(age_mouse = "adults", tissue_mouse = "brain", expt_mouse = "nicotine", age_human = "prenatal")
+prenatalHuman_in_NicAdultMouse <- replication_human_in_mouse(age_mouse = "adults", tissue_mouse = "brain", expt_mouse = "nicotine", age_human = "prenatal")
+## "0 out of 13 DEG in smoking human prenatal brain (FDR<0.1) replicate in nicotine adult mouse brain (with p<0.05 and same logFC direction) - 0%. Genes:"
+## character(0)
+
+################################################################
+##  Smoking human prenatal brain vs Smoking adult mouse brain   
+################################################################
+t_stat_plot_human_in_mouse(age_mouse = "adults", tissue_mouse = "brain", expt_mouse = "smoking", age_human = "prenatal")
+prenatalHuman_in_SmoAdultMouse <- replication_human_in_mouse(age_mouse = "adults", tissue_mouse = "brain", expt_mouse = "smoking", age_human = "prenatal")
+## "0 out of 13 DEG in smoking human prenatal brain (FDR<0.1) replicate in smoking adult mouse brain (with p<0.05 and same logFC direction) - 0%. Genes:"
+## character(0)
+
+################################################################
+##  Smoking human prenatal brain vs Smoking adult mouse blood   
+################################################################
+t_stat_plot_human_in_mouse(age_mouse = "adults", tissue_mouse = "blood", expt_mouse = "smoking", age_human = "prenatal")
+prenatalHuman_in_BloodMouse<- replication_human_in_mouse(age_mouse = "adults", tissue_mouse = "blood", expt_mouse = "smoking", age_human = "prenatal")
+## "1 out of 13 DEG in smoking human prenatal brain (FDR<0.1) replicate in smoking adult mouse blood (with p<0.05 and same logFC direction) - 7.69%. Genes:"
+## [1] "KCNN2"
+
+################################################################
+##  Smoking human adult brain vs Nicotine mouse pup brain   
+################################################################
+t_stat_plot_human_in_mouse(age_mouse = "pups", tissue_mouse = "brain", expt_mouse = "nicotine", age_human = "adult")
+adultHuman_in_NicPupMouse <- replication_human_in_mouse(age_mouse = "pups", tissue_mouse = "brain", expt_mouse = "nicotine", age_human = "adult")
+## "1 out of 1 DEG in smoking human adult brain (FDR<0.1) replicate in nicotine pup mouse brain (with p<0.05 and same logFC direction) - 100%. Genes:"
+## [1] "MARCO"
+
+################################################################
+##  Smoking human adult brain vs Smoking mouse pup brain   
+################################################################
+t_stat_plot_human_in_mouse(age_mouse = "pups", tissue_mouse = "brain", expt_mouse = "smoking", age_human = "adult")
+adultHuman_in_SmoPupMouse <- replication_human_in_mouse(age_mouse = "pups", tissue_mouse = "brain", expt_mouse = "smoking", age_human = "adult")
+## "0 out of 1 DEG in smoking human adult brain (FDR<0.1) replicate in smoking pup mouse brain (with p<0.05 and same logFC direction) - 0%. Genes:"
+## character(0)
+
+################################################################
+##  Smoking human adult brain vs Nicotine adult mouse brain   
+################################################################
+t_stat_plot_human_in_mouse(age_mouse = "adults", tissue_mouse = "brain", expt_mouse = "nicotine", age_human = "adult")
+adultHuman_in_NicAdultMouse <- replication_human_in_mouse(age_mouse = "adults", tissue_mouse = "brain", expt_mouse = "nicotine", age_human = "adult")
+## "0 out of 1 DEG in smoking human adult brain (FDR<0.1) replicate in nicotine adult mouse brain (with p<0.05 and same logFC direction) - 0%. Genes:"
+## character(0)
+
+################################################################
+##  Smoking human adult brain vs Smoking adult mouse brain   
+################################################################
+t_stat_plot_human_in_mouse(age_mouse = "adults", tissue_mouse = "brain", expt_mouse = "smoking", age_human = "adult")
+adultHuman_in_SmoAdultMouse <- replication_human_in_mouse(age_mouse = "adults", tissue_mouse = "brain", expt_mouse = "smoking", age_human = "adult")
+## "0 out of 1 DEG in smoking human adult brain (FDR<0.1) replicate in smoking adult mouse brain (with p<0.05 and same logFC direction) - 0%. Genes:"
+## character(0)
+
+################################################################
+##  Smoking human adult brain vs Smoking adult mouse blood   
+################################################################
+t_stat_plot_human_in_mouse(age_mouse = "adults", tissue_mouse = "blood", expt_mouse = "smoking", age_human = "adult")
+adultHuman_in_BloodMouse<- replication_human_in_mouse(age_mouse = "adults", tissue_mouse = "blood", expt_mouse = "smoking", age_human = "adult")
+## "0 out of 1 DEG in smoking human adult brain (FDR<0.1) replicate in smoking adult mouse blood (with p<0.05 and same logFC direction) - 0%. Genes:"
+## character(0)
 
 
+## Create table with the results 
 
+human_genes <- rbind(cbind(fetalGene[which(fetalGene$adj.P.Val<0.1), c("Symbol", "ensemblID")], Age="Prenatal"), 
+                     cbind(adultGene[which(adultGene$adj.P.Val<0.1), c("Symbol", "ensemblID")], Age="Adult"))
+human_genes_in_mouse <- cbind(human_genes, Replicate_in_NicPupMouseBrain=c("No","No","No","No","Yes","No","No","Yes","No","No","No","No","No","Yes"))
+human_genes_in_mouse <- cbind(human_genes_in_mouse, Replicate_in_SmoPupMouseBrain=c("No","No","No","No","No","No","No","No","No","No","No","No","Yes","No"))
+human_genes_in_mouse <- cbind(human_genes_in_mouse, Replicate_in_NicAdultMouseBrain=c("No","No","No","No","No","No","No","No","No","No","No","No","No","No"))
+human_genes_in_mouse <- cbind(human_genes_in_mouse, Replicate_in_SmoAdultMouseBrain=c("No","No","No","No","No","No","No","No","No","No","No","No","No","No"))
+human_genes_in_mouse <- cbind(human_genes_in_mouse, Replicate_in_SmoAdultMouseBlood=c("Yes","No","No","No","No","No","No","No","No","No","No","No","No","No"))
+save(human_genes_in_mouse, file="processed-data/04_DEA/Gene_analysis/human_genes_in_mouse.Rdata")
 
 
 
