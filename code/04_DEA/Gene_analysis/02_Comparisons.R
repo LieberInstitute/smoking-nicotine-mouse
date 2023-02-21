@@ -666,13 +666,13 @@ t_stat_plot_mouse_in_human <- function(age_mouse, expt_mouse, tissue_mouse, age_
   
   ## Colors and alphas for plot
   if (age_mouse=="pups"){
-    cols <- c("yellow3", "#ffad73", "red", "#26b3ff", "dark grey") 
+    cols <- c("mediumorchid2", "#ffad73", "red", "#26b3ff", "dark grey") 
     names(cols)<-c("Signif in both", "Signif in human (FDR<0.1)", "Replicating genes (p<0.05 in human, FDR<0.05 in mouse)","Signif in mouse (FDR<0.05)", "n.s. genes")
     alphas <- c(1, 1, 1, 1, 0.5)  
     names(alphas)<-c("Signif in both", "Signif in human (FDR<0.1)", "Replicating genes (p<0.05 in human, FDR<0.05 in mouse)","Signif in mouse (FDR<0.05)", "n.s. genes")
   }
   else {
-    cols <- c("yellow3", "#ffad73", "red","dark grey") 
+    cols <- c("mediumorchid2", "#ffad73", "red","dark grey") 
     names(cols)<-c("Signif in both", "Signif in human (FDR<0.1)", "Replicating genes (p<0.05 in human and mouse)","n.s. genes")
     alphas <- c(1, 1, 1, 0.5)  
     names(alphas)<-c("Signif in both", "Signif in human (FDR<0.1)", "Replicating genes (p<0.05 in human and mouse)","n.s. genes")
@@ -1009,7 +1009,7 @@ t_stat_plot_human_in_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_
   rho_anno = paste0("rho = ", format(round(rho, 2), nsmall = 2))
   
   ## Colors and alphas for plot
-  cols <- c("yellow3", "red", "#ffad73", "#26b3ff", "dark grey") 
+  cols <- c("mediumorchid2", "red", "#ffad73", "#26b3ff", "dark grey") 
   names(cols)<-c("Signif in both", "Replicating genes (FDR<0.1 in human, p<0.05 in mouse)", "Signif in human (FDR<0.1)", 
                  "Signif in mouse (FDR<0.05)", "n.s. genes")
   alphas <- c(1, 1, 1, 1, 0.5)  
