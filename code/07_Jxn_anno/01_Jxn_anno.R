@@ -47,13 +47,44 @@ table(rowData(rse_jx)[which(rowData(rse_jx)$isFusion=="TRUE"), c("inGencodeStart
 
 
 
+## Create table with the following info for each jxn class:
+
+##        - number: total number of jxns from that class
+##        - number_DEjxns_nic: number of nicotine DE jxns from that class
+##        - percentage_DEjxns_nic: % of nicotine DE jxns that were from that class
+##        - number_DEjxns_smo: number of smoking DE jxns from that class
+##        - percentage_DEjxns_smo: % of smoking DE jxns that were from that class
+jxn_classes <- lapply(unique(rowData(rse_jx)$Class), function(x){cbind(Class=x, 
+                                                        number_jxs=length(which(rowData(rse_jx)$Class==x)), 
+                                                        number_DEjxns_nic=length(which(de_jxns_nic$Class==x)),
+                                                        percentage_DEjxns_nic=signif(length(which(de_jxns_nic$Class==x))/dim(de_jxns_nic)[1]*100, 3),
+                                                        number_DEjxns_smo=length(which(de_jxns_smo$Class==x)),
+                                                        percentage_DEjxns_smo=signif(length(which(de_jxns_smo$Class==x))/dim(de_jxns_smo)[1]*100, 3))})
+jxn_classes <- rbind(jxn_classes[[1]], jxn_classes[[2]], jxn_classes[[3]], jxn_classes[[4]])
+
+## Add "isFusion" class
+jxn_classes <- cbind("isFusion", 
+                     length(which(rowData(rse_jx)$isFusion=="TRUE")), 
+                     number_DEjxns_nic=length(which(de_jxns_nic$Class=="InGen")),
+                     percentage_DEjxns_nic=signif(length(which(de_jxns_nic$Class=="InGen"))/dim(de_jxns_nic)[1]*100, 3),
+                     number_DEjxns_smo=length(which(de_jxns_smo$Class=="InGen")),
+                     percentage_DEjxns_smo=signif(length(which(de_jxns_smo$Class=="InGen"))/dim(de_jxns_smo)[1]*100, 3))
+
+
+
+
+
+
+
+
+
+
 ## Obtain novel DE introns/jxns
 
 ## Nicotine
 novel_jxns_nic <- de_jxns_nic[which(! (de_jxns_nic$Class=="InGen")),]
 ## Smoking
 novel_jxns_smo <- de_jxns_smo[which(! (de_jxns_smo$Class=="InGen")),]
-
 
 
 
