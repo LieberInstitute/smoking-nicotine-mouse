@@ -80,6 +80,7 @@ jxn_classes$percentage_DEjxns_smo<- as.numeric(jxn_classes$percentage_DEjxns_smo
 save(jxn_classes, file="processed-data/07_Jxn_anno/jxn_classes.Rdata")
 
 
+
 ## Create table with the information of DE jxns' genes:
 ##        - Gene: ID of gene with DE jxns
 ##        - number_DEjxns_nic: number of nicotine DE jxns the gene has
@@ -117,21 +118,75 @@ DEjxns_genes_info <- cbind(Gene=DEjxns_genes_info[,1], as.data.frame(apply(DEjxn
 save(DEjxns_genes_info, file="processed-data/07_Jxn_anno/DEjxns_genes_info.Rdata")
 
 
-## Boxplot of the number of DE jxns per gene
-pdf(file = paste("plots/07_Jxn_anno/Number_DEjxns_per_gene.pdf", sep="" ))
-par(mfrow=c(2,2))
+## Boxplots of the number of DE jxns per gene
+p1 <- ggplot(data=DEjxns_genes_info, aes(y=number_DEjxns_nic)) + 
+      geom_boxplot(fill="plum2") +
+      theme (axis.text.x=element_blank(),
+             axis.ticks.x=element_blank()) +
+      labs(x = "Nicotine", y = "Number of DE jxns per gene") 
 
-ggplot(data=DEjxns_genes_info, aes(x=0,y=number_DEjxns_nic)) + 
-      geom_boxplot() +
-      theme_classic() +
-      labs(x = 0, y = "Number of nicotine DE jxns per gene") 
+p2 <- ggplot(data=DEjxns_genes_info, aes(y=number_DEjxns_smo)) + 
+      geom_boxplot(fill="thistle1") +
+      theme (axis.text.x=element_blank(),
+             axis.ticks.x=element_blank()) +
+      labs(x = "Smoking", y = "Number of DE jxns per gene") 
 
-ggplot(data=DEjxns_genes_info, aes(x=0,y=number_DEjxns_smo)) + 
-      geom_boxplot() +
-      theme_classic() +
-      labs(x = 0, y = "Number of smoking DE jxns per gene") 
+p3 <- ggplot(data=DEjxns_genes_info, aes(y=number_DEjxns_nic_Novel)) + 
+      geom_boxplot(fill="lightyellow3") +
+      theme (axis.text.x=element_blank(),
+             axis.ticks.x=element_blank()) +  
+      labs(x = "Nicotine", y = "Number of novel DE jxns each gene has") 
 
-dev.off()
+p4 <- ggplot(data=DEjxns_genes_info, aes(y=number_DEjxns_smo_Novel)) + 
+      geom_boxplot(fill="lightyellow1") +
+      theme (axis.text.x=element_blank(),
+             axis.ticks.x=element_blank()) +
+      labs(x = "Smoking", y = "Number of novel DE jxns each gene has") 
+
+p5 <- ggplot(data=DEjxns_genes_info, aes(y=number_DEjxns_nic_AltStartEnd)) + 
+      geom_boxplot(fill="peachpuff3") +
+      theme (axis.text.x=element_blank(),
+             axis.ticks.x=element_blank()) +
+      labs(x = "Nicotine", y = "Number of DE jxns with alternative start/end, each gene has") 
+
+p6 <- ggplot(data=DEjxns_genes_info, aes(y=number_DEjxns_smo_AltStartEnd)) + 
+      geom_boxplot(fill="peachpuff1") +
+      theme (axis.text.x=element_blank(),
+             axis.ticks.x=element_blank()) +
+      labs(x = "Smoking", y = "Number of DE jxns with alternative start/end, each gene has") 
+
+p7 <- ggplot(data=DEjxns_genes_info, aes(y=number_DEjxns_nic_InGen)) + 
+      geom_boxplot(fill="slategray3") +
+      theme (axis.text.x=element_blank(),
+             axis.ticks.x=element_blank()) +
+      labs(x = "Nicotine", y = "Number of DE known (in Gencode) jxns each gene has") +
+      coord_cartesian(ylim=c(0, 1))
+
+p8 <- ggplot(data=DEjxns_genes_info, aes(y=number_DEjxns_smo_InGen)) + 
+      geom_boxplot(fill="slategray1") +
+      theme (axis.text.x=element_blank(),
+             axis.ticks.x=element_blank()) +
+      labs(x = "Smoking", y = "Number of DE known (in Gencode) jxns each gene has") 
+
+p9 <- ggplot(data=DEjxns_genes_info, aes(y=number_DEjxns_nic_ExonSkip)) + 
+      geom_boxplot(fill="plum3") +
+      theme (axis.text.x=element_blank(),
+             axis.ticks.x=element_blank()) +
+      labs(x = "Nicotine", y = "Number of DE jxns from non-successive exons, each gene has") 
+
+p10 <- ggplot(data=DEjxns_genes_info, aes(y=number_DEjxns_smo_ExonSkip)) + 
+      geom_boxplot(fill="lavender") +
+      theme (axis.text.x=element_blank(),
+             axis.ticks.x=element_blank()) +
+      labs(x = "Smoking", y = "Number of DE jxns from non-successive exons, each gene has") 
+    
+plot_grid(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, ncol=5)
+ggsave(here("plots/07_Jxn_anno/Number_DEjxns_per_gene.pdf"), width = 50, height = 25, units = "cm")
+
+
+
+
+
 
 
 
