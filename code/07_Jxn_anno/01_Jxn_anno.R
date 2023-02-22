@@ -188,10 +188,16 @@ ggsave(here("plots/07_Jxn_anno/Number_DEjxns_per_gene.pdf"), width = 50, height 
 
 
 
+## 1. Analysis of genes with multiple DE jxns -> search for new potential isoforms
 
 
 
 
+
+
+
+
+## 3. Find nearest genes of novel jxns without assigned gene
 ## Obtain novel DE introns/jxns (with at least one unknown end or if the combination of ends is unknown)
 
 ## Nicotine
@@ -199,7 +205,6 @@ novel_jxns_nic <- de_jxns_nic[which(! (de_jxns_nic$Class=="InGen")),]
 ## Smoking
 novel_jxns_smo <- de_jxns_smo[which(! (de_jxns_smo$Class=="InGen")),]
 
-## Find nearest genes of novel jxns
 
 
 
