@@ -13,7 +13,7 @@ load(here("processed-data/04_DEA/Jx_analysis/de_jxns_smo.Rdata"))
 
 ## Explore jxns classes
 
-## "Novel" jxns have unknown (not in Gencode) start and end sites
+## "Novel" jxns have unknown (not in GENCODE) start and end sites
 table(rowData(rse_jx)[which(rowData(rse_jx)$Class=="Novel"), c("inGencodeStart", "inGencodeEnd")])
 #                 inGencodeEnd
 #   inGencodeStart FALSE
@@ -32,7 +32,7 @@ table(rowData(rse_jx)[which(rowData(rse_jx)$Class=="ExonSkip"), c("inGencodeStar
 #   inGencodeStart TRUE
 #             TRUE  142
 
-## "InGen" jxns are in Gencode (both sites are known)
+## "InGen" jxns are in GENCODE (both sites are known)
 table(rowData(rse_jx)[which(rowData(rse_jx)$Class=="InGen"), c("inGencodeStart", "inGencodeEnd")])
 #                  inGencodeEnd
 #   inGencodeStart TRUE
@@ -86,12 +86,12 @@ save(jxn_classes, file="processed-data/07_Jxn_anno/jxn_classes.Rdata")
 ##        - number_DEjxns_nic: number of nicotine DE jxns the gene has
 ##        - number_DEjxns_nic_Novel: number of nicotine DE novel jxns the gene has
 ##        - number_DEjxns_nic_AltStartEnd: number of nicotine DE jxns with alternative start/end, the gene has
-##        - number_DEjxns_nic_InGen: number of nicotine DE known (in Gencode) jxns the gene has
+##        - number_DEjxns_nic_InGen: number of nicotine DE known (in GENCODE) jxns the gene has
 ##        - number_DEjxns_nic_ExonSkip: number of nicotine DE jxns from non-successive exons, the gene has
 ##        - number_DEjxns_smo: number of smoking DE jxns the gene has
 ##        - number_DEjxns_smo_Novel: number of smoking DE novel jxns the gene has
 ##        - number_DEjxns_smo_AltStartEnd: number of smoking DE jxns with alternative start/end, the gene has
-##        - number_DEjxns_smo_InGen: number of smoking DE known (in Gencode) jxns the gene has
+##        - number_DEjxns_smo_InGen: number of smoking DE known (in GENCODE) jxns the gene has
 ##        - number_DEjxns_smo_ExonSkip: number of smoking DE jxns from non-successive exons, the gene has
 
 ## Genes with DE jxns
@@ -102,6 +102,7 @@ DEjxns_genes_info <- vector()
 for (gene in DEjxns_genes){
           DEjxns_genes_info <- rbind(DEjxns_genes_info, 
                                     c(Gene=gene,
+                                      ## newGeneID: gene name(s) associated with the exons that each junction spans
                                       number_DEjxns_nic=length(which(de_jxns_nic$newGeneID==gene)),
                                       number_DEjxns_nic_Novel=length(which(de_jxns_nic$newGeneID==gene & de_jxns_nic$Class=="Novel")),
                                       number_DEjxns_nic_AltStartEnd=length(which(de_jxns_nic$newGeneID==gene & de_jxns_nic$Class=="AltStartEnd")),
@@ -159,14 +160,14 @@ p7 <- ggplot(data=DEjxns_genes_info, aes(y=number_DEjxns_nic_InGen)) +
       geom_boxplot(fill="slategray3") +
       theme (axis.text.x=element_blank(),
              axis.ticks.x=element_blank()) +
-      labs(x = "Nicotine", y = "Number of DE known (in Gencode) jxns each gene has") +
+      labs(x = "Nicotine", y = "Number of DE known (in GENCODE) jxns each gene has") +
       coord_cartesian(ylim=c(0, 1))
 
 p8 <- ggplot(data=DEjxns_genes_info, aes(y=number_DEjxns_smo_InGen)) + 
       geom_boxplot(fill="slategray1") +
       theme (axis.text.x=element_blank(),
              axis.ticks.x=element_blank()) +
-      labs(x = "Smoking", y = "Number of DE known (in Gencode) jxns each gene has") 
+      labs(x = "Smoking", y = "Number of DE known (in GENCODE) jxns each gene has") 
 
 p9 <- ggplot(data=DEjxns_genes_info, aes(y=number_DEjxns_nic_ExonSkip)) + 
       geom_boxplot(fill="plum3") +
