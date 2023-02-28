@@ -16,6 +16,7 @@ library(jaffelab)
 library(VennDiagram) 
 library(gridExtra)
 library(R.utils)
+library(biomartr)
 library(sessioninfo)
 
 load(here("raw-data/rse_jx_smoking_mouse_n208.Rdata"))
@@ -133,8 +134,13 @@ DE_boxplots <- function(RSE, de_jx){
 
   plots<-list()
   for (i in 1:3){
+    symbol<-biomart(genes  = strsplit(de_jx$newGeneID[i], "[.]")[[1]][1],
+                     mart       = "ENSEMBL_MART_ENSEMBL",
+                     dataset    = "mmusculus_gene_ensembl",
+                     attributes = c("external_gene_name"),
+                     filters    = "ensembl_gene_id")
     jx_ID<-colnames(lognorm_DE)[i]
-    jx_name<-paste(rownames(de_jx)[i], de_jx$newGeneID[i], sep="  ")
+    jx_name<-paste(rownames(de_jx)[i], symbol[2], sep="  ")
     p<-DE_one_boxplot(de_jx, lognorm_DE, jx_ID, jx_name)
     plots[[i]]<-print(p)
   }
@@ -200,6 +206,30 @@ save(top_jxns_smo, file="processed-data/04_DEA/Jx_analysis/top_jxns_smo.Rdata")
 save(de_jxns_smo, file="processed-data/04_DEA/Jx_analysis/de_jxns_smo.Rdata")
 
 
+
+
+
+
+
+## Reproducibility information
+print('Reproducibility information:')
+Sys.time()
+proc.time()
+options(width = 120)
+session_info()
+
+# setting  value
+# version  R version 4.2.2 (2022-10-31)
+# os       macOS Monterey 12.5.1
+# system   aarch64, darwin20
+# ui       RStudio
+# language (EN)
+# collate  en_US.UTF-8
+# ctype    en_US.UTF-8
+# tz       America/Mexico_City
+# date     2023-02-27
+# rstudio  2022.12.0+353 Elsbeth Geranium (desktop)
+# pandoc   NA
 
 
 
