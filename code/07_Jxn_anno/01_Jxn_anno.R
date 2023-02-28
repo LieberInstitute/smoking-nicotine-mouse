@@ -119,7 +119,51 @@ DEjxns_genes_info <- cbind(Gene=DEjxns_genes_info[,1], as.data.frame(apply(DEjxn
 save(DEjxns_genes_info, file="processed-data/07_Jxn_anno/DEjxns_genes_info.Rdata")
 
 
-## Boxplots of the number of DE jxns per gene
+
+## Histograms of the number of total, novel, AltStartEnd, InGen and ExonSkip DE jxns of the genes in nic and smo
+
+## Data frame
+total_DEjxns <- as.data.frame(rbind(nic=cbind(DEjxns_genes_info[,2:6], expt=rep("Nicotine", dim(DEjxns_genes_info)[1])), 
+                                    setNames(cbind(DEjxns_genes_info[,7:11], rep("Smoking", dim(DEjxns_genes_info)[1])), colnames(nic))))
+colnames(total_DEjxns) <- c("number_DEjxns", "number_DEjxns_Novel", "number_DEjxns_AltStartEnd", 
+                            "number_DEjxns_InGen", "number_DEjxns_ExonSkip", "expt")
+total_DEjxns_expt <- as.data.frame(apply(total_DEjxns[,1:5], 2, function(x){as.numeric(x)}))
+total_DEjxns_expt$expt <-total_DEjxns$expt
+
+## For known jxns' genes
+# Interleaved histograms 
+h1 <- ggplot(data=total_DEjxns_expt[which(total_DEjxns_expt$number_DEjxns!=0),], aes(x=number_DEjxns, color=expt, fill=expt)) +
+     geom_histogram(position="dodge", alpha=0.3) +
+     scale_x_continuous(breaks=seq(1,max(data$number_DEjxns),4)) + 
+     labs(x = "Number of DE jxns per gene", y="Frecuency", color="Experiment", fill="Experiment") 
+
+h2 <- ggplot(data=total_DEjxns_expt[which(total_DEjxns_expt$number_DEjxns_Novel!=0),], aes(x=number_DEjxns_Novel, color=expt, fill=expt)) +
+     geom_histogram(position="identity", alpha=0.3) +
+     scale_x_continuous(breaks=seq(1,max(data$number_DEjxns_Novel),1)) + 
+     scale_y_continuous(breaks=seq(1, max(table(data$number_DEjxns_Novel)),1)) +
+     labs(x = "Number of Novel DE jxns each gene has", y="Frecuency", color="Experiment", fill="Experiment") 
+
+h3 <- ggplot(data=total_DEjxns_expt[which(total_DEjxns_expt$number_DEjxns_AltStartEnd!=0),], aes(x=number_DEjxns_AltStartEnd, color=expt, fill=expt)) +
+     geom_histogram(position="identity", alpha=0.3) +
+     scale_x_continuous(breaks=seq(1,max(data$number_DEjxns_AltStartEnd),4)) + 
+     labs(x = "Number of DE jxns with alternative start/end, each gene has", y="Frecuency", color="Experiment", fill="Experiment") 
+
+h4 <- ggplot(data=total_DEjxns_expt[which(total_DEjxns_expt$number_DEjxns_InGen!=0),], aes(x=number_DEjxns_InGen, color=expt, fill=expt)) +
+     geom_histogram(position="identity", alpha=0.3) +
+     scale_x_continuous(breaks=seq(1,max(data$number_DEjxns_InGen),4)) + 
+     labs(x = "Number of DE known (in GENCODE) jxns each gene has", y="Frecuency", color="Experiment", fill="Experiment") 
+
+h5 <- ggplot(data=total_DEjxns_expt[which(total_DEjxns_expt$number_DEjxns_ExonSkip!=0),], aes(x=number_DEjxns_ExonSkip, color=expt, fill=expt)) +
+     geom_histogram(position="identity", alpha=0.3) +
+     scale_x_continuous(breaks=seq(1,max(data$number_DEjxns_ExonSkip),4)) + 
+     labs(x = "Number of DE jxns from non-successive exons, each gene has", y="Frecuency", color="Experiment", fill="Experiment") 
+
+plot <- plot_grid(h1, h2, h3, h4, h5, ncol=3)
+
+
+
+
+## Boxplots 
 p1 <- ggplot(data=DEjxns_genes_info, aes(y=number_DEjxns_nic)) + 
       geom_boxplot(fill="plum2") +
       theme (axis.text.x=element_blank(),
