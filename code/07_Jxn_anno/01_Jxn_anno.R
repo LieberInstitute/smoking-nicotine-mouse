@@ -131,32 +131,47 @@ total_DEjxns_expt <- as.data.frame(apply(total_DEjxns[,1:5], 2, function(x){as.n
 total_DEjxns_expt$expt <-total_DEjxns$expt
 
 ## For known jxns' genes
-# Interleaved histograms 
-h1 <- ggplot(data=total_DEjxns_expt[which(total_DEjxns_expt$number_DEjxns!=0),], aes(x=number_DEjxns, color=expt, fill=expt)) +
-     geom_histogram(position="dodge", alpha=0.3) +
-     scale_x_continuous(breaks=seq(1,max(data$number_DEjxns),4)) + 
-     labs(x = "Number of DE jxns per gene", y="Frecuency", color="Experiment", fill="Experiment") 
+h1 <- ggplot(data=total_DEjxns_expt[which(total_DEjxns_expt$number_DEjxns!=0),], aes(x=number_DEjxns, fill=expt)) +
+      geom_histogram(color="black", alpha=0.9, position="dodge")+
+      xlab("Number of DE jxns per gene")+
+      ylab("Frecuency")+
+      theme(axis.title=element_text(size=10,face="bold"), legend.position = "None")+
+      facet_wrap(~expt)
 
-h2 <- ggplot(data=total_DEjxns_expt[which(total_DEjxns_expt$number_DEjxns_Novel!=0),], aes(x=number_DEjxns_Novel, color=expt, fill=expt)) +
-     geom_histogram(position="identity", alpha=0.3) +
-     scale_x_continuous(breaks=seq(1,max(data$number_DEjxns_Novel),1)) + 
-     scale_y_continuous(breaks=seq(1, max(table(data$number_DEjxns_Novel)),1)) +
-     labs(x = "Number of Novel DE jxns each gene has", y="Frecuency", color="Experiment", fill="Experiment") 
+h2 <- ggplot(data=total_DEjxns_expt[which(total_DEjxns_expt$number_DEjxns_Novel!=0),], aes(x=number_DEjxns_Novel, fill=expt)) +
+      geom_histogram(color="black", alpha=0.9, position="dodge")+
+      xlab("Number of Novel DE jxns each gene has")+
+      ylab("Frecuency")+
+      scale_x_continuous(breaks=seq(1,max(data$number_DEjxns_Novel),1)) + 
+      scale_y_continuous(breaks=seq(1, max(table(data$number_DEjxns_Novel)),1)) +
+      theme(axis.title=element_text(size=10,face="bold"), legend.position = "None")+
+      facet_wrap(~expt)
 
 h3 <- ggplot(data=total_DEjxns_expt[which(total_DEjxns_expt$number_DEjxns_AltStartEnd!=0),], aes(x=number_DEjxns_AltStartEnd, color=expt, fill=expt)) +
-     geom_histogram(position="identity", alpha=0.3) +
-     scale_x_continuous(breaks=seq(1,max(data$number_DEjxns_AltStartEnd),4)) + 
-     labs(x = "Number of DE jxns with alternative start/end, each gene has", y="Frecuency", color="Experiment", fill="Experiment") 
+      geom_histogram(color="black", alpha=0.9, position="dodge")+
+      xlab("Number of DE jxns with alternative start/end, each gene has")+
+      ylab("Frecuency")+
+      theme(axis.title=element_text(size=10,face="bold"), legend.position = "None")+
+      facet_wrap(~expt)
+
 
 h4 <- ggplot(data=total_DEjxns_expt[which(total_DEjxns_expt$number_DEjxns_InGen!=0),], aes(x=number_DEjxns_InGen, color=expt, fill=expt)) +
-     geom_histogram(position="identity", alpha=0.3) +
-     scale_x_continuous(breaks=seq(1,max(data$number_DEjxns_InGen),4)) + 
-     labs(x = "Number of DE known (in GENCODE) jxns each gene has", y="Frecuency", color="Experiment", fill="Experiment") 
+      geom_histogram(color="black", alpha=0.9, position="dodge")+
+      xlab("Number of DE known (in GENCODE) jxns each gene has")+
+      ylab("Frecuency")+
+      scale_x_continuous(breaks=seq(1,max(data$number_DEjxns_InGen),1)) + 
+      theme(axis.title=element_text(size=10,face="bold"), legend.position = "None")+
+      facet_wrap(~expt)
+
 
 h5 <- ggplot(data=total_DEjxns_expt[which(total_DEjxns_expt$number_DEjxns_ExonSkip!=0),], aes(x=number_DEjxns_ExonSkip, color=expt, fill=expt)) +
-     geom_histogram(position="identity", alpha=0.3) +
-     scale_x_continuous(breaks=seq(1,max(data$number_DEjxns_ExonSkip),4)) + 
-     labs(x = "Number of DE jxns from non-successive exons, each gene has", y="Frecuency", color="Experiment", fill="Experiment") 
+      geom_histogram(color="black", alpha=0.9, position="dodge")+
+      xlab("Number of DE jxns from non-successive exons, each gene has")+
+      ylab("Frecuency")+
+      scale_x_continuous(breaks=seq(1,max(data$number_DEjxns_ExonSkip),1)) + 
+      theme(axis.title=element_text(size=10,face="bold"), legend.position = "None")+
+      facet_wrap(~expt)
+
 
 plot <- plot_grid(h1, h2, h3, h4, h5, ncol=3)
 
