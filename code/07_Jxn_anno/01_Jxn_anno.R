@@ -1,6 +1,9 @@
 
 ## 1. Junction annotation 
 
+library(ggplot2)
+library(here)
+
 ## Only for DE jxns from pup and brain samples
 
 load(here("raw-data/rse_jx_smoking_mouse_n208.Rdata"))
@@ -11,7 +14,7 @@ load(here("processed-data/04_DEA/Jx_analysis/de_jxns_smo.Rdata"))
 
 
 
-## Explore jxns classes
+## Explore jxn classes
 
 ## "Novel" jxns have unknown (not in GENCODE) start and end sites
 table(rowData(rse_jx)[which(rowData(rse_jx)$Class=="Novel"), c("inGencodeStart", "inGencodeEnd")])
@@ -130,7 +133,6 @@ colnames(total_DEjxns) <- c("number_DEjxns", "number_DEjxns_Novel", "number_DEjx
 total_DEjxns_expt <- as.data.frame(apply(total_DEjxns[,1:5], 2, function(x){as.numeric(x)}))
 total_DEjxns_expt$expt <-total_DEjxns$expt
 
-## For known jxns' genes
 h1 <- ggplot(data=total_DEjxns_expt[which(total_DEjxns_expt$number_DEjxns!=0),], aes(x=number_DEjxns, fill=expt)) +
       geom_histogram(color="black", alpha=0.9, position="dodge")+
       xlab("Number of DE jxns per gene")+
@@ -139,7 +141,7 @@ h1 <- ggplot(data=total_DEjxns_expt[which(total_DEjxns_expt$number_DEjxns!=0),],
       facet_wrap(~expt)
 
 h2 <- ggplot(data=total_DEjxns_expt[which(total_DEjxns_expt$number_DEjxns_Novel!=0),], aes(x=number_DEjxns_Novel, fill=expt)) +
-      geom_histogram(color="black", alpha=0.9, position="dodge")+
+      geom_histogram(color="black", alpha=0.9, position="dodge", binwidth = 0.1)+
       xlab("Number of Novel DE jxns each gene has")+
       ylab("Frecuency")+
       scale_x_continuous(breaks=seq(1,max(data$number_DEjxns_Novel),1)) + 
@@ -154,7 +156,7 @@ h3 <- ggplot(data=total_DEjxns_expt[which(total_DEjxns_expt$number_DEjxns_AltSta
       theme(axis.title=element_text(size=10,face="bold"), legend.position = "None")+
       facet_wrap(~expt)
 
-
+options(repr.plot.width = 2, repr.plot.height =6)
 h4 <- ggplot(data=total_DEjxns_expt[which(total_DEjxns_expt$number_DEjxns_InGen!=0),], aes(x=number_DEjxns_InGen, color=expt, fill=expt)) +
       geom_histogram(color="black", alpha=0.9, position="dodge")+
       xlab("Number of DE known (in GENCODE) jxns each gene has")+
@@ -173,7 +175,8 @@ h5 <- ggplot(data=total_DEjxns_expt[which(total_DEjxns_expt$number_DEjxns_ExonSk
       facet_wrap(~expt)
 
 
-plot <- plot_grid(h1, h2, h3, h4, h5, ncol=3)
+plot_grid(h1, h2, h3, h4, h5, ncol=3)
+ggsave(here("plots/07_Jxn_anno/histograms_numberDEjxns.pdf"), width = 50, height = 25, units = "cm")
 
 
 
