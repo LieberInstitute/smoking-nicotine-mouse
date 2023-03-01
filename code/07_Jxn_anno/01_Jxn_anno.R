@@ -84,18 +84,20 @@ save(jxn_classes, file="processed-data/07_Jxn_anno/jxn_classes.Rdata")
 
 
 
-## Create table with the information of DE jxns' genes:
+## Create table with the information of DE jxns' genes (the known ones):
 ##        - Gene: ID of gene with DE jxns
 ##        - number_DEjxns_nic: number of nicotine DE jxns the gene has
 ##        - number_DEjxns_nic_Novel: number of nicotine DE novel jxns the gene has
 ##        - number_DEjxns_nic_AltStartEnd: number of nicotine DE jxns with alternative start/end, the gene has
 ##        - number_DEjxns_nic_InGen: number of nicotine DE known (in GENCODE) jxns the gene has
 ##        - number_DEjxns_nic_ExonSkip: number of nicotine DE jxns from non-successive exons, the gene has
+##        - number_DEjxns_nic_isFusion: number of nicotine DE jxns that span multiple genes, the gene has
 ##        - number_DEjxns_smo: number of smoking DE jxns the gene has
 ##        - number_DEjxns_smo_Novel: number of smoking DE novel jxns the gene has
 ##        - number_DEjxns_smo_AltStartEnd: number of smoking DE jxns with alternative start/end, the gene has
 ##        - number_DEjxns_smo_InGen: number of smoking DE known (in GENCODE) jxns the gene has
 ##        - number_DEjxns_smo_ExonSkip: number of smoking DE jxns from non-successive exons, the gene has
+##        - number_DEjxns_smo_isFusion: number of smoking DE jxns that span multiple genes, the gene has
 
 ## Genes with DE jxns
 DEjxns_genes <- union(unique(de_jxns_nic$newGeneID), unique(de_jxns_smo$newGeneID))
@@ -111,30 +113,35 @@ for (gene in DEjxns_genes){
                                       number_DEjxns_nic_AltStartEnd=length(which(de_jxns_nic$newGeneID==gene & de_jxns_nic$Class=="AltStartEnd")),
                                       number_DEjxns_nic_InGen=length(which(de_jxns_nic$newGeneID==gene & de_jxns_nic$Class=="InGen")),
                                       number_DEjxns_nic_ExonSkip=length(which(de_jxns_nic$newGeneID==gene & de_jxns_nic$Class=="ExonSkip")),
+                                      number_DEjxns_nic_isFusion=length(which(de_jxns_nic$newGeneID==gene & de_jxns_nic$isFusion==TRUE)),
+                                      
                                       number_DEjxns_smo=length(which(de_jxns_smo$newGeneID==gene)),
                                       number_DEjxns_smo_Novel=length(which(de_jxns_smo$newGeneID==gene & de_jxns_smo$Class=="Novel")),
                                       number_DEjxns_smo_AltStartEnd=length(which(de_jxns_smo$newGeneID==gene & de_jxns_smo$Class=="AltStartEnd")),
                                       number_DEjxns_smo_InGen=length(which(de_jxns_smo$newGeneID==gene & de_jxns_smo$Class=="InGen")),
-                                      number_DEjxns_smo_ExonSkip=length(which(de_jxns_smo$newGeneID==gene & de_jxns_smo$Class=="ExonSkip"))))
+                                      number_DEjxns_smo_ExonSkip=length(which(de_jxns_smo$newGeneID==gene & de_jxns_smo$Class=="ExonSkip")),
+                                      number_DEjxns_smo_isFusion=length(which(de_jxns_smo$newGeneID==gene & de_jxns_smo$isFusion==TRUE))))
 }
 ## Char to numeric
-DEjxns_genes_info <- cbind(Gene=DEjxns_genes_info[,1], as.data.frame(apply(DEjxns_genes_info[,2:11], 2, function(x){as.numeric(as.character(x))})))
+DEjxns_genes_info <- cbind(Gene=DEjxns_genes_info[,1], as.data.frame(apply(DEjxns_genes_info[,2:13], 2, function(x){as.numeric(as.character(x))})))
 save(DEjxns_genes_info, file="processed-data/07_Jxn_anno/DEjxns_genes_info.Rdata")
 
 
 
-## Histograms of the number of total, novel, AltStartEnd, InGen and ExonSkip DE jxns of the genes in nic and smo
+## Histograms of the number of total, novel, AltStartEnd, InGen, ExonSkip and Fusion DE jxns of the genes in nic and smo
 
 ## Data frame
-total_DEjxns <- as.data.frame(rbind(nic=cbind(DEjxns_genes_info[,2:6], expt=rep("Nicotine", dim(DEjxns_genes_info)[1])), 
-                                    setNames(cbind(DEjxns_genes_info[,7:11], rep("Smoking", dim(DEjxns_genes_info)[1])), colnames(nic))))
+nic=cbind(DEjxns_genes_info[,2:7], expt=rep("Nicotine", dim(DEjxns_genes_info)[1]))
+total_DEjxns <- as.data.frame(rbind(nic, 
+                                    setNames(cbind(DEjxns_genes_info[,8:13], rep("Smoking", dim(DEjxns_genes_info)[1])), colnames(nic))))
 colnames(total_DEjxns) <- c("number_DEjxns", "number_DEjxns_Novel", "number_DEjxns_AltStartEnd", 
-                            "number_DEjxns_InGen", "number_DEjxns_ExonSkip", "expt")
-total_DEjxns_expt <- as.data.frame(apply(total_DEjxns[,1:5], 2, function(x){as.numeric(x)}))
+                            "number_DEjxns_InGen", "number_DEjxns_ExonSkip", "number_DEjxns_isFusion", "expt")
+total_DEjxns_expt <- as.data.frame(apply(total_DEjxns[,1:6], 2, function(x){as.numeric(x)}))
 total_DEjxns_expt$expt <-total_DEjxns$expt
 
+## Histograms ignoring zeros
 h1 <- ggplot(data=total_DEjxns_expt[which(total_DEjxns_expt$number_DEjxns!=0),], aes(x=number_DEjxns, fill=expt)) +
-      geom_histogram(color="black", alpha=0.9, position="dodge")+
+      geom_histogram(color="black", alpha=0.9, position="dodge", )+
       xlab("Number of DE jxns per gene")+
       ylab("Frecuency")+
       theme(axis.title=element_text(size=10,face="bold"), legend.position = "None")+
