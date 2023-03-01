@@ -95,6 +95,8 @@ DE_one_boxplot <- function (de_jx, lognorm_DE, jx_ID, jx_name){
   real_jx_ID <- strsplit(jx_name, "  ")[[1]][1]
   ## q-value for the jx
   q_value<-signif(de_jx[which(rownames(de_jx)==real_jx_ID), "adj.P.Val"], digits = 3)
+  ## Class of the jx
+  class<-de_jx[which(rownames(de_jx)==real_jx_ID), "Class"]
   
   ## Boxplot for each DE jx
   ggplot(data=as.data.frame(lognorm_DE), 
@@ -107,7 +109,7 @@ DE_one_boxplot <- function (de_jx, lognorm_DE, jx_ID, jx_name){
     theme_classic() +
     labs(x = "Group", y = "norm counts",
          title = jx_name, 
-         subtitle = paste("FDR:", q_value)) +
+         subtitle = paste(" FDR:", q_value, '\n', "Class:", class)) +
     theme(plot.margin=unit (c (1,1.5,1,1), 'cm'), legend.position = "none",
           plot.title = element_text(hjust=0.5, size=10, face="bold"), 
           plot.subtitle = element_text(size = 9)) 
