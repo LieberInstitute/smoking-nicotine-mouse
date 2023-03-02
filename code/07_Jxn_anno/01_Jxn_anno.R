@@ -3,6 +3,7 @@
 
 library(ggplot2)
 library(here)
+library(GenomicRanges)
 
 ## Only for DE jxns from pup and brain samples
 
@@ -22,7 +23,12 @@ table(rowData(rse_jx)[which(rowData(rse_jx)$Class=="Novel"), c("inGencodeStart",
 #   inGencodeStart FALSE
 #            FALSE 847606
 
-## "AltStartEnd" jxns have only one known site
+## Note: jxns without associated gene are all Novel
+table(rowData(rse_jx)[which(is.na(rowData(rse_jx)$newGeneID)), "Class"])
+# Novel 
+# 700460 
+
+## "AltStartEnd" jxns have only one known site 
 table(rowData(rse_jx)[which(rowData(rse_jx)$Class=="AltStartEnd"), c("inGencodeStart", "inGencodeEnd")])
 #                   inGencodeEnd
 #   inGencodeStart  FALSE   TRUE
@@ -199,11 +205,14 @@ ggsave(here("plots/07_Jxn_anno/histograms_numberDEjxns.pdf"), width = 50, height
 
 
 
+## 1. Find the closest upstream gene of DE Novel jxns (without gene)
 
+## Obtain novel DE introns/jxns without associated gene
 
-
-## 1. Analysis of genes with multiple DE jxns -> search for new potential isoforms
-
+## Nicotine
+novel_jxns_nic <- de_jxns_nic[which(! (de_jxns_nic$Class=="InGen")),]
+## Smoking
+novel_jxns_smo <- de_jxns_smo[which(! (de_jxns_smo$Class=="InGen")),]
 
 
 
@@ -212,12 +221,7 @@ ggsave(here("plots/07_Jxn_anno/histograms_numberDEjxns.pdf"), width = 50, height
 
 
 ## 3. Find nearest genes of novel jxns without assigned gene
-## Obtain novel DE introns/jxns (with at least one unknown end or if the combination of ends is unknown)
 
-## Nicotine
-novel_jxns_nic <- de_jxns_nic[which(! (de_jxns_nic$Class=="InGen")),]
-## Smoking
-novel_jxns_smo <- de_jxns_smo[which(! (de_jxns_smo$Class=="InGen")),]
 
 
 
