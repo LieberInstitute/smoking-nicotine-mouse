@@ -207,10 +207,9 @@ ggsave(here("plots/07_Jxn_anno/histograms_numberDEjxns.pdf"), width = 50, height
 
 
 
-## 1. Find the closest upstream gene of DE Novel jxns (without gene)
+## 1. Find the nearest, preceding and following genes of DE Novel jxns (without associated gene)
 
-## Obtain novel DE introns/jxns without associated gene
-
+## Obtain novel DE jxns without associated gene
 ## Nicotine
 novel_jxns_nic <- de_jxns_nic[which(de_jxns_nic$Class=="Novel" & is.na(de_jxns_nic$newGeneID)),]
 ## Smoking
@@ -219,13 +218,55 @@ novel_jxns_smo <- de_jxns_smo[which(de_jxns_smo$Class=="Novel" & is.na(de_jxns_s
 ## GRanges with novel nic and smo DE jxns = querys
 GRanges_novel_jxns_nic <- rowRanges(rse_jx_brain_pups_nicotine)[rownames(novel_jxns_nic)]
 GRanges_novel_jxns_smo <- rowRanges(rse_jx_brain_pups_smoking)[rownames(novel_jxns_smo)]
+## Same level style as subject to enable comparison between them
+seqlevelsStyle(GRanges_novel_jxns_nic) <- "NCBI"
+seqlevelsStyle(GRanges_novel_jxns_smo) <- "NCBI"
 
 ## GRanges of all mouse genes = subject (GRCm38 genome assembly)
 GRanges_mouse_genes <- makeGRangesFromEnsembl(
                               organism="Mus musculus",
                               level = "genes",
                               genomeBuild = "GRCm38",
-                              release = NULL
-                            )
+                              release = NULL)
+
+############## Nearest genes ##############
+nearest_genes_nic <- GRanges_mouse_genes[nearest(GRanges_novel_jxns_nic, GRanges_mouse_genes)]
+nearest_genes_smo <- GRanges_mouse_genes[nearest(GRanges_novel_jxns_smo, GRanges_mouse_genes)]
 
 
+############## Following genes ##############
+## Note that precede() returns the preceded gene by the jxn, i.e. the following gene in + strands
+following_genes_nic <- GRanges_mouse_genes[precede(GRanges_novel_jxns_nic, GRanges_mouse_genes)]
+following_genes_smo <- GRanges_mouse_genes[precede(GRanges_novel_jxns_smo, GRanges_mouse_genes)]
+
+
+############## Preceding genes ##############
+## Note that follow() returns the gene directly followed by the jxn, i.e. the preceding gene in + strands
+preceding_genes_nic <- GRanges_mouse_genes[follow(GRanges_novel_jxns_nic, GRanges_mouse_genes)]
+preceding_genes_smo <- GRanges_mouse_genes[follow(GRanges_novel_jxns_smo, GRanges_mouse_genes)]
+
+
+
+
+
+
+
+## Reproducibility information
+print('Reproducibility information:')
+Sys.time()
+proc.time()
+options(width = 120)
+session_info()
+
+# setting  value
+# version  R version 4.2.2 (2022-10-31)
+# os       macOS Monterey 12.5.1
+# system   aarch64, darwin20
+# ui       RStudio
+# language (EN)
+# collate  en_US.UTF-8
+# ctype    en_US.UTF-8
+# tz       America/Mexico_City
+# date     2023-03-01
+# rstudio  2022.12.0+353 Elsbeth Geranium (desktop)
+# pandoc   NA
