@@ -140,46 +140,56 @@ total_DEjxns_expt <- as.data.frame(apply(total_DEjxns[,1:6], 2, function(x){as.n
 total_DEjxns_expt$expt <-total_DEjxns$expt
 
 ## Histograms ignoring zeros
-h1 <- ggplot(data=total_DEjxns_expt[which(total_DEjxns_expt$number_DEjxns!=0),], aes(x=number_DEjxns, fill=expt)) +
-      geom_histogram(color="black", alpha=0.9, position="dodge", )+
-      xlab("Number of DE jxns per gene")+
-      ylab("Frecuency")+
+
+data=total_DEjxns_expt[which(total_DEjxns_expt$number_DEjxns!=0),]
+h1 <- ggplot(data, aes(x=number_DEjxns, fill=expt)) +
+      geom_histogram(color="black", alpha=0.9, position="dodge") +
+      scale_x_continuous(breaks = seq(1, max(data$number_DEjxns), 10)) +
+      xlab("Number of DE jxns per gene") +
+      ylab("Frecuency") +
       theme(axis.title=element_text(size=10,face="bold"), legend.position = "None")+
       facet_wrap(~expt)
 
-h2 <- ggplot(data=total_DEjxns_expt[which(total_DEjxns_expt$number_DEjxns_Novel!=0),], aes(x=number_DEjxns_Novel, fill=expt)) +
-      geom_histogram(color="black", alpha=0.9, position="dodge", binwidth = 0.1)+
+data=total_DEjxns_expt[which(total_DEjxns_expt$number_DEjxns_Novel!=0),]
+h2 <- ggplot(data, aes(x=number_DEjxns_Novel, fill=expt)) +
+      geom_histogram(color="black", alpha=0.9, position="dodge")+
       xlab("Number of Novel DE jxns each gene has")+
-      ylab("Frecuency")+
+      ylab("Frecuency") +
       scale_x_continuous(breaks=seq(1,max(data$number_DEjxns_Novel),1)) + 
       scale_y_continuous(breaks=seq(1, max(table(data$number_DEjxns_Novel)),1)) +
-      theme(axis.title=element_text(size=10,face="bold"), legend.position = "None")+
+      theme(axis.title=element_text(size=10,face="bold"), legend.position = "None", plot.margin = margin(0.2, 5, 0.2, 5, "cm"))+
       facet_wrap(~expt)
 
-h3 <- ggplot(data=total_DEjxns_expt[which(total_DEjxns_expt$number_DEjxns_AltStartEnd!=0),], aes(x=number_DEjxns_AltStartEnd, color=expt, fill=expt)) +
+data=total_DEjxns_expt[which(total_DEjxns_expt$number_DEjxns_AltStartEnd!=0),]
+h3 <- ggplot(data, aes(x=number_DEjxns_AltStartEnd, color=expt, fill=expt)) +
       geom_histogram(color="black", alpha=0.9, position="dodge")+
+      scale_x_continuous(breaks = seq(1, max(data$number_DEjxns_AltStartEnd), 10)) +    
       xlab("Number of DE jxns with alternative start/end, each gene has")+
       ylab("Frecuency")+
       theme(axis.title=element_text(size=10,face="bold"), legend.position = "None")+
       facet_wrap(~expt)
 
-options(repr.plot.width = 2, repr.plot.height =6)
-h4 <- ggplot(data=total_DEjxns_expt[which(total_DEjxns_expt$number_DEjxns_InGen!=0),], aes(x=number_DEjxns_InGen, color=expt, fill=expt)) +
+data=total_DEjxns_expt[which(total_DEjxns_expt$number_DEjxns_InGen!=0),]
+h4 <- ggplot(data, aes(x=number_DEjxns_InGen, color=expt, fill=expt)) +
       geom_histogram(color="black", alpha=0.9, position="dodge")+
       xlab("Number of DE known (in GENCODE) jxns each gene has")+
       ylab("Frecuency")+
       scale_x_continuous(breaks=seq(1,max(data$number_DEjxns_InGen),1)) + 
-      theme(axis.title=element_text(size=10,face="bold"), legend.position = "None")+
+      theme(axis.title=element_text(size=10,face="bold"), legend.position = "None", plot.margin = margin(0.2, 6.5, 0.2, 6.5, "cm"))+
       facet_wrap(~expt)
 
-
-h5 <- ggplot(data=total_DEjxns_expt[which(total_DEjxns_expt$number_DEjxns_ExonSkip!=0),], aes(x=number_DEjxns_ExonSkip, color=expt, fill=expt)) +
+data=total_DEjxns_expt[which(total_DEjxns_expt$number_DEjxns_ExonSkip!=0),]
+h5 <- ggplot(data, aes(x=number_DEjxns_ExonSkip, color=expt, fill=expt)) +
       geom_histogram(color="black", alpha=0.9, position="dodge")+
       xlab("Number of DE jxns from non-successive exons, each gene has")+
       ylab("Frecuency")+
       scale_x_continuous(breaks=seq(1,max(data$number_DEjxns_ExonSkip),1)) + 
-      theme(axis.title=element_text(size=10,face="bold"), legend.position = "None")+
+      theme(axis.title=element_text(size=10,face="bold"), legend.position = "None", plot.margin = margin(0.2, 5, 0.2, 5, "cm"))+
       facet_wrap(~expt)
+
+## There were not DE fusion jxns 
+length(which(total_DEjxns_expt$number_DEjxns_isFusion!=0))
+## [1] 0
 
 
 plot_grid(h1, h2, h3, h4, h5, ncol=3)
@@ -187,71 +197,6 @@ ggsave(here("plots/07_Jxn_anno/histograms_numberDEjxns.pdf"), width = 50, height
 
 
 
-
-## Boxplots 
-p1 <- ggplot(data=DEjxns_genes_info, aes(y=number_DEjxns_nic)) + 
-      geom_boxplot(fill="plum2") +
-      theme (axis.text.x=element_blank(),
-             axis.ticks.x=element_blank()) +
-      labs(x = "Nicotine", y = "Number of DE jxns per gene") 
-
-p2 <- ggplot(data=DEjxns_genes_info, aes(y=number_DEjxns_smo)) + 
-      geom_boxplot(fill="thistle1") +
-      theme (axis.text.x=element_blank(),
-             axis.ticks.x=element_blank()) +
-      labs(x = "Smoking", y = "Number of DE jxns per gene") 
-
-p3 <- ggplot(data=DEjxns_genes_info, aes(y=number_DEjxns_nic_Novel)) + 
-      geom_boxplot(fill="lightyellow3") +
-      theme (axis.text.x=element_blank(),
-             axis.ticks.x=element_blank()) +  
-      labs(x = "Nicotine", y = "Number of novel DE jxns each gene has") 
-
-p4 <- ggplot(data=DEjxns_genes_info, aes(y=number_DEjxns_smo_Novel)) + 
-      geom_boxplot(fill="lightyellow1") +
-      theme (axis.text.x=element_blank(),
-             axis.ticks.x=element_blank()) +
-      labs(x = "Smoking", y = "Number of novel DE jxns each gene has") 
-
-p5 <- ggplot(data=DEjxns_genes_info, aes(y=number_DEjxns_nic_AltStartEnd)) + 
-      geom_boxplot(fill="peachpuff3") +
-      theme (axis.text.x=element_blank(),
-             axis.ticks.x=element_blank()) +
-      labs(x = "Nicotine", y = "Number of DE jxns with alternative start/end, each gene has") 
-
-p6 <- ggplot(data=DEjxns_genes_info, aes(y=number_DEjxns_smo_AltStartEnd)) + 
-      geom_boxplot(fill="peachpuff1") +
-      theme (axis.text.x=element_blank(),
-             axis.ticks.x=element_blank()) +
-      labs(x = "Smoking", y = "Number of DE jxns with alternative start/end, each gene has") 
-
-p7 <- ggplot(data=DEjxns_genes_info, aes(y=number_DEjxns_nic_InGen)) + 
-      geom_boxplot(fill="slategray3") +
-      theme (axis.text.x=element_blank(),
-             axis.ticks.x=element_blank()) +
-      labs(x = "Nicotine", y = "Number of DE known (in GENCODE) jxns each gene has") +
-      coord_cartesian(ylim=c(0, 1))
-
-p8 <- ggplot(data=DEjxns_genes_info, aes(y=number_DEjxns_smo_InGen)) + 
-      geom_boxplot(fill="slategray1") +
-      theme (axis.text.x=element_blank(),
-             axis.ticks.x=element_blank()) +
-      labs(x = "Smoking", y = "Number of DE known (in GENCODE) jxns each gene has") 
-
-p9 <- ggplot(data=DEjxns_genes_info, aes(y=number_DEjxns_nic_ExonSkip)) + 
-      geom_boxplot(fill="plum3") +
-      theme (axis.text.x=element_blank(),
-             axis.ticks.x=element_blank()) +
-      labs(x = "Nicotine", y = "Number of DE jxns from non-successive exons, each gene has") 
-
-p10 <- ggplot(data=DEjxns_genes_info, aes(y=number_DEjxns_smo_ExonSkip)) + 
-      geom_boxplot(fill="lavender") +
-      theme (axis.text.x=element_blank(),
-             axis.ticks.x=element_blank()) +
-      labs(x = "Smoking", y = "Number of DE jxns from non-successive exons, each gene has") 
-    
-plot_grid(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, ncol=5)
-ggsave(here("plots/07_Jxn_anno/Number_DEjxns_per_gene.pdf"), width = 50, height = 25, units = "cm")
 
 
 
