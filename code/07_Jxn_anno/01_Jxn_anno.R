@@ -4,6 +4,8 @@
 library(ggplot2)
 library(here)
 library(GenomicRanges)
+library(rtracklayer)
+library(AcidGenomes)
 
 ## Only for DE jxns from pup and brain samples
 
@@ -210,20 +212,20 @@ ggsave(here("plots/07_Jxn_anno/histograms_numberDEjxns.pdf"), width = 50, height
 ## Obtain novel DE introns/jxns without associated gene
 
 ## Nicotine
-novel_jxns_nic <- de_jxns_nic[which(! (de_jxns_nic$Class=="InGen")),]
+novel_jxns_nic <- de_jxns_nic[which(de_jxns_nic$Class=="Novel" & is.na(de_jxns_nic$newGeneID)),]
 ## Smoking
-novel_jxns_smo <- de_jxns_smo[which(! (de_jxns_smo$Class=="InGen")),]
+novel_jxns_smo <- de_jxns_smo[which(de_jxns_smo$Class=="Novel" & is.na(de_jxns_smo$newGeneID)),]
 
+## GRanges with novel nic and smo DE jxns = querys
+GRanges_novel_jxns_nic <- rowRanges(rse_jx_brain_pups_nicotine)[rownames(novel_jxns_nic)]
+GRanges_novel_jxns_smo <- rowRanges(rse_jx_brain_pups_smoking)[rownames(novel_jxns_smo)]
 
-
-
-
-
-
-## 3. Find nearest genes of novel jxns without assigned gene
-
-
-
-
+## GRanges of all mouse genes = subject (GRCm38 genome assembly)
+GRanges_mouse_genes <- makeGRangesFromEnsembl(
+                              organism="Mus musculus",
+                              level = "genes",
+                              genomeBuild = "GRCm38",
+                              release = NULL
+                            )
 
 
