@@ -246,6 +246,22 @@ preceding_genes_nic <- GRanges_mouse_genes[follow(GRanges_novel_jxns_nic, GRange
 preceding_genes_smo <- GRanges_mouse_genes[follow(GRanges_novel_jxns_smo, GRanges_mouse_genes)]
 
 
+## List of all GRanges for nic and smo DE jxns' genes
+
+novel_jxns_foundGenes <- list (
+  DE_Novel_jxns_nic = GRanges_novel_jxns_nic,
+  nearest_genes_nic = nearest_genes_nic,
+  following_genes_nic = following_genes_nic, 
+  preceding_genes_nic = preceding_genes_nic,
+  DE_Novel_jxns_smo = GRanges_novel_jxns_smo,
+  nearest_genes_smo = nearest_genes_smo,
+  following_genes_smo = following_genes_smo, 
+  preceding_genes_smo = preceding_genes_smo
+)
+
+save(novel_jxns_foundGenes, file="processed-data/07_Jxn_anno/novel_jxns_foundGenes.Rdata")
+
+
 
 
 
