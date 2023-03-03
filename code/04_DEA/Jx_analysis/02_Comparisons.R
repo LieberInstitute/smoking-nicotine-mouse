@@ -384,6 +384,39 @@ venn_plot(DE_lists, colors, "DEG_VS_txs_VS_exons_VS_jxns_ExonSkip", c("All", "Ni
 
 
 
+### 1.2.2 Final results: obtain DE features of DEG
+
+## The next data frame contains the following info for all the DEG:
+##        - Gene: ID of the DEG
+##        - DEG_in_nic: 1 if the gene is DE in nicotine, 0 if not
+##        - DEG_in_smo: 1 if the gene is DE in smoking, 0 if not
+##        - with_DE_Txs_Nic: 1 if the DEG has DE txs in nicotine, 0 if not
+##        - with_DE_Exons_Nic: 1 if the DEG has DE exons in nicotine, 0 if not
+##        - with_DE_Jxns_Nic: 1 if the DEG has DE jxns in nicotine, 0 if not
+##        - with_DE_Txs_Smo: 1 if the DEG has DE txs in smoking, 0 if not
+##        - with_DE_Exons_Smo: 1 if the DEG has DE exons in smoking, 0 if not
+##        - with_DE_Jxns_Smo: 1 if the DEG has DE jxns in smoking, 0 if not
+
+## All DEG 
+DEG_all <- union(DEG_nic, DEG_smo)
+final_DE_results <- data.frame(
+  Gene=union(DEG_nic, DEG_smo),
+  DEG_in_nic= unlist(sapply(DEG_all, function(x){if (x %in% DEG_nic) {"Yes"} else {"No"}})),
+  DEG_in_smo= unlist(sapply(DEG_all, function(x){if (x %in% DEG_smo) {"Yes"} else {"No"}})),
+  with_DE_Txs_Nic= unlist(sapply(DEG_all, function(x){if (x %in% DEtxs_genes_nic) {"Yes"} else {"No"}})),
+  with_DE_Exons_Nic= unlist(sapply(DEG_all, function(x){if (x %in% DEexons_genes_nic) {"Yes"} else {"No"}})),
+  with_DE_Jxns_Nic= unlist(sapply(DEG_all, function(x){if (x %in% DEjxns_genes_nic) {"Yes"} else {"No"}})),
+  with_DE_Txs_Smo= unlist(sapply(DEG_all, function(x){if (x %in% DEtxs_genes_smo) {"Yes"} else {"No"}})),
+  with_DE_Exons_Smo= unlist(sapply(DEG_all, function(x){if (x %in% DEexons_genes_smo) {"Yes"} else {"No"}})),
+  with_DE_Jxns_Smo= unlist(sapply(DEG_all, function(x){if (x %in% DEjxns_genes_smo) {"Yes"} else {"No"}}))
+)
+
+save(final_DE_results, file="processed-data/04_DEA/Jx_analysis/final_DE_results.Rdata")
+
+
+
+
+
 
 
 ## Reproducibility information
