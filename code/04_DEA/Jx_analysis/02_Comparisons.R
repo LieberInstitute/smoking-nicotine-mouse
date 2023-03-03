@@ -56,7 +56,7 @@ DEtxs_genes_smo<-unique(de_tx_smo$ensembl_id)
 DEexons_genes_nic<-unique(de_exons_nic$gencodeID)
 DEexons_genes_smo<-unique(de_exons_smo$gencodeID)
 
-## Define groups of all DE jxns' genes
+## Define groups of all DE jxns' genes (from any jxn class)
 DEjxns_genes_nic <- unique(de_jxns_nic$newGeneID)[which(!is.na(unique(de_jxns_nic$newGeneID)))]
 DEjxns_genes_smo <- unique(de_jxns_smo$newGeneID)[which(!is.na(unique(de_jxns_smo$newGeneID)))]
 
@@ -67,26 +67,32 @@ novel_de_jxns_smo <- unique(de_jxns_smo[which(de_jxns_smo$Class=="Novel"), "newG
 Novel_DEjxns_genes_smo <- novel_de_jxns_smo[which(!is.na(novel_de_jxns_smo))]
 
 ## Define groups of the nearest genes of Novel DE jxns without associated gene
+## (No NAs)
 nearest_genes_nic <- unique(novel_jxns_foundGenes[["nearest_genes_nic"]]$geneIdVersion)
 nearest_genes_smo <- unique(novel_jxns_foundGenes[["nearest_genes_smo"]]$geneIdVersion)
 
 ## Define groups of the following genes of Novel DE jxns without associated gene
+## (No NAs)
 following_genes_nic <- unique(novel_jxns_foundGenes[["following_genes_nic"]]$geneIdVersion)
 following_genes_smo <- unique(novel_jxns_foundGenes[["following_genes_smo"]]$geneIdVersion)
 
 ## Define groups of the preceding genes of Novel DE jxns without associated gene
+## (No NAs)
 preceding_genes_nic <- unique(novel_jxns_foundGenes[["preceding_genes_nic"]]$geneIdVersion)
 preceding_genes_smo <- unique(novel_jxns_foundGenes[["preceding_genes_smo"]]$geneIdVersion)
 
 ## Define groups of AltStartEnd DE jxns' genes
+## (No NAs)
 alt_de_jxns_nic <- unique(de_jxns_nic[which(de_jxns_nic$Class=="AltStartEnd"), "newGeneID"])
 alt_de_jxns_smo <- unique(de_jxns_smo[which(de_jxns_smo$Class=="AltStartEnd"), "newGeneID"])
 
 ## Define groups of ExonSkip DE jxns' genes
+## (No NAs)
 exonSkip_de_jxns_nic <- unique(de_jxns_nic[which(de_jxns_nic$Class=="ExonSkip"), "newGeneID"])
 exonSkip_de_jxns_smo <- unique(de_jxns_smo[which(de_jxns_smo$Class=="ExonSkip"), "newGeneID"])
 
 ## Define groups of InGen DE jxns' genes
+## (No NAs)
 inGen_de_jxns_nic <- unique(de_jxns_nic[which(de_jxns_nic$Class=="InGen"), "newGeneID"])
 inGen_de_jxns_smo <- unique(de_jxns_smo[which(de_jxns_smo$Class=="InGen"), "newGeneID"])
 
@@ -127,7 +133,7 @@ DEG_vs_Txs_vs_Exons_vs_Jxns_smo <-list(
 DE_lists<-list(DEG_vs_Txs_vs_Exons_vs_Jxns_all, DEG_vs_Txs_vs_Exons_vs_Jxns_nic, DEG_vs_Txs_vs_Exons_vs_Jxns_smo)
 colors<-list(c("rosybrown2", "navajowhite2", "lightblue3", "darkolivegreen2"), c("plum", "lightgoldenrod2", "lightcyan3", "darkolivegreen3"), 
              c("pink1", "khaki2", "lightsteelblue3", "darkolivegreen4"))
-venn_plot(DE_lists, colors, "DEG_VS_txs_VS_exons_VS_jxns_All", c("All", "Nicotine", "Smoking"))
+venn_plot(DE_lists, colors, "DEG_VS_txs_VS_exons_VS_jxns", c("All", "Nicotine", "Smoking"))
 
 
 
@@ -166,9 +172,9 @@ venn_plot(DE_lists, colors, "DEG_VS_txs_VS_exons_VS_jxns_NovelAssigned", c("All"
 
 
 
-######################################################################################
-## Compare DEG vs DE txs' genes vs DE exons' genes vs nearest genes to Novel DE jxns
-######################################################################################
+#########################################################################################################################
+## Compare DEG vs DE txs' genes vs DE exons' genes vs nearest genes to Novel DE jxns (that were not assigned to a gene)
+#########################################################################################################################
 
 ## All genes
 DEG_vs_Txs_vs_Exons_vs_NovelNearestJxns_all <-list(
@@ -201,9 +207,9 @@ venn_plot(DE_lists, colors, "DEG_VS_txs_VS_exons_VS_jxns_NovelNearest", c("All",
 
 
 
-########################################################################################
-## Compare DEG vs DE txs' genes vs DE exons' genes vs following genes to Novel DE jxns
-########################################################################################
+###########################################################################################################################
+## Compare DEG vs DE txs' genes vs DE exons' genes vs following genes to Novel DE jxns (that were not assigned to a gene)
+###########################################################################################################################
 
 ## All genes
 DEG_vs_Txs_vs_Exons_vs_NovelFollowingJxns_all <-list(
@@ -236,9 +242,9 @@ venn_plot(DE_lists, colors, "DEG_VS_txs_VS_exons_VS_jxns_NovelFollowing", c("All
 
 
 
-########################################################################################
-## Compare DEG vs DE txs' genes vs DE exons' genes vs preceding genes to Novel DE jxns
-########################################################################################
+###########################################################################################################################
+## Compare DEG vs DE txs' genes vs DE exons' genes vs preceding genes to Novel DE jxns (that were not assigned to a gene)
+###########################################################################################################################
 
 ## All genes
 DEG_vs_Txs_vs_Exons_vs_NovelPrecedingJxns_all <-list(
