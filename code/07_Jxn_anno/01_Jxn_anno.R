@@ -246,7 +246,7 @@ preceding_genes_nic <- GRanges_mouse_genes[follow(GRanges_novel_jxns_nic, GRange
 preceding_genes_smo <- GRanges_mouse_genes[follow(GRanges_novel_jxns_smo, GRanges_mouse_genes)]
 
 
-## List of all GRanges for nic and smo DE jxns' genes
+## List of all GRanges for nic and smo DE Novel jxns' genes
 
 novel_jxns_foundGenes <- list (
   DE_Novel_jxns_nic = GRanges_novel_jxns_nic,
@@ -260,6 +260,23 @@ novel_jxns_foundGenes <- list (
 )
 
 save(novel_jxns_foundGenes, file="processed-data/07_Jxn_anno/novel_jxns_foundGenes.Rdata")
+
+
+## Data frame with DE novel jxns in nic and smo, their nearest, following and preceding genes IDs:
+##        - DE_Novel_jxn: ID of the Novel DE jxn
+##        - nearest_gene: ID of the nearest gene to the jxn
+##        - following_gene: ID of the following gene to the jxn
+##        - preceding_gene: ID of the preceding gene to the jxn
+##        - expt: the experiment (smo/nic) in which the jxn is DE
+
+NovelDEJxns_foundGenesIDs<- data.frame(
+  DE_Novel_jxn=c(names(novel_jxns_foundGenes[["DE_Novel_jxns_nic"]]), names(novel_jxns_foundGenes[["DE_Novel_jxns_smo"]])),
+  nearest_gene=c(names(novel_jxns_foundGenes[["nearest_genes_nic"]]), names(novel_jxns_foundGenes[["nearest_genes_smo"]])),
+  following_gene=c(names(novel_jxns_foundGenes[["following_genes_nic"]]), names(novel_jxns_foundGenes[["following_genes_smo"]])),
+  preceding_gene=c(names(novel_jxns_foundGenes[["preceding_genes_nic"]]), names(novel_jxns_foundGenes[["preceding_genes_smo"]])),
+  expt=c(rep("Nicotine", length(names(novel_jxns_foundGenes[["DE_Novel_jxns_nic"]]))), rep("Smoking", length(names(novel_jxns_foundGenes[["DE_Novel_jxns_smo"]]))))
+)
+save(NovelDEJxns_foundGenesIDs, file="processed-data/07_Jxn_anno/NovelDEJxns_foundGenesIDs.Rdata")
 
 
 
