@@ -9,7 +9,9 @@ load(here("processed-data/04_DEA/Tx_analysis/de_tx_nic.Rdata"))
 load(here("processed-data/04_DEA/Tx_analysis/de_tx_smo.Rdata"))
 
 load(here("processed-data/04_DEA/Gene_analysis/de_genes_pups_nicotine_fitted.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_nicotine_fitted.Rdata"))
 load(here("processed-data/04_DEA/Gene_analysis/de_genes_pups_smoking_fitted.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_smoking_fitted.Rdata"))
 
 load(here("processed-data/04_DEA/Exon_analysis/de_exons_nic.Rdata"))
 load(here("processed-data/04_DEA/Exon_analysis/de_exons_smo.Rdata"))
@@ -379,6 +381,37 @@ DE_lists<-list(DEG_vs_Txs_vs_Exons_vs_ExonSkipJxns_all, DEG_vs_Txs_vs_Exons_vs_E
 colors<-list(c("rosybrown2", "navajowhite2", "lightblue3", "darkolivegreen2"), c("plum", "lightgoldenrod2", "lightcyan3", "darkolivegreen3"), 
              c("pink1", "khaki2", "lightsteelblue3", "darkolivegreen4"))
 venn_plot(DE_lists, colors, "DEG_VS_txs_VS_exons_VS_jxns_ExonSkip", c("All", "Nicotine", "Smoking"))
+
+
+
+
+
+### 1.2.1.1 Explore expression levels of DE features at only one level in nic and smo
+## MA plots
+
+## Obtain DE features at only one level
+## DEG
+DEG_only <- 
+
+
+
+cols <- c("Up" = "#ffad73", "Down" = "#26b3ff", "ns" = "grey") 
+sizes <- c("Up" = 2, "Down" = 2, "ns" = 1) 
+alphas <- c("Up" = 1, "Down" = 1, "ns" = 0.5)
+top_genes$mean_log_expr<-apply(vGene$E, 1, mean)
+p1<-ggplot(data = top_genes, 
+           aes(x = mean_log_expr,y = logFC,
+               fill = DE,    
+               size = DE,
+               alpha = DE)) + 
+  geom_point(shape = 21,    
+             colour = "black") +
+  scale_fill_manual(values = cols) + 
+  scale_size_manual(values = sizes) + 
+  scale_alpha_manual(values = alphas) +
+  labs(x="Mean of normalized counts")
+
+
 
 
 
