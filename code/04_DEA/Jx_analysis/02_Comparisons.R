@@ -14,8 +14,10 @@ load(here("processed-data/04_DEA/Tx_analysis/top_tx_smo.Rdata"))
 
 load(here("processed-data/04_DEA/Gene_analysis/de_genes_pups_nicotine_fitted.Rdata"))
 load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_nicotine_fitted.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/results_pups_nicotine_fitted.Rdata"))
 load(here("processed-data/04_DEA/Gene_analysis/de_genes_pups_smoking_fitted.Rdata"))
 load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_smoking_fitted.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/results_pups_smoking_fitted.Rdata"))
 
 load(here("processed-data/04_DEA/Exon_analysis/de_exons_nic.Rdata"))
 load(here("processed-data/04_DEA/Exon_analysis/top_exons_nic.Rdata"))
@@ -389,67 +391,111 @@ venn_plot(DE_lists, colors, "DEG_VS_txs_VS_exons_VS_jxns_ExonSkip", c("All", "Ni
 
 
 
-### 1.2.1.1 Explore expression levels of features DE at only one level in nic and smo
-## MA plots
+### 1.2.2 Explore expression levels of features DE at only one level in nic and smo
 
-########################
-##     Nicotine
-########################
-
-## Obtain features DE at only one level
-
-###### DEG without DE txs, jxns and exons ######
-DEG_only <- DEG_nic[which(! (DEG_nic %in% DEtxs_genes_nic | 
-                             DEG_nic %in% DEexons_genes_nic | 
-                             DEG_nic %in% DEjxns_genes_nic))]
-top_genes_pups_nicotine_fitted$DEfeatures_onlyOnelevel <- unlist(apply(top_genes_pups_nicotine_fitted["gencodeID"], 1, function(x){if (x %in% DEG_only){x} else {NA}}))
+## Create MA plot
+MAplot <- function(top_genes, results, expt){
   
+  DEG <- eval(parse_expr(paste("DEG", expt, sep="_")))
+  DEtxs_genes <- eval(parse_expr(paste("DEtxs_genes", expt, sep="_")))
+  DEjxns_genes <- eval(parse_expr(paste("DEjxns_genes", expt, sep="_")))
+  DEexons_genes <- eval(parse_expr(paste("DEexons_genes", expt, sep="_")))
+  de_genes <- results[[2]]
   
-###### DE txs without DE gene, jxns and exons ######
-DEtx_only <- DEtxs_genes_nic[which(! (DEtxs_genes_nic %in% DEG_nic | 
-                                      DEtxs_genes_nic %in% DEexons_genes_nic | 
-                                      DEtxs_genes_nic %in% DEjxns_genes_nic))]
-top_tx_nic$DEfeatures_onlyOnelevel <- unlist(apply(top_tx_nic["ensembl_id"], 1, function(x){if (x %in% DEtx_only){x} else {NA}}))
+  ## Obtain genes with DE features 
+  
+  ###### DEG without DE txs, jxns and exons ######
+  DEG_only <- DEG[which(! (DEG %in% DEtxs_genes | 
+                           DEG %in% DEexons_genes | 
+                           DEG %in% DEjxns_genes ))]
+  
+  ###### DE txs without DE gene, jxns and exons ######
+  DEtx_only <- DEtxs_genes[which(! (DEtxs_genes %in% DEG | 
+                                    DEtxs_genes %in% DEexons_genes | 
+                                    DEtxs_genes %in% DEjxns_genes ))]
+  
+  ###### DE exons without DE gene, txs and jxns ######
+  DEexon_only <- DEexons_genes[which(! (DEexons_genes %in% DEG | 
+                                        DEexons_genes %in% DEtxs_genes | 
+                                        DEexons_genes %in% DEjxns_genes ))]
+  
+  ###### DE jxns without DE gene, tx and exon ######
+  DEjxn_only <- DEjxns_genes[which(! (DEjxns_genes %in% DEG | 
+                                      DEjxns_genes %in% DEtxs_genes | 
+                                      DEjxns_genes %in% DEexons_genes))]
+  
+  ###### DEG with DE txs, exons and jxns ######
+  DE_all_levels <- intersect(DEG, intersect(DEtxs_genes , intersect(DEjxns_genes, DEexons_genes)))
+  
+  ## Find those genes in the whole gene dataset
+  DEfeatures_onlyOnelevel <- vector()
+  for (gene in top_genes$gencodeID){
+    if (gene %in% DEG_only){
+      DEfeatures_onlyOnelevel <- append(DEfeatures_onlyOnelevel, "DEG without DE txs/jxns/exons")
+    }
+    else if (gene %in% DEtx_only){
+      DEfeatures_onlyOnelevel <- append(DEfeatures_onlyOnelevel, "Non-DE Gene with DE txs only")
+    }
+    else if (gene %in% DEjxn_only){
+      DEfeatures_onlyOnelevel <- append(DEfeatures_onlyOnelevel, "Non-DE Gene with DE jxns only")
+    }
+    else if (gene %in% DEexon_only){
+      DEfeatures_onlyOnelevel <- append(DEfeatures_onlyOnelevel, "Non-DE Gene with DE exons only")
+    }
+    else if (gene %in% DE_all_levels){
+      DEfeatures_onlyOnelevel <- append(DEfeatures_onlyOnelevel, "DEG with DE txs, exons and jxns")
+    }
+    else if(gene %in% de_genes$gencodeID){
+      DEfeatures_onlyOnelevel <- append(DEfeatures_onlyOnelevel, "Rest of DEG")
+    }
+    else {
+      DEfeatures_onlyOnelevel <- append(DEfeatures_onlyOnelevel, "n.s.")
+    }
+  }
+  
+  top_genes$DEfeatures_onlyOnelevel <- DEfeatures_onlyOnelevel
+  
+  ## Plot
+  cols <- c("DEG with DE txs, exons and jxns" = "orangered3", "DEG without DE txs/jxns/exons" = "cornflowerblue", 
+            "Non-DE Gene with DE txs only"= "darkturquoise", "Non-DE Gene with DE exons only"= "chartreuse3", 
+            "Non-DE Gene with DE jxns only"="deeppink1", "Rest of DEG"="wheat", "n.s." = "grey") 
+  sizes <- c("DEG with DE txs, exons and jxns" = 2, "DEG without DE txs/jxns/exons" = 2, 
+             "Non-DE Gene with DE txs only"= 2, "Non-DE Gene with DE exons only"= 2, 
+             "Non-DE Gene with DE jxns only"=2, "Rest of DEG"=1, "n.s." = 0.5) 
+  alphas <- c("DEG with DE txs, exons and jxns" = 1, "DEG without DE txs/jxns/exons" = 1, 
+              "Non-DE Gene with DE txs only"= 1, "Non-DE Gene with DE exons only"= 1, 
+              "Non-DE Gene with DE jxns only"=1, "Rest of DEG"=0.9, "n.s." = 0.5)
+  
+  ## Mean expression values of cpm
+  vGene <- results[[1]][[2]]
+  top_genes$mean_log_expr<-apply(vGene$E, 1, mean)
 
-###### DE exons without DE gene, txs and jxns ######
-DEexon_only <- DEexons_genes_nic[which(! (DEexons_genes_nic %in% DEG_nic | 
-                                          DEexons_genes_nic %in% DEtxs_genes_nic | 
-                                          DEexons_genes_nic %in% DEjxns_genes_nic))]
-top_exons_nic$DEfeatures_onlyOnelevel <- unlist(apply(top_exons_nic["gencodeID"], 1, function(x){if (x %in% DEexon_only){x} else {NA}}))
+  p <-ggplot(data = top_genes, 
+            aes(x = mean_log_expr,y = logFC,
+                 fill = DEfeatures_onlyOnelevel,    
+                 size = DEfeatures_onlyOnelevel,
+                 alpha = DEfeatures_onlyOnelevel)) + 
+    geom_point(shape = 21, colour="grey") +
+    scale_fill_manual(values = cols) + 
+    scale_size_manual(values = sizes) + 
+    scale_alpha_manual(values = alphas) +
+    labs(x="Mean of normalized counts", fill="Genes and their DE features", size="Genes and their DE features", alpha="Genes and their DE features") 
 
-###### DE jxns without DE gene, tx and exon ######
-DEjxn_only <- DEjxns_genes_nic[which(! (DEjxns_genes_nic %in% DEG_nic | 
-                                        DEjxns_genes_nic %in% DEtxs_genes_nic | 
-                                        DEjxns_genes_nic %in% DEexons_genes_nic))]
-top_jxns_nic$DEfeatures_onlyOnelevel <- unlist(apply(top_jxns_nic["newGeneID"], 1, function(x){if (x %in% DEjxn_only){x} else {NA}}))
+ ggsave(paste("plots/04_DEA/02_Comparisons/Jx_analysis/MAplots_DEfeatures_", expt, ".pdf", sep=""),
+        width = 25, height = 15, units = "cm")
+}
 
+## MA plot for nicotine genes
+MAplot(top_genes_pups_nicotine_fitted, results_pups_nicotine_fitted, "nic")
 
-DEfeatures_onlyOnelevel <- function(top_genes, vGene, name){}
-cols <- c("DE feature at onle one level" = "#ffad73", "Down" = "#26b3ff", "ns" = "grey") 
-sizes <- c("Up" = 2, "Down" = 2, "ns" = 1) 
-alphas <- c("Up" = 1, "Down" = 1, "ns" = 0.5)
-
-## Mean expression values of cpm
-top_genes$mean_log_expr<-apply(vGene$E, 1, mean)
-p<-ggplot(data = top_genes, 
-          aes(x = mean_log_expr,y = logFC,
-               fill = DE,    
-               size = DE,
-               alpha = DE)) + 
-  geom_point(shape = 21,    
-             colour = "black") +
-  scale_fill_manual(values = cols) + 
-  scale_size_manual(values = sizes) + 
-  scale_alpha_manual(values = alphas) +
-  labs(x="Mean of normalized counts")
+## MA plot for smoking genes
+MAplot(top_genes_pups_smoking_fitted, results_pups_smoking_fitted, "smo")
 
 
 
 
 
-
-
-### 1.2.2 Final results: obtain DE features of DEG
+### 1.2.3 Final results: obtain DE features of DEG
 
 ## The next data frame contains the following info for all the DEG:
 ##        - Gene: ID of the DEG
