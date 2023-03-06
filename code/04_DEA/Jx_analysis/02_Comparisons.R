@@ -2,11 +2,15 @@
 ## 1.2 Comparison of DE jnxs 
 
 load(here("processed-data/04_DEA/Jx_analysis/de_jxns_nic.Rdata"))
+load(here("processed-data/04_DEA/Jx_analysis/top_jxns_nic.Rdata"))
 load(here("processed-data/04_DEA/Jx_analysis/de_jxns_smo.Rdata"))
+load(here("processed-data/04_DEA/Jx_analysis/top_jxns_smo.Rdata"))
 load(here("processed-data/07_Jxn_anno/novel_jxns_foundGenes.Rdata"))
 
 load(here("processed-data/04_DEA/Tx_analysis/de_tx_nic.Rdata"))
+load(here("processed-data/04_DEA/Tx_analysis/top_tx_nic.Rdata"))
 load(here("processed-data/04_DEA/Tx_analysis/de_tx_smo.Rdata"))
+load(here("processed-data/04_DEA/Tx_analysis/top_tx_smo.Rdata"))
 
 load(here("processed-data/04_DEA/Gene_analysis/de_genes_pups_nicotine_fitted.Rdata"))
 load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_nicotine_fitted.Rdata"))
@@ -14,8 +18,9 @@ load(here("processed-data/04_DEA/Gene_analysis/de_genes_pups_smoking_fitted.Rdat
 load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_smoking_fitted.Rdata"))
 
 load(here("processed-data/04_DEA/Exon_analysis/de_exons_nic.Rdata"))
+load(here("processed-data/04_DEA/Exon_analysis/top_exons_nic.Rdata"))
 load(here("processed-data/04_DEA/Exon_analysis/de_exons_smo.Rdata"))
-
+load(here("processed-data/04_DEA/Exon_analysis/top_exons_smo.Rdata"))
 
 
 ### 1.2.1 Venn diagrams
@@ -97,8 +102,6 @@ exonSkip_de_jxns_smo <- unique(de_jxns_smo[which(de_jxns_smo$Class=="ExonSkip"),
 ## (No NAs)
 inGen_de_jxns_nic <- unique(de_jxns_nic[which(de_jxns_nic$Class=="InGen"), "newGeneID"])
 inGen_de_jxns_smo <- unique(de_jxns_smo[which(de_jxns_smo$Class=="InGen"), "newGeneID"])
-
-
 
 
 
@@ -386,21 +389,50 @@ venn_plot(DE_lists, colors, "DEG_VS_txs_VS_exons_VS_jxns_ExonSkip", c("All", "Ni
 
 
 
-### 1.2.1.1 Explore expression levels of DE features at only one level in nic and smo
+### 1.2.1.1 Explore expression levels of features DE at only one level in nic and smo
 ## MA plots
 
-## Obtain DE features at only one level
-## DEG
-DEG_only <- 
+########################
+##     Nicotine
+########################
+
+## Obtain features DE at only one level
+
+###### DEG without DE txs, jxns and exons ######
+DEG_only <- DEG_nic[which(! (DEG_nic %in% DEtxs_genes_nic | 
+                             DEG_nic %in% DEexons_genes_nic | 
+                             DEG_nic %in% DEjxns_genes_nic))]
+top_genes_pups_nicotine_fitted$DEfeatures_onlyOnelevel <- unlist(apply(top_genes_pups_nicotine_fitted["gencodeID"], 1, function(x){if (x %in% DEG_only){x} else {NA}}))
+  
+  
+###### DE txs without DE gene, jxns and exons ######
+DEtx_only <- DEtxs_genes_nic[which(! (DEtxs_genes_nic %in% DEG_nic | 
+                                      DEtxs_genes_nic %in% DEexons_genes_nic | 
+                                      DEtxs_genes_nic %in% DEjxns_genes_nic))]
+top_tx_nic$DEfeatures_onlyOnelevel <- unlist(apply(top_tx_nic["ensembl_id"], 1, function(x){if (x %in% DEtx_only){x} else {NA}}))
+
+###### DE exons without DE gene, txs and jxns ######
+DEexon_only <- DEexons_genes_nic[which(! (DEexons_genes_nic %in% DEG_nic | 
+                                          DEexons_genes_nic %in% DEtxs_genes_nic | 
+                                          DEexons_genes_nic %in% DEjxns_genes_nic))]
+top_exons_nic$DEfeatures_onlyOnelevel <- unlist(apply(top_exons_nic["gencodeID"], 1, function(x){if (x %in% DEexon_only){x} else {NA}}))
+
+###### DE jxns without DE gene, tx and exon ######
+DEjxn_only <- DEjxns_genes_nic[which(! (DEjxns_genes_nic %in% DEG_nic | 
+                                        DEjxns_genes_nic %in% DEtxs_genes_nic | 
+                                        DEjxns_genes_nic %in% DEexons_genes_nic))]
+top_jxns_nic$DEfeatures_onlyOnelevel <- unlist(apply(top_jxns_nic["newGeneID"], 1, function(x){if (x %in% DEjxn_only){x} else {NA}}))
 
 
-
-cols <- c("Up" = "#ffad73", "Down" = "#26b3ff", "ns" = "grey") 
+DEfeatures_onlyOnelevel <- function(top_genes, vGene, name){}
+cols <- c("DE feature at onle one level" = "#ffad73", "Down" = "#26b3ff", "ns" = "grey") 
 sizes <- c("Up" = 2, "Down" = 2, "ns" = 1) 
 alphas <- c("Up" = 1, "Down" = 1, "ns" = 0.5)
+
+## Mean expression values of cpm
 top_genes$mean_log_expr<-apply(vGene$E, 1, mean)
-p1<-ggplot(data = top_genes, 
-           aes(x = mean_log_expr,y = logFC,
+p<-ggplot(data = top_genes, 
+          aes(x = mean_log_expr,y = logFC,
                fill = DE,    
                size = DE,
                alpha = DE)) + 
