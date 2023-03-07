@@ -70,6 +70,7 @@ pheno$Pregnancy<-multiGSub(unique(sort(pheno$Pregnant)), c("No", "Yes"), x = phe
 flowcells<-flowcells[-1,]
 colnames(flowcells)<-c("SAMPLE_ID", "flowcell")
 pheno<-merge(pheno, flowcells, by="SAMPLE_ID")
+save(pheno, file="processed-data/02_build_objects/pheno.tsv")
 
 ## All samples' info in colData of RSE objects
 colData(rse_gene)<-merge(colData(rse_gene), pheno, by="SAMPLE_ID")
@@ -108,6 +109,11 @@ assays(rse_jx, withDimnames=FALSE)$logcounts<- edgeR::cpm(calcNormFactors(rse_jx
 ## Scale TPM (Transcripts per million) to log2(TPM + 0.5)
 assays(rse_tx)$logcounts<-log2(assays(rse_tx)$tpm + 0.5)
 
+## Save rse objects with the assays of normalized counts
+save(rse_gene, file="processed-data/02_build_objects/rse_gene_logcounts.Rdata")
+save(rse_exon, file="processed-data/02_build_objects/rse_exon_logcounts.Rdata")
+save(rse_jx, file="processed-data/02_build_objects/rse_jx_logcounts.Rdata")
+save(rse_tx, file="processed-data/02_build_objects/rse_tx_logcounts.Rdata")
 
 
 
