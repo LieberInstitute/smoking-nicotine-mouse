@@ -391,7 +391,7 @@ venn_plot(DE_lists, colors, "DEG_VS_txs_VS_exons_VS_jxns_ExonSkip", c("All", "Ni
 
 
 
-### 1.2.2 Explore expression levels of features DE at only one level in nic and smo
+### 1.2.2 Explore expression levels of genes with DE features in nic and smo
 
 ## Create MA plot
 MAplot <- function(top_genes, results, expt){
