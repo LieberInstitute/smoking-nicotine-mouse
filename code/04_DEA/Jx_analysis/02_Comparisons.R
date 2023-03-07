@@ -431,7 +431,7 @@ MAplot <- function(top_genes, results, expt){
   DEfeatures_onlyOnelevel <- vector()
   for (gene in top_genes$gencodeID){
     if (gene %in% DEG_only){
-      DEfeatures_onlyOnelevel <- append(DEfeatures_onlyOnelevel, "DEG without DE txs/jxns/exons")
+      DEfeatures_onlyOnelevel <- append(DEfeatures_onlyOnelevel, "DEG without DE txs, jxns and exons")
     }
     else if (gene %in% DEtx_only){
       DEfeatures_onlyOnelevel <- append(DEfeatures_onlyOnelevel, "Non-DE Gene with DE txs only")
@@ -456,13 +456,13 @@ MAplot <- function(top_genes, results, expt){
   top_genes$DEfeatures_onlyOnelevel <- DEfeatures_onlyOnelevel
   
   ## Plot
-  cols <- c("DEG with DE txs, exons and jxns" = "orangered3", "DEG without DE txs/jxns/exons" = "cornflowerblue", 
+  cols <- c("DEG with DE txs, exons and jxns" = "orangered3", "DEG without DE txs, jxns and exons" = "cornflowerblue", 
             "Non-DE Gene with DE txs only"= "darkturquoise", "Non-DE Gene with DE exons only"= "chartreuse3", 
             "Non-DE Gene with DE jxns only"="deeppink1", "Rest of DEG"="wheat", "n.s." = "grey") 
-  sizes <- c("DEG with DE txs, exons and jxns" = 2, "DEG without DE txs/jxns/exons" = 2, 
+  sizes <- c("DEG with DE txs, exons and jxns" = 2, "DEG without DE txs, jxns and exons" = 2, 
              "Non-DE Gene with DE txs only"= 2, "Non-DE Gene with DE exons only"= 2, 
              "Non-DE Gene with DE jxns only"=2, "Rest of DEG"=1, "n.s." = 0.5) 
-  alphas <- c("DEG with DE txs, exons and jxns" = 1, "DEG without DE txs/jxns/exons" = 1, 
+  alphas <- c("DEG with DE txs, exons and jxns" = 1, "DEG without DE txs, jxns and exons" = 1, 
               "Non-DE Gene with DE txs only"= 1, "Non-DE Gene with DE exons only"= 1, 
               "Non-DE Gene with DE jxns only"=1, "Rest of DEG"=0.9, "n.s." = 0.5)
   
