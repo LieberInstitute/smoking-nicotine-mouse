@@ -111,10 +111,11 @@ assays(rse_jx, withDimnames=FALSE)$logcounts<- edgeR::cpm(calcNormFactors(rse_jx
 assays(rse_tx)$logcounts<-log2(assays(rse_tx)$tpm + 0.5)
 
 ## Save rse objects with the assays of normalized counts
-save(rse_gene, file="processed-data/02_build_objects/rse_gene_logcounts.Rdata")
 save(rse_exon, file="processed-data/02_build_objects/rse_exon_logcounts.Rdata")
 save(rse_jx, file="processed-data/02_build_objects/rse_jx_logcounts.Rdata")
 save(rse_tx, file="processed-data/02_build_objects/rse_tx_logcounts.Rdata")
+
+
 
 
 
@@ -125,6 +126,8 @@ subsets=list(Mito=which(seqnames(rse_gene)=="chrM"),
 ## Add general qc-stats based on counts
 rse_gene <-addPerCellQC(rse_gene, subsets)
 
+## Save rse_gene with logcounts and qc-stats
+save(rse_gene, file="processed-data/02_build_objects/rse_gene_logcounts.Rdata")
 
 
 
