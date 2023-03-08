@@ -4,14 +4,25 @@
 
 ## Load data without outliers and rare samples
 load(here("processed-data/03_EDA/02_QC/rse_gene_blood_qc.Rdata"))
-load(here("processed-data/03_EDA/02_QC/rse_gene_brain_adults_qc.Rdata"))
-load(here("processed-data/03_EDA/02_QC/rse_gene_brain_pups_qc.Rdata"))
-load(here("processed-data/03_EDA/02_QC/rse_exon_brain_adults_qc.Rdata"))
-load(here("processed-data/03_EDA/02_QC/rse_exon_brain_pups_qc.Rdata"))
-load(here("processed-data/03_EDA/02_QC/rse_tx_brain_adults_qc.Rdata"))
-load(here("processed-data/03_EDA/02_QC/rse_tx_brain_pups_qc.Rdata"))
-load(here("processed-data/03_EDA/02_QC/rse_jx_brain_adults_qc.Rdata"))
-load(here("processed-data/03_EDA/02_QC/rse_jx_brain_pups_qc.Rdata"))
+load(here("processed-data/03_EDA/03_PCA/rse_gene_brain_adults_qc_afterPCA.Rdata"))
+load(here("processed-data/03_EDA/03_PCA/rse_gene_brain_pups_qc_afterPCA.Rdata"))
+load(here("processed-data/03_EDA/03_PCA/rse_exon_brain_adults_qc_afterPCA.Rdata"))
+load(here("processed-data/03_EDA/03_PCA/rse_exon_brain_pups_qc_afterPCA.Rdata"))
+load(here("processed-data/03_EDA/03_PCA/rse_tx_brain_adults_qc_afterPCA.Rdata"))
+load(here("processed-data/03_EDA/03_PCA/rse_tx_brain_pups_qc_afterPCA.Rdata"))
+load(here("processed-data/03_EDA/03_PCA/rse_jx_brain_adults_qc_afterPCA.Rdata"))
+load(here("processed-data/03_EDA/03_PCA/rse_jx_brain_pups_qc_afterPCA.Rdata"))
+
+## Reduce objects' names
+rse_gene_brain_adults_qc <- rse_gene_brain_adults_qc_afterPCA
+rse_gene_brain_pups_qc <- rse_gene_brain_pups_qc_afterPCA
+rse_exon_brain_adults_qc <- rse_exon_brain_adults_qc_afterPCA
+rse_exon_brain_pups_qc <- rse_exon_brain_pups_qc_afterPCA
+rse_tx_brain_adults_qc <- rse_tx_brain_adults_qc_afterPCA
+rse_tx_brain_pups_qc <- rse_tx_brain_pups_qc_afterPCA
+rse_jx_brain_adults_qc <- rse_jx_brain_adults_qc_afterPCA
+rse_jx_brain_pups_qc <- rse_jx_brain_pups_qc_afterPCA
+
 
 ## Brain data separated by type of experiment
 rse_gene_brain_adults_smoking<-rse_gene_brain_adults_qc[,rse_gene_brain_adults_qc$Expt=="Smoking"]
