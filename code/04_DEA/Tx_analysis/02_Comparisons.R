@@ -17,9 +17,7 @@ load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_smoking_fitted.Rda
 load(here("processed-data/04_DEA/Gene_analysis/results_pups_smoking_fitted.Rdata"))
 load(here("processed-data/05_GO_KEGG/Gene_analysis/intersections.Rdata"))     
 
-# load(here("processed-data/04_DEA/Exon_analysis/top_exons_nic.Rdata"))
 load(here("processed-data/04_DEA/Exon_analysis/de_exons_nic.Rdata"))
-# load(here("processed-data/04_DEA/Exon_analysis/top_exons_smo.Rdata"))
 load(here("processed-data/04_DEA/Exon_analysis/de_exons_smo.Rdata"))
 
 

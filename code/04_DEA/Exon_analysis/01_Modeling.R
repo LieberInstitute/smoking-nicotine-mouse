@@ -20,7 +20,10 @@ library(R.utils)
 library(sessioninfo)
 
 load(here("raw-data/rse_exon_smoking_mouse_n208.Rdata"))
-load(here("processed-data/03_EDA/02_QC/rse_exon_brain_pups_qc.Rdata"))
+load(here("processed-data/03_EDA/03_PCA/rse_exon_brain_pups_qc_afterPCA.Rdata"))
+
+## Simplify rse name
+rse_exon_brain_pups_qc <- rse_exon_brain_pups_qc_afterPCA
 
 ## Separate samples by Expt
 rse_exon_brain_pups_nicotine<-rse_exon_brain_pups_qc[,rse_exon_brain_pups_qc$Expt=="Nicotine"]
