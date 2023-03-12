@@ -1,5 +1,7 @@
 
-## Add gene and sample information in the rse objects for each analysis done
+## Create complete RSE objects at gene, exon, jxn and tx level adding lognorm counts, info of which features and samples 
+## passed filtering steps and which features were DE in the different groups of samples
+
 
 library(SummarizedExperiment)
 library(here)
@@ -175,10 +177,10 @@ rowData(rse_jx)$DE_in_pup_brain_smoking <- unlist(sapply(rownames(rowData(rse_jx
 
 
 ## Save complete datasets
-save(rse_gene, file="smokingMouse_pkg/data/rse_gene_complete.Rdata")
-save(rse_exon, file="smokingMouse_pkg/data/rse_exon_complete.Rdata")
-save(rse_tx, file="smokingMouse_pkg/data/rse_tx_complete.Rdata")
-save(rse_jx, file="smokingMouse_pkg/data/rse_jx_complete.Rdata")
+save(rse_gene, file="smokingMouse_pkg/inst/extdata/rse_gene_complete.Rdata")
+save(rse_exon, file="smokingMouse_pkg/inst/extdata/rse_exon_complete.Rdata")
+save(rse_tx, file="smokingMouse_pkg/inst/extdata/rse_tx_complete.Rdata")
+save(rse_jx, file="smokingMouse_pkg/inst/extdata/rse_jx_complete.Rdata")
 
 
 
