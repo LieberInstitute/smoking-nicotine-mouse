@@ -11,7 +11,8 @@ This project consists of a differential expression analysis involving 4 data typ
 
 ## Study design
  
-36 pregnant mice and 35 not pregnant female adults were administered nicotine (n=12), exposed to cigarette smoke (n=24) or controls (n=35) and RNA sequecing experiments were performed on frontal cortices of all the resultant 137 P0 pups and on frontal cortices (n=47) and blood (n=24) from the 71 adults, totaling 208 samples. Of the total pup samples, 19 were born to mice that were administered nicotine, 46 to mice exposed to smoking and the remainig 72 to control mice.
+36 pregnant mice and 35 not pregnant female adults were administered nicotine (n=12), exposed to cigarette smoke (n=24) or controls (n=35) and RNA sequencing experiments were performed on frontal cortices of all the resultant 137 P0 pups and on frontal cortices (n=47) and blood (n=24) from the 71 adults, totaling 208 samples. Of the total pup samples, 19 were born to mice that were administered nicotine, 46 to mice exposed to smoking and the remaining 72 to control mice.
+
 
 <img src="https://s3.us-west-2.amazonaws.com/secure.notion-static.com/618bb981-d4c7-4caa-8a1c-5af4cc0cfb83/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230131%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230131T012754Z&X-Amz-Expires=86400&X-Amz-Signature=ee963a83bf64bc83fdd1ee01bf22428c0d0ef8d47e1dfb1a01e78f9bf31be85e&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject" width="600px" align="center" />
 
