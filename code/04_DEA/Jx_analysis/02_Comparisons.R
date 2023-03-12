@@ -393,7 +393,7 @@ venn_plot(DE_lists, colors, "DEG_VS_txs_VS_exons_VS_jxns_ExonSkip", c("All", "Ni
 
 ### 1.2.2 Explore expression levels of genes with DE features in nic and smo
 
-## Create MA plot
+## Create MA plots
 MAplot <- function(top_genes, results, expt){
   
   DEG <- eval(parse_expr(paste("DEG", expt, sep="_")))
@@ -455,7 +455,7 @@ MAplot <- function(top_genes, results, expt){
   
   top_genes$DEfeatures_onlyOnelevel <- DEfeatures_onlyOnelevel
   
-  ## Plot
+  ## Plots
   cols <- c("DEG with DE txs, exons and jxns" = "orangered3", "DEG without DE txs, jxns and exons" = "cornflowerblue", 
             "Non-DE Gene with DE txs only"= "darkturquoise", "Non-DE Gene with DE exons only"= "chartreuse3", 
             "Non-DE Gene with DE jxns only"="deeppink1", "Rest of DEG"="wheat", "n.s." = "grey") 
@@ -470,6 +470,8 @@ MAplot <- function(top_genes, results, expt){
   vGene <- results[[1]][[2]]
   top_genes$mean_log_expr<-apply(vGene$E, 1, mean)
 
+  
+  ## MA plots
   p <-ggplot(data = top_genes, 
             aes(x = mean_log_expr,y = logFC,
                  fill = DEfeatures_onlyOnelevel,    
@@ -481,14 +483,32 @@ MAplot <- function(top_genes, results, expt){
     scale_alpha_manual(values = alphas) +
     labs(x="Mean of normalized counts", fill="Genes and their DE features", size="Genes and their DE features", alpha="Genes and their DE features") 
 
- ggsave(paste("plots/04_DEA/02_Comparisons/Jx_analysis/MAplots_DEfeatures_", expt, ".pdf", sep=""),
+  ggsave(paste("plots/04_DEA/02_Comparisons/Jx_analysis/MAplots_DEfeatures_", expt, ".pdf", sep=""),
         width = 25, height = 15, units = "cm")
+ 
+ 
+   ## Create facets of MA plots
+   p <-ggplot(data = top_genes, 
+              aes(x = mean_log_expr,y = logFC,
+                  fill = DEfeatures_onlyOnelevel,    
+                  alpha = DEfeatures_onlyOnelevel)) + 
+     geom_point(shape = 21, show.legend = FALSE) +
+     scale_fill_manual(values = cols) + 
+     scale_alpha_manual(values = alphas) +
+     labs(x="Mean of normalized counts") 
+   
+   p <- p +  facet_wrap(~DEfeatures_onlyOnelevel, scales = "fixed") +
+     theme(strip.text = element_text(size = 8, face = "bold"),
+           strip.background = element_blank())
+   
+   ggsave(paste("plots/04_DEA/02_Comparisons/Jx_analysis/facets_MAplots_DEfeatures_", expt, ".pdf", sep=""),
+          width = 17, height = 15, units = "cm")
 }
 
-## MA plot for nicotine genes
+## MA plots for nicotine genes
 MAplot(top_genes_pups_nicotine_fitted, results_pups_nicotine_fitted, "nic")
 
-## MA plot for smoking genes
+## MA plots for smoking genes
 MAplot(top_genes_pups_smoking_fitted, results_pups_smoking_fitted, "smo")
 
 
