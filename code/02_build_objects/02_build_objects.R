@@ -2,7 +2,7 @@
 #processed-data/01_SPEAQeasy/pipeline_output/count_objects/
 
 
-# 1. Build objects
+# 1. Data preparation
 
 
 ## Load required libraries
@@ -18,7 +18,7 @@ library(biomartr)
 library(sessioninfo)
 
 
-## 1.1 Data exploration and preparation
+## 1.1 Data exploration and correction
 
 ## Load RSE objects
 load(here("raw-data/rse_exon_smoking_mouse_n208.Rdata"))
