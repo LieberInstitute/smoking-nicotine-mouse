@@ -1,6 +1,6 @@
 
 # 1. Explore sample effects
-
+##  (Dimensionality Reduction) 
 
 ## Load data
 load(here("processed-data/02_build_objects/rse_gene_brain.Rdata"))
@@ -18,9 +18,7 @@ rse_gene_brain_qc<-rse_gene_brain
 
 
 
-## 1.1 Dimensionality Reduction 
-
-### 1.1.1 Principal Component Analysis (PCA)
+### 1.1 Principal Component Analysis (PCA)
 ### Explore samples' expression variation
 
 ## Generate PCA data
@@ -149,7 +147,7 @@ plot_PCAs("jx", "brain", "pups")
 
 
 
-### 1.1.1.1 Manual sample filtering 
+### 1.1.1 Manual sample filtering 
 ## Removal of rare samples in brain PCA plots
 
 ## PC data
@@ -324,7 +322,7 @@ plot_PCAs("jx", "brain", "pups")
 
 
 
-### 1.1.1.2 Explore nicotine and smoking samples' separation by Group
+### 1.1.2 Explore the separation of nicotine and smoking samples by Group
 
 ## PCA plots for Group and Expt
 PCA_Expt_Group<- function(type, tissue, age){
@@ -383,8 +381,7 @@ PCA_Expt_Group("jx", "brain", "pups")
 
 
 
-### 1.1.1.3 Explore samples' gene expression variation across phenotypes by Group
-
+### 1.1.3 Explore separation of samples by phenotype and Group in a PC 
 ## PC boxplots 
 PC_boxplots <- function (PCx, pheno_var1, pheno_var2, pca_data, pca_vars) {
     plot=ggplot(data=pca_data, 
@@ -401,7 +398,7 @@ PC_boxplots <- function (PCx, pheno_var1, pheno_var2, pca_data, pca_vars) {
     return(plot)
 }
 
-## Boxplots of PC1 data separated by Group and phenotypes
+## Boxplots of PC1 data of samples separated by Group and phenotypes
 plot_PC_boxplots<-function(PCx, type, tissue, age) {
   pca_data<-PCA(tissue, type, age)[[1]]
   pca_vars<-PCA(tissue, type, age)[[2]]
@@ -462,7 +459,7 @@ plot_PC_boxplots("PC2", "gene", "brain", "pups")
 
 
 
-## 1.1.2  Multidimensional scaling (MDS)
+## 1.2  Multidimensional scaling (MDS)
 
 ## MDS plot
 MDS<- function(pheno_var, MDS){
