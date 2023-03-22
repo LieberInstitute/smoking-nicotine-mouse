@@ -21,7 +21,7 @@ rse_gene_brain_qc<-rse_gene_brain
 ## 1.1 Dimensionality Reduction 
 
 ### 1.1.1 Principal Component Analysis (PCA)
-### 1.1.1.1 Explore samples' expression variation
+### Explore samples' expression variation
 
 ## Generate PCA data
 PCA<-function(tissue, type, age){
@@ -149,7 +149,9 @@ plot_PCAs("jx", "brain", "pups")
 
 
 
-## Rare samples in brain PCA plots
+### 1.1.1.1 Manual sample filtering 
+## Removal of rare samples in brain PCA plots
+
 ## PC data
 pca_data_gene_brain_adults<-PCA("brain", "gene", "adults")[[1]]
 pca_data_exon_brain_adults<-PCA("brain", "exon", "adults")[[1]]
