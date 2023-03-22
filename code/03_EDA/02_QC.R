@@ -32,9 +32,11 @@ load(here("processed-data/02_build_objects/rse_jx_brain_pups.Rdata"))
 
 
 
-## 1.1 Relationships between QC variables and mouse phenotypes
+## 1.1 Explore QC metrics of samples in different groups 
 
-## Boxplots 
+
+## 1.1.1 Boxplots of quality metrics 
+
 create_boxplots <- function(pheno_var, qc_var, tissue, age) {
   if (is.null(age)){
     ## Tissue data
@@ -96,9 +98,9 @@ table(rse_gene_blood$trimmed)
 
 
 
-## 1.2 Plot quality metrics per sample
+## 1.1.2 Scatterplots of quality metrics per sample
 
-## Detected/mt/ribo genes VS total counts 
+## Plots of number of genes & mt/ribo proportions VS total counts 
 ## Samples separated by phenotypes
 sum_vs_qc<- function (pheno_var, qc_stats, qc_stats_lab, label, tissue, age){
     if (is.null(age)){
@@ -249,8 +251,9 @@ plot_mito_vs_ribo("brain", "pups")
 
 
 
-## 1.3 Sample filtering by QC 
-### 1.3.1 Detection-based and Mito/Ribo filtering 
+
+## 1.2 Sample filtering by QC 
+## Based on their detected number of genes, library sizes and proportions of ribo/mt counts
 
 # Filter brain samples
 ## Drop samples with lower library sizes and number of genes
@@ -331,11 +334,11 @@ save(rse_gene_blood_qc, file = 'processed-data/03_EDA/02_QC/rse_gene_blood_qc.Rd
 
 
 
-### 1.3.2 Plot QC metrics for samples retained and samples dropped
+### 1.2.1 Scatterplots of QC metrics for samples retained and samples dropped
 
 ## Generate column with samples retained/dropped
 qc_filt_col <- function(tissue, age){
-  if (is.null(age)){
+  if (is.null(age)){ 
     RSE<-eval(parse_expr(paste("rse_gene_", tissue, sep="")))
     RSE_qc<-eval(parse_expr(paste("rse_gene", tissue, "qc", sep="_")))
   }
@@ -413,7 +416,10 @@ plots_Retained("brain", "pups")
 
 
 
-## Boxplots of QC metrics after sample filtering 
+
+
+## 1.2.2 Boxplots of QC metrics after sample filtering 
+
 ## Samples separated by Retention and phenotype
 QC_boxplots <- function (pheno_var1, pheno_var2, qc_var, tissue, age) {
   if (is.null(age)){
@@ -473,6 +479,9 @@ plot_QC_boxplots("brain", NULL)
 plot_QC_boxplots("blood", NULL)
 plot_QC_boxplots("brain", "adults")
 plot_QC_boxplots("brain", "pups")
+
+
+
 
 
 
