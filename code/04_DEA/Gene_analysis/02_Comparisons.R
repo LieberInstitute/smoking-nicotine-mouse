@@ -1381,7 +1381,7 @@ venn_plot(DEG_lists, colors, "all_DEG")
 
 
 ################################################################################
-##          5.  Venn diagrams of mouse replicating genes in human
+##          4.  Venn diagrams of mouse replicating genes in human
 ################################################################################
 
 ## Note: each circle represents the number of unique gene pairs (mouse-human homologs), with p<0.05 in adult mouse / FDR<0.05 in mouse pups, 
@@ -1490,12 +1490,39 @@ venn_human_vs_mouse("adultHuman_bloodMouse_data", "adult", "smoking", "blood", "
 
 
 ################################################################################################
-##      6. Venn diagrams of Tobacco Use Disorder (TUD) associated human genes vs mouse DEG 
+##      5. Venn diagrams of Tobacco Use Disorder (TUD) associated human genes vs mouse DEG 
 ################################################################################################
 
-## Access to data
+## Prepare data
 
+## Data of
+TUD_multi_UKBB_nearestGenes <- as.data.frame(TUD_multi_UKBB_nearestGenes)
+colnames(TUD_multi_UKBB_nearestGenes) <- TUD_multi_UKBB_nearestGenes[1,]
+TUD_multi_UKBB_nearestGenes <- TUD_multi_UKBB_nearestGenes[-1,]
 
+TUD_EUR_UKBB_nearestGenes <- as.data.frame(TUD_EUR_UKBB_nearestGenes)
+colnames(TUD_EUR_UKBB_nearestGenes) <- TUD_EUR_UKBB_nearestGenes[1,]
+TUD_EUR_UKBB_nearestGeness <- TUD_EUR_UKBB_nearestGenes[-1,]
+
+TUD_AA_nearestGenes <- as.data.frame(TUD_AA_nearestGenes)
+colnames(TUD_AA_nearestGenes) <- TUD_AA_nearestGenes[1,]
+TUD_AA_nearestGenes <- TUD_AA_nearestGenes[-1,]
+
+TUD_EUR_MAGMA_associatedGenes <- as.data.frame(TUD_EUR_MAGMA_associatedGenes)
+colnames(TUD_EUR_MAGMA_associatedGenes) <- TUD_EUR_MAGMA_associatedGenes[1,]
+TUD_EUR_MAGMA_associatedGenes <- TUD_EUR_MAGMA_associatedGenes[-1,]
+
+TUD_EUR_H_MAGMA_associatedGenes <- as.data.frame(TUD_EUR_H_MAGMA_associatedGenes)
+colnames(TUD_EUR_H_MAGMA_associatedGenes) <- TUD_EUR_H_MAGMA_associatedGenes[1,]
+TUD_EUR_H_MAGMA_associatedGenes <- TUD_EUR_H_MAGMA_associatedGenes[-1,]
+
+TUD_EUR_S_MultiXcan_associatedGenes<- as.data.frame(TUD_EUR_S_MultiXcan_associatedGenes)
+colnames(TUD_EUR_S_MultiXcan_associatedGenes) <- TUD_EUR_S_MultiXcan_associatedGenes[1,]
+TUD_EUR_S_MultiXcan_associatedGenes <- TUD_EUR_S_MultiXcan_associatedGenes[-1,]
+
+TUD_EUR_S_PrediXcan_associatedGenes <- as.data.frame(TUD_EUR_S_PrediXcan_associatedGenes)
+colnames(TUD_EUR_S_PrediXcan_associatedGenes) <- TUD_EUR_S_PrediXcan_associatedGenes[1,]
+TUD_EUR_S_PrediXcan_associatedGenes <- TUD_EUR_S_PrediXcan_associatedGenes[-1,]
 
 ####### 6.1 All nearest human genes vs nicotine mouse DEG
 
