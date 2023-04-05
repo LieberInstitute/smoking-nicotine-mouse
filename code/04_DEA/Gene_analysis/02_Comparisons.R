@@ -33,6 +33,9 @@ load(here("processed-data/04_DEA/Tx_analysis/top_tx_smo.Rdata"))
 ## (from Steve's paper https://github.com/LieberInstitute/Smoking_DLPFC_Devel/blob/master/README.md)
 load(here("raw-data/Genes_DE_sva.rda"))
 
+## Data from ...
+
+
 
 
 ### 1.2.1 T-stats plots
@@ -1190,7 +1193,7 @@ venn_plot<-function(DEG_lists, colors, filename){
 
 
 ################################################################################
-##                   Compare naive VS fitted models DEG 
+##                  1. Compare naive VS fitted models DEG 
 ################################################################################
 
 ## Nicotine DEG
@@ -1222,7 +1225,7 @@ venn_plot(DEG_lists, colors, "model_smo_and_nic")
 
 
 ################################################################################
-##                Venn diagrams for Up and Down regulated DEG
+##              2. Venn diagrams for Up and Down regulated DEG
 ################################################################################
 
 ## Genes of each group
@@ -1339,7 +1342,7 @@ venn_plot(DEG_lists, colors, "Fitted_smo_VS_nic_Up_and_Down")
 
 
 ################################################################################
-##                Compare all 4 groups of DEG (by expt and model)
+##              3. Compare all 4 groups of DEG (by expt and model)
 ################################################################################
 
 DEG_all<-list(
@@ -1370,7 +1373,7 @@ venn_plot(DEG_lists, colors, "all_DEG")
 
 
 ################################################################################
-##          Venn diagrams of mouse replicating genes in human
+##          5.  Venn diagrams of mouse replicating genes in human
 ################################################################################
 
 ## Note: each circle represents the number of unique gene pairs (mouse-human homologs), with p<0.05 in adult mouse / FDR<0.05 in mouse pups, 
@@ -1477,6 +1480,28 @@ venn_human_vs_mouse("adultHuman_adultSmoMouse_data", "adult", "smoking", "brain"
 venn_human_vs_mouse("adultHuman_bloodMouse_data", "adult", "smoking", "blood", "adult")
 
 
+
+################################################################################################
+##      6. Venn diagrams of Tobacco Use Disorder (TUD) associated human genes vs mouse DEG 
+################################################################################################
+
+
+
+
+## Load files
+TUD_multi_UKBB_nearestGenes <- read_excel("raw-data/TUD-multi+UKBB_NearestGenes.xlsx")
+TUD_EUR_UKBB_nearestGenes <- read_excel("raw-data/TUD-EUR+UKBB_NearestGenes.xlsx")
+TUD_AA_nearestGenes <- read_excel("raw-data/TUD-AA_NearestGenes.xlsx")
+TUD_EUR_MAGMA_associatedGenes <- read_excel("raw-data/TUD-EUR_MAGMA_associatedGenes.xlsx")
+TUD_EUR_H_MAGMA_associatedGenes <- read_excel("raw-data/TUD-EUR_H-MAGMA_associatedGenes.xlsx")
+TUD_EUR_S_MultiXcan_associatedGenes <- read_excel("raw-data/TUD-EUR_S-MultiXcan_associatedGenes.xlsx")
+TUD_EUR_S_PrediXcan_associatedGenes <- read_excel("raw-data/TUD-EUR_S-PrediXcan_associatedGenes.xlsx")
+
+## Access to data
+
+
+
+####### 6.1 All nearest human genes vs nicotine mouse DEG
 
 
 
