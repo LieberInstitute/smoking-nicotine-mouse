@@ -29,12 +29,20 @@ load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_smoking_interactio
 load(here("processed-data/04_DEA/Tx_analysis/top_tx_nic.Rdata"))
 load(here("processed-data/04_DEA/Tx_analysis/top_tx_smo.Rdata"))
 
-## Data from prenatal and adult human postmortem prefrontal cortices 
-## (from Steve's paper https://github.com/LieberInstitute/Smoking_DLPFC_Devel/blob/master/README.md)
+## Data from prenatal and adult human postmortem prefrontal cortices exposed to cigarette smoke
+## (from Semick, S.A. et al. (2018) in Mol Psychiatry, DOI: https://doi.org/10.1038/s41380-018-0223-1
+## Check code here: https://github.com/LieberInstitute/Smoking_DLPFC_Devel/blob/master/README.md)
 load(here("raw-data/Genes_DE_sva.rda"))
 
-## Data from ...
-
+## Data of nearest and associated genes to genome-wide significant SNPs related to Tobacco Use Disorder (TUD)
+## (from Toikumo, S. et al. (2023), in medRxiv, DOI: https://doi.org/10.1101/2023.03.27.23287713)
+TUD_multi_UKBB_nearestGenes <- read_excel("raw-data/TUD-multi+UKBB_NearestGenes.xlsx")
+TUD_EUR_UKBB_nearestGenes <- read_excel("raw-data/TUD-EUR+UKBB_NearestGenes.xlsx")
+TUD_AA_nearestGenes <- read_excel("raw-data/TUD-AA_NearestGenes.xlsx")
+TUD_EUR_MAGMA_associatedGenes <- read_excel("raw-data/TUD-EUR_MAGMA_associatedGenes.xlsx")
+TUD_EUR_H_MAGMA_associatedGenes <- read_excel("raw-data/TUD-EUR_H-MAGMA_associatedGenes.xlsx")
+TUD_EUR_S_MultiXcan_associatedGenes <- read_excel("raw-data/TUD-EUR_S-MultiXcan_associatedGenes.xlsx")
+TUD_EUR_S_PrediXcan_associatedGenes <- read_excel("raw-data/TUD-EUR_S-PrediXcan_associatedGenes.xlsx")
 
 
 
@@ -1484,18 +1492,6 @@ venn_human_vs_mouse("adultHuman_bloodMouse_data", "adult", "smoking", "blood", "
 ################################################################################################
 ##      6. Venn diagrams of Tobacco Use Disorder (TUD) associated human genes vs mouse DEG 
 ################################################################################################
-
-
-
-
-## Load files
-TUD_multi_UKBB_nearestGenes <- read_excel("raw-data/TUD-multi+UKBB_NearestGenes.xlsx")
-TUD_EUR_UKBB_nearestGenes <- read_excel("raw-data/TUD-EUR+UKBB_NearestGenes.xlsx")
-TUD_AA_nearestGenes <- read_excel("raw-data/TUD-AA_NearestGenes.xlsx")
-TUD_EUR_MAGMA_associatedGenes <- read_excel("raw-data/TUD-EUR_MAGMA_associatedGenes.xlsx")
-TUD_EUR_H_MAGMA_associatedGenes <- read_excel("raw-data/TUD-EUR_H-MAGMA_associatedGenes.xlsx")
-TUD_EUR_S_MultiXcan_associatedGenes <- read_excel("raw-data/TUD-EUR_S-MultiXcan_associatedGenes.xlsx")
-TUD_EUR_S_PrediXcan_associatedGenes <- read_excel("raw-data/TUD-EUR_S-PrediXcan_associatedGenes.xlsx")
 
 ## Access to data
 
