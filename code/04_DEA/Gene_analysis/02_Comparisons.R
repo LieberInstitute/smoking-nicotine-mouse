@@ -36,13 +36,13 @@ load(here("raw-data/Genes_DE_sva.rda"))
 
 ## Data of nearest and associated genes to genome-wide significant SNPs related to Tobacco Use Disorder (TUD)
 ## (from Toikumo, S. et al. (2023), in medRxiv, DOI: https://doi.org/10.1101/2023.03.27.23287713)
-TUD_multi_UKBB_nearestGenes <- read_excel("raw-data/TUD-multi+UKBB_NearestGenes.xlsx")
-TUD_EUR_UKBB_nearestGenes <- read_excel("raw-data/TUD-EUR+UKBB_NearestGenes.xlsx")
-TUD_AA_nearestGenes <- read_excel("raw-data/TUD-AA_NearestGenes.xlsx")
-TUD_EUR_MAGMA_associatedGenes <- read_excel("raw-data/TUD-EUR_MAGMA_associatedGenes.xlsx")
-TUD_EUR_H_MAGMA_associatedGenes <- read_excel("raw-data/TUD-EUR_H-MAGMA_associatedGenes.xlsx")
-TUD_EUR_S_MultiXcan_associatedGenes <- read_excel("raw-data/TUD-EUR_S-MultiXcan_associatedGenes.xlsx")
-TUD_EUR_S_PrediXcan_associatedGenes <- read_excel("raw-data/TUD-EUR_S-PrediXcan_associatedGenes.xlsx")
+TUD_multi_UKBB <- read_excel("raw-data/TUD-multi+UKBB_NearestGenes.xlsx")
+TUD_EUR_UKBB <- read_excel("raw-data/TUD-EUR+UKBB_NearestGenes.xlsx")
+TUD_AA <- read_excel("raw-data/TUD-AA_NearestGenes.xlsx")
+TUD_EUR_MAGMA <- read_excel("raw-data/TUD-EUR_MAGMA_associatedGenes.xlsx")
+TUD_EUR_H_MAGMA<- read_excel("raw-data/TUD-EUR_H-MAGMA_associatedGenes.xlsx")
+TUD_EUR_S_MultiXcan <- read_excel("raw-data/TUD-EUR_S-MultiXcan_associatedGenes.xlsx")
+TUD_EUR_S_PrediXcan <- read_excel("raw-data/TUD-EUR_S-PrediXcan_associatedGenes.xlsx")
 
 
 
@@ -1501,51 +1501,80 @@ venn_human_vs_mouse("adultHuman_bloodMouse_data", "adult", "smoking", "blood", "
 ## the nearest genes of those SNPs: 
 
 ## TUD-multi+UKBB data resulted from a multi-ancestral GWAS meta-analysis of TUD cases and controls in individuals from 8 cohorts (including UKBB) with European (EUR), African American (AA) and Latin American (LA) ancestry.
-TUD_multi_UKBB_nearestGenes <- as.data.frame(TUD_multi_UKBB_nearestGenes)
-colnames(TUD_multi_UKBB_nearestGenes) <- TUD_multi_UKBB_nearestGenes[1,]
-TUD_multi_UKBB_nearestGenes <- TUD_multi_UKBB_nearestGenes[-1,]
+TUD_multi_UKBB <- as.data.frame(TUD_multi_UKBB)
+colnames(TUD_multi_UKBB) <- TUD_multi_UKBB[1,]
+TUD_multi_UKBB <- TUD_multi_UKBB[-1,]
 
 ## TUD-EUR+UKBB data resulted from a within-ancestry GWAS meta-analysis in EUR individuals from 5 cohorts, including UKBB data.
-TUD_EUR_UKBB_nearestGenes <- as.data.frame(TUD_EUR_UKBB_nearestGenes)
-colnames(TUD_EUR_UKBB_nearestGenes) <- TUD_EUR_UKBB_nearestGenes[1,]
-TUD_EUR_UKBB_nearestGeness <- TUD_EUR_UKBB_nearestGenes[-1,]
+TUD_EUR_UKBB <- as.data.frame(TUD_EUR_UKBB)
+colnames(TUD_EUR_UKBB) <- TUD_EUR_UKBB[1,]
+TUD_EUR_UKBB <- TUD_EUR_UKBB[-1,]
+## Remove empty last line
+TUD_EUR_UKBB <- TUD_EUR_UKBB[-dim(TUD_EUR_UKBB)[1],]
 
 ## TUD-AA data resulted from a within-ancestry GWAS meta-analysis in AA individuals from 2 cohorts.
-TUD_AA_nearestGenes <- as.data.frame(TUD_AA_nearestGenes)
-colnames(TUD_AA_nearestGenes) <- TUD_AA_nearestGenes[1,]
-TUD_AA_nearestGenes <- TUD_AA_nearestGenes[-1,]
+TUD_AA <- as.data.frame(TUD_AA)
+colnames(TUD_AA) <- TUD_AA[1,]
+TUD_AA <- TUD_AA[-1,]
 
 ## Of note: no GWS loci were identified in LA individuals from the single cohort used
-
 
 
 ## The next datasets contain information of significant genes associated to EUR-SNPs (candidate risk genes)
 ## The SNPs were obtained from the TUD-EUR GWAS (that didn't add the UKBB cohort): 
 
-## TUD-EUR-MAGMA dataset has data of genes significantly associated to the SNPs, obtained using MAGMA.
-TUD_EUR_MAGMA_associatedGenes <- as.data.frame(TUD_EUR_MAGMA_associatedGenes)
-colnames(TUD_EUR_MAGMA_associatedGenes) <- TUD_EUR_MAGMA_associatedGenes[1,]
-TUD_EUR_MAGMA_associatedGenes <- TUD_EUR_MAGMA_associatedGenes[-1,]
+## TUD-EUR-MAGMA dataset has data of genes significantly associated to the SNPs (p<2.63E-06), obtained using MAGMA.
+TUD_EUR_MAGMA <- as.data.frame(TUD_EUR_MAGMA)
+colnames(TUD_EUR_MAGMA) <- TUD_EUR_MAGMA[1,]
+TUD_EUR_MAGMA <- TUD_EUR_MAGMA[-1,]
 
 ## TUD-EUR-H-MAGMA dataset contains neurobiologically relevant target genes: brain genes associated with TUD (p<9.44E-07),
 ## including certain cell-types or developmental stages in which they're specifically expressed. They were obtained with H-MAGMA.
-TUD_EUR_H_MAGMA_associatedGenes <- as.data.frame(TUD_EUR_H_MAGMA_associatedGenes)
-colnames(TUD_EUR_H_MAGMA_associatedGenes) <- TUD_EUR_H_MAGMA_associatedGenes[1,]
-TUD_EUR_H_MAGMA_associatedGenes <- TUD_EUR_H_MAGMA_associatedGenes[-1,]
+TUD_EUR_H_MAGMA <- as.data.frame(TUD_EUR_H_MAGMA)
+colnames(TUD_EUR_H_MAGMA) <- TUD_EUR_H_MAGMA[1,]
+TUD_EUR_H_MAGMA <- TUD_EUR_H_MAGMA[-1,]
+## Remove empty last line
+TUD_EUR_H_MAGMA <- TUD_EUR_H_MAGMA[-dim(TUD_EUR_H_MAGMA)[1],]
 
 ## TUD-EUR-S-MultiXcan contains significant predicted genes whose expression is affected by the SNPs in brain tissues.
 ## The analysis was performed using S-MultiXcan
-TUD_EUR_S_MultiXcan_associatedGenes<- as.data.frame(TUD_EUR_S_MultiXcan_associatedGenes)
-colnames(TUD_EUR_S_MultiXcan_associatedGenes) <- TUD_EUR_S_MultiXcan_associatedGenes[1,]
-TUD_EUR_S_MultiXcan_associatedGenes <- TUD_EUR_S_MultiXcan_associatedGenes[-1,]
+TUD_EUR_S_MultiXcan<- as.data.frame(TUD_EUR_S_MultiXcan)
+colnames(TUD_EUR_S_MultiXcan) <- TUD_EUR_S_MultiXcan[1,]
+TUD_EUR_S_MultiXcan <- TUD_EUR_S_MultiXcan[-1,]
+## Remove empty last line
+TUD_EUR_S_MultiXcan <- TUD_EUR_S_MultiXcan[-dim(TUD_EUR_S_MultiXcan)[1],]
 
 ## TUD-EUR-S-PrediXcan has affected genes in specific brain regions, returned by S-PrediXcan. 
-TUD_EUR_S_PrediXcan_associatedGenes <- as.data.frame(TUD_EUR_S_PrediXcan_associatedGenes)
-colnames(TUD_EUR_S_PrediXcan_associatedGenes) <- TUD_EUR_S_PrediXcan_associatedGenes[1,]
-TUD_EUR_S_PrediXcan_associatedGenes <- TUD_EUR_S_PrediXcan_associatedGenes[-1,]
+TUD_EUR_S_PrediXcan <- as.data.frame(TUD_EUR_S_PrediXcan)
+colnames(TUD_EUR_S_PrediXcan) <- TUD_EUR_S_PrediXcan[1,]
+TUD_EUR_S_PrediXcan<- TUD_EUR_S_PrediXcan[-1,]
+
 
 
 ## Extract genes from datasets
+
+## Nearest genes
+TUD_multi_UKBB_nearestGenes <- as.vector(na.omit(TUD_multi_UKBB$Nearest_Gene))
+TUD_EUR_UKBB_nearestGenes <- as.vector(na.omit(TUD_EUR_UKBB$Nearest_Gene))
+TUD_AA_nearestGenes <- as.vector(na.omit(TUD_AA$Nearest_Gene))
+
+## Associated genes
+TUD_EUR_MAGMA_associatedGenes <- as.vector(na.omit(TUD_EUR_MAGMA$SYMBOL))
+## Associated brain genes
+TUD_EUR_H_MAGMA_associatedGenes <- as.vector(na.omit(TUD_EUR_H_MAGMA$SYMBOL))
+## Associated genes specific of fetal human brain
+TUD_EUR_H_MAGMA_fetal_associatedGenes <- as.vector(na.omit(TUD_EUR_H_MAGMA[which(TUD_EUR_H_MAGMA$Type=="Fetal_brain"), "SYMBOL"]))
+## Associated genes specific of adult human brain
+TUD_EUR_H_MAGMA_adult_associatedGenes <- as.vector(na.omit(TUD_EUR_H_MAGMA[which(TUD_EUR_H_MAGMA$Type=="Adult_brain"), "SYMBOL"]))
+## Affected genes in brain
+TUD_EUR_S_MultiXcan_associatedGenes <- as.vector(na.omit(TUD_EUR_S_MultiXcan$gene_name))
+TUD_EUR_S_PrediXcan_associatedGenes <- as.vector(na.omit(TUD_EUR_S_PrediXcan$`gene name`))
+## Affected genes in frontal cortex
+TUD_EUR_S_MultiXcan_FrontalCortex_associatedGenes <- as.vector(na.omit(TUD_EUR_S_MultiXcan[which(TUD_EUR_S_MultiXcan$t_i_best=="Frontal_Cortex_BA9"), "gene_name"]))
+TUD_EUR_S_PrediXcan_FrontalCortex_associatedGenes <- as.vector(na.omit(TUD_EUR_S_PrediXcan[which(TUD_EUR_S_PrediXcan$tissue=="Brain Frontal Cortex BA9"), "gene name"]))
+
+
+
 
 
 
