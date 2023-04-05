@@ -1383,6 +1383,7 @@ venn_plot(DEG_lists, colors, "all_DEG")
 ################################################################################
 ##          4.  Venn diagrams of mouse replicating genes in human
 ################################################################################
+## (Mouse genes are from fitted models only)
 
 ## Note: each circle represents the number of unique gene pairs (mouse-human homologs), with p<0.05 in adult mouse / FDR<0.05 in mouse pups, 
 ## p<0.05 in prenatal/adult human brain and the same logFC sign in both species. Therefore, the intersection contains the replicating genes. 
@@ -1492,39 +1493,74 @@ venn_human_vs_mouse("adultHuman_bloodMouse_data", "adult", "smoking", "blood", "
 ################################################################################################
 ##      5. Venn diagrams of Tobacco Use Disorder (TUD) associated human genes vs mouse DEG 
 ################################################################################################
+## (Mouse pup DEG are from fitted models only)
 
-## Prepare data
+## Prepare & describe datasets
 
-## Data of
+## The following datasets contain genome-wide significant (GWS) lead SNPs (p<5.00E-08) in loci associated with TUD, as well as
+## the nearest genes of those SNPs: 
+
+## TUD-multi+UKBB data resulted from a multi-ancestral GWAS meta-analysis of TUD cases and controls in individuals from 8 cohorts (including UKBB) with European (EUR), African American (AA) and Latin American (LA) ancestry.
 TUD_multi_UKBB_nearestGenes <- as.data.frame(TUD_multi_UKBB_nearestGenes)
 colnames(TUD_multi_UKBB_nearestGenes) <- TUD_multi_UKBB_nearestGenes[1,]
 TUD_multi_UKBB_nearestGenes <- TUD_multi_UKBB_nearestGenes[-1,]
 
+## TUD-EUR+UKBB data resulted from a within-ancestry GWAS meta-analysis in EUR individuals from 5 cohorts, including UKBB data.
 TUD_EUR_UKBB_nearestGenes <- as.data.frame(TUD_EUR_UKBB_nearestGenes)
 colnames(TUD_EUR_UKBB_nearestGenes) <- TUD_EUR_UKBB_nearestGenes[1,]
 TUD_EUR_UKBB_nearestGeness <- TUD_EUR_UKBB_nearestGenes[-1,]
 
+## TUD-AA data resulted from a within-ancestry GWAS meta-analysis in AA individuals from 2 cohorts.
 TUD_AA_nearestGenes <- as.data.frame(TUD_AA_nearestGenes)
 colnames(TUD_AA_nearestGenes) <- TUD_AA_nearestGenes[1,]
 TUD_AA_nearestGenes <- TUD_AA_nearestGenes[-1,]
 
+## Of note: no GWS loci were identified in LA individuals from the single cohort used
+
+
+
+## The next datasets contain information of significant genes associated to EUR-SNPs (candidate risk genes)
+## The SNPs were obtained from the TUD-EUR GWAS (that didn't add the UKBB cohort): 
+
+## TUD-EUR-MAGMA dataset has data of genes significantly associated to the SNPs, obtained using MAGMA.
 TUD_EUR_MAGMA_associatedGenes <- as.data.frame(TUD_EUR_MAGMA_associatedGenes)
 colnames(TUD_EUR_MAGMA_associatedGenes) <- TUD_EUR_MAGMA_associatedGenes[1,]
 TUD_EUR_MAGMA_associatedGenes <- TUD_EUR_MAGMA_associatedGenes[-1,]
 
+## TUD-EUR-H-MAGMA dataset contains neurobiologically relevant target genes: brain genes associated with TUD (p<9.44E-07),
+## including certain cell-types or developmental stages in which they're specifically expressed. They were obtained with H-MAGMA.
 TUD_EUR_H_MAGMA_associatedGenes <- as.data.frame(TUD_EUR_H_MAGMA_associatedGenes)
 colnames(TUD_EUR_H_MAGMA_associatedGenes) <- TUD_EUR_H_MAGMA_associatedGenes[1,]
 TUD_EUR_H_MAGMA_associatedGenes <- TUD_EUR_H_MAGMA_associatedGenes[-1,]
 
+## TUD-EUR-S-MultiXcan contains significant predicted genes whose expression is affected by the SNPs in brain tissues.
+## The analysis was performed using S-MultiXcan
 TUD_EUR_S_MultiXcan_associatedGenes<- as.data.frame(TUD_EUR_S_MultiXcan_associatedGenes)
 colnames(TUD_EUR_S_MultiXcan_associatedGenes) <- TUD_EUR_S_MultiXcan_associatedGenes[1,]
 TUD_EUR_S_MultiXcan_associatedGenes <- TUD_EUR_S_MultiXcan_associatedGenes[-1,]
 
+## TUD-EUR-S-PrediXcan has affected genes in specific brain regions, returned by S-PrediXcan. 
 TUD_EUR_S_PrediXcan_associatedGenes <- as.data.frame(TUD_EUR_S_PrediXcan_associatedGenes)
 colnames(TUD_EUR_S_PrediXcan_associatedGenes) <- TUD_EUR_S_PrediXcan_associatedGenes[1,]
 TUD_EUR_S_PrediXcan_associatedGenes <- TUD_EUR_S_PrediXcan_associatedGenes[-1,]
 
-####### 6.1 All nearest human genes vs nicotine mouse DEG
+
+## Extract genes from datasets
+
+
+
+## Obtain the homologs in mouse
+
+
+
+
+
+
+############### 5.1 TUD-multi+UKBB nearest human genes vs mouse pup DEG ###############
+
+
+
+
 
 
 
