@@ -1660,8 +1660,8 @@ venn_humanGWASGenes_vs_mouseDEG <- function (human_dataset, name, human_genes_de
   }
   else {
     margin =0.4
-    cat_cex = c(1, 1.2)
-    cat_dist = c(0.38, 0.05)
+    cat_cex = c(0.9, 1.2)
+    cat_dist = c(0.36, 0.05)
     cat_pos = list(c(260,0), c(260,0))
     cex = 1.6
   }
