@@ -69,7 +69,7 @@ DEexons_genes_smo<-unique(de_exons_smo$gencodeID)
 DEjxns_genes_nic <- unique(de_jxns_nic$newGeneID)[which(!is.na(unique(de_jxns_nic$newGeneID)))]
 DEjxns_genes_smo <- unique(de_jxns_smo$newGeneID)[which(!is.na(unique(de_jxns_smo$newGeneID)))]
 
-## Define groups of genes associated to Novel DE jxns
+## Define groups of genes associated with Novel DE jxns
 novel_de_jxns_nic <- unique(de_jxns_nic[which(de_jxns_nic$Class=="Novel"), "newGeneID"])
 Novel_DEjxns_genes_nic <- novel_de_jxns_nic[which(!is.na(novel_de_jxns_nic))]
 novel_de_jxns_smo <- unique(de_jxns_smo[which(de_jxns_smo$Class=="Novel"), "newGeneID"])
@@ -145,7 +145,7 @@ venn_plot(DE_lists, colors, "DEG_VS_txs_VS_exons_VS_jxns", c("All", "Nicotine", 
 
 
 ##########################################################################################
-## Compare DEG vs DE txs' genes vs DE exons' genes vs genes associated to Novel DE jxns
+## Compare DEG vs DE txs' genes vs DE exons' genes vs genes associated with Novel DE jxns
 ##########################################################################################
 
 ## All genes

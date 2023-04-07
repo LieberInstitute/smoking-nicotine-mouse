@@ -185,7 +185,7 @@ rse_exon_filt<-rse_exon[which(filterByExpr(assay(rse_exon),
 dim(rse_exon_filt)
 # 290800 208 
 
-## Add gene symbol of all genes associated to exons
+## Add gene symbol of all genes associated with exons
 rowData(rse_exon_filt)$MGI_Symbol<-rowData(rse_exon_filt)$Symbol
 symbols<-biomart(genes  = unique(rowData(rse_exon_filt)$ensemblID),
                  mart       = "ENSEMBL_MART_ENSEMBL",

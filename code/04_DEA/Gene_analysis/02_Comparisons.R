@@ -1520,10 +1520,10 @@ TUD_AA <- TUD_AA[-1,]
 ## Of note: no GWS loci were identified in LA individuals from the single cohort used
 
 
-## The next datasets contain information of significant genes associated to EUR-SNPs (candidate risk genes)
+## The next datasets contain information of significant genes associated with EUR-SNPs (candidate risk genes)
 ## The SNPs were obtained from the TUD-EUR GWAS (that didn't add the UKBB cohort): 
 
-## TUD-EUR-MAGMA dataset has data of genes significantly associated to the SNPs (p<2.63E-06), obtained using MAGMA.
+## TUD-EUR-MAGMA dataset has data of genes significantly associated with the SNPs (p<2.63E-06), obtained using MAGMA.
 TUD_EUR_MAGMA <- as.data.frame(TUD_EUR_MAGMA)
 colnames(TUD_EUR_MAGMA) <- TUD_EUR_MAGMA[1,]
 TUD_EUR_MAGMA <- TUD_EUR_MAGMA[-1,]
@@ -1683,24 +1683,24 @@ venn_humanGWASGenes_vs_mouseDEG <- function (human_dataset, name, human_genes_de
 ## Plots
 
 ############### 5.1 TUD-multi+UKBB nearest human genes vs mouse pup DEG ###############
-venn_humanGWASGenes_vs_mouseDEG(TUD_multi_UKBB_nearestGenes, "TUD_multi_UKBB_nearestGenes" , "Mouse homologs of nearest human genes to GWS SNPs associated to TUD in EUR, AA & LA individuals")
+venn_humanGWASGenes_vs_mouseDEG(TUD_multi_UKBB_nearestGenes, "TUD_multi_UKBB_nearestGenes" , "Mouse homologs of nearest human genes to GWS SNPs associated with TUD in EUR, AA & LA individuals")
 
 ############### 5.2 TUD-EUR+UKBB nearest human genes vs mouse pup DEG ###############
-venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_UKBB_nearestGenes, "TUD_EUR_UKBB_nearestGenes" , "Mouse homologs of nearest human genes to GWS SNPs associated to TUD in EUR individuals")
+venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_UKBB_nearestGenes, "TUD_EUR_UKBB_nearestGenes" , "Mouse homologs of nearest human genes to GWS SNPs associated with TUD in EUR individuals")
 
 ############### 5.3 TUD-AA nearest human genes vs mouse pup DEG ###############
-venn_humanGWASGenes_vs_mouseDEG(TUD_AA_nearestGenes, "TUD_AA_nearestGenes" , "Mouse homologs of nearest human genes to GWS SNPs associated to TUD in AA individuals")
+venn_humanGWASGenes_vs_mouseDEG(TUD_AA_nearestGenes, "TUD_AA_nearestGenes" , "Mouse homologs of nearest human genes to GWS SNPs associated with TUD in AA individuals")
 
 ############### 5.4 TUD-EUR-MAGMA associated human genes vs mouse pup DEG ###############
-venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_MAGMA_associatedGenes, "TUD_EUR_MAGMA_associatedGenes" , "Mouse homologs of human genes associated to EUR-SNPs related to TUD")
+venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_MAGMA_associatedGenes, "TUD_EUR_MAGMA_associatedGenes" , "Mouse homologs of human genes associated with EUR-SNPs related to TUD")
 
 ############### 5.5 TUD-EUR-H-MAGMA associated human genes vs mouse pup DEG ###############
-venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_H_MAGMA_associatedGenes, "TUD_EUR_H_MAGMA_associatedGenes" , "Mouse homologs of brain human genes associated to EUR-SNPs related to TUD")
+venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_H_MAGMA_associatedGenes, "TUD_EUR_H_MAGMA_associatedGenes" , "Mouse homologs of brain human genes associated with EUR-SNPs related to TUD")
 
 #####       5.5.1 TUD-EUR-H-MAGMA associated fetal human genes vs mouse pup DEG       #####
-venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_H_MAGMA_fetal_associatedGenes, "TUD_EUR_H_MAGMA_fetal_associatedGenes" , "Mouse homologs of fetal brain human genes associated to EUR-SNPs related to TUD")
+venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_H_MAGMA_fetal_associatedGenes, "TUD_EUR_H_MAGMA_fetal_associatedGenes" , "Mouse homologs of fetal brain human genes associated with EUR-SNPs related to TUD")
 #####       5.5.2 TUD-EUR-H-MAGMA associated adult human genes vs mouse pup DEG       #####
-venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_H_MAGMA_adult_associatedGenes, "TUD_EUR_H_MAGMA_adult_associatedGenes" , "Mouse homologs of adult brain human genes associated to EUR-SNPs related to TUD")
+venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_H_MAGMA_adult_associatedGenes, "TUD_EUR_H_MAGMA_adult_associatedGenes" , "Mouse homologs of adult brain human genes associated with EUR-SNPs related to TUD")
 
 ############### 5.6 TUD_EUR_S_MultiXcan affected human genes vs mouse pup DEG ###############
 venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_S_MultiXcan_associatedGenes, "TUD_EUR_S_MultiXcan_associatedGenes" , "Mouse homologs of human genes affected in brain by EUR-SNPs related to TUD")
