@@ -1500,7 +1500,7 @@ venn_human_vs_mouse("adultHuman_bloodMouse_data", "adult", "smoking", "blood", "
 ## The following datasets contain genome-wide significant (GWS) lead SNPs (p<5.00E-08) in loci associated with TUD, as well as
 ## the nearest genes of those SNPs: 
 
-## TUD-multi+UKBB data resulted from a multi-ancestral GWAS meta-analysis of TUD cases and controls in individuals from 8 cohorts (including UKBB) with European (EUR), African American (AA) and Latin American (LA) ancestry.
+## TUD-multi+UKBB data resulted from a multi-ancestral GWAS meta-analysis of TUD cases and controls in individuals from 8 cohorts (including UKBB), with European (EUR), African American (AA) and Latin American (LA) ancestry.
 TUD_multi_UKBB <- as.data.frame(TUD_multi_UKBB)
 colnames(TUD_multi_UKBB) <- TUD_multi_UKBB[1,]
 TUD_multi_UKBB <- TUD_multi_UKBB[-1,]
@@ -1517,26 +1517,26 @@ TUD_AA <- as.data.frame(TUD_AA)
 colnames(TUD_AA) <- TUD_AA[1,]
 TUD_AA <- TUD_AA[-1,]
 
-## Of note: no GWS loci were identified in LA individuals from the single cohort used
+## Of note: no GWS loci were identified in LA individuals from the single cohort used.
 
 
 ## The next datasets contain information of significant genes associated with EUR-SNPs (candidate risk genes)
-## The SNPs were obtained from the TUD-EUR GWAS (that didn't add the UKBB cohort): 
+## The SNPs were obtained from the TUD-EUR GWAS (that didn't consider the UKBB cohort): 
 
-## TUD-EUR-MAGMA dataset has data of genes significantly associated with the SNPs (p<2.63E-06), obtained using MAGMA.
+## TUD-EUR-MAGMA dataset has data of genes significantly associated with TUD (p<2.63E-06), obtained using MAGMA.
 TUD_EUR_MAGMA <- as.data.frame(TUD_EUR_MAGMA)
 colnames(TUD_EUR_MAGMA) <- TUD_EUR_MAGMA[1,]
 TUD_EUR_MAGMA <- TUD_EUR_MAGMA[-1,]
 
-## TUD-EUR-H-MAGMA dataset contains neurobiologically relevant target genes: brain genes associated with TUD (p<9.44E-07),
-## including certain cell-types or developmental stages in which they're specifically expressed. They were obtained with H-MAGMA.
+## TUD-EUR-H-MAGMA dataset contains neurobiologically relevant target genes: brain-related genes associated with TUD (p<9.44E-07),
+## specially expressed in certain cell-types or developmental stages of the brain. They were obtained with H-MAGMA.
 TUD_EUR_H_MAGMA <- as.data.frame(TUD_EUR_H_MAGMA)
 colnames(TUD_EUR_H_MAGMA) <- TUD_EUR_H_MAGMA[1,]
 TUD_EUR_H_MAGMA <- TUD_EUR_H_MAGMA[-1,]
 ## Remove empty last line
 TUD_EUR_H_MAGMA <- TUD_EUR_H_MAGMA[-dim(TUD_EUR_H_MAGMA)[1],]
 
-## TUD-EUR-S-MultiXcan contains significant predicted genes whose expression is affected by the SNPs in brain tissues.
+## TUD-EUR-S-MultiXcan contains significant genes whose predicted expression is affected by the EUR-SNPs in brain regions.
 ## The analysis was performed using S-MultiXcan
 TUD_EUR_S_MultiXcan<- as.data.frame(TUD_EUR_S_MultiXcan)
 colnames(TUD_EUR_S_MultiXcan) <- TUD_EUR_S_MultiXcan[1,]
@@ -1544,7 +1544,7 @@ TUD_EUR_S_MultiXcan <- TUD_EUR_S_MultiXcan[-1,]
 ## Remove empty last line
 TUD_EUR_S_MultiXcan <- TUD_EUR_S_MultiXcan[-dim(TUD_EUR_S_MultiXcan)[1],]
 
-## TUD-EUR-S-PrediXcan has affected genes in specific brain regions, returned by S-PrediXcan. 
+## TUD-EUR-S-PrediXcan has affected genes by the EUR-SNPs in specific brain regions, returned by S-PrediXcan. 
 TUD_EUR_S_PrediXcan <- as.data.frame(TUD_EUR_S_PrediXcan)
 colnames(TUD_EUR_S_PrediXcan) <- TUD_EUR_S_PrediXcan[1,]
 TUD_EUR_S_PrediXcan<- TUD_EUR_S_PrediXcan[-1,]
@@ -1556,20 +1556,19 @@ TUD_EUR_S_PrediXcan<- TUD_EUR_S_PrediXcan[-1,]
 TUD_multi_UKBB_nearestGenes <- as.vector(na.omit(TUD_multi_UKBB$Nearest_Gene))
 TUD_EUR_UKBB_nearestGenes <- as.vector(na.omit(TUD_EUR_UKBB$Nearest_Gene))
 TUD_AA_nearestGenes <- as.vector(na.omit(TUD_AA$Nearest_Gene))
-
 ## Associated genes
 TUD_EUR_MAGMA_associatedGenes <- as.vector(na.omit(TUD_EUR_MAGMA$SYMBOL))
-## Associated brain genes
+## Neurobiologically relevant genes
 TUD_EUR_H_MAGMA_associatedGenes <- as.vector(na.omit(TUD_EUR_H_MAGMA$SYMBOL))
-## Associated genes specific of fetal human brain
+## Neurobiologically relevant genes of fetal human brain
 TUD_EUR_H_MAGMA_fetal_associatedGenes <- as.vector(na.omit(TUD_EUR_H_MAGMA[which(TUD_EUR_H_MAGMA$Type=="Fetal_brain"), "SYMBOL"]))
-## Associated genes specific of adult human brain
+## Neurobiologically relevant genes of adult human brain
 TUD_EUR_H_MAGMA_adult_associatedGenes <- as.vector(na.omit(TUD_EUR_H_MAGMA[which(TUD_EUR_H_MAGMA$Type=="Adult_brain"), "SYMBOL"]))
-## Affected genes in brain
+## Affected genes in brain regions
 TUD_EUR_S_MultiXcan_associatedGenes <- as.vector(na.omit(TUD_EUR_S_MultiXcan$gene_name))
+## Affected genes in specific brain regions
 TUD_EUR_S_PrediXcan_associatedGenes <- as.vector(na.omit(TUD_EUR_S_PrediXcan$`gene name`))
 ## Affected genes in frontal cortex (FC)
-TUD_EUR_S_MultiXcan_FrontalCortex_associatedGenes <- as.vector(na.omit(TUD_EUR_S_MultiXcan[which(TUD_EUR_S_MultiXcan$t_i_best=="Frontal_Cortex_BA9"), "gene_name"]))
 TUD_EUR_S_PrediXcan_FrontalCortex_associatedGenes <- as.vector(na.omit(TUD_EUR_S_PrediXcan[which(TUD_EUR_S_PrediXcan$tissue=="Brain Frontal Cortex BA9"), "gene name"]))
 
 
@@ -1585,6 +1584,13 @@ venn_humanGWASGenes_vs_mouseDEG <- function (human_dataset, name, human_genes_de
   ## Remove empty chars  and repeated mouse genes 
   mouse_genes <- unique(human_mouse_genes$mmusculus_homolog_associated_gene_name[human_mouse_genes$mmusculus_homolog_associated_gene_name!=""])
   
+  ## Save gene sets
+  ## Nic DEG vs mouse homologs 
+  nic_overlapping_genes <- intersect(mouse_genes, de_genes_pups_nicotine_fitted$Symbol)
+  smo_overlapping_genes <- intersect(mouse_genes, de_genes_pups_smoking_fitted$Symbol)
+  ## Compare nicotine and smoking overlapping genes 
+  nicOverl_vs_smoOverl_genes <- intersect(nic_overlapping_genes, smo_overlapping_genes)
+  
   ## Venn diagrams
   nic_genes<-list(
     "Mouse homologs of TUD-associated human genes" = mouse_genes,
@@ -1594,12 +1600,19 @@ venn_humanGWASGenes_vs_mouseDEG <- function (human_dataset, name, human_genes_de
     "Mouse homologs of TUD-associated human genes" = mouse_genes,
     "DEG in smoking mouse pups" = de_genes_pups_smoking_fitted$Symbol
     )
+  overl_genes <- list(
+    "Overlapping genes in nicotine" = nic_overlapping_genes,
+    "Overlapping genes in smoking" = smo_overlapping_genes
+  )
   
-  genes_lists<-list(nic_genes, smo_genes)
-  colors<-list(c("firebrick3", "brown1"), c("dodgerblue2", "deepskyblue1"))
+
+  
+  genes_lists<-list(nic_genes, smo_genes, overl_genes)
+  colors<-list(c("firebrick3", "brown1"), c("dodgerblue2", "deepskyblue1"), c("indianred2" , "skyblue2"))
   mouse_categories_nic <- c(human_genes_description, "Mouse Pup DEG in nicotine")
   mouse_categories_smo <- c(human_genes_description, "Mouse Pup DEG in smoking")
-  mouse_categories <- list(mouse_categories_nic, mouse_categories_smo)
+  overl_genes_categories <- c("Overlapping genes in nicotine", "Overlapping genes in smoking")
+  mouse_categories <- list(mouse_categories_nic, mouse_categories_smo, overl_genes_categories)
   
   if (name=="TUD_EUR_UKBB_nearestGenes"){
     margin =0.4
@@ -1644,13 +1657,6 @@ venn_humanGWASGenes_vs_mouseDEG <- function (human_dataset, name, human_genes_de
     cat_pos = list(c(270,0), c(270,0))
     cex = 1.6
   }
-  else if (name=="TUD_EUR_S_MultiXcan_FrontalCortex_associatedGenes"){
-    margin = 0.8
-    cat_cex = c(1, 1.2)
-    cat_dist = c(0.64, 0.04)
-    cat_pos = list(c(90,0), c(90,0))
-    cex = 1
-  }
   else if(name=="TUD_EUR_S_PrediXcan_FrontalCortex_associatedGenes"){
     margin = 0.8
     cat_cex = c(1.1, 1.2)
@@ -1692,27 +1698,24 @@ venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_UKBB_nearestGenes, "TUD_EUR_UKBB_nearest
 venn_humanGWASGenes_vs_mouseDEG(TUD_AA_nearestGenes, "TUD_AA_nearestGenes" , "Mouse homologs of nearest human genes to GWS SNPs associated with TUD in AA individuals")
 
 ############### 5.4 TUD-EUR-MAGMA associated human genes vs mouse pup DEG ###############
-venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_MAGMA_associatedGenes, "TUD_EUR_MAGMA_associatedGenes" , "Mouse homologs of human genes associated with EUR-SNPs related to TUD")
+venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_MAGMA_associatedGenes, "TUD_EUR_MAGMA_associatedGenes" , "Mouse homologs of human genes associated with TUD based on their EUR-SNPs")
 
 ############### 5.5 TUD-EUR-H-MAGMA associated human genes vs mouse pup DEG ###############
-venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_H_MAGMA_associatedGenes, "TUD_EUR_H_MAGMA_associatedGenes" , "Mouse homologs of brain human genes associated with EUR-SNPs related to TUD")
+venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_H_MAGMA_associatedGenes, "TUD_EUR_H_MAGMA_associatedGenes" , "Mouse homologs of neurobiologically relevant human genes associated with TUD")
 
 #####       5.5.1 TUD-EUR-H-MAGMA associated fetal human genes vs mouse pup DEG       #####
-venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_H_MAGMA_fetal_associatedGenes, "TUD_EUR_H_MAGMA_fetal_associatedGenes" , "Mouse homologs of fetal brain human genes associated with EUR-SNPs related to TUD")
+venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_H_MAGMA_fetal_associatedGenes, "TUD_EUR_H_MAGMA_fetal_associatedGenes" , "Mouse homologs of fetal brain human genes associated with TUD")
 #####       5.5.2 TUD-EUR-H-MAGMA associated adult human genes vs mouse pup DEG       #####
-venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_H_MAGMA_adult_associatedGenes, "TUD_EUR_H_MAGMA_adult_associatedGenes" , "Mouse homologs of adult brain human genes associated with EUR-SNPs related to TUD")
+venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_H_MAGMA_adult_associatedGenes, "TUD_EUR_H_MAGMA_adult_associatedGenes" , "Mouse homologs of adult brain human genes associated with TUD")
 
 ############### 5.6 TUD_EUR_S_MultiXcan affected human genes vs mouse pup DEG ###############
-venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_S_MultiXcan_associatedGenes, "TUD_EUR_S_MultiXcan_associatedGenes" , "Mouse homologs of human genes affected in brain by EUR-SNPs related to TUD")
-
-#####       5.6.1 TUD_EUR_S_MultiXcan affected human genes in FC vs mouse pup DEG       #####
-venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_S_MultiXcan_FrontalCortex_associatedGenes, "TUD_EUR_S_MultiXcan_FrontalCortex_associatedGenes" , "Mouse homologs of human genes affected in frontal cortex by EUR-SNPs related to TUD")
+venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_S_MultiXcan_associatedGenes, "TUD_EUR_S_MultiXcan_associatedGenes" , "Mouse homologs of human genes affected in brain by EUR-SNPs associated with TUD")
 
 ############### 5.7 TUD_EUR_S_PrediXcan affected human genes vs mouse pup DEG ###############
-venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_S_PrediXcan_associatedGenes, "TUD_EUR_S_PrediXcan_associatedGenes" , "Mouse homologs of human genes affected in brain regions by EUR-SNPs related to TUD")
+venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_S_PrediXcan_associatedGenes, "TUD_EUR_S_PrediXcan_associatedGenes" , "Mouse homologs of human genes affected in brain regions by EUR-SNPs associated with TUD")
 
 #####       5.7.1 TUD_EUR_S_PrediXcan affected human genes in FC vs mouse pup DEG       #####
-venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_S_PrediXcan_FrontalCortex_associatedGenes, "TUD_EUR_S_PrediXcan_FrontalCortex_associatedGenes" , "Mouse homologs of human genes affected in frontal cortex by EUR-SNPs related to TUD")
+venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_S_PrediXcan_FrontalCortex_associatedGenes, "TUD_EUR_S_PrediXcan_FrontalCortex_associatedGenes" , "Mouse homologs of human genes affected in frontal cortex by EUR-SNPs associated with TUD")
 
 
 
