@@ -282,10 +282,10 @@ pca_data_gene_brain_pups[which.min(pca_data_gene_brain_pups$sum), "SAMPLE_ID"]
 ## Remove those samples
 ## In adults
 poorQC_samples<-c("Sample_FE3P2", "Sample_4067", "Sample_FC41")
-rse_gene_brain_adults_qc_afterPCA<-rse_gene_brain_adults_qc[,-which(rse_gene_brain_adults_qc$SAMPLE_ID %in% poorQC_samples)]
-rse_exon_brain_adults_qc_afterPCA<-rse_exon_brain_adults_qc[,-which(rse_exon_brain_adults_qc$SAMPLE_ID %in% poorQC_samples)]
-rse_tx_brain_adults_qc_afterPCA<-rse_tx_brain_adults_qc[,-which(rse_tx_brain_adults_qc$SAMPLE_ID %in% poorQC_samples)]
-rse_jx_brain_adults_qc_afterPCA<-rse_jx_brain_adults_qc[,-which(rse_jx_brain_adults_qc$SAMPLE_ID %in% poorQC_samples)]
+rse_gene_brain_adults_qc <- rse_gene_brain_adults_qc_afterPCA<-rse_gene_brain_adults_qc[,-which(rse_gene_brain_adults_qc$SAMPLE_ID %in% poorQC_samples)]
+rse_exon_brain_adults_qc <- rse_exon_brain_adults_qc_afterPCA<-rse_exon_brain_adults_qc[,-which(rse_exon_brain_adults_qc$SAMPLE_ID %in% poorQC_samples)]
+rse_tx_brain_adults_qc <- rse_tx_brain_adults_qc_afterPCA<-rse_tx_brain_adults_qc[,-which(rse_tx_brain_adults_qc$SAMPLE_ID %in% poorQC_samples)]
+rse_jx_brain_adults_qc <- rse_jx_brain_adults_qc_afterPCA<-rse_jx_brain_adults_qc[,-which(rse_jx_brain_adults_qc$SAMPLE_ID %in% poorQC_samples)]
 
 ## Save RSE without those samples
 save(rse_gene_brain_adults_qc_afterPCA, file="processed-data/03_EDA/03_PCA/rse_gene_brain_adults_qc_afterPCA.Rdata")
@@ -296,10 +296,11 @@ save(rse_jx_brain_adults_qc_afterPCA, file="processed-data/03_EDA/03_PCA/rse_jx_
 
 ## In pups
 poorQC_samples<-c("Sample_P2_fe2_022019", "Sample_P1_fe3_021819", "Sample_P7_fe3_021719")
-rse_gene_brain_pups_qc_afterPCA<-rse_gene_brain_pups_qc[,-which(rse_gene_brain_pups_qc$SAMPLE_ID %in% poorQC_samples)]
-rse_exon_brain_pups_qc_afterPCA<-rse_exon_brain_pups_qc[,-which(rse_exon_brain_pups_qc$SAMPLE_ID %in% poorQC_samples)]
-rse_tx_brain_pups_qc_afterPCA<-rse_tx_brain_pups_qc[,-which(rse_tx_brain_pups_qc$SAMPLE_ID %in% poorQC_samples)]
-rse_jx_brain_pups_qc_afterPCA<-rse_jx_brain_pups_qc[,-which(rse_jx_brain_pups_qc$SAMPLE_ID %in% poorQC_samples)]
+rse_gene_brain_pups_qc <- rse_gene_brain_pups_qc_afterPCA<-rse_gene_brain_pups_qc[,-which(rse_gene_brain_pups_qc$SAMPLE_ID %in% poorQC_samples)]
+rse_exon_brain_pups_qc <- rse_exon_brain_pups_qc_afterPCA<-rse_exon_brain_pups_qc[,-which(rse_exon_brain_pups_qc$SAMPLE_ID %in% poorQC_samples)]
+rse_tx_brain_pups_qc <- rse_tx_brain_pups_qc_afterPCA<-rse_tx_brain_pups_qc[,-which(rse_tx_brain_pups_qc$SAMPLE_ID %in% poorQC_samples)]
+rse_jx_brain_pups_qc <- rse_jx_brain_pups_qc_afterPCA<-rse_jx_brain_pups_qc[,-which(rse_jx_brain_pups_qc$SAMPLE_ID %in% poorQC_samples)]
+
 ## Save RSE without those samples
 save(rse_gene_brain_pups_qc_afterPCA, file="processed-data/03_EDA/03_PCA/rse_gene_brain_pups_qc_afterPCA.Rdata")
 save(rse_exon_brain_pups_qc_afterPCA, file="processed-data/03_EDA/03_PCA/rse_exon_brain_pups_qc_afterPCA.Rdata")
