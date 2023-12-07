@@ -3,6 +3,7 @@
 
 library(ggplot2)
 library(here)
+library(SummarizedExperiment)
 library(GenomicRanges)
 library(rtracklayer)
 library(AcidGenomes)
