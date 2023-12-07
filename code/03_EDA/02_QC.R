@@ -16,6 +16,8 @@ library(cowplot)
 library(ggrepel)
 library(variancePartition)
 library(gridExtra)
+library(Hmisc)
+library(stringr)
 library(sessioninfo)
 
 
@@ -37,46 +39,109 @@ load(here("processed-data/02_build_objects/rse_jx_brain_pups.Rdata"))
 
 ## 1.1.1 Boxplots of quality metrics 
 
-create_boxplots <- function(pheno_var, qc_var, tissue, age) {
+## Function to create boxplots of QC metrics for groups of samples
+
+## Define QC metrics of interest
+qc_metrics <- c("mitoRate", "overallMapRate", "totalAssignedGene", "rRNA_rate", "sum", "detected", "ERCCsumLogErr")
+
+## Define sample variables of interest
+sample_variables <- c("Group", "Expt", "Age", "Sex", "Pregnancy", "plate", "flowcell")
+
+QC_boxplots <- function(qc_metric, sample_var, tissue, age) {
+  
   if (is.null(age)){
     ## Tissue data
     RSE<-eval(parse_expr(paste("rse_gene_", tissue, sep="")))
-    }
+  }
   else {
     ## Tissue and Age data
     RSE<-eval(parse_expr(paste("rse_gene", tissue, age, sep="_")))
-    }
-
-  ## Quantitative QC values grouped by a qualitative phenotype variable
-  plot=ggplot(as.data.frame(colData(RSE)), 
-      aes(x=eval(parse_expr(pheno_var)), y=eval(parse_expr(qc_var)), 
-          fill=eval(parse_expr(pheno_var)))) +
-      geom_boxplot() +
-      theme_classic(base_size = 10) +
-      theme(legend.position="none", plot.margin=unit (c (1.5,2,1,2), 'cm'), 
-            axis.text.x = element_text(vjust = 0.45) ) +
-     labs(x=pheno_var, y=qc_var) 
-return(plot)
+  }
+  
+  ## Define sample colors depending on the sample variable
+  if (sample_var == "Group") {
+    colors <- c("Control" = "seashell3", "Experimental" = "orange3")
+  } else if(sample_var=='Expt'){
+    colors <- c("Nicotine" = "lightblue3", "Smoking" = "salmon")
+  } else if (sample_var == "Age") {
+    colors <- c("Adult" = "slateblue3", "Pup" = "yellow3")
+  } else if (sample_var == "Sex") {
+    colors <- c("F" = "hotpink1", "M" = "dodgerblue")
+  } else if (sample_var == "Pregnancy") {
+    colors <- c("Yes" = "darkorchid3", "No" = "darkolivegreen4")
+  } else if (sample_var == "plate") {
+    colors <- c("Plate1" = "darkorange", "Plate2" = "lightskyblue", "Plate3" = "deeppink1")
+  } else if (sample_var == "flowcell") {
+    colors <- c(
+      "HKCG7DSXX" = "chartreuse2", "HKCMHDSXX" = "magenta", "HKCNKDSXX" = "turquoise3",
+      "HKCTMDSXX" = "tomato", "HK7JHDSXX"="olivedrab1", "HKCJCDSXX"="plum1"
+    )
+  }
+  
+  ## Axis labels
+  x_label <- capitalize(sample_var)
+  y_label <- str_replace_all(qc_metric, c("_" = ""))
+  
+  ## x-axis text angle and position
+  if (sample_var == "flowcell") {
+    x_axis_angle <- 18
+    x_axis_hjust <- 0.5
+    x_axis_vjust <- 0.7
+    x_axis_size <- 8
+  } else {
+    x_axis_angle <- 0
+    x_axis_hjust <- 0.5
+    x_axis_vjust <- 0.5
+    x_axis_size <- 10
+  }
+  
+  data <- data.frame(colData(RSE))
+  
+  ## Sample variable separating samples in x-axis and QC metric in y-axis
+  ## (Coloring by sample variable)
+  plot <- ggplot(data = data, mapping = aes(x = !!rlang::sym(sample_var), y = !!rlang::sym(qc_metric), color = !!rlang::sym(sample_var))) +
+    ## Add violin plots
+    geom_violin(alpha = 0, size = 0.4, color = "black", width = 0.7) +
+    ## Spread dots
+    geom_jitter(width = 0.05, alpha = 0.7, size = 1.3) +
+    ## Add boxplots
+    geom_boxplot(alpha = 0, size = 0.4, width = 0.1, color = "black") +
+    ## Set colors
+    scale_color_manual(values = colors) +
+    ## Define axis labels
+    labs(y = y_label, x = x_label) +
+    ## Get rid of the background
+    theme_bw() +
+    ## Hide legend and define plot margins and size of axis title and text
+    theme(
+      legend.position = "none",
+      plot.margin = unit(c(0.5, 0.4, 0.5, 0.4), "cm"),
+      axis.title = element_text(size = 11),
+      axis.text = element_text(size = x_axis_size),
+      axis.text.x = element_text(angle = x_axis_angle, hjust = x_axis_hjust, vjust = x_axis_vjust),
+    )
+  
+  return(plot)
 }
 
 ## Plot all boxplots for a single qc variable
 plot_boxplots <- function(tissue, age){
-  for (qc_var in c("rRNA_rate","mitoRate","totalAssignedGene", "ERCCsumLogErr", "overallMapRate")){
+  for (qc_var in qc_metrics){
     plots<-list()
     i=1
-      for (pheno_var in c("Age", "plate","Expt", "Sex", "Group", "medium", "Pregnancy", "flowcell")){
-         p<-create_boxplots(pheno_var, qc_var, tissue, age)
-         plots[[i]]=p
-         i=i+1
-      }
+    for (pheno_var in sample_variables){
+      p<-QC_boxplots(qc_var, pheno_var, tissue, age)
+      plots[[i]]=p
+      i=i+1
+    }
     plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]], plots[[6]], 
-              plots[[7]], plots[[8]], nrow = 2)
+              plots[[7]], nrow = 2)
     ## Save plots
     if (is.null(age)) {fileName=paste("plots/03_EDA/02_QC/boxplot_",qc_var,"_", 
-                                        tissue, ".pdf", sep="")}
+                                      tissue, ".pdf", sep="")}
     else {fileName=paste("plots/03_EDA/02_QC/boxplot_",qc_var,"_", tissue, "_", 
-                       age, ".pdf", sep="")}
-    ggsave(fileName, width = 55, height = 25, units = "cm")
+                         age, ".pdf", sep="")}
+    ggsave(fileName, width = 35, height = 17, units = "cm")
   }
 }
 
@@ -93,7 +158,6 @@ table(rse_gene_brain$trimmed)
 table(rse_gene_blood$trimmed)
 # FALSE 
 #   24 
-
 
 
 
