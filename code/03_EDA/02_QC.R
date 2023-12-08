@@ -1,9 +1,5 @@
 
-## 1. Quality Control analysis
-
-
 ## Load all libraries for EDA 
-
 library(SummarizedExperiment)
 library(recount)
 library(edgeR)
@@ -21,6 +17,9 @@ library(stringr)
 library(sessioninfo)
 
 
+## 1. Quality Control analysis
+
+
 load(here("processed-data/02_build_objects/rse_gene_brain.Rdata"))
 load(here("processed-data/02_build_objects/rse_gene_blood.Rdata"))
 load(here("processed-data/02_build_objects/rse_gene_brain_adults.Rdata"))
@@ -33,10 +32,11 @@ load(here("processed-data/02_build_objects/rse_tx_brain_pups.Rdata"))
 load(here("processed-data/02_build_objects/rse_jx_brain_pups.Rdata"))
 
 
+# ------------------------------------------------------------------------------
+##  1.1 Evaluate QC metrics for groups of samples
+# ------------------------------------------------------------------------------
 
-## 1.1 Evaluate QC metrics for groups of samples
-
-## Function to create boxplots of QC metrics for groups of samples
+## 1.1.1 Compare QC metrics in sample groups
 
 ## Define QC metrics of interest
 qc_metrics <- c("mitoRate", "overallMapRate", "totalAssignedGene", "rRNA_rate", "sum", "detected", "ERCCsumLogErr")
@@ -44,6 +44,7 @@ qc_metrics <- c("mitoRate", "overallMapRate", "totalAssignedGene", "rRNA_rate", 
 ## Define sample variables of interest
 sample_variables <- c("Group", "Expt", "Age", "Sex", "Pregnancy", "plate", "flowcell")
 
+## Function to create boxplots of QC metrics for groups of samples
 QC_boxplots <- function(qc_metric, sample_var, tissue, age) {
   
   if (is.null(age)){
@@ -158,8 +159,7 @@ table(rse_gene_blood$trimmed)
 
 
 
-
-## 1.2 Examine relationships between QC metrics of samples
+## 1.1.2 Examine relationships between QC metrics of samples
 
 QC_scatterplots <- function(sample_var, qc_metric1, qc_metric2, tissue, age) {
   
@@ -190,8 +190,11 @@ QC_scatterplots <- function(sample_var, qc_metric1, qc_metric2, tissue, age) {
       "HKCG7DSXX" = "chartreuse2", "HKCMHDSXX" = "magenta", "HKCNKDSXX" = "turquoise3",
       "HKCTMDSXX" = "tomato", "HK7JHDSXX"="seagreen3", "HKCJCDSXX"="palevioletred2"
     )
+  } else if(sample_var=='Retention'){
+    colors <- c('False'='indianred', 'True'='darkseagreen3')
   }
   
+  ## Axis text size
   if (qc_metric1 == "sum") {
     x_axis_size <- 7
   } else {
@@ -202,7 +205,7 @@ QC_scatterplots <- function(sample_var, qc_metric1, qc_metric2, tissue, age) {
   ## Data
   data <- colData(RSE)
   
-  ## Labels
+  ## Axis labels
   if (qc_metric1=="detected"){
     lab_x="Number of detected genes"}
   else if (qc_metric1=="subsets_Mito_percent"){
@@ -225,24 +228,29 @@ QC_scatterplots <- function(sample_var, qc_metric1, qc_metric2, tissue, age) {
   else{
     lab_y = gsub("_", " ", qc_metric2)}
   
-  ## Scatterplots for continuous variable vs continuous variable
-  ## First QC metric in x-axis and second QC metric in y-axis
+  ## Sample labels (for the ones that were filtered out)
+  if(sample_var!='Retention' | (is.null(age) & tissue=='brain')){
+    data$Dropped_samples <- rep(NA, dim(data)[1])
+  }
+  
+  ## Scatterplots: first QC metric in x-axis and second QC metric in y-axis
   plot <- ggplot(as.data.frame(data), aes(
     x = !!rlang::sym(qc_metric1),
     y = !!rlang::sym(qc_metric2),
     ## Color samples by a variable
-    color = eval(parse_expr(sample_var))
+    color = eval(parse_expr(sample_var)), 
+    label = Dropped_samples
   )) +
     ## Add scatterplot
     geom_point(size = 1) +
-    ## Add regression line
-    stat_smooth(geom = "line", alpha = 0.7, size = 0.7, span = 0.25, method = lm, color = "orangered3") +
     ## Colors
     scale_color_manual(name = capitalize(sample_var), values = colors) +
+    ## Labels
+    geom_text_repel(aes(label=Dropped_samples), size=2.6, color='black', min.segment.length = 0., 
+                    max.overlaps=Inf, box.padding = 0.4) +
     theme_bw() +
     ## Add Pearson correlation coefficient between the metrics as subtitle
     labs(
-      subtitle = paste0("Corr: ", signif(cor(data[, qc_metric1], data[, qc_metric2], method = "pearson"), digits = 3)),
       ## Add axis labels
       y = lab_y,
       x = lab_x
@@ -252,13 +260,21 @@ QC_scatterplots <- function(sample_var, qc_metric1, qc_metric2, tissue, age) {
       plot.margin = unit(c(0.1, 1.2, 0.1, 1.2), "cm"),
       axis.title = element_text(size = (10)),
       axis.text = element_text(size = (x_axis_size)),
-      plot.subtitle = element_text(size = 9, color = "gray40"),
       legend.text = element_text(size = 9),
       legend.title = element_text(size = 10)
     )
+  
+  if(sample_var!='Retention'){
+    plot <- plot +  
+      ## Add regression line
+      stat_smooth(geom = "line", alpha = 0.7, size = 0.7, span = 0.25, method = lm, color = "orangered3") +
+      ## Add Pearson correlation coefficient between the metrics as subtitle
+      labs(subtitle = paste0("Corr: ", signif(cor(data[, qc_metric1], data[, qc_metric2], method = "pearson"), digits = 3))) +
+      theme(plot.subtitle = element_text(size = 9, color = "gray40"))
+  }
+  
   return(plot)
 }
-
 
 
 ## QC scatterplots coloring by all sample variables
@@ -305,165 +321,10 @@ multiple_QC_scatterplots('sum', 'detected', 'brain', 'adults')
 
 
 
-
-
-
-
-
-## Plots of number of genes & mt/ribo proportions VS total counts 
-## Samples separated by phenotypes
-sum_vs_qc<- function (pheno_var, qc_stats, qc_stats_lab, label, tissue, age){
-    if (is.null(age)){
-      RSE<-eval(parse_expr(paste("rse_gene_", tissue, sep="")))
-      }
-    else {
-      RSE<-eval(parse_expr(paste("rse_gene", tissue, age, sep="_")))
-    }
-    ## Samples' labels
-    if (label==""){
-      plot=ggplot(data=as.data.frame(colData(RSE)), 
-         aes(x=sum, y=eval(parse_expr(qc_stats)), color=eval(parse_expr(pheno_var)), 
-             label=""))+ 
-      geom_point() +
-      theme(text = element_text(size = 10)) +
-      theme(legend.position="right", plot.margin=unit (c (1.5,2,1,2), 'cm')) +
-      labs(x="Total read counts", y=qc_stats_lab, color=pheno_var)
-    
-    }
-    else {
-      plot=ggplot(data=as.data.frame(colData(RSE)), 
-         aes(x=sum, y=eval(parse_expr(qc_stats)), color=eval(parse_expr(pheno_var)), 
-             label=eval(parse_expr(label))))+ 
-      geom_point() +
-      ## Add labels
-      geom_text_repel(color="black", size=2, max.overlaps = 100) +
-      theme(text = element_text(size = 10)) +
-      theme(legend.position="right", plot.margin=unit (c (1.5,2,1,2), 'cm')) +
-      labs(x="Total read counts", y=qc_stats_lab, color=pheno_var)
-    }
-    return(plot)
-}
-
-## All plots for a qc variable
-plot_sum_vs_qc<- function(tissue, age){
-  for (qc_stats in c("detected","subsets_Mito_percent", "subsets_Ribo_percent")){
-    if (qc_stats=="detected")
-       {qc_stats_lab="Detected number of genes"
-       qc_var="Detected"}
-    if (qc_stats=="subsets_Mito_percent")
-       {qc_stats_lab="Percentage of mt counts "
-        qc_var="mtCounts"}
-    if (qc_stats=="subsets_Ribo_percent")
-       {qc_stats_lab="Percentage of ribosomal counts "
-        qc_var="riboCounts"}
-    plots<-list()
-    i=1
-      for (pheno_var in c("Age", "plate","Expt", "Sex", "Group", "medium", "Pregnancy", "flowcell")){
-         ## Without labels for samples
-         p<-sum_vs_qc(pheno_var, qc_stats, qc_stats_lab, "", tissue, age)
-         plots[[i]]=p
-         i=i+1
-      }
-  
-    plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]], plots[[6]], 
-              plots[[7]], plots[[8]], nrow = 2)
-    ## Save plots
-    if (is.null(age)){fileName=paste("plots/03_EDA/02_QC/totalCounts_vs_",qc_var,"_",tissue,".pdf", sep="")}
-    else {fileName=paste("plots/03_EDA/02_QC/totalCounts_vs_",qc_var,"_",tissue,"_", age,".pdf", sep="")}
-    ggsave(fileName, width = 65, height = 25, units = "cm")
-  }
-}
-
-## Plots
-plot_sum_vs_qc("brain", NULL)
-plot_sum_vs_qc("blood", NULL)
-plot_sum_vs_qc("brain", "adults")
-plot_sum_vs_qc("brain", "pups")
-
-## Brain
-## Correlation between number of genes and total read counts
-cor(rse_gene_brain$sum, rse_gene_brain$detected)
-# 0.7358813
-
-## Blood
-## Correlation between number of genes and total read counts
-cor(rse_gene_blood$sum, rse_gene_blood$detected)
-# -0.1830506
-
-## Adult brain 
-## Correlation between number of genes and total read counts
-cor(rse_gene_brain_adults$sum, rse_gene_brain_adults$detected)
-# 0.6474778
-
-## Pup brain
-## Correlation between number of genes and total read counts
-cor(rse_gene_brain_pups$sum, rse_gene_brain_pups$detected)
-# 0.7703833
-
-
-
-## Plot mito VS ribo percentages per sample 
-mito_vs_ribo<- function (pheno_var, tissue, age, label){
-    if (is.null(age)){
-      RSE<-eval(parse_expr(paste("rse_gene_", tissue, sep="")))
-      }
-    else {
-      RSE<-eval(parse_expr(paste("rse_gene", tissue, age, sep="_")))
-    }
-    if (label==""){
-      plot=ggplot(data=as.data.frame(colData(RSE)), 
-           aes(x=subsets_Mito_percent, y=subsets_Ribo_percent, color=eval(parse_expr(pheno_var)), 
-               label=label))+ 
-        geom_point() +
-        theme(text = element_text(size = 10)) +
-        theme(legend.position="right", plot.margin=unit (c (1.5,2,1,2), 'cm')) +
-        labs(x="Percentage of mt counts", y="Percentage of ribosomal counts", color=pheno_var)
-    }
-    else {
-      plot=ggplot(data=as.data.frame(colData(RSE)), 
-           aes(x=subsets_Mito_percent, y=subsets_Ribo_percent, color=eval(parse_expr(pheno_var)), 
-               label=eval(parse_expr(label))))+ 
-        geom_point() +
-        ## Add samples' labels
-        geom_text_repel(color="black", size=2, max.overlaps = 100) +
-        theme(text = element_text(size = 10)) +
-        theme(legend.position="right", plot.margin=unit (c (1.5,2,1,2), 'cm')) +
-        labs(x="Percentage of mt counts", y="Percentage of ribosomal counts", color=pheno_var)
-    }
-    return(plot)
-}
-
-plot_mito_vs_ribo<- function(tissue, age){
-    plots<-list()
-    i=1
-      for (pheno_var in c("Age", "plate","Expt", "Sex", "Group", "medium", "Pregnancy", "flowcell")){
-         p<-mito_vs_ribo(pheno_var,tissue, age, "")
-         plots[[i]]=p
-         i=i+1
-      }
-  
-    plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]], plots[[6]], 
-              plots[[7]], plots[[8]], nrow = 2)
-    ## Save plots
-    if (is.null(age)){fileName=paste("plots/03_EDA/02_QC/Mito_vs_Ribo_",tissue,".pdf", sep="")}
-    else {fileName=paste("plots/03_EDA/02_QC/Mito_vs_Ribo_",tissue,"_", age,".pdf", sep="")}
-    ggsave(fileName, width = 65, height = 25, units = "cm")
-}
-
-## Plots
-plot_mito_vs_ribo("brain", NULL)
-plot_mito_vs_ribo("blood", NULL)
-plot_mito_vs_ribo("brain", "adults")
-plot_mito_vs_ribo("brain", "pups")
-
-
-
-
-
-
-
-## 1.2 Sample filtering by QC 
-## Based on their detected number of genes, library sizes and proportions of ribo/mt counts
+# ------------------------------------------------------------------------------
+##  1.2  Sample filtering by QC 
+# ------------------------------------------------------------------------------
+## (Based on their detected number of genes, library sizes and proportions of ribo/mt counts)
 
 # Filter brain samples
 ## Drop samples with lower library sizes and number of genes
@@ -544,7 +405,7 @@ save(rse_gene_blood_qc, file = 'processed-data/03_EDA/02_QC/rse_gene_blood_qc.Rd
 
 
 
-### 1.2.1 Scatterplots of QC metrics for samples retained and samples dropped
+## 1.2.1 Examine QC metrics of samples retained and dropped
 
 ## Generate column with samples retained/dropped
 qc_filt_col <- function(tissue, age){
@@ -561,13 +422,13 @@ qc_filt_col <- function(tissue, age){
   for (sample in RSE$SAMPLE_ID){
     ## Samples retained
     if(sample %in% RSE_qc$SAMPLE_ID){
-      qc_filt<-append(qc_filt, "Yes")
+      qc_filt<-append(qc_filt, "True")
       ## Samples' names
       names<-append(names, "")
       }
     ## Samples dropped
     else {
-      qc_filt<-append(qc_filt, "No")
+      qc_filt<-append(qc_filt, "False")
       names<-append(names, sample)
       }
   }
@@ -590,22 +451,16 @@ rse_gene_brain_pups$Dropped_samples<-qc_filt_col("brain", "pups")[[2]]
 ## Generate plots with samples separated by Retention and with labels
 plots_Retained <- function(tissue, age){
   ## Plot total counts VS number of genes
-  qc_stats="detected"
-  qc_stats_lab="Detected number of genes"
-  p1<-sum_vs_qc("Retention", qc_stats, qc_stats_lab, "Dropped_samples", tissue, age)
+  p1<-QC_scatterplots("Retention", 'sum', 'detected', tissue, age)
 
   ## Plot total counts VS mt percentage
-  qc_stats="subsets_Mito_percent"
-  qc_stats_lab="Percentage of mt counts"
-  p2<-sum_vs_qc("Retention", qc_stats, qc_stats_lab, "Dropped_samples", tissue, age)
+  p2<-QC_scatterplots("Retention", 'sum', 'subsets_Mito_percent', tissue, age)
   
   ## Plot total counts VS ribo percentage
-  qc_stats="subsets_Ribo_percent"
-  qc_stats_lab="Percentage of ribosomal counts"
-  p3<-sum_vs_qc("Retention", qc_stats, qc_stats_lab, "Dropped_samples", tissue, age)
+  p3<-QC_scatterplots("Retention", 'sum', 'subsets_Ribo_percent', tissue, age)
   
   ## Plot mt VS ribosomal percentage
-  p4<-mito_vs_ribo("Retention", tissue, age, "Dropped_samples")
+  p4<-QC_scatterplots("Retention", 'subsets_Mito_percent',  'subsets_Ribo_percent', tissue, age)
   
   plot_grid(p1, p2, p3, p4, nrow = 2)
   ## Save plots
@@ -615,7 +470,7 @@ plots_Retained <- function(tissue, age){
   else {
     fileName=paste("plots/03_EDA/02_QC/samples_Retained_", tissue,"_", age,".pdf", sep="")
   }
-  ggsave(fileName, width = 35, height = 25, units = "cm")
+  ggsave(fileName, width = 23.6, height = 14, units = "cm")
 }
 
 ## Plots
@@ -626,9 +481,7 @@ plots_Retained("brain", "pups")
 
 
 
-
-
-## 1.2.2 Boxplots of QC metrics after sample filtering 
+## 1.2.2 Map QC metrics after sample filtering 
 
 ## Samples separated by Retention and phenotype
 QC_boxplots <- function (pheno_var1, pheno_var2, qc_var, tissue, age) {
