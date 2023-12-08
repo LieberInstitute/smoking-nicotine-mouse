@@ -34,10 +34,7 @@ load(here("processed-data/02_build_objects/rse_jx_brain_pups.Rdata"))
 
 
 
-## 1.1 Explore QC metrics of samples in different groups 
-
-
-## 1.1.1 Boxplots of quality metrics 
+## 1.1 Evaluate QC metrics for groups of samples
 
 ## Function to create boxplots of QC metrics for groups of samples
 
@@ -74,7 +71,7 @@ QC_boxplots <- function(qc_metric, sample_var, tissue, age) {
   } else if (sample_var == "flowcell") {
     colors <- c(
       "HKCG7DSXX" = "chartreuse2", "HKCMHDSXX" = "magenta", "HKCNKDSXX" = "turquoise3",
-      "HKCTMDSXX" = "tomato", "HK7JHDSXX"="olivedrab1", "HKCJCDSXX"="plum1"
+      "HKCTMDSXX" = "tomato", "HK7JHDSXX"="seagreen3", "HKCJCDSXX"="palevioletred2"
     )
   }
   
@@ -162,7 +159,150 @@ table(rse_gene_blood$trimmed)
 
 
 
-## 1.1.2 Scatterplots of quality metrics per sample
+## 1.2 Examine relationships between QC metrics of samples
+
+QC_scatterplots <- function(sample_var, qc_metric1, qc_metric2, tissue, age) {
+  
+  if (is.null(age)){
+    ## Tissue data
+    RSE<-eval(parse_expr(paste("rse_gene_", tissue, sep="")))
+  }
+  else {
+    ## Tissue and Age data
+    RSE<-eval(parse_expr(paste("rse_gene", tissue, age, sep="_")))
+  }
+  
+  ## Define sample colors
+  if (sample_var == "Group") {
+    colors <- c("Control" = "seashell3", "Experimental" = "orange3")
+  } else if(sample_var=='Expt'){
+    colors <- c("Nicotine" = "lightblue3", "Smoking" = "salmon")
+  } else if (sample_var == "Age") {
+    colors <- c("Adult" = "slateblue3", "Pup" = "yellow3")
+  } else if (sample_var == "Sex") {
+    colors <- c("F" = "hotpink1", "M" = "dodgerblue")
+  } else if (sample_var == "Pregnancy") {
+    colors <- c("Yes" = "darkorchid3", "No" = "darkolivegreen4")
+  } else if (sample_var == "plate") {
+    colors <- c("Plate1" = "darkorange", "Plate2" = "lightskyblue", "Plate3" = "deeppink1")
+  } else if (sample_var == "flowcell") {
+    colors <- c(
+      "HKCG7DSXX" = "chartreuse2", "HKCMHDSXX" = "magenta", "HKCNKDSXX" = "turquoise3",
+      "HKCTMDSXX" = "tomato", "HK7JHDSXX"="seagreen3", "HKCJCDSXX"="palevioletred2"
+    )
+  }
+  
+  ## Data
+  data <- colData(RSE)
+  
+  ## Labels
+  if (qc_metric1=="detected"){
+    lab_x="Detected number of genes"}
+  else if (qc_metric1=="subsets_Mito_percent"){
+    lab_x="Percentage of mt counts"}
+  else if (qc_metric1=="subsets_Ribo_percent"){
+    lab_x="Percentage of ribosomal counts"}
+  else if(qc_metric1=='sum'){
+    lab_x='Library size'}
+  else{
+    lab_x = gsub("_", " ", qc_metric1)}
+  
+  if (qc_metric2=="detected"){
+    lab_y="Detected number of genes"}
+  else if (qc_metric2=="subsets_Mito_percent"){
+    lab_y="Percentage of mt counts"}
+  else if (qc_metric2=="subsets_Ribo_percent"){
+    lab_y="Percentage of ribosomal counts"}
+  else if(qc_metric2=='sum'){
+    lab_y='Library size'}
+  else{
+    lab_y = gsub("_", " ", qc_metric2)}
+  
+  ## Scatterplots for continuous variable vs continuous variable
+  ## First QC metric in x-axis and second QC metric in y-axis
+  plot <- ggplot(as.data.frame(data), aes(
+    x = !!rlang::sym(qc_metric1),
+    y = !!rlang::sym(qc_metric2),
+    ## Color samples by a variable
+    color = !!rlang::sym(sample_var)
+  )) +
+    ## Add scatterplot
+    geom_point(size = 1) +
+    ## Add regression line
+    stat_smooth(geom = "line", alpha = 0.7, size = 0.7, span = 0.25, method = lm, color = "orangered3") +
+    ## Colors
+    scale_color_manual(name = sample_var, values = colors) +
+    theme_bw() +
+    ## Add Pearson correlation coefficient between the metrics as subtitle
+    labs(
+      subtitle = paste0("Corr: ", signif(cor(data[, qc_metric1], data[, qc_metric2], method = "pearson"), digits = 3)),
+      ## Add axis labels
+      y = lab_y,
+      x = lab_x,
+      color=capitalize(sample_var)
+    ) +
+    ## Plot margins and text size
+    theme(
+      plot.margin = unit(c(0.1, 1.2, 0.1, 1.2), "cm"),
+      axis.title = element_text(size = (10)),
+      axis.text = element_text(size = (9)),
+      plot.subtitle = element_text(size = 9, color = "gray40"),
+      legend.text = element_text(size = 9),
+      legend.title = element_text(size = 10)
+    )
+  return(plot)
+}
+
+
+
+## QC scatterplots coloring by all sample variables
+multiple_QC_scatterplots <- function(qc_metric1, qc_metric2, tissue, age) {
+  
+  i <- 1
+  plots <- list()
+  for (sample_var in sample_variables) {
+    plots[[i]] <- QC_scatterplots(sample_var, qc_metric1, qc_metric2, tissue, age)
+    i <- i + 1
+  }
+  plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]], plots[[6]], plots[[7]], nrow = 3, rel_widths = c(1, 1))
+  ## Save plots
+  if (is.null(age)){fileName=paste("plots/03_EDA/02_QC/",qc_metric1,"_vs_",qc_metric2, '_', tissue,".pdf", sep="")}
+  else {fileName=paste("plots/03_EDA/02_QC/",qc_metric1,"_vs_", qc_metric2, '_', tissue,"_", age,".pdf", sep="")}
+  ggsave(fileName, width = 35, height = 23, units = "cm")
+}
+
+## Plots of mito VS ribo percentages per sample 
+multiple_QC_scatterplots('subsets_Mito_percent', 'subsets_Ribo_percent', 'brain', NULL)
+multiple_QC_scatterplots('subsets_Mito_percent', 'subsets_Ribo_percent', 'blood', NULL)
+multiple_QC_scatterplots('subsets_Mito_percent', 'subsets_Ribo_percent', 'brain', 'pups')
+multiple_QC_scatterplots('subsets_Mito_percent', 'subsets_Ribo_percent', 'brain', 'adults')
+
+## Plots of library size VS mito percentages per sample 
+multiple_QC_scatterplots('sum', 'subsets_Mito_percent', 'brain', NULL)
+multiple_QC_scatterplots('sum', 'subsets_Mito_percent', 'blood', NULL)
+multiple_QC_scatterplots('sum', 'subsets_Mito_percent', 'brain', 'pups')
+multiple_QC_scatterplots('sum', 'subsets_Mito_percent', 'brain', 'adults')
+
+## Plots of library size VS ribo percentages per sample 
+multiple_QC_scatterplots('sum', 'subsets_Ribo_percent', 'brain', NULL)
+multiple_QC_scatterplots('sum', 'subsets_Ribo_percent', 'blood', NULL)
+multiple_QC_scatterplots('sum', 'subsets_Ribo_percent', 'brain', 'pups')
+multiple_QC_scatterplots('sum', 'subsets_Ribo_percent', 'brain', 'adults')
+
+## Plots of library size VS number of detected genes per sample 
+multiple_QC_scatterplots('sum', 'detected', 'brain', NULL)
+multiple_QC_scatterplots('sum', 'detected', 'blood', NULL)
+multiple_QC_scatterplots('sum', 'detected', 'brain', 'pups')
+multiple_QC_scatterplots('sum', 'detected', 'brain', 'adults')
+
+
+
+
+
+
+
+
+
 
 ## Plots of number of genes & mt/ribo proportions VS total counts 
 ## Samples separated by phenotypes
