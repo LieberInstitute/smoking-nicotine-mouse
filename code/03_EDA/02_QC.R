@@ -192,12 +192,19 @@ QC_scatterplots <- function(sample_var, qc_metric1, qc_metric2, tissue, age) {
     )
   }
   
+  if (qc_metric1 == "sum") {
+    x_axis_size <- 7
+  } else {
+    x_axis_size <- 9
+  }
+  
+  
   ## Data
   data <- colData(RSE)
   
   ## Labels
   if (qc_metric1=="detected"){
-    lab_x="Detected number of genes"}
+    lab_x="Number of detected genes"}
   else if (qc_metric1=="subsets_Mito_percent"){
     lab_x="Percentage of mt counts"}
   else if (qc_metric1=="subsets_Ribo_percent"){
@@ -208,7 +215,7 @@ QC_scatterplots <- function(sample_var, qc_metric1, qc_metric2, tissue, age) {
     lab_x = gsub("_", " ", qc_metric1)}
   
   if (qc_metric2=="detected"){
-    lab_y="Detected number of genes"}
+    lab_y="Number of detected genes"}
   else if (qc_metric2=="subsets_Mito_percent"){
     lab_y="Percentage of mt counts"}
   else if (qc_metric2=="subsets_Ribo_percent"){
@@ -224,28 +231,27 @@ QC_scatterplots <- function(sample_var, qc_metric1, qc_metric2, tissue, age) {
     x = !!rlang::sym(qc_metric1),
     y = !!rlang::sym(qc_metric2),
     ## Color samples by a variable
-    color = !!rlang::sym(sample_var)
+    color = eval(parse_expr(sample_var))
   )) +
     ## Add scatterplot
     geom_point(size = 1) +
     ## Add regression line
     stat_smooth(geom = "line", alpha = 0.7, size = 0.7, span = 0.25, method = lm, color = "orangered3") +
     ## Colors
-    scale_color_manual(name = sample_var, values = colors) +
+    scale_color_manual(name = capitalize(sample_var), values = colors) +
     theme_bw() +
     ## Add Pearson correlation coefficient between the metrics as subtitle
     labs(
       subtitle = paste0("Corr: ", signif(cor(data[, qc_metric1], data[, qc_metric2], method = "pearson"), digits = 3)),
       ## Add axis labels
       y = lab_y,
-      x = lab_x,
-      color=capitalize(sample_var)
+      x = lab_x
     ) +
     ## Plot margins and text size
     theme(
       plot.margin = unit(c(0.1, 1.2, 0.1, 1.2), "cm"),
       axis.title = element_text(size = (10)),
-      axis.text = element_text(size = (9)),
+      axis.text = element_text(size = (x_axis_size)),
       plot.subtitle = element_text(size = 9, color = "gray40"),
       legend.text = element_text(size = 9),
       legend.title = element_text(size = 10)
