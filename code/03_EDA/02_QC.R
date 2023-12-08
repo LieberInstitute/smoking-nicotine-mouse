@@ -483,57 +483,96 @@ plots_Retained("brain", "pups")
 
 ## 1.2.2 Map QC metrics after sample filtering 
 
-## Samples separated by Retention and phenotype
-QC_boxplots <- function (pheno_var1, pheno_var2, qc_var, tissue, age) {
+## Boxplots of QC metrics for samples filtered and retained
+boxplots_after_QC_filtering <- function(qc_metric, sample_var, tissue, age) {
+  
   if (is.null(age)){
     ## Tissue data
-    RSE<-eval(parse_expr(paste("rse_gene_", tissue, sep="")))
-    }
+    rse_gene<-eval(parse_expr(paste("rse_gene_", tissue, sep="")))
+  }
   else {
     ## Tissue and Age data
-    RSE<-eval(parse_expr(paste("rse_gene", tissue, age, sep="_")))
+    rse_gene<-eval(parse_expr(paste("rse_gene", tissue, age, sep="_")))
   }
+  
+  ## Color samples
+  colors <- c("True" = "darkseagreen3", "False" = "indianred")
+  
+  ## Sample shape by sample variables
+  if (sample_var == "Group") {
+    shapes <- c("Control" = 0, "Experimental" = 15)
+  } else if(sample_var == 'Expt'){
+    shapes <- c("Nicotine" = 8, "Smoking" = 6)
+  }else if (sample_var == "Age") {
+    shapes <- c("Adult" = 16, "Pup" = 1)
+  } else if (sample_var == "Sex") {
+    shapes <- c("F" = 11, "M" = 17)
+  } else if (sample_var == "Pregnancy") {
+    shapes <- c("Yes" = 10, "No" = 1)
+  } else if (sample_var == "plate") {
+    shapes <- c("Plate1" = 12, "Plate2" = 5, "Plate3" = 4)
+  } else if (sample_var == "flowcell") {
+    shapes <- c(
+      "HKCG7DSXX" = 3, "HKCMHDSXX" = 9, "HKCNKDSXX" = 14,
+      "HKCTMDSXX" = 7, "HK7JHDSXX"=2, "HKCJCDSXX"=13
+    )
+  }
+  
+  y_label <- str_replace_all(qc_metric, c("_" = " "))
+  
+  data <- data.frame(colData(rse_gene))
+  
   ## Median of the QC var values
-  median<-median(eval(parse_expr(paste("RSE$", qc_var, sep=""))))
-  ## MAD of the QC var values
-  mad<-mad(eval(parse_expr(paste("RSE$", qc_var, sep=""))))
-  plot=ggplot(as.data.frame(colData(RSE)), 
-         aes(x="", y=eval(parse_expr(qc_var)))) + 
-         ## Hide outliers
-         geom_boxplot(outlier.color = "#FFFFFFFF") +
-         ## Samples separated by Retention and by phenotype
-         geom_jitter(aes(colour=eval(parse_expr(pheno_var1)),shape=eval(parse_expr(pheno_var2))), 
-                     position=position_jitter(0.2)) +
-         ## Median line
-         geom_hline(yintercept = median, size=0.5) +
-         ## Line of median + 3 MADs
-         geom_hline(yintercept = median+(3*mad), size=0.5, linetype=2) +
-         ## Line of median - 3 MADs
-         geom_hline(yintercept = median-(3*mad), size=0.5, linetype=2) +
-         theme_classic() +
-         theme(legend.position="right", plot.margin=unit (c (1,1.5,1,1), 'cm')) +
-         labs(x="", y = qc_var, color=pheno_var1, shape=pheno_var2)
-    return(plot)
+  median <- median(eval(parse_expr(paste("rse_gene$", qc_metric, sep = ""))))
+  ## Median-absolute-deviation of the QC var values
+  mad <- mad(eval(parse_expr(paste("rse_gene$", qc_metric, sep = ""))))
+  
+  options(repr.plot.width = 4, repr.plot.height =6) 
+  plot <- ggplot(data = data, mapping = aes(
+    x = "", y = !!rlang::sym(qc_metric),
+    color = Retention
+  )) +
+    geom_jitter(alpha = 0.8, size = 2.5, aes(shape = eval(parse_expr((sample_var)))), stroke = 1) +
+    geom_boxplot(alpha = 0, size = 0.45, color = "black", ) +
+    scale_color_manual(values = colors) +
+    scale_shape_manual(values = shapes) +
+    guides(color = guide_legend(order = 1), 
+           shape = guide_legend(order = 2)) +
+    labs(x = "", y = y_label, color = "Retention after QC filtering", shape = capitalize(sample_var)) +
+    theme_bw() +
+    ## Median line
+    geom_hline(yintercept = median, size = 0.5) +
+    ## Line of median + 3 MADs
+    geom_hline(yintercept = median + (3 * mad), size = 0.5, linetype = 2) +
+    ## Line of median - 3 MADs
+    geom_hline(yintercept = median - (3 * mad), size = 0.5, linetype = 2) +
+    theme(
+      legend.position = "right",
+      legend.text = element_text(size = 11),
+      legend.title = element_text(size = 12),
+      plot.margin = unit(c(0.1, 1.2, 0.1, 1.2), "cm"),
+      axis.title = element_text(size = 12),
+      axis.text = element_text(size = 11)
+    )
+  
+  return(plot)
 }
 
-
+## Multiple boxplots
 plot_QC_boxplots<- function(tissue, age){
-  for (qc_var in c("sum", "detected", "subsets_Mito_percent", "subsets_Ribo_percent")){
+  for (sample_var in sample_variables){
     plots<-list()
     i=1
-      for (pheno_var in c("Age", "plate","Expt", "Sex", "Group", "medium", "Pregnancy", "flowcell")){
-         p<-QC_boxplots("Retention", pheno_var, qc_var, tissue, age)
-         plots[[i]]=p
-         i=i+1
-      }
-    plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]], plots[[6]], 
-              plots[[7]], plots[[8]], nrow = 2)
+    for (qc_var in c("sum", "detected", "subsets_Mito_percent", "subsets_Ribo_percent")){
+      p<-boxplots_after_QC_filtering(qc_var, sample_var, tissue, age)
+      plots[[i]]=p
+      i=i+1
+    }
+    plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], nrow = 2, align="v")
     ## Save plots
-    if (is.null(age)) {fileName=paste("plots/03_EDA/02_QC/QC_boxplot_",qc_var,"_", 
-                                        tissue, ".pdf", sep="")}
-    else {fileName=paste("plots/03_EDA/02_QC/QC_boxplot_",qc_var,"_", tissue, "_", 
-                       age, ".pdf", sep="")}
-    ggsave(fileName, width = 55, height = 25, units = "cm")
+    if (is.null(age)) {fileName=paste("plots/03_EDA/02_QC/QC_boxplot_",sample_var,"_", tissue, ".pdf", sep="")}
+    else {fileName=paste("plots/03_EDA/02_QC/QC_boxplot_",sample_var,"_", tissue, "_", age, ".pdf", sep="")}
+    ggsave(fileName, width = 30, height = 14, units = "cm")
   }
 }
 
