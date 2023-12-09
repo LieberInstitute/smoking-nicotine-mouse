@@ -24,10 +24,12 @@ rse_gene_brain_qc<-rse_gene_brain
 
 ## Generate PCA data
 PCA<-function(tissue, type, age){
+  
   if (is.null(age)) {
     RSE<-eval(parse_expr(paste("rse", type, tissue, "qc", sep="_"))) }
   else {
     RSE<-eval(parse_expr(paste("rse", type, tissue, age, "qc", sep="_")))}
+  
   pca<-prcomp(t(assays(RSE)$logcounts))
   ## % of the variance explained by each PC
   pca_vars<- getPcaVars(pca)
@@ -94,7 +96,7 @@ PCx_vs_PCy <- function (PCx, PCy, pca_data, pca_vars, sample_var, level) {
 }
 
 ## All PCA plots 
-plot_PCAs<-function(type, tissue, age){
+plot_PCAs<-function(type, tissue, age, afterFiltering){
   
   ## PC data
   pca_results<-PCA(tissue, type, age)
@@ -106,8 +108,17 @@ plot_PCAs<-function(type, tissue, age){
     pca_data$label <- sapply(pca_data$SAMPLE_ID, function(x){if(x %in% c("Sample_FE3P2", "Sample_4067", "Sample_FC41", 
                                                                        "Sample_P2_fe2_022019", "Sample_P1_fe3_021819", "Sample_P7_fe3_021719")){x} else{NA}})
   }
-  else
-    pca_data$label <- rep(NA, dim(pca_data)[1])
+  else{
+    pca_data$label <- rep(NA, dim(pca_data)[1])}
+  
+  ## File name termination for plots after manual sample filtering  
+  if(afterFiltering==TRUE){
+    term <- '_afterManualFilt.pdf'
+  }
+  else{
+    term <- '.pdf'
+  }
+  
   
   ## PC pairs to plot
   PC_pairs <- list(c("PC1", "PC2"), c("PC3", "PC4"), c("PC5", "PC6"))
@@ -125,7 +136,7 @@ plot_PCAs<-function(type, tissue, age){
         }
         plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], nrow = 2, align="v")
         ## Save plots
-        ggsave(paste("plots/03_EDA/03_PCA_MDS/",PCs[1],"_vs_",PCs[2],"_", type, "_", tissue ,".pdf", sep=""), 
+        ggsave(paste("plots/03_EDA/03_PCA_MDS/",PCs[1],"_vs_",PCs[2],"_", type, "_", tissue , term, sep=""), 
                  width = 26, height = 16, units = "cm")
       }
     }  
@@ -141,7 +152,7 @@ plot_PCAs<-function(type, tissue, age){
         }
         plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]], plots[[6]], plots[[7]], nrow = 2, align="v")
         ## Save plots
-        ggsave(paste("plots/03_EDA/03_PCA_MDS/",PCs[1],"_vs_",PCs[2],"_", type, "_", tissue ,".pdf", sep=""), 
+        ggsave(paste("plots/03_EDA/03_PCA_MDS/",PCs[1],"_vs_",PCs[2],"_", type, "_", tissue , term, sep=""), 
                  width = 52, height = 16, units = "cm")
       }
     }
@@ -159,7 +170,7 @@ plot_PCAs<-function(type, tissue, age){
       }
       plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]], nrow = 2, align="v")
       ## Save plots
-      ggsave(paste("plots/03_EDA/03_PCA_MDS/",PCs[1],"_vs_",PCs[2],"_", type, "_", tissue ,"_", age, ".pdf", sep=""), 
+      ggsave(paste("plots/03_EDA/03_PCA_MDS/",PCs[1],"_vs_",PCs[2],"_", type, "_", tissue ,"_", age, term, sep=""), 
              width = 39, height = 16, units = "cm")
     }
   }
@@ -176,7 +187,7 @@ plot_PCAs<-function(type, tissue, age){
       }
       plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]], nrow = 2, align="v")
       ## Save plots
-      ggsave(paste("plots/03_EDA/03_PCA_MDS/",PCs[1],"_vs_",PCs[2],"_", type, "_", tissue ,"_", age, ".pdf", sep=""), 
+      ggsave(paste("plots/03_EDA/03_PCA_MDS/",PCs[1],"_vs_",PCs[2],"_", type, "_", tissue ,"_", age, term, sep=""), 
              width = 39, height = 16, units = "cm")
 
   }
@@ -185,19 +196,19 @@ plot_PCAs<-function(type, tissue, age){
 
 ## Plots
 ## Gene level
-plot_PCAs("gene", "blood", NULL)
-plot_PCAs("gene", "brain", NULL)
-plot_PCAs("gene", "brain", "adults")
-plot_PCAs("gene", "brain", "pups")
+plot_PCAs("gene", "blood", NULL, FALSE)
+plot_PCAs("gene", "brain", NULL, FALSE)
+plot_PCAs("gene", "brain", "adults", FALSE)
+plot_PCAs("gene", "brain", "pups", FALSE)
 ## Exon level 
-plot_PCAs("exon", "brain", "adults")
-plot_PCAs("exon", "brain", "pups")
+plot_PCAs("exon", "brain", "adults", FALSE)
+plot_PCAs("exon", "brain", "pups", FALSE)
 ## Tx level
-plot_PCAs("tx", "brain", "adults")
-plot_PCAs("tx", "brain", "pups")
+plot_PCAs("tx", "brain", "adults", FALSE)
+plot_PCAs("tx", "brain", "pups", FALSE)
 ## Jxn level
-plot_PCAs("jx", "brain", "adults")
-plot_PCAs("jx", "brain", "pups")
+plot_PCAs("jx", "brain", "adults", FALSE)
+plot_PCAs("jx", "brain", "pups", FALSE)
 
 
 
@@ -339,7 +350,7 @@ pca_data_gene_brain_pups[which.min(pca_data_gene_brain_pups$sum), "SAMPLE_ID"]
 
 ## Remove those samples
 ## In adults
-poorQC_samples_adults<-c("Sample_FE3P2", "Sample_4067", "Sample_FC41")
+poorQC_samples<-c("Sample_FE3P2", "Sample_4067", "Sample_FC41")
 rse_gene_brain_adults_qc <- rse_gene_brain_adults_qc_afterPCA<-rse_gene_brain_adults_qc[,-which(rse_gene_brain_adults_qc$SAMPLE_ID %in% poorQC_samples)]
 rse_exon_brain_adults_qc <- rse_exon_brain_adults_qc_afterPCA<-rse_exon_brain_adults_qc[,-which(rse_exon_brain_adults_qc$SAMPLE_ID %in% poorQC_samples)]
 rse_tx_brain_adults_qc <- rse_tx_brain_adults_qc_afterPCA<-rse_tx_brain_adults_qc[,-which(rse_tx_brain_adults_qc$SAMPLE_ID %in% poorQC_samples)]
@@ -353,7 +364,7 @@ save(rse_jx_brain_adults_qc_afterPCA, file="processed-data/03_EDA/03_PCA/rse_jx_
 
 
 ## In pups
-poorQC_samples_pups<-c("Sample_P2_fe2_022019", "Sample_P1_fe3_021819", "Sample_P7_fe3_021719")
+poorQC_samples<-c("Sample_P2_fe2_022019", "Sample_P1_fe3_021819", "Sample_P7_fe3_021719")
 rse_gene_brain_pups_qc <- rse_gene_brain_pups_qc_afterPCA<-rse_gene_brain_pups_qc[,-which(rse_gene_brain_pups_qc$SAMPLE_ID %in% poorQC_samples)]
 rse_exon_brain_pups_qc <- rse_exon_brain_pups_qc_afterPCA<-rse_exon_brain_pups_qc[,-which(rse_exon_brain_pups_qc$SAMPLE_ID %in% poorQC_samples)]
 rse_tx_brain_pups_qc <- rse_tx_brain_pups_qc_afterPCA<-rse_tx_brain_pups_qc[,-which(rse_tx_brain_pups_qc$SAMPLE_ID %in% poorQC_samples)]
@@ -367,14 +378,14 @@ save(rse_jx_brain_pups_qc_afterPCA, file="processed-data/03_EDA/03_PCA/rse_jx_br
 
 
 ## PCA plots without those samples
-plot_PCAs("gene", "brain", "adults")
-plot_PCAs("gene", "brain", "pups")
-plot_PCAs("exon", "brain", "adults")
-plot_PCAs("exon", "brain", "pups")
-plot_PCAs("tx", "brain", "adults")
-plot_PCAs("tx", "brain", "pups")
-plot_PCAs("jx", "brain", "adults")
-plot_PCAs("jx", "brain", "pups")
+plot_PCAs("gene", "brain", "adults", TRUE)
+plot_PCAs("gene", "brain", "pups", TRUE)
+plot_PCAs("exon", "brain", "adults", TRUE)
+plot_PCAs("exon", "brain", "pups", TRUE)
+plot_PCAs("tx", "brain", "adults", TRUE)
+plot_PCAs("tx", "brain", "pups", TRUE)
+plot_PCAs("jx", "brain", "adults", TRUE)
+plot_PCAs("jx", "brain", "pups", TRUE)
 
 
 
@@ -437,7 +448,7 @@ PCA_Expt_Group("jx", "brain", "pups")
 
 
 
-### 1.1.3 Explore separation of samples by phenotype and Group in a PC 
+### 1.1.3 Explore separation of samples by sample variable and Group in a PC 
 ## PC boxplots 
 PC_boxplots <- function (PCx, pheno_var1, pheno_var2, pca_data, pca_vars) {
     plot=ggplot(data=pca_data, 
