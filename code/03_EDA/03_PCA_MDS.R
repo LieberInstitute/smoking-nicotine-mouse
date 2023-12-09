@@ -455,66 +455,81 @@ PCA_Expt_Group("jx", "brain", "pups")
 ### 1.1.3 Explore separation of samples by sample variable and Group in a PC 
 
 ## PC boxplots 
-PC_boxplots <- function (PCx, pheno_var1, pheno_var2, pca_data, pca_vars) {
+PC_boxplots <- function (PCx, sample_var1, sample_var2, pca_data, pca_vars) {
+  
+    if(sample_var1=='flowcell'){
+      axis_text_size=7
+    }
+    else{
+      axis_text_size=10
+    }
+  
     plot=ggplot(data=pca_data, 
-         aes(x=eval(parse_expr(pheno_var1)),y=eval(parse_expr(PCx)))) + 
+         aes(x=eval(parse_expr(sample_var1)),y=eval(parse_expr(PCx)))) + 
          ## Hide outliers
          geom_boxplot(outlier.color = "#FFFFFFFF") +
          ## PC dots colored by a group + noise
-         geom_jitter(aes(colour=eval(parse_expr(pheno_var2))),shape=16, 
+         geom_jitter(aes(colour=eval(parse_expr(sample_var2))),shape=16, size=2, 
                      position=position_jitter(0.2)) +
-         theme_classic() +
-         theme(legend.position="right", plot.margin=unit (c (1,1.5,1,1), 'cm')) +
-         labs(x= pheno_var1, y = pca_vars[strtoi(gsub("PC","", PCx))],  
-              color=pheno_var2)
+         scale_color_manual(values = colors[[sample_var2]]) +
+         theme_bw() +
+         labs(x=capitalize(sample_var1), y = pca_vars[strtoi(gsub("PC","", PCx))], color=capitalize(sample_var2)) +
+         theme(legend.position="right", 
+               plot.margin=unit (c (0.1,0.1,0.1,0.1), 'cm'),
+               legend.text = element_text(size = 11),
+               legend.title = element_text(size = 12),
+               axis.title = element_text(size = 12),
+               axis.text.x = element_text(size = axis_text_size)) 
+         
     return(plot)
 }
 
 ## Boxplots of PC1 data of samples separated by Group and phenotypes
 plot_PC_boxplots<-function(PCx, type, tissue, age) {
+  
   pca_data<-PCA(tissue, type, age)[[1]]
   pca_vars<-PCA(tissue, type, age)[[2]]
 
   if (is.null(age)){
     i=1
     plots<-list()
-    for (pheno_var1 in c("plate", "Pregnancy", "flowcell")){
-        p<-PC_boxplots(PCx, pheno_var1, "Group", pca_data, pca_vars)
+    for (sample_var1 in c("Pregnancy", "plate", "flowcell")){
+        p<-PC_boxplots(PCx, sample_var1, "Group", pca_data, pca_vars)
         plots[[i]]=p
         i=i+1
       }
     plot_grid(plots[[1]], plots[[2]], plots[[3]], nrow = 1)
     ## Save plot
     ggsave(paste("plots/03_EDA/03_PCA_MDS/boxplot_",PCx,"_", type, "_", tissue, ".pdf", 
-         sep=""), width = 35, height = 15, units = "cm")
+         sep=""), width = 30, height = 7, units = "cm")
   }
 
   else if (age=="adults") {
     i=1
     plots<-list()
-    for (pheno_var1 in c("plate","Expt", "Pregnancy", "flowcell")){
-        p<-PC_boxplots(PCx, pheno_var1, "Group", pca_data, pca_vars)
+    for (sample_var1 in c("Expt", "Pregnancy", "plate", "flowcell")){
+        p<-PC_boxplots(PCx, sample_var1, "Group", pca_data, pca_vars)
         plots[[i]]=p
         i=i+1
       }
     plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], nrow = 2)
     ## Save plot
     ggsave(paste("plots/03_EDA/03_PCA_MDS/boxplot_",PCx,"_", type, "_", tissue, "_", age, ".pdf", 
-         sep=""), width = 28, height = 25, units = "cm")
+         sep=""), width = 24, height = 17, units = "cm")
   }
 
   else if (age=="pups") {
     i=1
     plots<-list()
-    for (pheno_var1 in c("plate","Expt", "Sex", "flowcell")){
-        p<-PC_boxplots(PCx, pheno_var1, "Group", pca_data, pca_vars)
+    for (sample_var1 in c("Expt", "Sex", "plate", "flowcell")){
+        p<-PC_boxplots(PCx, sample_var1, "Group", pca_data, pca_vars)
         plots[[i]]=p
         i=i+1
       }
     plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], nrow = 2)
     ## Save plot
     ggsave(paste("plots/03_EDA/03_PCA_MDS/boxplot_",PCx,"_", type, "_", tissue, "_", age, ".pdf", 
-         sep=""), width = 32, height = 27, units = "cm")
+         sep=""), width = 24, height = 17, units = "cm")
   }
 }
 
