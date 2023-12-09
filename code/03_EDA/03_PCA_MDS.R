@@ -409,10 +409,12 @@ PCA_Expt_Group<- function(type, tissue, age){
   ## Join PCs and samples' info 
   pca_data<-cbind(pca$x,colData(RSE_smoking))
   pca_data<-as.data.frame(pca_data)
+  pca_data$label <- rep(NA, dim(pca_data)[1])
+  
   ## Plot
-  p1<-PCx_vs_PCy("PC1", "PC2", pca_data, pca_vars_labs, "Group") + ggtitle("Smoking")
-  p2<-PCx_vs_PCy("PC3", "PC4", pca_data, pca_vars_labs, "Group") + ggtitle("Smoking")
-  p3<-PCx_vs_PCy("PC5", "PC6", pca_data, pca_vars_labs, "Group") + ggtitle("Smoking")
+  p1<-PCx_vs_PCy("PC1", "PC2", pca_data, pca_vars_labs, "Group", type) + ggtitle("Smoking")
+  p2<-PCx_vs_PCy("PC3", "PC4", pca_data, pca_vars_labs, "Group", type) + ggtitle("Smoking")
+  p3<-PCx_vs_PCy("PC5", "PC6", pca_data, pca_vars_labs, "Group", type) + ggtitle("Smoking")
   
   
   ## PCA plots for nicotine samples separated by Group
@@ -424,14 +426,16 @@ PCA_Expt_Group<- function(type, tissue, age){
       pca_vars, "% Var Expl")
   pca_data<-cbind(pca$x,colData(RSE_nicotine))
   pca_data<-as.data.frame(pca_data)
+  pca_data$label <- rep(NA, dim(pca_data)[1])
+  
   ## Plot
-  p4<-PCx_vs_PCy("PC1", "PC2", pca_data, pca_vars_labs, "Group") + ggtitle("Nicotine")
-  p5<-PCx_vs_PCy("PC3", "PC4", pca_data, pca_vars_labs, "Group") + ggtitle("Nicotine")
-  p6<-PCx_vs_PCy("PC5", "PC6", pca_data, pca_vars_labs, "Group") + ggtitle("Nicotine")
+  p4<-PCx_vs_PCy("PC1", "PC2", pca_data, pca_vars_labs, "Group", type) + ggtitle("Nicotine")
+  p5<-PCx_vs_PCy("PC3", "PC4", pca_data, pca_vars_labs, "Group", type) + ggtitle("Nicotine")
+  p6<-PCx_vs_PCy("PC5", "PC6", pca_data, pca_vars_labs, "Group", type) + ggtitle("Nicotine")
   
   plot_grid(p1,p2,p3,p4,p5,p6, nrow=2)
   ggsave(paste("plots/03_EDA/03_PCA_MDS/Expt_samples_", type, "_", tissue, "_", age, ".pdf", sep=""), 
-           width = 40, height = 20, units = "cm")
+           width = 39, height = 18, units = "cm")
   return(NULL)
 }
 
@@ -449,6 +453,7 @@ PCA_Expt_Group("jx", "brain", "pups")
 
 
 ### 1.1.3 Explore separation of samples by sample variable and Group in a PC 
+
 ## PC boxplots 
 PC_boxplots <- function (PCx, pheno_var1, pheno_var2, pca_data, pca_vars) {
     plot=ggplot(data=pca_data, 
