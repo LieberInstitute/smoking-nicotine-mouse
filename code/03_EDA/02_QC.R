@@ -14,6 +14,7 @@ library(variancePartition)
 library(gridExtra)
 library(Hmisc)
 library(stringr)
+library(ggnewscale)
 library(sessioninfo)
 
 
@@ -72,8 +73,7 @@ QC_boxplots <- function(qc_metric, sample_var, tissue, age) {
   } else if (sample_var == "flowcell") {
     colors <- c(
       "HKCG7DSXX" = "chartreuse2", "HKCMHDSXX" = "magenta", "HKCNKDSXX" = "turquoise3",
-      "HKCTMDSXX" = "tomato", "HK7JHDSXX"="seagreen3", "HKCJCDSXX"="palevioletred2"
-    )
+      "HKCTMDSXX" = "tomato", "HK7JHDSXX"="seagreen3", "HKCJCDSXX"="palevioletred2")
   }
   
   ## Axis labels
@@ -156,6 +156,7 @@ table(rse_gene_brain$trimmed)
 table(rse_gene_blood$trimmed)
 # FALSE 
 #   24 
+
 
 
 
@@ -478,6 +479,7 @@ plots_Retained("brain", NULL)
 plots_Retained("blood", NULL)
 plots_Retained("brain", "adults")
 plots_Retained("brain", "pups")
+
 
 
 
