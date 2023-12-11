@@ -39,11 +39,13 @@ save(rse_gene_brain_pups_nicotine,
      file="processed-data/03_EDA/04_Expl_Var_partition/rse_gene_brain_pups_nicotine.Rdata")
 
 
-
+# ------------------------------------------------------------------------------
 ## 1.1 Explanatory Variables
+# ------------------------------------------------------------------------------
 
 ## Plot density function for % of variance explained 
 expl_var<- function(type, tissue, age, expt){
+  
   ## For blood or all adults/pups data
   if (is.null(expt)){
     if (is.null(age)){ 
@@ -72,7 +74,7 @@ expl_var<- function(type, tissue, age, expt){
   ## Plot explanatory variables 
   ## Variables' colors
   colors=c("Sex"="tomato3", "Pregnancy"="lightpink", "Expt"="slateblue2","Group"="seagreen3","plate"="tan1",
-           "flowcell"="mediumorchid1", "mitoRate"="royalblue1","rRNA_rate"="yellow3","overallMapRate"="wheat4", 
+           "flowcell"="mediumorchid1", "mitoRate"="royalblue1","rRNA_rate"="yellow3","overallMapRate"="wheat3", 
            "totalAssignedGene"="violetred1", "ERCCsumLogErr"="ivory4")
   values<-c()
   for (variable in variables){
@@ -83,7 +85,7 @@ expl_var<- function(type, tissue, age, expt){
     }
   }
   ## Plot density graph for each variable
-  p<-plotExplanatoryVariables(exp_vars, theme_size = 10, nvars_to_plot = 12)
+  p<-plotExplanatoryVariables(exp_vars, theme_size = 20, nvars_to_plot = 12)
   p + scale_colour_manual(values = colors[c(values)]) + labs(color="Variables")
   ## Save plot
   ggsave(fileName, width = 25, height = 15, units = "cm")
@@ -104,14 +106,16 @@ expl_var("gene", "brain", "pups", "nicotine")
 
 
 
-
-
+# ------------------------------------------------------------------------------
 ## 1.2 Variance Partition
+# ------------------------------------------------------------------------------
 
 ### 1.2.1 Canonical Correlation Analysis (CCA) 
 
 ## Plot Heatmap of CC between variables
 plot_CCA<- function(tissue, age, expt){
+  
+  type <- 'gene'
   
   if (is.null(expt)){
     
@@ -168,7 +172,6 @@ plot_CCA("brain", "adults", "smoking")
 plot_CCA("brain", "adults", "nicotine")
 plot_CCA("brain", "pups", "smoking")
 plot_CCA("brain", "pups", "nicotine")
-
 
 
 
@@ -245,7 +248,6 @@ var_part("brain", "adults", "smoking")
 var_part("brain", "adults", "nicotine")
 var_part("brain", "pups", "smoking")
 var_part("brain", "pups", "nicotine")
-
 
 
 
