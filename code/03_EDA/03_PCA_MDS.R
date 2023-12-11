@@ -549,12 +549,20 @@ plot_PC_boxplots("PC2", "gene", "brain", "pups")
 # ------------------------------------------------------------------------------
 
 ## MDS plot
-MDS<- function(pheno_var, MDS){
+MDS<- function(sample_var, MDS){
   plot=ggplot(data=as.data.frame(MDS), 
-         aes(x=V1,y=V2, color=eval(parse_expr(pheno_var)))) + 
-         geom_point() + 
-         theme(legend.position="right", plot.margin=unit (c (1,1.5,1,1), 'cm')) +
-         labs(x= "Component 1", y = "Component 2",  color=pheno_var)
+         aes(x=V1,y=V2, color=eval(parse_expr(sample_var)))) + 
+         geom_point(size=2) + 
+         scale_color_manual(values = colors[[sample_var]]) +
+         theme_bw() +
+         labs(x= "Component 1", y = "Component 2",  color=capitalize(sample_var)) +
+         theme(plot.margin=unit (c (1,1.5,1,1), 'cm'), 
+              legend.position = "right",
+              legend.text = element_text(size = 11),
+              legend.title = element_text(size = 12),
+              axis.title = element_text(size = 12),
+              axis.text = element_text(size = 10)) 
+         
     return(plot)
 } 
 
@@ -569,15 +577,15 @@ plot_MDS<- function(tissue, type, age) {
     
     i=1
     plots<-list()
-    for (pheno_var in c("plate", "Group", "Pregnancy", "flowcell")){
+    for (pheno_var in c("Group", "Pregnancy", "plate", "flowcell")){
         p<-MDS(pheno_var, MDS)
         plots[[i]]=p
         i=i+1
       }
-    plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], nrow = 2)
+    plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], nrow = 2, align='v')
     ## Save plot
     ggsave(paste("plots/03_EDA/03_PCA_MDS/MDS_", type, "_", tissue, ".pdf", 
-           sep=""), width = 30, height = 25, units = "cm")
+           sep=""), width = 26, height = 16, units = "cm")
   }
   
   else if (age=="adults") {
@@ -587,15 +595,15 @@ plot_MDS<- function(tissue, type, age) {
     
     i=1
     plots<-list()
-    for (pheno_var in c("plate","Expt", "Group", "Pregnancy", "flowcell")){
+    for (pheno_var in c("Expt", "Group", "Pregnancy", "plate", "flowcell")){
         p<-MDS(pheno_var, MDS)
         plots[[i]]=p
         i=i+1
       }
-    plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]], nrow = 2)
+    plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]], nrow = 2, align='v')
     ## Save plot
     ggsave(paste("plots/03_EDA/03_PCA_MDS/MDS_", type, "_", tissue, "_", age, ".pdf", 
-           sep=""), width = 40, height = 20, units = "cm")
+           sep=""), width = 39, height = 16, units = "cm")
   }
   
   else if (age=="pups") {
@@ -605,15 +613,15 @@ plot_MDS<- function(tissue, type, age) {
     
     i=1
     plots<-list()
-    for (pheno_var in c("plate","Expt", "Sex", "Group", "flowcell")){
+    for (pheno_var in c("Expt", "Group", "Sex", "plate", "flowcell")){
         p<-MDS(pheno_var, MDS)
         plots[[i]]=p
         i=i+1
       }
-    plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]], nrow = 2)
+    plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]], nrow = 2, align='v')
     ## Save plot
     ggsave(paste("plots/03_EDA/03_PCA_MDS/MDS_", type, "_", tissue, "_", age, ".pdf", 
-           sep=""), width = 40, height = 20, units = "cm")
+           sep=""), width = 39, height = 16, units = "cm")
   }
 }
 
