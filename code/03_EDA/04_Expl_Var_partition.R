@@ -361,6 +361,7 @@ var_part_subsets("brain", "pups", "nicotine")
 ## Reproducibility information
 options(width = 120)
 session_info()
+
 # ─ Session info ───────────────────────────────────────────────────────────────────────────────────────────────────────
 # setting  value
 # version  R version 4.3.0 (2023-04-21)
