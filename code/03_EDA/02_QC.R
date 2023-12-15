@@ -193,7 +193,7 @@ QC_scatterplots <- function(sample_var, qc_metric1, qc_metric2, tissue, age) {
       "HKCTMDSXX" = "tomato", "HK7JHDSXX"="seagreen3", "HKCJCDSXX"="palevioletred2"
     )
   } else if(sample_var=='Retention'){
-    colors <- c('False'='indianred', 'True'='darkseagreen3')
+    colors <- c('False'='chocolate', 'True'='lightsteelblue3')
   }
   
   ## Axis text size
@@ -499,7 +499,7 @@ boxplots_after_QC_filtering <- function(qc_metric, sample_var, tissue, age) {
   }
   
   ## Color samples
-  colors <- c("True" = "darkseagreen3", "False" = "indianred")
+  colors <- c("True" = "lightsteelblue3", "False" = "chocolate")
   
   ## Sample shape by sample variables
   if (sample_var == "Group") {
