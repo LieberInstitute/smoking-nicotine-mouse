@@ -143,7 +143,7 @@ plots_DE<-function(top_genes, vGene, FDR=0.05, name) {
     scale_fill_manual(values = cols, name=NULL) +
     scale_size_manual(values = sizes, name=NULL) +
     scale_alpha_manual(values = alphas, name=NULL) +
-    labs(x="Mean of normalized counts", y="Log2FC (Exposed vs Ctrl)") +
+    labs(x="Mean of log-normalized counts", y="Log2FC (Exposed vs Ctrl)") +
     theme(plot.margin = unit(c(1,1,1,1), "cm"),
           legend.position = c(0.82, 0.15),
           legend.background = element_rect(fill=NA, color='black'),
@@ -237,8 +237,6 @@ DE_one_boxplot <- function (de_genes, lognorm_DE, DEgene){
 ## Obtain lognorm counts of DE genes
 DE_boxplots <- function(RSE, vGene, model, de_genes){
   
-  ## Regress out residuals to remove batch effects
-  vGene$E<-cleaningY(vGene$E, model, P=2)
   ## Order genes by q-value
   de_genes<-de_genes[order(de_genes$adj.P.Val),]
   lognorm_DE<-vGene$E[rownames(de_genes),]
