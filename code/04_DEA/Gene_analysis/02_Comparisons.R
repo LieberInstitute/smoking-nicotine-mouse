@@ -62,7 +62,7 @@ add_DE_info <-function(top_genes1, top_genes2, name_1, name_2) {
     }
     
     else if (top_genes2$adj.P.Val[i]<0.05 && !top_genes1$adj.P.Val[i]<0.05) {
-      DE<-append(DE, paste("sig",name_2))
+      DE<-append(DE, paste("sig", name_2))
     }
     ## No DE genes in neither group
     else {
@@ -80,26 +80,35 @@ t_stat_plot <- function(top_genes1, top_genes2, name_1, name_2, model_name){
   rho <- cor(top_genes1$t, top_genes2$t, method = "spearman")
   rho_anno = paste0("rho = ", format(round(rho, 2), nsmall = 2))
   
+  ## Colors and transparency
+  cols <- c("deeppink2", "darkolivegreen3","bisque2", "darkgrey") 
+  names(cols)<-c("sig Both", paste0("sig ", name_1), paste0("sig ", name_2), "None")
+  alphas <- c( 1, 1, 1,0.5)  
+  names(alphas)<-c("sig Both", paste0("sig  ", name_1), paste0("sig ", name_2), "None")
+  
   ## Merge data
   t_stats<-data.frame(t1=top_genes1$t, t2=top_genes2$t)
   ## Add DE info for both groups
   t_stats$DEG<-add_DE_info(top_genes1, top_genes2, name_1, name_2)
-  
-  cols <- c("red", "#ffad73","#26b3ff", "dark grey") 
-  names(cols)<-c("sig Both", paste0("sig ", name_1), paste0("sig ", name_2), "None")
-  alphas <- c( 1, 1, 1,0.5)  
-  names(alphas)<-c("sig Both", paste0("sig ", name_1), paste0("sig ", name_2), "None")
+  t_stats$DEG <- factor(t_stats$DEG, levels=names(cols))
    
   plot <- ggplot(t_stats, aes(x = t1, y = t2, color=DEG, alpha=DEG)) +
-     geom_point(size = 1) +
+     geom_point(size = 1.5) +
+     scale_color_manual(values = cols, labels=names(cols), drop = FALSE) + 
+     scale_alpha_manual(values = alphas, labels=names(alphas), drop=FALSE) +
      labs(x = paste("t-stats", name_1), 
-          y = paste("t-stats", name_2),
-          title = model_name, 
-          subtitle = rho_anno, 
-          parse = T) +
-     theme_bw() +
-     scale_color_manual(values = cols) + 
-     scale_alpha_manual(values = alphas) 
+         y = paste("t-stats", name_2),
+         title = model_name, 
+         subtitle = rho_anno, 
+         color = "Differential expression",
+         parse = T) +
+    guides(alpha = 'none') + 
+    theme_bw() +
+    theme(plot.margin = unit(c(1,1,1,1), "cm"),
+          axis.title = element_text(size = 12),
+          axis.text = element_text(size = 10),
+          legend.text = element_text(size=11),
+          legend.title = element_text(size=12))
  return(plot)
 }
 
@@ -112,10 +121,10 @@ tstats_plots<-function(top_genes_pairs, name_1, name_2, models){
     p<-t_stat_plot(top_genes_pairs[[i]][[1]], top_genes_pairs[[i]][[2]], name_1, name_2, models[i])
     plots[[i]]<-p
   }
-  plot_grid(plots[[1]], plots[[2]], plots[[3]], ncol=2)
+  plot_grid(plots[[1]], plots[[2]], plots[[3]], ncol=2, align = 'hv')
   ggsave(filename=paste("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_",gsub(" ", "_", name_1), "_VS_",
                         gsub(" ", "_", name_2), ".pdf", sep=""), 
-                        height = 20, width = 25, units = "cm")
+                        height = 20, width = 30, units = "cm")
 }
 
 
@@ -203,7 +212,7 @@ t_stat_plot_brain_blood_replication <- function(age_mouse, expt_mouse, feature){
         
         ## Non-significant genes 
         else {
-          DE<-append(DE, "n.s. genes")      
+          DE<-append(DE, "ns genes")      
         }
       }
       
