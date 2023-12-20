@@ -190,6 +190,20 @@ t_stat_plot_brain_blood_replication <- function(age_mouse, expt_mouse, feature){
     t_stats<-data.frame(ensemblID=rownames(top_genes_brain), gene_symbol=top_genes_brain$Symbol, t_blood=top_genes_blood$t, t_brain=top_genes_brain$t,
                         FDR_blood=top_genes_blood$adj.P.Val, FDR_brain=top_genes_brain$adj.P.Val, P.Val_blood=top_genes_blood$P.Value, P.Val_brain=top_genes_brain$P.Value,
                         logFC_blood=top_genes_blood$logFC, logFC_brain=top_genes_brain$logFC)
+    
+    ## Colors and alphas for plot
+    if (age_mouse=="pups"){
+      cols <- c("deeppink2", "darkolivegreen3", "darkgrey") 
+      names(cols)<-c("Replicating genes (p<0.05 in blood, FDR<0.05 in brain)", "Signif in brain (FDR<0.05)", "ns genes")
+      alphas <- c(1, 1, 0.5)  
+      names(alphas)<-c("Replicating genes (p<0.05 in blood, FDR<0.05 in brain)", "Signif in brain (FDR<0.05)", "ns genes")
+    }
+    else {
+      cols <- c("deeppink2", "darkgrey") 
+      names(cols)<-c("Replicating genes (p<0.05 in blood and brain)", "ns genes")
+      alphas <- c(1, 0.3)  
+      names(alphas)<-c("Replicating genes (p<0.05 in blood and brain)", "ns genes")
+    }
    
     ## Add DE and replication info for each gene
     DE <-vector()
@@ -225,30 +239,18 @@ t_stat_plot_brain_blood_replication <- function(age_mouse, expt_mouse, feature){
           DE<-append(DE, "Replicating genes (p<0.05 in blood and brain)")
         }
         else {
-          DE<-append(DE, "n.s. genes")      
+          DE<-append(DE, "ns genes")      
         }
       }
     }
     
     t_stats$DE<- DE
+    t_stats$DE <- factor(t_stats$DE, levels=names(cols))
     
     ## Correlation coeff between t-stats of blood vs brain genes 
     rho <- cor(t_stats$t_blood, t_stats$t_brain, method = "spearman")
     rho_anno = paste0("rho = ", format(round(rho, 2), nsmall = 2))
     
-    ## Colors and alphas for plot
-    if (age_mouse=="pups"){
-      cols <- c("red",   "#26b3ff", "dark grey") 
-      names(cols)<-c("Replicating genes (p<0.05 in blood, FDR<0.05 in brain)", "Signif in brain (FDR<0.05)", "n.s. genes")
-      alphas <- c(1, 1, 0.5)  
-      names(alphas)<-c("Replicating genes (p<0.05 in blood, FDR<0.05 in brain)", "Signif in brain (FDR<0.05)", "n.s. genes")
-    }
-    else {
-      cols <- c("red","dark grey") 
-      names(cols)<-c("Replicating genes (p<0.05 in blood and brain)", "n.s. genes")
-      alphas <- c(1, 0.5)  
-      names(alphas)<-c("Replicating genes (p<0.05 in blood and brain)", "n.s. genes")
-    }
     
     ## Add labels of interesting genes 
     
@@ -260,7 +262,7 @@ t_stat_plot_brain_blood_replication <- function(age_mouse, expt_mouse, feature){
     for (i in 1:dim(t_stats)[1]){
       ## Labels of the top 3 replicating genes
       if (t_stats$gene_symbol[i] %in% top_rep_genes){
-        label <- append(label, paste(t_stats$ensemblID[i], t_stats$gene_symbol[i], sep="-"))
+        label <- append(label,  t_stats$gene_symbol[i])
       }
       else{
         label <- append(label, NA)
@@ -271,20 +273,33 @@ t_stat_plot_brain_blood_replication <- function(age_mouse, expt_mouse, feature){
     
     ## Plot
     plot <- ggplot(t_stats, aes(x = t_brain, y = t_blood, color=DE, alpha=DE, label=label)) +
-      geom_point(size = 1) +
+      geom_point(size = 1.5) +
       labs(x = paste("t-stats in", capitalize(expt_mouse), substr(age_mouse, 1, nchar(age_mouse)-1), "brain"), 
            y = "t-stats in Smoking adult blood",
            title = paste(capitalize(expt_mouse), "mouse brain vs Smoking mouse blood", sep=" "), 
+           color = 'DE/Replication',
            subtitle = rho_anno, 
            parse = T) +
-      geom_label_repel(fill="white", size=2, max.overlaps = Inf,  
-                       box.padding = 0.2, 
+      scale_color_manual(values = cols, labels=names(cols), drop = FALSE) + 
+      scale_alpha_manual(values = alphas, labels=names(alphas), drop=FALSE) +
+      guides(alpha = 'none') + 
+      geom_label_repel(aes(fontface = 'bold'), fill='white', color='black',
+                       size=3.3,
+                       max.overlaps = 15,
+                       min.segment.length = unit(0, "cm"),
+                       point.padding = unit(0.1, "cm"),
+                       box.padding = 0.2,
+                       label.padding = 0.2,
+                       label.size = 0.2,
+                       nudge_y=0.9,
                        show.legend=FALSE) +
       theme_bw() +
-      scale_color_manual(values = cols) + 
-      scale_alpha_manual(values = alphas)
+      theme(plot.margin = unit(c(1,1,1,1), "cm"),
+            axis.title = element_text(size = 12),
+            axis.text = element_text(size = 10),
+            legend.text = element_text(size=11),
+            legend.title = element_text(size=12))
     
-    plot + theme(legend.text = element_text(size=8))
     plot
     ggsave(filename=paste("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_replication_", capitalize(expt_mouse), "_", substr(age_mouse, 1, nchar(age_mouse)-1),
                           "_Brain_vs_Smoking_adult_Blood.pdf", sep=""), height = 12, width = 20, units = "cm")
@@ -313,6 +328,7 @@ t_stat_plot_brain_blood_replication <- function(age_mouse, expt_mouse, feature){
     }
 
   }
+  
   
   ## Compare blood genes vs brain txs
   else {
@@ -343,7 +359,12 @@ t_stat_plot_brain_blood_replication <- function(age_mouse, expt_mouse, feature){
     t_stats$P.Val_gene<-P_val_tx_genes
     t_stats$logFC_gene<-logFC_tx_genes
   
-  
+    ## Colors and alphas for plot
+    cols <- c("deeppink2", "darkolivegreen3", "darkgrey") 
+    names(cols)<-c("Replicating txs (blood gene with p<0.05, brain tx with FDR<0.05)", "Signif txs in brain (FDR<0.05)", "ns txs")
+    alphas <- c(1, 1, 0.3)  
+    names(alphas)<-c("Replicating txs (blood gene with p<0.05, brain tx with FDR<0.05)", "Signif txs in brain (FDR<0.05)", "ns txs")
+    
     ## Add DE and replication info for each tx
     DE <-vector()
     for (i in 1:dim(t_stats)[1]) {
@@ -362,21 +383,16 @@ t_stat_plot_brain_blood_replication <- function(age_mouse, expt_mouse, feature){
       
       ## Non-significant txs
       else {
-        DE<-append(DE, "n.s. txs")      
+        DE<-append(DE, "ns txs")      
       }
     }
     
     t_stats$DE<- DE
+    t_stats$DE <- factor(t_stats$DE, levels=names(cols))
     
     ## Correlation coeff between t-stats of blood genes vs brain txs 
     rho <- cor(t_stats$t_gene, t_stats$t_tx, method = "spearman")
     rho_anno = paste0("rho = ", format(round(rho, 2), nsmall = 2))
-    
-    ## Colors and alphas for plot
-    cols <- c("red", "#26b3ff", "dark grey") 
-    names(cols)<-c("Replicating txs (blood gene with p<0.05, brain tx with FDR<0.05)", "Signif txs in brain (FDR<0.05)", "n.s. txs")
-    alphas <- c(1, 1, 0.5)  
-    names(alphas)<-c("Replicating txs (blood gene with p<0.05, brain tx with FDR<0.05)", "Signif txs in brain (FDR<0.05)", "n.s. txs")
     
     
     ## Add labels of interesting txs and their genes
@@ -400,23 +416,36 @@ t_stat_plot_brain_blood_replication <- function(age_mouse, expt_mouse, feature){
     
     ## Plot
     plot <- ggplot(t_stats, aes(x = t_tx, y = t_gene, color=DE, alpha=DE, label=label)) +
-      geom_point(size = 1) +
+      geom_point(size = 1.5) +
       labs(x = paste("t-stats of txs from", capitalize(expt_mouse), "pup brain"), 
            y = "t-stats of genes from Smoking adult blood",
            title = paste(capitalize(expt_mouse), "mouse brain vs Smoking mouse blood", sep=" "), 
            subtitle = rho_anno, 
+           color = 'DE/Replication',
            parse = T) +
-      geom_label_repel(fill="white", size=2, max.overlaps = Inf,  
-                       box.padding = 0.2, 
+      scale_color_manual(values = cols, labels=names(cols), drop = FALSE) + 
+      scale_alpha_manual(values = alphas, labels=names(alphas), drop=FALSE) +
+      guides(alpha = 'none') + 
+      geom_label_repel(aes(fontface = 'bold'), fill='white', color='black',
+                       size=2,
+                       max.overlaps = 3,
+                       min.segment.length = unit(0, "cm"),
+                       point.padding = unit(0.1, "cm"),
+                       box.padding = 0.2,
+                       label.padding = 0.2,
+                       label.size = 0.2,
+                       nudge_y=0.9,
                        show.legend=FALSE) +
       theme_bw() +
-      scale_color_manual(values = cols) + 
-      scale_alpha_manual(values = alphas)
+      theme(plot.margin = unit(c(1,1,1,1), "cm"),
+            axis.title = element_text(size = 12),
+            axis.text = element_text(size = 10),
+            legend.text = element_text(size=11),
+            legend.title = element_text(size=12))
     
-    plot + theme(legend.text = element_text(size=8))
     plot
     ggsave(filename=paste("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_replication_", capitalize(substr(expt_mouse, 1, 3)), 
-                          "PupBrain_Tx_vs_SmoAdultBlood_Genes.pdf", sep=""), height = 12, width = 20, units = "cm")
+                          "PupBrain_Tx_vs_SmoAdultBlood_Genes.pdf", sep=""), height = 12, width = 23, units = "cm")
     
     
     ## Quantify the number of brain txs that replicate in blood
