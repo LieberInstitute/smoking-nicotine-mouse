@@ -187,6 +187,7 @@ t_stat_plot_brain_blood_replication <- function(age_mouse, expt_mouse, feature){
     width=20.5
   }
   
+  # ----------------------------------------------------------------------------
   ## Compare blood genes vs brain genes
   if (feature=="genes"){
     
@@ -337,7 +338,7 @@ t_stat_plot_brain_blood_replication <- function(age_mouse, expt_mouse, feature){
 
   }
   
-  #-----------------------------------------------------------------------------
+  # ----------------------------------------------------------------------------
   ## Compare blood genes vs brain txs
   else {
     
@@ -368,7 +369,7 @@ t_stat_plot_brain_blood_replication <- function(age_mouse, expt_mouse, feature){
     t_stats$logFC_gene<-logFC_tx_genes
   
     ## Colors and alphas for plot
-    cols <- c("deeppink2", "darkolivegreen3", "darkgrey") 
+    cols <- c("deeppink3", "thistle3", "darkgrey") 
     names(cols)<-c("Replicating txs (blood gene with p<0.05, brain tx with FDR<0.05)", "Signif txs in brain (FDR<0.05)", "ns txs")
     alphas <- c(1, 1, 0.3)  
     names(alphas)<-c("Replicating txs (blood gene with p<0.05, brain tx with FDR<0.05)", "Signif txs in brain (FDR<0.05)", "ns txs")
@@ -453,7 +454,7 @@ t_stat_plot_brain_blood_replication <- function(age_mouse, expt_mouse, feature){
     
     plot
     ggsave(filename=paste("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_replication_", capitalize(substr(expt_mouse, 1, 3)), 
-                          "PupBrain_Tx_vs_SmoAdultBlood_Genes.pdf", sep=""), height = 12, width = 23, units = "cm")
+                          "PupBrain_Tx_vs_SmoAdultBlood_Genes.pdf", sep=""), height = 12, width = width, units = "cm")
     
     
     ## Quantify the number of brain txs that replicate in blood
@@ -509,19 +510,17 @@ save(top_genes_pups_nicotine_fitted, file="processed-data/04_DEA/Gene_analysis/t
 
 
 
-
 ################### 1.2.2 Brain txs vs blood genes ###################
 
 ####### Smoking adult blood (genes) vs Smoking pup brain Txs #######
-Blood_vs_SmoPupBrainTx_data <- t_stat_plot_brain_blood_replication(age_mouse = NULL, expt_mouse = "smoking", feature = "txs")
+Blood_vs_SmoPupBrainTx_data <- t_stat_plot_brain_blood_replication(age_mouse = 'pups', expt_mouse = "smoking", feature = "txs")
 ## "112 out of 4059 DE txs in smoking pup brain (FDR<0.05) replicate in smoking adult blood genes (with p<0.05 and same logFC direction) - 2.76%"
 save(Blood_vs_SmoPupBrainTx_data, file="processed-data/04_DEA/Gene_analysis/Blood_vs_SmoPupBrainTx_data.Rdata")
                                   
 ####### Smoking adult blood (genes) vs Nicotine pup brain Txs #######
-Blood_vs_NicPupBrainTx_data <- t_stat_plot_brain_blood_replication(age_mouse = NULL, expt_mouse = "nicotine", feature = "txs")
+Blood_vs_NicPupBrainTx_data <- t_stat_plot_brain_blood_replication(age_mouse = 'pups', expt_mouse = "nicotine", feature = "txs")
 ## "9 out of 232 DE txs in nicotine pup brain (FDR<0.05) replicate in smoking adult blood genes (with p<0.05 and same logFC direction) - 3.88%"
 save(Blood_vs_NicPupBrainTx_data, file="processed-data/04_DEA/Gene_analysis/Blood_vs_NicPupBrainTx_data.Rdata")
-
 
 
 ## (See code below to search for mouse blood genes that replicate in human brain and human brain genes that replicate in mouse blood)
@@ -585,7 +584,6 @@ t<-t_stat_plot(top_genes_pups_smoking_naive, top_genes_pups_smoking_fitted,
                "Naive model", "Fitted model", "Smoking pups")
 ggsave("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_Naive_VS_Fitted_Smoking.pdf", t, 
        height = 10, width = 12, units = "cm")
-
 
 
 ################################################################################
