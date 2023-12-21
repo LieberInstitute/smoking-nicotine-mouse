@@ -124,7 +124,7 @@ tstats_plots<-function(top_genes_pairs, name_1, name_2, models){
   plot_grid(plots[[1]], plots[[2]], plots[[3]], ncol=2, align = 'hv')
   ggsave(filename=paste("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_",gsub(" ", "_", name_1), "_VS_",
                         gsub(" ", "_", name_2), ".pdf", sep=""), 
-                        height = 20, width = 30, units = "cm")
+                        height = 19, width = 27, units = "cm")
 }
 
 
@@ -584,6 +584,7 @@ t<-t_stat_plot(top_genes_pups_smoking_naive, top_genes_pups_smoking_fitted,
                "Naive model", "Fitted model", "Smoking pups")
 ggsave("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_Naive_VS_Fitted_Smoking.pdf", t, 
        height = 10, width = 12, units = "cm")
+
 
 
 ################################################################################
