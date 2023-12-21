@@ -81,7 +81,7 @@ t_stat_plot <- function(top_genes1, top_genes2, name_1, name_2, model_name){
   rho_anno = paste0("rho = ", format(round(rho, 2), nsmall = 2))
   
   ## Colors and transparency
-  cols <- c("deeppink2", "darkolivegreen3","bisque2", "darkgrey") 
+  cols <- c("deeppink3", "thistle3","navajowhite2", "darkgrey") 
   names(cols)<-c("sig Both", paste0("sig ", name_1), paste0("sig ", name_2), "None")
   alphas <- c( 1, 1, 1,0.5)  
   names(alphas)<-c("sig Both", paste0("sig  ", name_1), paste0("sig ", name_2), "None")
@@ -179,6 +179,14 @@ t_stat_plot_brain_blood_replication <- function(age_mouse, expt_mouse, feature){
   ## Define blood dataset
   top_genes_blood <- top_genes_blood_smoking_fitted
   
+  ## Width of plot
+  if (age_mouse == "pups"){
+    width=22
+  }
+  else{
+    width=20.5
+  }
+  
   ## Compare blood genes vs brain genes
   if (feature=="genes"){
     
@@ -193,13 +201,13 @@ t_stat_plot_brain_blood_replication <- function(age_mouse, expt_mouse, feature){
     
     ## Colors and alphas for plot
     if (age_mouse=="pups"){
-      cols <- c("deeppink2", "darkolivegreen3", "darkgrey") 
+      cols <- c("deeppink3", "thistle3", "darkgrey")
       names(cols)<-c("Replicating genes (p<0.05 in blood, FDR<0.05 in brain)", "Signif in brain (FDR<0.05)", "ns genes")
       alphas <- c(1, 1, 0.5)  
       names(alphas)<-c("Replicating genes (p<0.05 in blood, FDR<0.05 in brain)", "Signif in brain (FDR<0.05)", "ns genes")
     }
     else {
-      cols <- c("deeppink2", "darkgrey") 
+      cols <- c("deeppink3", "darkgrey") 
       names(cols)<-c("Replicating genes (p<0.05 in blood and brain)", "ns genes")
       alphas <- c(1, 0.3)  
       names(alphas)<-c("Replicating genes (p<0.05 in blood and brain)", "ns genes")
@@ -302,7 +310,7 @@ t_stat_plot_brain_blood_replication <- function(age_mouse, expt_mouse, feature){
     
     plot
     ggsave(filename=paste("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_replication_", capitalize(expt_mouse), "_", substr(age_mouse, 1, nchar(age_mouse)-1),
-                          "_Brain_vs_Smoking_adult_Blood.pdf", sep=""), height = 12, width = 20, units = "cm")
+                          "_Brain_vs_Smoking_adult_Blood.pdf", sep=""), height = 12, width = width, units = "cm")
     
     
     ## Quantify the number of brain genes that replicate in blood
@@ -329,7 +337,7 @@ t_stat_plot_brain_blood_replication <- function(age_mouse, expt_mouse, feature){
 
   }
   
-  
+  #-----------------------------------------------------------------------------
   ## Compare blood genes vs brain txs
   else {
     
