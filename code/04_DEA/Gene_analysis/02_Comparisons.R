@@ -621,6 +621,7 @@ common_genes <- human_mouse_ids[which(human_mouse_ids$mmusculus_homolog_ensembl_
 common_genes$human_ensembl_gene_id <- common_genes$ensembl_gene_id
 common_genes$ensembl_gene_id <- NULL
 
+
 ## Create plots to check if mouse genes replicate (FDR<5% for pups and p-value<5% for adults) in human brain (with p-value<5% and same logFC sign)
 t_stat_plot_mouse_in_human <- function(age_mouse, expt_mouse, tissue_mouse, age_human){
   
@@ -660,6 +661,28 @@ t_stat_plot_mouse_in_human <- function(age_mouse, expt_mouse, tissue_mouse, age_
     human_mouse_data[i,] <- cbind(common_genes[i,], mouse_data, human_data)
   }
   
+  ## Width of plot
+  if (age_mouse == "pups"){
+    width=23
+  }
+  else{
+    width=21.5
+  }
+  
+  ## Colors and alphas for plot
+  if (age_mouse=="pups"){
+    cols <- c('blue', "deeppink3", "thistle3", "navajowhite2", "darkgrey") 
+    names(cols) <- c("Signif in both", "Replicating genes (p<0.05 in human, FDR<0.05 in mouse)", "Signif in mouse (FDR<0.05)", "Signif in human (FDR<0.1)", "ns genes")
+    alphas <- c(1, 1, 1, 1, 0.5)  
+    names(alphas) <- names(cols)
+  }
+  else {
+    cols <- c("blue", "deeppink3", "navajowhite2", "darkgrey") 
+    names(cols) <- c("Signif in both", "Replicating genes (p<0.05 in human and mouse)", "Signif in human (FDR<0.1)", "ns genes")
+    alphas <- c(1, 1, 1, 0.5)  
+    names(alphas) <- names(cols)
+  }
+  
   ## Add DE and replication info of each gene
   DE<-vector()
   for (i in 1:dim(human_mouse_data)[1]) {
@@ -690,7 +713,7 @@ t_stat_plot_mouse_in_human <- function(age_mouse, expt_mouse, tissue_mouse, age_
   
       ## Non-significant genes 
       else {
-        DE<-append(DE, "n.s. genes")      
+        DE<-append(DE, "ns genes")      
       }
     }
     
@@ -709,36 +732,23 @@ t_stat_plot_mouse_in_human <- function(age_mouse, expt_mouse, tissue_mouse, age_
         DE<-append(DE, "Replicating genes (p<0.05 in human and mouse)")
       }
       else {
-        DE<-append(DE, "n.s. genes")      
+        DE<-append(DE, "ns genes")      
       }
     }
   }
   
   human_mouse_data$DE<- DE
+  human_mouse_data$DE <- factor(human_mouse_data$DE, levels=names(cols))
   
   ## Correlation coeff between t-stats of genes in human and mouse
   rho <- cor(human_mouse_data$t_human, human_mouse_data$t_mouse, method = "spearman")
   rho_anno = paste0("rho = ", format(round(rho, 2), nsmall = 2))
   
-  ## Colors and alphas for plot
-  if (age_mouse=="pups"){
-    cols <- c("mediumorchid2", "#ffad73", "red", "#26b3ff", "dark grey") 
-    names(cols)<-c("Signif in both", "Signif in human (FDR<0.1)", "Replicating genes (p<0.05 in human, FDR<0.05 in mouse)","Signif in mouse (FDR<0.05)", "n.s. genes")
-    alphas <- c(1, 1, 1, 1, 0.5)  
-    names(alphas)<-c("Signif in both", "Signif in human (FDR<0.1)", "Replicating genes (p<0.05 in human, FDR<0.05 in mouse)","Signif in mouse (FDR<0.05)", "n.s. genes")
-  }
-  else {
-    cols <- c("mediumorchid2", "#ffad73", "red","dark grey") 
-    names(cols)<-c("Signif in both", "Signif in human (FDR<0.1)", "Replicating genes (p<0.05 in human and mouse)","n.s. genes")
-    alphas <- c(1, 1, 1, 0.5)  
-    names(alphas)<-c("Signif in both", "Signif in human (FDR<0.1)", "Replicating genes (p<0.05 in human and mouse)","n.s. genes")
-  }
-  
   
   ## Add labels of interesting genes 
 
   ## 3 most significant replicating genes in human
-  rep_genes <- human_mouse_data[which(human_mouse_data$DE==names(alphas)[3]),]
+  rep_genes <- human_mouse_data[which(human_mouse_data$DE==names(alphas)[2]),]
   top_rep_genes <- rep_genes[order(rep_genes$adj.P.Val_human),"gene_symbol_human"][1:3]
   
   label <- vector()
@@ -761,23 +771,37 @@ t_stat_plot_mouse_in_human <- function(age_mouse, expt_mouse, tissue_mouse, age_
   
   ## Plot
   plot <- ggplot(human_mouse_data, aes(x = t_mouse, y = t_human, color=DE, alpha=DE, label=label)) +
-    geom_point(size = 1) +
-    labs(x = paste("t-stats in", substr(age_mouse, 1, nchar(age_mouse)-1), "mouse", tissue_mouse), 
-         y = paste("t-stats in", age_human, "human brain"),
-         title = paste(capitalize(expt_mouse),"mouse vs Smoking human", sep=" "), 
-         subtitle = rho_anno, 
-         parse = T) +
-    geom_label_repel(fill="white", size=2, max.overlaps = Inf,  
-                     box.padding = 0.2, 
+    geom_point(size = 1.5) +
+    geom_label_repel(aes(fontface = 'bold'), fill='white', color='black',
+                     size=3.3,
+                     max.overlaps = 15,
+                     min.segment.length = unit(0, "cm"),
+                     point.padding = unit(0.1, "cm"),
+                     box.padding = 0.2,
+                     label.padding = 0.2,
+                     label.size = 0.2,
+                     nudge_y=0.9,
                      show.legend=FALSE) +
+    scale_color_manual(values = cols, labels=names(cols), drop = FALSE) + 
+    scale_alpha_manual(values = alphas, labels=names(alphas), drop=FALSE) +
+      labs(x = paste("t-stats in", substr(age_mouse, 1, nchar(age_mouse)-1), "mouse", tissue_mouse), 
+           y = paste("t-stats in", age_human, "human brain"),
+           title = paste(capitalize(expt_mouse),"mouse vs Smoking human", sep=" "), 
+           subtitle = rho_anno, 
+           color='DE/Replication',
+           parse = T) +
+    guides(alpha = 'none') + 
     theme_bw() +
-    scale_color_manual(values = cols) + 
-    scale_alpha_manual(values = alphas)
+    theme(plot.margin = unit(c(1,1,1,1), "cm"),
+          axis.title = element_text(size = 12),
+          axis.text = element_text(size = 10),
+          legend.text = element_text(size=11),
+          legend.title = element_text(size=12))
   
-  plot + theme(legend.text = element_text(size=8))
+  
   plot
   ggsave(filename=paste("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_", age_human, "_Human_vs_Mouse_", age_mouse, "_", substr(expt_mouse,1,3), "_", 
-                        tissue_mouse, ".pdf", sep=""), height = 12, width = 20, units = "cm")
+                        tissue_mouse, ".pdf", sep=""), height = 12, width = width, units = "cm")
   
   
   ## Quantify mouse genes that replicate in human
@@ -787,7 +811,7 @@ t_stat_plot_mouse_in_human <- function(age_mouse, expt_mouse, tissue_mouse, age_
   ## Total unique adult brain genes with p<0.05
   total_adults_P_val_genes=length(unique(top_genes[which(top_genes$P.Val<0.05),"ensemblID"]))
   ## Unique replicating genes 
-  rep_genes=length(unique(human_mouse_data[which(human_mouse_data$DE==names(alphas)[3]),"mmusculus_homolog_ensembl_gene"]))
+  rep_genes=length(unique(human_mouse_data[which(human_mouse_data$DE==names(alphas)[2]),"mmusculus_homolog_ensembl_gene"]))
   
   if (age_mouse=="pups"){
     ## Percentage 
@@ -823,7 +847,7 @@ save(top_genes_pups_nicotine_fitted, file="processed-data/04_DEA/Gene_analysis/t
 ##  Smoking mouse pup brain vs Smoking human prenatal brain 
 ################################################################
 prenatalHuman_pupSmoMouse_data <- t_stat_plot_mouse_in_human(age_mouse = "pups", tissue_mouse = "brain", expt_mouse = "smoking", age_human = "prenatal")
-## "267 out of 4165 DEG in smoking mouse pup brain (FDR<0.05) replicate in smoking human prenatal brain (with p<0.05 and same logFC direction) - 6.41%"
+## "266 out of 4165 DEG in smoking mouse pup brain (FDR<0.05) replicate in smoking human prenatal brain (with p<0.05 and same logFC direction) - 6.39%"
 save(prenatalHuman_pupSmoMouse_data, file="processed-data/04_DEA/Gene_analysis/prenatalHuman_pupSmoMouse_data.Rdata")
 top_genes_pups_smoking_fitted$replication_in_prenatalHumanBrain <- apply(top_genes_pups_smoking_fitted, 1, function(x){prenatalHuman_pupSmoMouse_data[match(x["ensemblID"], prenatalHuman_pupSmoMouse_data$mmusculus_homolog_ensembl_gene), "DE"]})
 save(top_genes_pups_smoking_fitted, file="processed-data/04_DEA/Gene_analysis/top_genes_pups_smoking_fitted.Rdata")
@@ -853,7 +877,7 @@ save(top_genes_adults_smoking_fitted, file="processed-data/04_DEA/Gene_analysis/
 ##  Smoking adult mouse blood vs Smoking human prenatal brain 
 ################################################################
 prenatalHuman_bloodMouse_data <- t_stat_plot_mouse_in_human(age_mouse = "adults", tissue_mouse = "blood", expt_mouse = "smoking", age_human = "prenatal")
-## "101 out of 1499 genes in smoking adult mouse blood (p<0.05) replicate in smoking human prenatal brain (also p<0.05 and same logFC direction) - 6.74%"
+## "100 out of 1499 genes in smoking adult mouse blood (p<0.05) replicate in smoking human prenatal brain (also p<0.05 and same logFC direction) - 6.67%"
 save(prenatalHuman_bloodMouse_data, file="processed-data/04_DEA/Gene_analysis/prenatalHuman_bloodMouse_data.Rdata")
 top_genes_blood_smoking_fitted$replication_in_prenatalHumanBrain <- apply(top_genes_blood_smoking_fitted, 1, function(x){prenatalHuman_bloodMouse_data[match(x["ensemblID"], prenatalHuman_bloodMouse_data$mmusculus_homolog_ensembl_gene), "DE"]})
 save(top_genes_blood_smoking_fitted, file="processed-data/04_DEA/Gene_analysis/top_genes_blood_smoking_fitted.Rdata")
@@ -1027,6 +1051,24 @@ t_stat_plot_human_in_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_
     human_mouse_data[i,] <- cbind(common_genes[i,], mouse_data, human_data)
   }
   
+  ## Colors and alphas for plot
+  cols <- c('blue', "deeppink3", "navajowhite2", "thistle3", "darkgrey") 
+  names(cols) <- c("Signif in both", "Replicating genes (FDR<0.1 in human, p<0.05 in mouse)", "Signif in human (FDR<0.1)", 
+                   "Signif in mouse (FDR<0.05)", "ns genes")
+  alphas <- c(1, 1, 1, 1, 0.5)  
+  names(alphas) <- names(cols)
+  
+  ## Width of plot
+  if (age_mouse == "pups"){
+    width=23
+  }
+  else if (tissue_mouse == "blood"){
+    width=22.5
+  }
+  else{
+    width=21.5
+  }
+  
   ## Add DE and replication info of each gene
   DE<-vector()
   for (i in 1:dim(human_mouse_data)[1]) {
@@ -1054,24 +1096,16 @@ t_stat_plot_human_in_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_
     
     ## Non-significant genes 
     else {
-      DE<-append(DE, "n.s. genes")      
+      DE<-append(DE, "ns genes")      
     }
   }
   
   human_mouse_data$DE<- DE
+  human_mouse_data$DE <- factor(human_mouse_data$DE, levels=names(cols))
   
   ## Correlation coeff between t-stats of genes in human and mouse
   rho <- cor(human_mouse_data$t_human, human_mouse_data$t_mouse, method = "spearman")
   rho_anno = paste0("rho = ", format(round(rho, 2), nsmall = 2))
-  
-  ## Colors and alphas for plot
-  cols <- c("mediumorchid2", "red", "#ffad73", "#26b3ff", "dark grey") 
-  names(cols)<-c("Signif in both", "Replicating genes (FDR<0.1 in human, p<0.05 in mouse)", "Signif in human (FDR<0.1)", 
-                 "Signif in mouse (FDR<0.05)", "n.s. genes")
-  alphas <- c(1, 1, 1, 1, 0.5)  
-  names(alphas)<-c("Signif in both", "Replicating genes (FDR<0.1 in human, p<0.05 in mouse)", "Signif in human (FDR<0.1)", 
-                   "Signif in mouse (FDR<0.05)", "n.s. genes")
-  
   
   ## Add labels of replicating human genes 
   rep_genes <- human_mouse_data[which(human_mouse_data$DE==names(alphas)[2]), "gene_symbol_human"]
@@ -1096,23 +1130,36 @@ t_stat_plot_human_in_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_
   
   ## Plot
   plot <- ggplot(human_mouse_data, aes(x = t_human, y = t_mouse, color=DE, alpha=DE, label=label)) +
-    geom_point(size = 1) +
+    geom_point(size = 1.5) +
     labs(x = paste("t-stats in", age_human, "human brain"), 
          y = paste("t-stats in", substr(age_mouse, 1, nchar(age_mouse)-1), "mouse", tissue_mouse),
          title = paste("Smoking human vs", capitalize(expt_mouse), "mouse", sep=" "), 
          subtitle = rho_anno, 
+         color='DE/Replication',
          parse = T) +
-    geom_label_repel(fill="white", size=2, max.overlaps = Inf,  
-                     box.padding = 0.2, 
+    geom_label_repel(aes(fontface = 'bold'), fill='white', color='black',
+                     size=3.3,
+                     max.overlaps = 15,
+                     min.segment.length = unit(0, "cm"),
+                     point.padding = unit(0.1, "cm"),
+                     box.padding = 0.2,
+                     label.padding = 0.2,
+                     label.size = 0.2,
+                     nudge_y=0.9,
                      show.legend=FALSE) +
+    scale_color_manual(values = cols, labels=names(cols), drop = FALSE) + 
+    scale_alpha_manual(values = alphas, labels=names(alphas), drop=FALSE) +
+    guides(alpha = 'none') + 
     theme_bw() +
-    scale_color_manual(values = cols) + 
-    scale_alpha_manual(values = alphas)
+    theme(plot.margin = unit(c(1,1,1,1), "cm"),
+          axis.title = element_text(size = 12),
+          axis.text = element_text(size = 10),
+          legend.text = element_text(size=11),
+          legend.title = element_text(size=12))
   
-  plot + theme(legend.text = element_text(size=8))
   plot
   ggsave(filename=paste("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_replication_", age_human, "_Human_in_Mouse_", age_mouse, "_", substr(expt_mouse,1,3), "_", 
-                        tissue_mouse, ".pdf", sep=""), height = 12, width = 20, units = "cm")
+                        tissue_mouse, ".pdf", sep=""), height = 12, width = width, units = "cm")
   
 }
 
