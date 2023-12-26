@@ -63,26 +63,35 @@ t_stat_plot <- function(top_exons1, top_exons2, name_1, name_2, title){
   rho <- cor(top_exons1$t, top_exons2$t, method = "spearman")
   rho_anno = paste0("rho = ", format(round(rho, 2), nsmall = 2))
   
+  ## Colors and alphas
+  cols <- c("deeppink3", "thistle3","navajowhite2", "darkgrey") 
+  names(cols) <- c("sig Both", "sig nic", "sig smo", "None")
+  alphas <- c( 1, 1, 1,0.5)  
+  names(alphas) <- names(cols)
+  
   ## Merge data
   t_stats<-data.frame(t1=top_exons1$t, t2=top_exons2$t)
   ## Add DE info for both groups
   t_stats$DE<-add_DE_info(top_exons1, top_exons2)
-  
-  cols <- c("red", "#ffad73","#26b3ff", "dark grey") 
-  names(cols)<-c("sig Both", "sig nic", "sig smo", "None")
-  alphas <- c( 1, 1, 1,0.5)  
-  names(alphas)<-c("sig Both", "sig nic", "sig smo", "None")
+  t_stats$DE <- factor(t_stats$DE, levels=names(cols))
   
   plot <- ggplot(t_stats, aes(x = t1, y = t2, color=DE, alpha=DE)) +
-    geom_point(size = 1) +
+    geom_point(size = 1.5) +
+    scale_color_manual(values = cols, labels=names(cols), drop = FALSE) + 
+    scale_alpha_manual(values = alphas, labels=names(alphas), drop=FALSE) +
     labs(x = paste("t-stats", name_1), 
          y = paste("t-stats", name_2),
          title = title, 
          subtitle = rho_anno, 
+         color = "Differential expression",
          parse = T) +
+    guides(alpha = 'none') + 
     theme_bw() +
-    scale_color_manual(values = cols) + 
-    scale_alpha_manual(values = alphas)
+    theme(plot.margin = unit(c(1,1,1,1), "cm"),
+          axis.title = element_text(size = 12),
+          axis.text = element_text(size = 10),
+          legend.text = element_text(size=11),
+          legend.title = element_text(size=12))
   
   plot
   ggsave(filename=paste("plots/04_DEA/02_Comparisons/Exon_analysis/t_stats_", gsub(" ", "_", title), 
@@ -117,7 +126,7 @@ add_DE_info_exons_vs_genes <-function(t_stats) {
       }
       ## DE genes only
       else {
-        DE<-append(DE, "sig gene")
+        DE<-append(DE, "sig Gene")
       } 
     }
     
@@ -125,7 +134,7 @@ add_DE_info_exons_vs_genes <-function(t_stats) {
       
       ## DE exons only
       if(abs(t_stats$logFC_exons[i])>0.25) {
-        DE<-append(DE, "sig exon")
+        DE<-append(DE, "sig Exon")
       }
       else{
         DE<-append(DE, "None")
@@ -134,7 +143,7 @@ add_DE_info_exons_vs_genes <-function(t_stats) {
     
     else if(t_stats$adj.P.Val_exons[i]>=0.05 && t_stats$adj.P.Val_genes[i]<0.05){
       ## DE genes only
-      DE<-append(DE, "sig gene")
+      DE<-append(DE, "sig Gene")
     }
       
     else {
@@ -185,8 +194,15 @@ t_stat_exons_vs_genes<- function(expt){
   rho <- cor(t_stats$t_exons, t_stats$t_genes, method = "spearman")
   rho_anno = paste0("rho = ", format(round(rho, 2), nsmall = 2))
   
+  ## Colors
+  cols <- c("coral2","pink", "turquoise", "grey") 
+  names(cols) <- c("sig Both","sig Gene", "sig Exon", "None")
+  alphas <- c( 1, 1, 1, 0.2)  
+  names(alphas) <- names(cols)
+  
   ## Add DE info for both groups
-  t_stats$DE<-add_DE_info_exons_vs_genes(t_stats)
+  t_stats$DE <- add_DE_info_exons_vs_genes(t_stats)
+  t_stats$DE <-  factor(t_stats$DE, levels=names(cols))
   
   
   ## Gene-exon symbols of DE exons with no DEG, 
@@ -228,28 +244,31 @@ t_stat_exons_vs_genes<- function(expt){
   t_stats$exon_symbols<- exon_symbols
   
   ## Plot
-  cols <- c("red", "#ffad73","#26b3ff", "dark grey") 
-  names(cols)<-c("sig Both","sig exon", "sig gene", "None")
-  alphas <- c( 1, 1, 1,0.5)  
-  names(alphas)<-c("sig Both", "sig exon", "sig gene", "None")
-  
-  plot <- ggplot(t_stats, aes(x = t_genes, y = t_exons, color=DE, alpha=DE, label= exon_symbols)) +
-    geom_point(size = 1) +
+  plot <- ggplot(t_stats, aes(x = t_genes, y = t_exons, color=DE, alpha=DE)) +
+    geom_point(size = 1.2) +
     labs(x = "t-stats genes", 
          y = "t-stats exons",
          title = paste(capitalize(expt),"genes vs exons", sep=" "), 
          subtitle = rho_anno, 
          parse = T) +
-    geom_label_repel(fill="white", size=2, max.overlaps = Inf,  
-                     box.padding = 0.2, 
-                     show.legend=FALSE) +
+    ## Remove labels
+    # geom_label_repel(fill="white", size=2, max.overlaps = Inf,  
+    #                  box.padding = 0.2, 
+    #                  show.legend=FALSE) +
     theme_bw() +
-    scale_color_manual(values = cols) + 
-    scale_alpha_manual(values = alphas)
+    guides(alpha = 'none') + 
+    scale_color_manual(values = cols, labels=names(cols), drop = FALSE) + 
+    scale_alpha_manual(values = alphas, labels=names(alphas), drop=FALSE) +
+    theme(plot.margin = unit(c(1,1,1,1), "cm"),
+          axis.title = element_text(size = 12),
+          axis.text = element_text(size = 10),
+          legend.text = element_text(size=11),
+          legend.title = element_text(size=12))
+    
   
   plot
   ggsave(filename=paste("plots/04_DEA/02_Comparisons/Exon_analysis/t_stats_global_", substr(expt,1,3), 
-                        ".pdf", sep=""), height = 20, width = 25, units = "cm")
+                        ".pdf", sep=""), height = 14.5, width = 18, units = "cm")
 
 }
 
