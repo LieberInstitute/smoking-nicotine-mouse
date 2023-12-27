@@ -66,26 +66,33 @@ t_stat_plot <- function(top_tx1, top_tx2, name_1, name_2, title){
   rho <- cor(top_tx1$t, top_tx2$t, method = "spearman")
   rho_anno = paste0("rho = ", format(round(rho, 2), nsmall = 2))
   
-  ## Merge data
-  t_stats<-data.frame(t1=top_tx1$t, t2=top_tx2$t)
-  ## Add DE info for both groups 
-  t_stats$DE<-add_DE_info(top_tx1)
-  
-  cols <- c("red", "#ffad73","#26b3ff", "dark grey") 
+  cols <- cols <- c("deeppink3", "thistle3","navajowhite2", "darkgrey") 
   names(cols)<-c("sig Both", "sig nic", "sig smo", "None")
   alphas <- c( 1, 1, 1,0.5)  
   names(alphas)<-c("sig Both", "sig nic", "sig smo", "None")
   
+  ## Merge data
+  t_stats<-data.frame(t1=top_tx1$t, t2=top_tx2$t)
+  ## Add DE info for both groups 
+  t_stats$DE<-add_DE_info(top_tx1)
+  t_stats$DE <- factor(t_stats$DE, levels=names(cols))
+  
   plot <- ggplot(t_stats, aes(x = t1, y = t2, color=DE, alpha=DE)) +
-    geom_point(size = 1) +
+    geom_point(size = 1.5) +
     labs(x = paste("t-stats", name_1), 
          y = paste("t-stats", name_2),
          title = title, 
          subtitle = rho_anno, 
          parse = T) +
+    scale_color_manual(values = cols, labels=names(cols), drop = FALSE) + 
+    scale_alpha_manual(values = alphas, labels=names(alphas), drop=FALSE) +
+    guides(alpha = 'none') + 
     theme_bw() +
-    scale_color_manual(values = cols) + 
-    scale_alpha_manual(values = alphas)
+    theme(plot.margin = unit(c(1,1,1,1), "cm"),
+          axis.title = element_text(size = 12),
+          axis.text = element_text(size = 10),
+          legend.text = element_text(size=11),
+          legend.title = element_text(size=12))
   
   plot
   ggsave(filename=paste("plots/04_DEA/02_Comparisons/Tx_analysis/t_stats_", gsub(" ", "_", title), 
@@ -119,12 +126,12 @@ add_DE_info_tx_vs_genes <-function(t_stats) {
     
     ## DE tx only
     else if (t_stats$adj.P.Val_tx[i]<0.05 && t_stats$adj.P.Val_genes[i]>=0.05){
-      DE<-append(DE, "sig tx")
+      DE<-append(DE, "sig Tx")
     }
     
     ## DE genes only
     else if(t_stats$adj.P.Val_tx[i]>=0.05 && t_stats$adj.P.Val_genes[i]<0.05){
-      DE<-append(DE, "sig gene")
+      DE<-append(DE, "sig Gene")
     }
     
     ## Neither DE tx nor DE genes
