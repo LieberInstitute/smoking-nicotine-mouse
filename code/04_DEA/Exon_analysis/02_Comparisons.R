@@ -317,18 +317,24 @@ t_stat_tg<-function(expt){
   tg_te$tg<-as.numeric(tg_te$tg)
   tg_te$t<-as.numeric(tg_te$t)
   
+  cols <- c("pink", "grey") 
+  names(cols)<-c("sig Gene", "ns")
+  alphas <- c( 1,0.5)  
+  names(alphas)<-c("sig Gene", "ns")
+  
   ## Add DE info of genes
   DE<-vector()
   for (gene in tg_te$ensemblID){
     FDR=top_genes[which(top_genes$ensemblID==gene),"adj.P.Val"]
     if(FDR<0.05){
-      DE<-append(DE, "sig gene")
+      DE<-append(DE, "sig Gene")
     }
     else{
       DE<-append(DE, "ns")
     }
   }
   tg_te$DE<-DE
+  tg_te$DE <- factor(tg_te$DE, levels=names(cols))
   
   ## Add symbols of genes with the highest values of mean(|tg-te|)
   tg_te_ordered <- tg_te[order(-tg_te$t)[1:10], "ensemblID"]
@@ -345,26 +351,28 @@ t_stat_tg<-function(expt){
   tg_te$gene_symbols<-gene_symbols
   
   ## Plot
-  cols <- c("red", "dark grey") 
-  names(cols)<-c("sig gene", "ns")
-  alphas <- c( 1,0.5)  
-  names(alphas)<-c("sig gene", "ns")
   
   plot <- ggplot(tg_te, aes(x =tg, y = t, color=DE, alpha=DE, label=gene_symbols)) +
-    geom_point(size = 1) +
+    geom_point(size = 1.2) +
     labs(x = "t-stats of gene", 
          y = "mean of |tg-te|",
          title = paste(capitalize(expt),"genes", sep=" ")) +
-    geom_label_repel(fill="white", size=2, max.overlaps = Inf,
+    geom_label_repel(aes(alpha=NULL), fill="white", color='black', size=2, max.overlaps = Inf,
                      box.padding = 0.2,
                      show.legend=FALSE) +
     theme_bw() +
-    scale_color_manual(values = cols) + 
-    scale_alpha_manual(values = alphas)
+    guides(alpha = 'none') + 
+    scale_color_manual(values = cols, labels=names(cols), drop = FALSE) + 
+    scale_alpha_manual(values = alphas, labels=names(alphas), drop=FALSE) +
+    theme(plot.margin = unit(c(1,1,1,1), "cm"),
+          axis.title = element_text(size = 12),
+          axis.text = element_text(size = 10),
+          legend.text = element_text(size=11),
+          legend.title = element_text(size=12))
   
   plot
   ggsave(filename=paste("plots/04_DEA/02_Comparisons/Exon_analysis/t_stats_tg_", substr(expt,1,3), 
-                        ".pdf", sep=""), height = 20, width = 25, units = "cm")
+                        ".pdf", sep=""), height = 15, width = 20, units = "cm")
 }
 
 
@@ -403,6 +411,12 @@ t_stat_te<- function(expt){
   colnames(t_stats)[4]<-"te"
   colnames(t_stats)[6]<-"logFC_exons"
   
+  ## Plot
+  cols <- cols <- c("coral2","pink", "turquoise", "grey") 
+  names(cols)<-c("sig Both","sig Gene", "sig Exon", "None")
+  alphas <- c( 1, 1, 1, 0.5)  
+  names(alphas)<-c("sig Both", "sig Gene", "sig Exon", "None")
+  
   ## Add t-stats and FDRs of exons' genes
   t_genes<-vector()
   FDRs<-vector()
@@ -420,6 +434,7 @@ t_stat_te<- function(expt){
   
   ## Add DE info of exons (and exons' genes)
   t_stats$DE<-add_DE_info_exons_vs_genes(t_stats)
+  t_stats$DE <- factor(t_stats$DE, levels=names(cols))
   
   ## Add symbols of exons with the highest values of |te-tg|
   t_stats_ordered <- t_stats[order(-t_stats$t)[1:10], "exon_libdID"]
@@ -436,28 +451,27 @@ t_stat_te<- function(expt){
   }
   t_stats$exon_symbols<-exon_symbols
   
-  
-  ## Plot
-  cols <- c("red", "#ffad73","#26b3ff", "dark grey") 
-  names(cols)<-c("sig Both","sig exon", "sig gene", "None")
-  alphas <- c( 1, 1, 1,0.5)  
-  names(alphas)<-c("sig Both", "sig exon", "sig gene", "None")
-  
   plot <- ggplot(t_stats, aes(x =te, y = t, color=DE, alpha=DE, label=exon_symbols)) +
-    geom_point(size = 1) +
+    geom_point(size = 1.2) +
     labs(x = "t-stats of exon", 
          y = "|te-tg|",
          title = paste(capitalize(expt),"exons", sep=" ")) +
-    geom_label_repel(fill="white", size=2, max.overlaps = Inf,
+    geom_label_repel(aes(alpha=NULL), fill="white", color='black', size=2, max.overlaps = Inf,
                      box.padding = 0.2,
                      show.legend=FALSE) +
     theme_bw() +
-    scale_color_manual(values = cols) + 
-    scale_alpha_manual(values = alphas)
+    guides(alpha = 'none') + 
+    scale_color_manual(values = cols, labels=names(cols), drop = FALSE) + 
+    scale_alpha_manual(values = alphas, labels=names(alphas), drop=FALSE) +
+    theme(plot.margin = unit(c(1,1,1,1), "cm"),
+          axis.title = element_text(size = 12),
+          axis.text = element_text(size = 10),
+          legend.text = element_text(size=11),
+          legend.title = element_text(size=12))
   
   plot
   ggsave(filename=paste("plots/04_DEA/02_Comparisons/Exon_analysis/t_stats_te_", substr(expt,1,3), 
-                        ".pdf", sep=""), height = 20, width = 25, units = "cm")
+                        ".pdf", sep=""), height = 15, width = 20, units = "cm")
 }
 
 
@@ -488,17 +502,22 @@ create_boxplot<- function(counts, y, title, q_value, FC){
   ## Boxplot
   p<-ggplot(data=counts, 
             aes(x=Group,y=eval(parse_expr(y)))) + 
-    geom_boxplot(outlier.color = "#FFFFFFFF") +
+    geom_boxplot(outlier.color = "#FFFFFFFF", width=0.35) +
     geom_jitter(aes(colour=Group),shape=16, 
-                position=position_jitter(0.2)) +
-    theme_classic() +
-    labs(x = "Group", y = "norm counts",
+                position=position_jitter(0.2), size=2.1) +
+    theme_bw() +
+    labs(x = "Group", y = "lognorm counts",
          title = title,
          ## Add FDR and FC of genes and exons
-         subtitle=paste(" FDR:", q_value, "\n", "FC:", FC)) +
-    theme(plot.margin=unit (c (1,1.5,1,1), 'cm'), legend.position = "none",
-          plot.title = element_text(hjust=0.5, size=10, face="bold"), 
-          plot.subtitle = element_text(size = 9)) 
+         subtitle=paste(" FDR:", q_value, '    ', "FC:", FC)) +
+    scale_color_manual(values=c("Control" = "seashell3", "Experimental" = "orange3")) +
+    scale_x_discrete(labels=c("Control"="Ctrl","Experimental"="Expt")) +
+    theme(plot.margin=unit (c(0.4,0.4,0.4,0.4), 'cm'), 
+          legend.position = "none",
+          plot.title = element_text(hjust=0.5, size=12, face="bold"), 
+          plot.subtitle = element_text(size = 10),
+          axis.title = element_text(size = (12)),
+          axis.text = element_text(size = 10.5)) 
   
   print(p)
 }
