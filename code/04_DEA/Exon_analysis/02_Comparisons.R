@@ -509,7 +509,7 @@ create_boxplot<- function(counts, y, title, q_value, FC){
     labs(x = "Group", y = "lognorm counts",
          title = title,
          ## Add FDR and FC of genes and exons
-         subtitle=paste(" FDR:", q_value, '    ', "FC:", FC)) +
+         subtitle=paste(" FDR:", q_value, '          ', "FC:", FC)) +
     scale_color_manual(values=c("Control" = "seashell3", "Experimental" = "orange3")) +
     scale_x_discrete(labels=c("Control"="Ctrl","Experimental"="Expt")) +
     theme(plot.margin=unit (c(0.4,0.4,0.4,0.4), 'cm'), 
@@ -534,11 +534,6 @@ gene_exons_boxplots<- function(expt, gene, exon1, exon2){
   ## Expression values of all genes
   vGene<-results_genes[[1]][[2]]
   rownames(vGene)<- vGene$genes$ensemblID
-  
-  ## Regress out residuals
-  formula<- ~ Group + Sex + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr + overallMapRate + mitoRate
-  model=model.matrix(formula, data=vGene$targets)
-  vGene$E<-cleaningY(vGene$E, model, P=2)
   
   ## Get ensembl ID and symbol of the gene
   if(! gene %in% rownames(vGene)){
@@ -607,12 +602,8 @@ gene_exons_boxplots<- function(expt, gene, exon1, exon2){
     }
   }
     
-  ## Expression values of that exons
+  ## Expression values of those exons
   vExon<-results_nic[[1]][[2]]
-  ## Regress out residuals
-  formula<- ~ Group + Sex + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr + overallMapRate + mitoRate
-  model=model.matrix(formula, data=vExon$targets)
-  vExon$E<-cleaningY(vExon$E, model, P=2)
   counts_exons<-vExon$E[which(rownames(vExon) %in% top_gene_exons[1:3]),]
   counts_exons<-t(counts_exons)
   
@@ -656,7 +647,7 @@ gene_exons_boxplots<- function(expt, gene, exon1, exon2){
   
   plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], ncol = 4)
   ggsave(here(paste("plots/04_DEA/02_Comparisons/Exon_analysis/Boxplots_", gene_symbol, ".pdf", sep="")), 
-         width = 35, height = 10, units = "cm")
+         width = 37, height = 10, units = "cm")
 
 }
 
