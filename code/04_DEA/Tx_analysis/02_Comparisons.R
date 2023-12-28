@@ -156,7 +156,7 @@ t_stat_tx_vs_genes<- function(expt){
     abs_t_tx=6
   }
   else{
-    abs_t_tx=5
+    abs_t_tx=4
   }
   
   ## Transcripts' genes
@@ -342,8 +342,8 @@ t_stat_tx_vs_genes<- function(expt){
            title = paste(capitalize(expt),"genes vs tx", sep=" "), 
            subtitle = rho_anno, 
            parse = T) +
-      geom_label_repel(data=subset(t_stats, tx_symbols %in% 
-                                     c('Btf3-ENSMUST00000022163.14', 'Cyhr1-ENSMUST00000176274.1')),
+      ## Label only the most significant DE txs per gene
+      geom_label_repel(data=subset(t_stats, tx_symbols %in% c('Btf3-ENSMUST00000022163.14', 'Cyhr1-ENSMUST00000176274.1')),
                        aes(fontface = 'bold'), fill='white',
                        size=2.8,
                        max.overlaps = Inf,
@@ -355,8 +355,7 @@ t_stat_tx_vs_genes<- function(expt){
                        nudge_y= 3.8,
                        nudge_x = -3,
                        show.legend=FALSE) +
-      geom_label_repel(data=subset(t_stats, tx_symbols %in% 
-                                     c('Srsf6-ENSMUST00000017065.14')),
+      geom_label_repel(data=subset(t_stats, tx_symbols %in% c('Srsf6-ENSMUST00000017065.14')),
                        aes(fontface = 'bold'), fill='white',
                        size=2.8,
                        max.overlaps = Inf,
@@ -368,8 +367,7 @@ t_stat_tx_vs_genes<- function(expt){
                        nudge_y= -3,
                        nudge_x = 3.5,
                        show.legend=FALSE) +
-    geom_label_repel(data=subset(t_stats, tx_symbols %in% 
-                                   c('Ppp2r5c-ENSMUST00000221715.1')),
+    geom_label_repel(data=subset(t_stats, tx_symbols %in% c('Ppp2r5c-ENSMUST00000221715.1')),
                      aes(fontface = 'bold'), fill='white',
                      size=2.8,
                      max.overlaps = Inf,
@@ -381,8 +379,7 @@ t_stat_tx_vs_genes<- function(expt){
                      nudge_y= 2,
                      nudge_x = -2,
                      show.legend=FALSE) +
-      geom_label_repel(data=subset(t_stats, tx_symbols %in% 
-                                     c('Ivns1abp-ENSMUST00000111887.9')),
+      geom_label_repel(data=subset(t_stats, tx_symbols %in% c('Ivns1abp-ENSMUST00000111887.9')),
                        aes(fontface = 'bold'), fill='white',
                        size=2.8,
                        max.overlaps = Inf,
@@ -406,9 +403,8 @@ t_stat_tx_vs_genes<- function(expt){
                        nudge_y= 2,
                        nudge_x = 1,
                        show.legend=FALSE) +
-      geom_label_repel(data=subset(t_stats, tx_symbols %in% 
-                                     c('Mt2-ENSMUST00000034214.7', 'Sin3b-ENSMUST00000109950.4',
-                                        'Ppp2r5c-ENSMUST00000109832.2')),
+      geom_label_repel(data=subset(t_stats, tx_symbols %in% c('Mt2-ENSMUST00000034214.7', 'Sin3b-ENSMUST00000109950.4',
+                                                              'Ppp2r5c-ENSMUST00000109832.2')),
                        aes(fontface = 'bold'), fill='white',
                        size=2.8,
                        max.overlaps = Inf,
@@ -420,8 +416,7 @@ t_stat_tx_vs_genes<- function(expt){
                        nudge_y= 0.2,
                        nudge_x = 0.1,
                        show.legend=FALSE) +
-    geom_label_repel(data=subset(t_stats, tx_symbols %in% 
-                                   c('Meaf6-ENSMUST00000154689.7')),
+    geom_label_repel(data=subset(t_stats, tx_symbols %in% c('Meaf6-ENSMUST00000154689.7')),
                      aes(fontface = 'bold'), fill='white',
                      size=2.8,
                      max.overlaps = Inf,
@@ -433,8 +428,7 @@ t_stat_tx_vs_genes<- function(expt){
                      nudge_y= -0.5,
                      nudge_x = 0.1,
                      show.legend=FALSE) +
-      geom_label_repel(data=subset(t_stats, tx_symbols %in% 
-                                     c('Morf4l2-ENSMUST00000169418.7')),
+      geom_label_repel(data=subset(t_stats, tx_symbols %in% c('Morf4l2-ENSMUST00000169418.7')),
                        aes(fontface = 'bold'), fill='white',
                        size=2.8,
                        max.overlaps = Inf,
@@ -447,7 +441,7 @@ t_stat_tx_vs_genes<- function(expt){
                        nudge_x = 0.5,
                        show.legend=FALSE) +
       geom_label_repel(data=subset(t_stats, tx_symbols %in% c('Morf4l2-ENSMUST00000080411.12', 
-                                                              'Sin3b-ENSMUST00000004494.15', 'Sin3b-ENSMUST00000212095.1')),
+                                                              'Sin3b-ENSMUST00000004494.15')),
                        aes(fontface = 'bold'), fill='white',
                        size=2.8,
                        max.overlaps = Inf,
