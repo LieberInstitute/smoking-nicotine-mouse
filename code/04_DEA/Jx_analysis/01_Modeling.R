@@ -98,6 +98,8 @@ DE_one_boxplot <- function (de_jx, lognorm_DE, jx_ID, jx_name){
   real_jx_ID <- strsplit(jx_name, "  ")[[1]][1]
   ## q-value for the jx
   q_value<-signif(de_jx[which(rownames(de_jx)==real_jx_ID), "adj.P.Val"], digits = 3)
+  ## FC of the jx
+  FC<-signif(2**(de_jx[which(rownames(de_jx)==real_jx_ID), "logFC"]), digits=2)
   ## Class of the jx
   class<-de_jx[which(rownames(de_jx)==real_jx_ID), "Class"]
   
@@ -105,17 +107,22 @@ DE_one_boxplot <- function (de_jx, lognorm_DE, jx_ID, jx_name){
   ggplot(data=as.data.frame(lognorm_DE), 
          aes(x=Group,y=eval(parse_expr(jx_ID)))) + 
     ## Hide outliers
-    geom_boxplot(outlier.color = "#FFFFFFFF") +
+    geom_boxplot(outlier.color = "#FFFFFFFF", width=0.35) +
     ## Samples colored by Group + noise
-    geom_jitter(aes(colour=Group),shape=16, 
-                position=position_jitter(0.2)) +
-    theme_classic() +
-    labs(x = "Group", y = "norm counts",
+    geom_jitter(aes(colour=Group), shape=16, 
+                position=position_jitter(0.2), size=2.1) +
+    theme_bw() +
+    scale_color_manual(values=c("Control" = "seashell3", "Experimental" = "orange3")) +
+    scale_x_discrete(labels=c("Control"="Ctrl","Experimental"="Expt")) +
+    labs(x = "Group", y = "lognorm counts",
          title = jx_name, 
-         subtitle = paste(" FDR:", q_value, '\n', "Class:", class)) +
-    theme(plot.margin=unit (c (1,1.5,1,1), 'cm'), legend.position = "none",
-          plot.title = element_text(hjust=0.5, size=10, face="bold"), 
-          plot.subtitle = element_text(size = 9)) 
+         subtitle = paste(" FDR:", q_value, '       ', 'FC:', FC, '\n', "Class:", class)) +
+    theme(plot.margin=unit (c(0.4,0.4,0.4,0.4), 'cm'), 
+          legend.position = "none",
+          plot.title = element_text(hjust=0.5, size=9, face="bold"), 
+          plot.subtitle = element_text(size = 10),
+          axis.title = element_text(size = (12)),
+          axis.text = element_text(size = 10.5)) 
   
 }
 
@@ -123,15 +130,12 @@ DE_one_boxplot <- function (de_jx, lognorm_DE, jx_ID, jx_name){
 
 ## Boxplot of lognorm counts for top 3 DE jxns
 ## Obtain lognorm counts of DE jxns
-DE_boxplots <- function(RSE, de_jx){
-  ## Regress out residuals to remove batch effects
-  formula<- ~ Group + Sex + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr + overallMapRate + mitoRate
-  model=model.matrix(formula, data=colData(RSE))
-  logcounts<-cleaningY(assays(RSE)$logcounts, model, P=2)
+DE_boxplots <- function(RSE, de_jx, vJxn){
+
   ## Order jxns by q-value
   de_jx<-de_jx[order(de_jx$adj.P.Val),]
   ## Lognorm counts of DE jxs
-  lognorm_DE<-logcounts[rownames(de_jx),]
+  lognorm_DE<-vJxn$E[rownames(de_jx),]
   ## Samples as rows and jxns as columns
   lognorm_DE<-t(lognorm_DE)
   ## Add samples' Group information
@@ -149,9 +153,9 @@ DE_boxplots <- function(RSE, de_jx){
     p<-DE_one_boxplot(de_jx, lognorm_DE, jx_ID, jx_name)
     plots[[i]]<-print(p)
   }
-  plot_grid(plots[[1]], plots[[2]], plots[[3]], ncol = 3)
+  plot_grid(plots[[1]], plots[[2]], plots[[3]], ncol = 2, align = 'vh')
   ggsave(here(paste("plots/04_DEA/01_Modeling/Jx_analysis/DE_boxplots_jx_", name, ".pdf", sep="")), 
-         width = 35, height = 13, units = "cm")
+         width = 14, height = 15, units = "cm")
 }
 
 
@@ -161,13 +165,14 @@ apply_DEA<-function(RSE, name){
   ## DEA
   results<-DEA_expt_vs_ctl(RSE, name)
   top_jxns<-results[[1]]
+  vJxn <- results[[2]]
   
   ## If there are DE jxns
   if (length(which(top_jxns$adj.P.Val<0.05))>0){
     ## Signif jxns
-    de_jxns<-top_jxns[which(top_jxns$adj.P.Val < 0.05),]
-    print(paste(dim(de_jxns)[1], "differentially expressed jxns", sep=" "))
-    DE_boxplots(RSE, de_jxns)
+    de_jx<-top_jxns[which(top_jxns$adj.P.Val < 0.05),]
+    print(paste(dim(de_jx)[1], "differentially expressed jxns", sep=" "))
+    DE_boxplots(RSE, de_jx, vJxn)
     return(list(results, de_jxns))
   }
   else {
