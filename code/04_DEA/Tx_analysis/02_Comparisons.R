@@ -154,13 +154,9 @@ t_stat_tx_vs_genes<- function(expt){
   
   if (expt=="nicotine"){
     abs_t_tx=6
-    both_t=c(3,-4)
-    FDR=1
   }
   else{
-    abs_t_tx=7
-    both_t=c(4,-5)
-    FDR=0.001
+    abs_t_tx=5
   }
   
   ## Transcripts' genes
@@ -179,27 +175,82 @@ t_stat_tx_vs_genes<- function(expt){
   ## Add t-stats and FDRs of transcripts' genes 
   t_genes<-vector()
   FDRs<-vector()
+  logFCs <- vector()
+  
   for (i in 1:dim(t_stats)[1]){
     t<-top_genes[which(top_genes$gencodeID==t_stats$ensembl_id[i]), "t"]
     FDR<-top_genes[which(top_genes$gencodeID==t_stats$ensembl_id[i]), "adj.P.Val"]
+    logFC <- top_genes[which(top_genes$gencodeID==t_stats$ensembl_id[i]), "logFC"]
+    
     t_genes<-append(t_genes, t)
     FDRs<-append(FDRs, FDR)
+    logFCs <- append(logFCs, logFC)
   }
   t_stats$t_genes<-t_genes
   t_stats$adj.P.Val_genes<-FDRs
+  t_stats$logFC_genes <- logFCs
   
   ## Correlation coeff between t-stats of genes and transcripts
   rho <- cor(t_stats$t_tx, t_stats$t_genes, method = "spearman")
   rho_anno = paste0("rho = ", format(round(rho, 2), nsmall = 2))
   
+  cols <- c("coral2","pink", "lightgoldenrod3", "grey") 
+  names(cols) <- c("sig Both","sig Gene", "sig Tx", "None")
+  alphas <- c(1, 1, 1, 0.2)  
+  names(alphas) <- names(cols)
+  
   ## Add DE info for both groups 
   t_stats$DE<-add_DE_info_tx_vs_genes(t_stats)
+  t_stats$DE <- factor(t_stats$DE, levels=names(cols))
   
   
-  ## Gene-tx symbols of DE tx with no DEG, 
-  ## DE tx whose DEG have an opposite sign in logFC
-  ## and also label DE tx from genes with up and down tx
+  ## Gene-tx symbols of:
   
+  # ------- Top 3 DE txs ------- 
+  paste0(de_tx[order(de_tx$adj.P.Val, decreasing = FALSE), c('Symbol')][1:3], '-', 
+                       de_tx[order(de_tx$adj.P.Val, decreasing = FALSE), c('transcript_id')][1:3])
+  top_de_txs <- de_tx[order(de_tx$adj.P.Val, decreasing = FALSE), c('transcript_id')][1:3]
+  # [1] "Phf3-ENSMUST00000185521.1"    "Pnisr-ENSMUST00000029911.11"  "Ankrd11-ENSMUST00000212937.1"     <- for nic
+  # [1] "Ccnb2-ENSMUST00000034742.7" "Top2a-ENSMUST00000068031.7" "Mt2-ENSMUST00000034214.7"    <- for smo
+  
+  
+  #  ------- DE tx from non-DEG with |t-stat|>abs_t_tx ------- 
+  if (expt == 'nicotine'){
+    paste0(t_stats[which(t_stats$DE=='sig Tx' & (abs(t_stats$t_tx)>abs_t_tx)), 'Symbol'], '-', 
+           t_stats[which(t_stats$DE=='sig Tx' & (abs(t_stats$t_tx)>abs_t_tx)), 'transcript_id'])
+    de_txs_nonDEGs <- t_stats[which(t_stats$DE=='sig Tx' & (abs(t_stats$t_tx)>abs_t_tx)), 'transcript_id']
+    # [1] "Phf3-ENSMUST00000185521.1"    "Trpc4-ENSMUST00000199359.1"   "Ankrd11-ENSMUST00000212937.1" "Bcl11a-ENSMUST00000124148.1" 
+    # [5] "Galnt10-ENSMUST00000108846.1" "Scaf11-ENSMUST00000227133.1"    <- for nic
+    
+    ## Ignore Galnt10-ENSMUST00000108846.1 in nic
+    de_txs_nonDEGs <- de_txs_nonDEGs[-which(de_txs_nonDEGs=='ENSMUST00000108846.1')]
+  }
+  
+  ## Take only Btf3, Srsf6, Cyhr1 and H13 txs for smo
+  else {
+   nonDEGs <- c("Btf3", "Srsf6", "Cyhr1", "H13")
+   paste0(t_stats[which(t_stats$DE=='sig Tx' & (abs(t_stats$t_tx)>abs_t_tx) & t_stats$Symbol %in% nonDEGs), 'Symbol'], '-', 
+          t_stats[which(t_stats$DE=='sig Tx' & (abs(t_stats$t_tx)>abs_t_tx) & t_stats$Symbol %in% nonDEGs), 'transcript_id'])
+   # [1] "H13-ENSMUST00000125366.7"    "H13-ENSMUST00000089059.8"    "Srsf6-ENSMUST00000017065.14" "Btf3-ENSMUST00000022163.14"  "Cyhr1-ENSMUST00000081291.12"
+   # [6] "Cyhr1-ENSMUST00000176274.1"    <- for smo
+   de_txs_nonDEGs <- t_stats[which(t_stats$DE=='sig Tx' & (abs(t_stats$t_tx)>abs_t_tx) & t_stats$Symbol %in% nonDEGs), 'transcript_id']
+  }
+  
+  
+  #  ------- DE tx whose DEG have an opposite sign in logFC ------- 
+  if (expt == 'nicotine'){
+    paste0(t_stats[which(t_stats$DE=='sig Both' & (sign(t_stats$logFC_tx)!=sign(t_stats$logFC_genes))), 'Symbol'], '-',
+           t_stats[which(t_stats$DE=='sig Both' & (sign(t_stats$logFC_tx)!=sign(t_stats$logFC_genes))), 'transcript_id'])
+    de_txs_DEGs <- t_stats[which(t_stats$DE=='sig Both' & (sign(t_stats$logFC_tx)!=sign(t_stats$logFC_genes))), 'transcript_id']
+    # [1] "Pnisr-ENSMUST00000148561.1"   "Dcun1d5-ENSMUST00000216770.1" "Dgcr8-ENSMUST00000115633.2"   <- for nic
+  }
+  else{
+    ## Ignore for smo
+    de_txs_DEGs <- NULL
+  }
+
+  
+  #  ------- DE tx from DEGs with up and down txs ------- 
   ## Up and down transcripts' genes
   tx_up_genes<-unique(de_tx[which(de_tx$logFC>0),"ensembl_id"])
   tx_down_genes<-unique(de_tx[which(de_tx$logFC<0),"ensembl_id"])
@@ -208,54 +259,246 @@ t_stat_tx_vs_genes<- function(expt){
   ## Retain only the transcripts' genes that were considered at the gene level
   interest_genes<-intersect(interest_genes, tx_genes)
   
+  if (expt == 'nicotine'){
+    ## Only DEGs and DE txs
+    paste0(t_stats[which(t_stats$ensembl_id %in% interest_genes & t_stats$adj.P.Val_genes< 0.05 & t_stats$adj.P.Val_tx<0.05), 'Symbol'], '-',
+           t_stats[which(t_stats$ensembl_id %in% interest_genes & t_stats$adj.P.Val_genes< 0.05 & t_stats$adj.P.Val_tx<0.05), 'transcript_id'])
+    de_txs_up_down_DEGs <- t_stats[which(t_stats$ensembl_id %in% interest_genes & t_stats$adj.P.Val_genes< 0.05 & t_stats$adj.P.Val_tx<0.05), 'transcript_id']
+    # [1] "Pnisr-ENSMUST00000029911.11"  "Pnisr-ENSMUST00000148561.1"   "Dcun1d5-ENSMUST00000215683.1" "Dcun1d5-ENSMUST00000216770.1"    <- for nic
+  }
+  else{
+    ## DE txs from the DEGs Meaf6, Ivns1abp, Morf4l2, Sin3b and Ppp2r5c for smo
+    DEGs <- c("Meaf6", "Ivns1abp", "Morf4l2", "Sin3b", "Ppp2r5c")
+    paste0(t_stats[which(t_stats$ensembl_id %in% interest_genes & t_stats$adj.P.Val_genes< 0.05 & t_stats$adj.P.Val_tx<0.05 & t_stats$Symbol %in% DEGs), 'Symbol'], '-',
+           t_stats[which(t_stats$ensembl_id %in% interest_genes & t_stats$adj.P.Val_genes< 0.05 & t_stats$adj.P.Val_tx<0.05 & t_stats$Symbol %in% DEGs), 'transcript_id'])
+    # [1] "Ivns1abp-ENSMUST00000023918.12" "Ivns1abp-ENSMUST00000111887.9"  "Meaf6-ENSMUST00000154689.7"     "Meaf6-ENSMUST00000184205.7"    
+    # [5] "Sin3b-ENSMUST00000109950.4"     "Sin3b-ENSMUST00000004494.15"    "Sin3b-ENSMUST00000212095.1"     "Ppp2r5c-ENSMUST00000221715.1"  
+    # [9] "Ppp2r5c-ENSMUST00000109832.2"   "Morf4l2-ENSMUST00000080411.12"  "Morf4l2-ENSMUST00000169418.7"   "Morf4l2-ENSMUST00000113095.7"  
+    de_txs_up_down_DEGs <- t_stats[which(t_stats$ensembl_id %in% interest_genes & t_stats$adj.P.Val_genes< 0.05 & t_stats$adj.P.Val_tx<0.05 & t_stats$Symbol %in% DEGs), 'transcript_id']
+  }
+  
   tx_symbols<-vector()
+  
   for (i in 1:dim(t_stats)[1]) {
-    
-    if (t_stats$DE[i]=="sig tx" & (abs(t_stats$t_tx[i])>abs_t_tx | 
-       ((t_stats$ensembl_id[i] %in% interest_genes) & (t_stats$adj.P.Val_tx[i]< FDR)))) {
-      tx_symbols<-append(tx_symbols, paste(t_stats$Symbol[i], "-", t_stats$transcript_id[i], sep=""))
-    }
-    else if(t_stats$DE[i]=="sig Both"){
-      if ((t_stats$t_genes[i]> both_t[1] & t_stats$t_tx[i]< both_t[2]) | 
-          (t_stats$t_genes[i]< -both_t[1] & t_stats$t_tx[i]> -both_t[2])){
-        tx_symbols<-append(tx_symbols, paste(t_stats$Symbol[i], "-", t_stats$transcript_id[i], sep=""))
-      }
-      else if((t_stats$ensembl_id[i] %in% interest_genes) & (t_stats$adj.P.Val_tx[i]< FDR)){
-        tx_symbols<-append(tx_symbols, paste(t_stats$Symbol[i], "-", t_stats$transcript_id[i], sep=""))
-      }      
-      else{
-        tx_symbols<-append(tx_symbols, NA)
-      }
+    if (t_stats$transcript_id[i] %in% c(top_de_txs, de_txs_nonDEGs, de_txs_DEGs, de_txs_up_down_DEGs)){
+      tx_symbols <- append(tx_symbols, paste0(t_stats$Symbol[i], '-', t_stats$transcript_id[i]))
     }
     else {
-      tx_symbols<-append(tx_symbols, NA)
+      tx_symbols <- append(tx_symbols, NA)
     }
   }
   t_stats$tx_symbols<-tx_symbols
   
   ## Plot
-  cols <- c("red", "#ffad73","#26b3ff", "dark grey") 
-  names(cols)<-c("sig Both","sig tx", "sig gene", "None")
-  alphas <- c(1, 1, 1,0.5)  
-  names(alphas)<-c("sig Both", "sig tx", "sig gene", "None")
   
-  plot <- ggplot(t_stats, aes(x = t_genes, y = t_tx, color=DE, alpha=DE, label= tx_symbols)) +
-    geom_point(size = 1) +
-    labs(x = "t-stats genes", 
-         y = "t-stats tx",
-         title = paste(capitalize(expt),"genes vs tx", sep=" "), 
-         subtitle = rho_anno, 
-         parse = T) +
-    geom_label_repel(fill="white", size=2, max.overlaps = Inf,  
-                     box.padding = 0.2, 
+  if(expt == 'nicotine'){
+    plot <- ggplot(t_stats, aes(x = t_genes, y = t_tx, color=DE, alpha=DE, label= tx_symbols)) +
+      geom_point(size = 1.2) +
+      labs(x = "t-stats genes", 
+           y = "t-stats tx",
+           title = paste(capitalize(expt),"genes vs tx", sep=" "), 
+           subtitle = rho_anno, 
+           parse = T) +
+      geom_label_repel(data=subset(t_stats, !tx_symbols %in% c('Trpc4-ENSMUST00000199359.1', 'Dgcr8-ENSMUST00000115633.2')), 
+                       aes(fontface = 'bold'), fill='white',
+                       size=2.8,
+                       max.overlaps = Inf,
+                       min.segment.length = unit(0, "cm"),
+                       point.padding = unit(0.1, "cm"),
+                       box.padding = 0.2,
+                       label.padding = 0.2,
+                       label.size = 0.2,
+                       nudge_y=0.8,
+                       nudge_x = 1,
+                       show.legend=FALSE) +
+      geom_label_repel(data=subset(t_stats, tx_symbols %in% c('Trpc4-ENSMUST00000199359.1', 'Dgcr8-ENSMUST00000115633.2')), 
+                       aes(fontface = 'bold'), fill='white',
+                       size=2.8,
+                       max.overlaps = Inf,
+                       min.segment.length = unit(0, "cm"),
+                       point.padding = unit(0.1, "cm"),
+                       box.padding = 0.2,
+                       label.padding = 0.2,
+                       label.size = 0.2,
+                       nudge_y=-1.9,
+                       nudge_x = -1,
+                       show.legend=FALSE) +
+      theme_bw() +
+      guides(alpha = 'none') + 
+      scale_color_manual(values = cols, labels=names(cols), drop = FALSE) + 
+      scale_alpha_manual(values = alphas, labels=names(alphas), drop=FALSE) +
+      theme(plot.margin = unit(c(1,1,1,1), "cm"),
+            axis.title = element_text(size = 12),
+            axis.text = element_text(size = 10),
+            legend.text = element_text(size=11),
+            legend.title = element_text(size=12))
+  }
+  
+  else{
+    plot <- ggplot(t_stats, aes(x = t_genes, y = t_tx, color=DE, alpha=DE, label= tx_symbols)) +
+      geom_point(size = 1.2) +
+      labs(x = "t-stats genes", 
+           y = "t-stats tx",
+           title = paste(capitalize(expt),"genes vs tx", sep=" "), 
+           subtitle = rho_anno, 
+           parse = T) +
+      geom_label_repel(data=subset(t_stats, tx_symbols %in% 
+                                     c('Btf3-ENSMUST00000022163.14', 'Cyhr1-ENSMUST00000176274.1')),
+                       aes(fontface = 'bold'), fill='white',
+                       size=2.8,
+                       max.overlaps = Inf,
+                       min.segment.length = unit(0, "cm"),
+                       point.padding = unit(0.1, "cm"),
+                       box.padding = 0.2,
+                       label.padding = 0.2,
+                       label.size = 0.2,
+                       nudge_y= 3.8,
+                       nudge_x = -3,
+                       show.legend=FALSE) +
+      geom_label_repel(data=subset(t_stats, tx_symbols %in% 
+                                     c('Srsf6-ENSMUST00000017065.14')),
+                       aes(fontface = 'bold'), fill='white',
+                       size=2.8,
+                       max.overlaps = Inf,
+                       min.segment.length = unit(0, "cm"),
+                       point.padding = unit(0.1, "cm"),
+                       box.padding = 0.2,
+                       label.padding = 0.2,
+                       label.size = 0.2,
+                       nudge_y= -3,
+                       nudge_x = 3.5,
+                       show.legend=FALSE) +
+    geom_label_repel(data=subset(t_stats, tx_symbols %in% 
+                                   c('Ppp2r5c-ENSMUST00000221715.1')),
+                     aes(fontface = 'bold'), fill='white',
+                     size=2.8,
+                     max.overlaps = Inf,
+                     min.segment.length = unit(0, "cm"),
+                     point.padding = unit(0.1, "cm"),
+                     box.padding = 0.2,
+                     label.padding = 0.2,
+                     label.size = 0.2,
+                     nudge_y= 2,
+                     nudge_x = -2,
                      show.legend=FALSE) +
-    theme_bw() +
-    scale_color_manual(values = cols) + 
-    scale_alpha_manual(values = alphas)
+      geom_label_repel(data=subset(t_stats, tx_symbols %in% 
+                                     c('Ivns1abp-ENSMUST00000111887.9')),
+                       aes(fontface = 'bold'), fill='white',
+                       size=2.8,
+                       max.overlaps = Inf,
+                       min.segment.length = unit(0, "cm"),
+                       point.padding = unit(0.1, "cm"),
+                       box.padding = 0.2,
+                       label.padding = 0.2,
+                       label.size = 0.2,
+                       nudge_y= 0,
+                       nudge_x = -2,
+                       show.legend=FALSE) +
+      geom_label_repel(data=subset(t_stats, tx_symbols %in% c('Meaf6-ENSMUST00000184205.7')),
+                       aes(fontface = 'bold'), fill='white',
+                       size=2.8,
+                       max.overlaps = Inf,
+                       min.segment.length = unit(0, "cm"),
+                       point.padding = unit(0.1, "cm"),
+                       box.padding = 0.2,
+                       label.padding = 0.2,
+                       label.size = 0.2,
+                       nudge_y= 2,
+                       nudge_x = 1,
+                       show.legend=FALSE) +
+      geom_label_repel(data=subset(t_stats, tx_symbols %in% 
+                                     c('Mt2-ENSMUST00000034214.7', 'Sin3b-ENSMUST00000109950.4',
+                                        'Ppp2r5c-ENSMUST00000109832.2')),
+                       aes(fontface = 'bold'), fill='white',
+                       size=2.8,
+                       max.overlaps = Inf,
+                       min.segment.length = unit(0, "cm"),
+                       point.padding = unit(0.1, "cm"),
+                       box.padding = 0.2,
+                       label.padding = 0.2,
+                       label.size = 0.2,
+                       nudge_y= 0.2,
+                       nudge_x = 0.1,
+                       show.legend=FALSE) +
+    geom_label_repel(data=subset(t_stats, tx_symbols %in% 
+                                   c('Meaf6-ENSMUST00000154689.7')),
+                     aes(fontface = 'bold'), fill='white',
+                     size=2.8,
+                     max.overlaps = Inf,
+                     min.segment.length = unit(0, "cm"),
+                     point.padding = unit(0.1, "cm"),
+                     box.padding = 0.2,
+                     label.padding = 0.2,
+                     label.size = 0.2,
+                     nudge_y= -0.5,
+                     nudge_x = 0.1,
+                     show.legend=FALSE) +
+      geom_label_repel(data=subset(t_stats, tx_symbols %in% 
+                                     c('Morf4l2-ENSMUST00000169418.7')),
+                       aes(fontface = 'bold'), fill='white',
+                       size=2.8,
+                       max.overlaps = Inf,
+                       min.segment.length = unit(0, "cm"),
+                       point.padding = unit(0.1, "cm"),
+                       box.padding = 0.2,
+                       label.padding = 0.2,
+                       label.size = 0.2,
+                       nudge_y= -0.01,
+                       nudge_x = 0.5,
+                       show.legend=FALSE) +
+      geom_label_repel(data=subset(t_stats, tx_symbols %in% c('Morf4l2-ENSMUST00000113095.7', 'Morf4l2-ENSMUST00000080411.12', 
+                                                              'Sin3b-ENSMUST00000004494.15', 'Sin3b-ENSMUST00000212095.1')),
+                       aes(fontface = 'bold'), fill='white',
+                       size=2.8,
+                       max.overlaps = Inf,
+                       min.segment.length = unit(0, "cm"),
+                       point.padding = unit(0.1, "cm"),
+                       box.padding = 0.2,
+                       label.padding = 0.2,
+                       label.size = 0.2,
+                       nudge_y= -0.9,
+                       nudge_x = 0.5,
+                       show.legend=FALSE) +
+      geom_label_repel(data=subset(t_stats, tx_symbols %in% c('Top2a-ENSMUST00000068031.7', 'Ccnb2-ENSMUST00000034742.7',
+                                                              'Ivns1abp-ENSMUST00000023918.12')),
+                       aes(fontface = 'bold'), fill='white',
+                       size=2.8,
+                       max.overlaps = Inf,
+                       min.segment.length = unit(0, "cm"),
+                       point.padding = unit(0.1, "cm"),
+                       box.padding = 0.2,
+                       label.padding = 0.2,
+                       label.size = 0.2,
+                       nudge_y= -1.8,
+                       nudge_x = -3,
+                       show.legend=FALSE) +
+      geom_label_repel(data=subset(t_stats, tx_symbols %in% c('H13-ENSMUST00000089059.8')),
+                       aes(fontface = 'bold'), fill='white',
+                       size=2.8,
+                       max.overlaps = Inf,
+                       min.segment.length = unit(0, "cm"),
+                       point.padding = unit(0.1, "cm"),
+                       box.padding = 0.2,
+                       label.padding = 0.2,
+                       label.size = 0.2,
+                       nudge_y= -0.5,
+                       nudge_x = -6,
+                       show.legend=FALSE) +
+      theme_bw() +
+      guides(alpha = 'none') + 
+      scale_color_manual(values = cols, labels=names(cols), drop = FALSE) + 
+      scale_alpha_manual(values = alphas, labels=names(alphas), drop=FALSE) +
+      theme(plot.margin = unit(c(1,1,1,1), "cm"),
+            axis.title = element_text(size = 12),
+            axis.text = element_text(size = 10),
+            legend.text = element_text(size=11),
+            legend.title = element_text(size=12))
+  }
+
   
   plot
   ggsave(filename=paste("plots/04_DEA/02_Comparisons/Tx_analysis/t_stats_tx_vs_genes_", substr(expt,1,3), 
-                        ".pdf", sep=""), height = 20, width = 25, units = "cm")
+                        ".pdf", sep=""), height = 14.5, width = 18, units = "cm")
   
 }
 
