@@ -808,10 +808,10 @@ gene_tx_boxplots("smoking", "Meaf6", "Meaf6−ENSMUST00000184205.7", "Meaf6−EN
 venn_plot<-function(DE_lists, colors, name, titles){
   
   if (name=="smo_VS_nic_DE_txs"){
-    height=10
-    width=15
+    height=8
+    width=12
     margin=0.2
-    dist=0.1
+    dist=0.23
     cat=0.75
     cex=0.8
     main_pos = c(0.5,0.476)
@@ -833,7 +833,7 @@ venn_plot<-function(DE_lists, colors, name, titles){
     height=12
     width=16
     margin=0.2
-    dist=0.09
+    dist=0.23
     cat=0.75
     cex=0.8
     main_pos = c(0.5,0.476)
@@ -863,12 +863,12 @@ venn_plot<-function(DE_lists, colors, name, titles){
   }
   
   else if (name=="intersections_DEG_VS_txs_VS_exons"){
-    height=15
-    width=30
+    height=11
+    width=23
     margin=1.15
-    dist=0.09
+    dist=0.12
     cat=1.3
-    cex=1.3
+    cex=1.5
     main_pos = c(0.5,0.375)
     main_cex =1.5
   }
@@ -1221,8 +1221,9 @@ DE_lists<-list(DEG_vs_Txs_only_up_nic, DEG_vs_Txs_only_down_nic, DEG_vs_Txs_only
                DEG_vs_Txs_only_down_smo, DEG_vs_Txs_smoUp_nicUp, DEG_vs_Txs_smoDown_nicDown,
                DEG_vs_Txs_smoUp_nicDown, DEG_vs_Txs_smoDown_nicUp)
 colors<-list(c("darkslategray3", "lightgoldenrod3"), c("darkslategray1", "lightgoldenrod1"), 
-             c("lightpink3", "olivedrab3"), c("pink", "olivedrab1"), c("palegreen3", "navajowhite3"),
-             c("palegreen", "navajowhite"), c("palegreen","navajowhite3"), c("palegreen3", "navajowhite"))
+             c("olivedrab3", "lightpink3"), c("olivedrab1", "pink"), 
+             c("palegreen3", "navajowhite3"),c("palegreen", "navajowhite"), 
+             c("palegreen2","navajowhite2"), c("palegreen2", "navajowhite2"))
 venn_plot(DE_lists, colors, "intersections_DEG_VS_txs_genes", c("Only up in nic", "Only down in nic",
                                                                   "Only up in smo", "Only down in smo", 
                                                                   "Smo up, nic up", "Smo down, nic down",
@@ -1379,10 +1380,12 @@ DEG_vs_Txs_vs_Exons_smoDown_nicUp <-list(
 DE_lists<-list(DEG_vs_Txs_vs_Exons_only_up_nic, DEG_vs_Txs_vs_Exons_only_down_nic, DEG_vs_Txs_vs_Exons_only_up_smo,
                DEG_vs_Txs_vs_Exons_only_down_smo, DEG_vs_Txs_vs_Exons_smoUp_nicUp, DEG_vs_Txs_vs_Exons_smoDown_nicDown,
                DEG_vs_Txs_vs_Exons_smoUp_nicDown, DEG_vs_Txs_vs_Exons_smoDown_nicUp)
-colors<-list(c("darkslategray3", "lightgoldenrod3", "orangered"), c("darkslategray1", "lightgoldenrod1", "sienna1"), 
-             c("lightpink3", "olivedrab3", "indianred"), c("pink", "olivedrab1", "indianred1"), 
-             c("palegreen3", "navajowhite3", "orange3"), c("palegreen", "navajowhite", "orange1"), 
-             c("palegreen2","navajowhite2", "orange2"), c("palegreen2", "navajowhite2", "orange2"))
+cols <- c('DEGs'="pink", "Txs"="lightgoldenrod3", 'Exons'="turquoise") 
+
+colors <- list(c("hotpink3", "lemonchiffon4", "paleturquoise4"), c("plum1", "lemonchiffon2", "paleturquoise2"),
+               c('indianred2', 'lightsalmon2', 'palevioletred3'), c('coral', 'lightsalmon1', 'palevioletred1'),
+               c('orangered3', 'orange3', 'orchid3'), c('salmon1',"lightgoldenrod1", 'plum2'),
+               c('orangered1', 'orange1', 'orchid1'), c('orangered1', 'orange1', 'orchid1'))
 venn_plot(DE_lists, colors, "intersections_DEG_VS_txs_VS_exons", c("Only up in nic", "Only down in nic",
                                                                 "Only up in smo", "Only down in smo", 
                                                                 "Smo up, nic up", "Smo down, nic down",
