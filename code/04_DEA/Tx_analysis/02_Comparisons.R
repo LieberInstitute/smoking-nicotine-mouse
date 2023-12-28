@@ -446,7 +446,7 @@ t_stat_tx_vs_genes<- function(expt){
                        nudge_y= -0.01,
                        nudge_x = 0.5,
                        show.legend=FALSE) +
-      geom_label_repel(data=subset(t_stats, tx_symbols %in% c('Morf4l2-ENSMUST00000113095.7', 'Morf4l2-ENSMUST00000080411.12', 
+      geom_label_repel(data=subset(t_stats, tx_symbols %in% c('Morf4l2-ENSMUST00000080411.12', 
                                                               'Sin3b-ENSMUST00000004494.15', 'Sin3b-ENSMUST00000212095.1')),
                        aes(fontface = 'bold'), fill='white',
                        size=2.8,
@@ -530,18 +530,23 @@ create_boxplot<- function(counts, y, title, q_value, FC, tx_tpm){
   ## Boxplot
   p<-ggplot(data=counts, 
             aes(x=Group,y=eval(parse_expr(y)))) + 
-    geom_boxplot(outlier.color = "#FFFFFFFF") +
+    geom_boxplot(outlier.color = "#FFFFFFFF", width=0.65) +
     geom_jitter(aes(colour=Group),shape=16, 
-                position=position_jitter(0.2)) +
-    theme_classic() +
-    labs(x = "Group", y = "norm counts",
+                position=position_jitter(0.2), size=2.7) +
+    theme_bw() +
+    labs(x = "Group", y = "lognorm counts",
          title = title,
-         ## Add FDR and FC of genes and txs
+         ## Add FDR, FC and % of tpm
          subtitle=paste(" FDR:", q_value, "       ", tx_tpm,  
                         "\n", "FC:", FC)) +
-    theme(plot.margin=unit (c (1,1.5,1,1), 'cm'), legend.position = "none",
-          plot.title = element_text(hjust=0.5, size=10, face="bold"), 
-          plot.subtitle = element_text(size = 9)) 
+    scale_color_manual(values=c("Control" = "seashell3", "Experimental" = "orange3")) +
+    scale_x_discrete(labels=c("Control"="Ctrl","Experimental"="Expt")) +
+    theme(plot.margin=unit (c(0.4,0.4,0.4,0.4), 'cm'), 
+          legend.position = "none",
+          plot.title = element_text(hjust=0.5, size=12, face="bold"), 
+          plot.subtitle = element_text(size = 10),
+          axis.title = element_text(size = (12)),
+          axis.text = element_text(size = 10.5)) 
   
   print(p)
 }
@@ -558,11 +563,6 @@ gene_tx_boxplots<- function(expt, gene, tx1, tx2){
   
   ## Expression values of all genes
   vGene<-results_genes[[1]][[2]]
-  
-  ## Regress out residuals
-  formula<- ~ Group + Sex + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr + overallMapRate + mitoRate
-  model=model.matrix(formula, data=vGene$targets)
-  vGene$E<-cleaningY(vGene$E, model, P=2)
   
   ## Get ensembl ID and symbol of the gene
   if(! gene %in% rownames(vGene)){
@@ -586,7 +586,13 @@ gene_tx_boxplots<- function(expt, gene, tx1, tx2){
   
   ## Obtain total tpm of the gene's transcripts
   gene_txs_tpm<-assays(RSE)$tpm[which(rowData(RSE)$gene_id==gene),]
-  gene_txs_tpm<-sum(apply(gene_txs_tpm, 1, sum))
+  if(is.null(dim(gene_txs_tpm))){
+    gene_txs_tpm<-sum(gene_txs_tpm)
+  }
+  else{
+    gene_txs_tpm<-sum(apply(gene_txs_tpm, 1, sum)) 
+  }
+ 
   
   ## Add specific transcripts
   if (!is.null(tx1) | !is.null(tx2)){
@@ -620,23 +626,28 @@ gene_tx_boxplots<- function(expt, gene, tx1, tx2){
     }
   }
   
-  ## Log-expression values of that txs
-  ## Regress out residuals
-  formula<- ~ Group + Sex + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr + overallMapRate + mitoRate
-  model=model.matrix(formula, data=colData(RSE))
-  logcounts<-cleaningY(assays(RSE)$logcounts, model, P=2)
-  
+  ## Log-expression values of the txs
+  logcounts<-assays(RSE)$logcounts
   counts_txs<-logcounts[which(rownames(logcounts) %in% top_gene_txs[1:3]),]
-  counts_txs<-t(counts_txs)
+  if(!is.null(dim(counts_txs))){
+    counts_txs<-t(counts_txs)
+  }
   
   ## Data frame with all expression values and samples' group
   counts<-cbind(counts_gene, counts_txs, "Group"=vGene$targets$Group)
   counts<-as.data.frame(counts)
   counts$counts_gene<-as.numeric(counts$counts_gene)
   colnames(counts)[1]<-gene
-  counts[,2]<-as.numeric(counts[,2])
-  counts[,3]<-as.numeric(counts[,3])
-  counts[,4]<-as.numeric(counts[,4])
+  if(!is.null(dim(counts_txs))){
+    counts[,2]<-as.numeric(counts[,2])
+    counts[,3]<-as.numeric(counts[,3])
+    counts[,4]<-as.numeric(counts[,4])
+  }
+  else{
+    counts$counts_txs <- as.numeric(counts$counts_txs)
+    colnames(counts)[2] <- top_gene_txs[1]
+  }
+
   
   plots<-list()
   for (i in 1:(dim(counts)[2]-1)){
@@ -668,9 +679,17 @@ gene_tx_boxplots<- function(expt, gene, tx1, tx2){
     plots[[i]]<-p
   }
   
-  plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], ncol = 4)
-  ggsave(here(paste("plots/04_DEA/02_Comparisons/Tx_analysis/Boxplots_", gene_symbol, ".pdf", sep="")), 
-         width = 35, height = 10, units = "cm")
+  if(!is.null(dim(counts_txs))){
+    plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], ncol = 4)
+    ggsave(here(paste("plots/04_DEA/02_Comparisons/Tx_analysis/Boxplots_", gene_symbol, ".pdf", sep="")), 
+           width = 34, height = 10, units = "cm")
+  }
+  else{
+    plot_grid(plots[[1]], plots[[2]], ncol = 2)
+    ggsave(here(paste("plots/04_DEA/02_Comparisons/Tx_analysis/Boxplots_", gene_symbol, ".pdf", sep="")), 
+           width = 17, height = 10, units = "cm")
+  }
+ 
   
 }
 
@@ -680,7 +699,11 @@ gene_tx_boxplots<- function(expt, gene, tx1, tx2){
 ## Boxplots of nicotine genes and txs
 #########################################
 
-#### Non-DE genes but with DE txs ####
+#### Non-DE genes but with DE txs (including top DE txs already) ####
+
+## Phf3: predicted to be involved in transcription, DNA-templated;
+## expressed in CNS
+gene_tx_boxplots("nicotine", "Phf3", "Phf3−ENSMUST00000185521.1", NULL)
 
 ## Ankrd11: acts in head morphogenesis; expressed in cerebral cortex
 gene_tx_boxplots("nicotine", "Ankrd11", "Ankrd11−ENSMUST00000212937.1", NULL)
@@ -722,18 +745,16 @@ gene_tx_boxplots("nicotine", "Dcun1d5", "Dcun1d5−ENSMUST00000215683.1",
 
 
 
-#### Non-DE genes with Up and Down DE tx ####
-
-## Phf3: predicted to be involved in transcription, DNA-templated;
-## expressed in CNS
-gene_tx_boxplots("nicotine", "Phf3", "Phf3−ENSMUST00000185521.1", 
-                 "Phf3−ENSMUST00000191329.1")
-
-
-
 #########################################
 ## Boxplots of smoking genes and txs
 #########################################
+
+#### Top DE txs ####
+gene_tx_boxplots('smoking', 'Top2a', 'Top2a−ENSMUST00000068031.7', NULL)
+gene_tx_boxplots('smoking', 'Ccnb2', 'Ccnb2−ENSMUST00000034742.7', NULL)
+gene_tx_boxplots('smoking', 'Mt2', 'Mt2−ENSMUST00000034214.7', NULL)
+
+
 
 #### Non-DE genes but with DE txs ####
 
@@ -744,14 +765,14 @@ gene_tx_boxplots("smoking", "Btf3", "Btf3−ENSMUST00000022163.14", NULL)
 ## expressed in CNS
 gene_tx_boxplots("smoking", "Srsf6", "Srsf6−ENSMUST00000017065.14", NULL)
 
+## Cyhr1: predicted to enable zinc ion binding activity; located in cytoplasm and nuclear envelope
+gene_tx_boxplots("smoking", "Cyhr1", "Cyhr1−ENSMUST00000176274.1", 
+                 "Cyhr1−ENSMUST00000081291.12")
 
-
-#### DE tx whose DEG have opposite direction of regulation ####
-
-## Meaf6: predicted to act upstream of or within chromatin organization;
-## expressed in CNS and whole brain
-gene_tx_boxplots("smoking", "Meaf6", "Meaf6−ENSMUST00000184205.7", NULL)
-
+## H13: acts upstream of or within in utero embryonic development; expressed in  brain, 
+## embryo ectoderm, extraembryonic component, hemolymphoid system and intervertebral disc
+gene_tx_boxplots("smoking", "H13", "H13−ENSMUST00000089059.8", 
+                 "H13−ENSMUST00000125366.7")
 
 
 #### DEG with Up and Down DE tx ####
@@ -776,18 +797,10 @@ gene_tx_boxplots("smoking", "Sin3b", "Sin3b−ENSMUST00000109950.4",
 gene_tx_boxplots("smoking", "Ppp2r5c", "Ppp2r5c−ENSMUST00000221715.1", 
                  "Ppp2r5c−ENSMUST00000109832.2")
 
+## Meaf6: predicted to act upstream of or within chromatin organization;
+## expressed in CNS and whole brain
+gene_tx_boxplots("smoking", "Meaf6", "Meaf6−ENSMUST00000184205.7", "Meaf6−ENSMUST00000154689.7")
 
-
-#### Non-DE genes with Up and Down DE tx ####
-
-## Cyhr1: predicted to enable zinc ion binding activity; located in cytoplasm and nuclear envelope
-gene_tx_boxplots("smoking", "Cyhr1", "Cyhr1−ENSMUST00000176274.1", 
-                 "Cyhr1−ENSMUST00000081291.12")
-
-## H13: acts upstream of or within in utero embryonic development; expressed in  brain, 
-## embryo ectoderm, extraembryonic component, hemolymphoid system and intervertebral disc
-gene_tx_boxplots("smoking", "H13", "H13−ENSMUST00000089059.8", 
-                 "H13−ENSMUST00000125366.7")
 
 
 
