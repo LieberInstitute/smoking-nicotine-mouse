@@ -1380,7 +1380,6 @@ DEG_vs_Txs_vs_Exons_smoDown_nicUp <-list(
 DE_lists<-list(DEG_vs_Txs_vs_Exons_only_up_nic, DEG_vs_Txs_vs_Exons_only_down_nic, DEG_vs_Txs_vs_Exons_only_up_smo,
                DEG_vs_Txs_vs_Exons_only_down_smo, DEG_vs_Txs_vs_Exons_smoUp_nicUp, DEG_vs_Txs_vs_Exons_smoDown_nicDown,
                DEG_vs_Txs_vs_Exons_smoUp_nicDown, DEG_vs_Txs_vs_Exons_smoDown_nicUp)
-cols <- c('DEGs'="pink", "Txs"="lightgoldenrod3", 'Exons'="turquoise") 
 
 colors <- list(c("hotpink3", "lemonchiffon4", "paleturquoise4"), c("plum1", "lemonchiffon2", "paleturquoise2"),
                c('indianred2', 'lightsalmon2', 'palevioletred3'), c('coral', 'lightsalmon1', 'palevioletred1'),
