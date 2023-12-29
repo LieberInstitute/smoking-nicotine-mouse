@@ -17,6 +17,7 @@ library(VennDiagram)
 library(gridExtra)
 library(R.utils)
 library(biomartr)
+library(rlang)
 library(sessioninfo)
 
 load(here("raw-data/rse_jx_smoking_mouse_n208.Rdata"))
