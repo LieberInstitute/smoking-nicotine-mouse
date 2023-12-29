@@ -28,20 +28,29 @@ load(here("processed-data/04_DEA/Exon_analysis/top_exons_smo.Rdata"))
 ### 1.2.1 Venn diagrams
 
 ## Function to create multiple Venn diagrams
-venn_plot<-function(DE_lists, colors, name, titles){
+venn_plot<-function(DE_lists, name, titles){
+  
+  if(name!='DEG_VS_txs_VS_exons_VS_jxns'){
+    cat=1.05
+    dist=0.2
+  }
+  else{
+    cat=1.2
+    dist=0.2
+  }
 
-  height=5
-  width=14
-  dist=0.1
-  cat=0.75
-  cex=0.8
-  main_cex =1 
-  main_pos=c(0.5, 0.09)
+  height=6 
+  width=17.5
+  cex=1.2
+  main_cex =1.2 
+  main_pos=c(0.5, 0.25)
+  
+  colors<-c("pink", "lightgoldenrod3", "turquoise", "lightsteelblue3")
   
   plots<-list()
   pdf(file = paste("plots/04_DEA/02_Comparisons/Jx_analysis/Venn_", name, ".pdf", sep=""), height = height, width = width)
   for (i in 1:length(DE_lists)){
-    v<-venn.diagram(DE_lists[[i]], fill=colors[[i]], alpha = rep(0.5, length(DE_lists[[i]])), 
+    v<-venn.diagram(DE_lists[[i]], fill=colors, alpha = rep(0.5, length(DE_lists[[i]])), margin= 0.4,
                     lwd =0, cat.cex=cat, cex=cex, cat.dist=rep(dist, length(DE_lists[[i]])), filename=NULL, main = titles[i], 
                     main.cex = main_cex, main.pos = main_pos, disable.logging=TRUE)
     plots[[i]]<-v
@@ -138,9 +147,7 @@ DEG_vs_Txs_vs_Exons_vs_Jxns_smo <-list(
 )
 
 DE_lists<-list(DEG_vs_Txs_vs_Exons_vs_Jxns_all, DEG_vs_Txs_vs_Exons_vs_Jxns_nic, DEG_vs_Txs_vs_Exons_vs_Jxns_smo)
-colors<-list(c("rosybrown2", "navajowhite2", "lightblue3", "darkolivegreen2"), c("plum", "lightgoldenrod2", "lightcyan3", "darkolivegreen3"), 
-             c("pink1", "khaki2", "lightsteelblue3", "darkolivegreen4"))
-venn_plot(DE_lists, colors, "DEG_VS_txs_VS_exons_VS_jxns", c("All", "Nicotine", "Smoking"))
+venn_plot(DE_lists, "DEG_VS_txs_VS_exons_VS_jxns", c("All", "Nicotine", "Smoking"))
 
 
 
@@ -173,9 +180,7 @@ DEG_vs_Txs_vs_Exons_vs_NovelAssignedJxns_smo <-list(
 )
 
 DE_lists<-list(DEG_vs_Txs_vs_Exons_vs_NovelAssignedJxns_all, DEG_vs_Txs_vs_Exons_vs_NovelAssignedJxns_nic, DEG_vs_Txs_vs_Exons_vs_NovelAssignedJxns_smo)
-colors<-list(c("rosybrown2", "navajowhite2", "lightblue3", "darkolivegreen2"), c("plum", "lightgoldenrod2", "lightcyan3", "darkolivegreen3"), 
-             c("pink1", "khaki2", "lightsteelblue3", "darkolivegreen4"))
-venn_plot(DE_lists, colors, "DEG_VS_txs_VS_exons_VS_jxns_NovelAssigned", c("All", "Nicotine", "Smoking"))
+venn_plot(DE_lists, "DEG_VS_txs_VS_exons_VS_jxns_NovelAssigned", c("All", "Nicotine", "Smoking"))
 
 
 
@@ -208,9 +213,7 @@ DEG_vs_Txs_vs_Exons_vs_NovelNearestJxns_smo <-list(
 )
 
 DE_lists<-list(DEG_vs_Txs_vs_Exons_vs_NovelNearestJxns_all, DEG_vs_Txs_vs_Exons_vs_NovelNearestJxns_nic, DEG_vs_Txs_vs_Exons_vs_NovelNearestJxns_smo)
-colors<-list(c("rosybrown2", "navajowhite2", "lightblue3", "darkolivegreen2"), c("plum", "lightgoldenrod2", "lightcyan3", "darkolivegreen3"), 
-             c("pink1", "khaki2", "lightsteelblue3", "darkolivegreen4"))
-venn_plot(DE_lists, colors, "DEG_VS_txs_VS_exons_VS_jxns_NovelNearest", c("All", "Nicotine", "Smoking"))
+venn_plot(DE_lists, "DEG_VS_txs_VS_exons_VS_jxns_NovelNearest", c("All", "Nicotine", "Smoking"))
 
 
 
@@ -243,9 +246,7 @@ DEG_vs_Txs_vs_Exons_vs_NovelFollowingJxns_smo <-list(
 )
 
 DE_lists<-list(DEG_vs_Txs_vs_Exons_vs_NovelFollowingJxns_all, DEG_vs_Txs_vs_Exons_vs_NovelFollowingJxns_nic, DEG_vs_Txs_vs_Exons_vs_NovelFollowingJxns_smo)
-colors<-list(c("rosybrown2", "navajowhite2", "lightblue3", "darkolivegreen2"), c("plum", "lightgoldenrod2", "lightcyan3", "darkolivegreen3"), 
-             c("pink1", "khaki2", "lightsteelblue3", "darkolivegreen4"))
-venn_plot(DE_lists, colors, "DEG_VS_txs_VS_exons_VS_jxns_NovelFollowing", c("All", "Nicotine", "Smoking"))
+venn_plot(DE_lists, "DEG_VS_txs_VS_exons_VS_jxns_NovelFollowing", c("All", "Nicotine", "Smoking"))
 
 
 
@@ -278,9 +279,7 @@ DEG_vs_Txs_vs_Exons_vs_NovelPrecedingJxns_smo <-list(
 )
 
 DE_lists<-list(DEG_vs_Txs_vs_Exons_vs_NovelPrecedingJxns_all, DEG_vs_Txs_vs_Exons_vs_NovelPrecedingJxns_nic, DEG_vs_Txs_vs_Exons_vs_NovelPrecedingJxns_smo)
-colors<-list(c("rosybrown2", "navajowhite2", "lightblue3", "darkolivegreen2"), c("plum", "lightgoldenrod2", "lightcyan3", "darkolivegreen3"), 
-             c("pink1", "khaki2", "lightsteelblue3", "darkolivegreen4"))
-venn_plot(DE_lists, colors, "DEG_VS_txs_VS_exons_VS_jxns_NovelPreceding", c("All", "Nicotine", "Smoking"))
+venn_plot(DE_lists, "DEG_VS_txs_VS_exons_VS_jxns_NovelPreceding", c("All", "Nicotine", "Smoking"))
 
 
 
@@ -313,9 +312,7 @@ DEG_vs_Txs_vs_Exons_vs_AltJxns_smo <-list(
 )
 
 DE_lists<-list(DEG_vs_Txs_vs_Exons_vs_AltJxns_all, DEG_vs_Txs_vs_Exons_vs_AltJxns_nic, DEG_vs_Txs_vs_Exons_vs_AltJxns_smo)
-colors<-list(c("rosybrown2", "navajowhite2", "lightblue3", "darkolivegreen2"), c("plum", "lightgoldenrod2", "lightcyan3", "darkolivegreen3"), 
-             c("pink1", "khaki2", "lightsteelblue3", "darkolivegreen4"))
-venn_plot(DE_lists, colors, "DEG_VS_txs_VS_exons_VS_jxns_AltStartEnd", c("All", "Nicotine", "Smoking"))
+venn_plot(DE_lists, "DEG_VS_txs_VS_exons_VS_jxns_AltStartEnd", c("All", "Nicotine", "Smoking"))
 
 
 
@@ -348,9 +345,7 @@ DEG_vs_Txs_vs_Exons_vs_InGenJxns_smo <-list(
 )
 
 DE_lists<-list(DEG_vs_Txs_vs_Exons_vs_InGenJxns_all, DEG_vs_Txs_vs_Exons_vs_InGenJxns_nic, DEG_vs_Txs_vs_Exons_vs_InGenJxns_smo)
-colors<-list(c("rosybrown2", "navajowhite2", "lightblue3", "darkolivegreen2"), c("plum", "lightgoldenrod2", "lightcyan3", "darkolivegreen3"), 
-             c("pink1", "khaki2", "lightsteelblue3", "darkolivegreen4"))
-venn_plot(DE_lists, colors, "DEG_VS_txs_VS_exons_VS_jxns_InGen", c("All", "Nicotine", "Smoking"))
+venn_plot(DE_lists, "DEG_VS_txs_VS_exons_VS_jxns_InGen", c("All", "Nicotine", "Smoking"))
 
 
 
@@ -383,9 +378,7 @@ DEG_vs_Txs_vs_Exons_vs_ExonSkipJxns_smo <-list(
 )
 
 DE_lists<-list(DEG_vs_Txs_vs_Exons_vs_ExonSkipJxns_all, DEG_vs_Txs_vs_Exons_vs_ExonSkipJxns_nic, DEG_vs_Txs_vs_Exons_vs_ExonSkipJxns_smo)
-colors<-list(c("rosybrown2", "navajowhite2", "lightblue3", "darkolivegreen2"), c("plum", "lightgoldenrod2", "lightcyan3", "darkolivegreen3"), 
-             c("pink1", "khaki2", "lightsteelblue3", "darkolivegreen4"))
-venn_plot(DE_lists, colors, "DEG_VS_txs_VS_exons_VS_jxns_ExonSkip", c("All", "Nicotine", "Smoking"))
+venn_plot(DE_lists, "DEG_VS_txs_VS_exons_VS_jxns_ExonSkip", c("All", "Nicotine", "Smoking"))
 
 
 
@@ -401,6 +394,17 @@ MAplot <- function(top_genes, results, expt){
   DEjxns_genes <- eval(parse_expr(paste("DEjxns_genes", expt, sep="_")))
   DEexons_genes <- eval(parse_expr(paste("DEexons_genes", expt, sep="_")))
   de_genes <- results[[2]]
+  
+  ## Colors for plot
+  cols <- c("DEG with DE txs, exons and jxns" = "orangered3", "DEG without DE txs, jxns and exons" = "cornflowerblue", 
+            "Non-DE Gene with DE txs only"= "darkturquoise", "Non-DE Gene with DE exons only"= "chartreuse3", 
+            "Non-DE Gene with DE jxns only"="deeppink1", "Rest of DEG"="wheat", "ns" = "grey") 
+  sizes <- c("DEG with DE txs, exons and jxns" = 2, "DEG without DE txs, jxns and exons" = 2, 
+             "Non-DE Gene with DE txs only"= 2, "Non-DE Gene with DE exons only"= 2, 
+             "Non-DE Gene with DE jxns only"=2, "Rest of DEG"=1, "ns" = 0.5) 
+  alphas <- c("DEG with DE txs, exons and jxns" = 1, "DEG without DE txs, jxns and exons" = 1, 
+              "Non-DE Gene with DE txs only"= 1, "Non-DE Gene with DE exons only"= 1, 
+              "Non-DE Gene with DE jxns only"=1, "Rest of DEG"=0.9, "ns" = 0.3)
   
   ## Obtain genes with DE features 
   
@@ -449,22 +453,14 @@ MAplot <- function(top_genes, results, expt){
       DEfeatures_onlyOnelevel <- append(DEfeatures_onlyOnelevel, "Rest of DEG")
     }
     else {
-      DEfeatures_onlyOnelevel <- append(DEfeatures_onlyOnelevel, "n.s.")
+      DEfeatures_onlyOnelevel <- append(DEfeatures_onlyOnelevel, "ns")
     }
   }
   
   top_genes$DEfeatures_onlyOnelevel <- DEfeatures_onlyOnelevel
+  top_genes$DEfeatures_onlyOnelevel <- factor(top_genes$DEfeatures_onlyOnelevel, levels=names(cols))
   
   ## Plots
-  cols <- c("DEG with DE txs, exons and jxns" = "orangered3", "DEG without DE txs, jxns and exons" = "cornflowerblue", 
-            "Non-DE Gene with DE txs only"= "darkturquoise", "Non-DE Gene with DE exons only"= "chartreuse3", 
-            "Non-DE Gene with DE jxns only"="deeppink1", "Rest of DEG"="wheat", "n.s." = "grey") 
-  sizes <- c("DEG with DE txs, exons and jxns" = 2, "DEG without DE txs, jxns and exons" = 2, 
-             "Non-DE Gene with DE txs only"= 2, "Non-DE Gene with DE exons only"= 2, 
-             "Non-DE Gene with DE jxns only"=2, "Rest of DEG"=1, "n.s." = 0.5) 
-  alphas <- c("DEG with DE txs, exons and jxns" = 1, "DEG without DE txs, jxns and exons" = 1, 
-              "Non-DE Gene with DE txs only"= 1, "Non-DE Gene with DE exons only"= 1, 
-              "Non-DE Gene with DE jxns only"=1, "Rest of DEG"=0.9, "n.s." = 0.5)
   
   ## Mean expression values of cpm
   vGene <- results[[1]][[2]]
@@ -477,32 +473,31 @@ MAplot <- function(top_genes, results, expt){
                  fill = DEfeatures_onlyOnelevel,    
                  size = DEfeatures_onlyOnelevel,
                  alpha = DEfeatures_onlyOnelevel)) + 
-    geom_point(shape = 21, colour="grey") +
+    geom_point(data=subset(top_genes, DEfeatures_onlyOnelevel!='ns'), shape = 21, colour="black") +
+    geom_point(data=subset(top_genes, DEfeatures_onlyOnelevel=='ns'), shape = 21, colour="gray49") +
+    theme_bw() +
     scale_fill_manual(values = cols) + 
     scale_size_manual(values = sizes) + 
     scale_alpha_manual(values = alphas) +
-    labs(x="Mean of normalized counts", fill="Genes and their DE features", size="Genes and their DE features", alpha="Genes and their DE features") 
+    labs(x="Mean of lognorm counts", fill="Genes and their DE features", size="Genes and their DE features", 
+         alpha="Genes and their DE features", y='Log2FC (Exposed vs Ctrl)') +
+    theme(plot.margin = unit(c(1,1,1,1), "cm"),
+          axis.title = element_text(size = (11)),
+          axis.text = element_text(size = (10)),
+          legend.text = element_text(size=10),
+          legend.title = element_text(size=11))
 
   ggsave(paste("plots/04_DEA/02_Comparisons/Jx_analysis/MAplots_DEfeatures_", expt, ".pdf", sep=""),
         width = 25, height = 15, units = "cm")
  
  
    ## Create facets of MA plots
-   p <-ggplot(data = top_genes, 
-              aes(x = mean_log_expr,y = logFC,
-                  fill = DEfeatures_onlyOnelevel,    
-                  alpha = DEfeatures_onlyOnelevel)) + 
-     geom_point(shape = 21, show.legend = FALSE) +
-     scale_fill_manual(values = cols) + 
-     scale_alpha_manual(values = alphas) +
-     labs(x="Mean of normalized counts") 
-   
    p <- p +  facet_wrap(~DEfeatures_onlyOnelevel, scales = "fixed") +
-     theme(strip.text = element_text(size = 8, face = "bold"),
+     theme(strip.text = element_text(size = 9, face = "bold"),
            strip.background = element_blank())
    
    ggsave(paste("plots/04_DEA/02_Comparisons/Jx_analysis/facets_MAplots_DEfeatures_", expt, ".pdf", sep=""),
-          width = 17, height = 15, units = "cm")
+          width = 25, height = 17, units = "cm")
 }
 
 ## MA plots for nicotine genes
