@@ -231,20 +231,20 @@ GRanges_mouse_genes <- makeGRangesFromEnsembl(
                               release = NULL)
 
 ############## Nearest genes ##############
-nearest_genes_nic <- GRanges_mouse_genes[nearest(GRanges_novel_jxns_nic, GRanges_mouse_genes)]
-nearest_genes_smo <- GRanges_mouse_genes[nearest(GRanges_novel_jxns_smo, GRanges_mouse_genes)]
+nearest_genes_nic <- GRanges_mouse_genes[IRanges::nearest(GRanges_novel_jxns_nic, GRanges_mouse_genes)]
+nearest_genes_smo <- GRanges_mouse_genes[IRanges::nearest(GRanges_novel_jxns_smo, GRanges_mouse_genes)]
 
 
 ############## Following genes ##############
 ## Note that precede() returns the preceded gene by the jxn, i.e. the following gene in + strands
-following_genes_nic <- GRanges_mouse_genes[precede(GRanges_novel_jxns_nic, GRanges_mouse_genes)]
-following_genes_smo <- GRanges_mouse_genes[precede(GRanges_novel_jxns_smo, GRanges_mouse_genes)]
+following_genes_nic <- GRanges_mouse_genes[IRanges::precede(GRanges_novel_jxns_nic, GRanges_mouse_genes)]
+following_genes_smo <- GRanges_mouse_genes[IRanges::precede(GRanges_novel_jxns_smo, GRanges_mouse_genes)]
 
 
 ############## Preceding genes ##############
 ## Note that follow() returns the gene directly followed by the jxn, i.e. the preceding gene in + strands
-preceding_genes_nic <- GRanges_mouse_genes[follow(GRanges_novel_jxns_nic, GRanges_mouse_genes)]
-preceding_genes_smo <- GRanges_mouse_genes[follow(GRanges_novel_jxns_smo, GRanges_mouse_genes)]
+preceding_genes_nic <- GRanges_mouse_genes[IRanges::follow(GRanges_novel_jxns_nic, GRanges_mouse_genes)]
+preceding_genes_smo <- GRanges_mouse_genes[IRanges::follow(GRanges_novel_jxns_smo, GRanges_mouse_genes)]
 
 
 ## List of all GRanges for nic and smo DE Novel jxns' genes
