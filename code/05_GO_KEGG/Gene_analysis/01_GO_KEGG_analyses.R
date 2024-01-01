@@ -523,10 +523,10 @@ GO_genes<-GO_KEGG_genes("goList_intersections", "MF", "Smo down, nic up", "heat 
 top_DEG<-extract_top_genes(GO_genes)
 GO_KEGG_boxplots(top_DEG, "HeatShock_protein_binding", "smoDown_nicUp")
 
-## Genes with SNAP receptor activity
-GO_genes<-GO_KEGG_genes("goList_intersections", "MF", "Smo up, nic down", "SNAP receptor activity")
-top_DEG<-extract_top_genes(GO_genes)
-GO_KEGG_boxplots(top_DEG, "SNAP_receptor_activity", "smoUp_nicDown")
+## Genes with SNAP receptor activity (same as those in SNARE interactions in vesicular transport)
+# GO_genes<-GO_KEGG_genes("goList_intersections", "MF", "Smo up, nic down", "SNAP receptor activity")
+# top_DEG<-extract_top_genes(GO_genes)
+# GO_KEGG_boxplots(top_DEG, "SNAP_receptor_activity", "smoUp_nicDown")
 
 
 ## 3. Pathways
@@ -554,7 +554,6 @@ GO_KEGG_boxplots(top_DEG, "Long-term_depression", "Only_up_nic")
 GO_genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Smo up, nic down", "SNARE interactions in vesicular transport - Mus musculus (house mouse)")
 top_DEG<-extract_top_genes(GO_genes)
 GO_KEGG_boxplots(top_DEG, "SNARE_int_ves_transport", "smoUp_nicDown")
-
 
 
 
