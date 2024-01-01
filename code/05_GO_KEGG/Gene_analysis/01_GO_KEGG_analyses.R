@@ -523,31 +523,35 @@ GO_genes<-GO_KEGG_genes("goList_intersections", "MF", "Smo down, nic up", "heat 
 top_DEG<-extract_top_genes(GO_genes)
 GO_KEGG_boxplots(top_DEG, "HeatShock_protein_binding", "smoDown_nicUp")
 
+## Genes with SNAP receptor activity
+GO_genes<-GO_KEGG_genes("goList_intersections", "MF", "Smo up, nic down", "SNAP receptor activity")
+top_DEG<-extract_top_genes(GO_genes)
+GO_KEGG_boxplots(top_DEG, "SNAP_receptor_activity", "smoUp_nicDown")
 
 
 ## 3. Pathways
 
 ## Genes involved in Parkinson disease
-GO_genes<-GO_KEGG_genes("goList_global", "KEGG", "up", "Parkinson disease")
+GO_genes<-GO_KEGG_genes("goList_global", "KEGG", "up", "Parkinson disease - Mus musculus (house mouse)")
 top_DEG<-extract_top_genes(GO_genes)
 GO_KEGG_boxplots(top_DEG, "Parkinson_disease", "up")
 
 ## Genes involved in dopaminergic synapses
-GO_genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only up nic", "Dopaminergic synapse")
+GO_genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only up nic", "Dopaminergic synapse - Mus musculus (house mouse)")
 top_DEG<-extract_top_genes(GO_genes)
 GO_KEGG_boxplots(top_DEG, "Dopaminergic_synapse", "Only_up_nic")
 
-GO_genes<-GO_KEGG_genes("goList_nic", "KEGG", "up", "Dopaminergic synapse")
+GO_genes<-GO_KEGG_genes("goList_nic", "KEGG", "up", "Dopaminergic synapse - Mus musculus (house mouse)")
 top_DEG<-extract_top_genes(GO_genes)
 GO_KEGG_boxplots(top_DEG, "Dopaminergic_synapse", "up_nic")
 
 ## Genes involved in long−term depression
-GO_genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only up nic", "Long-term depression")
+GO_genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only up nic", "Long-term depression - Mus musculus (house mouse)")
 top_DEG<-extract_top_genes(GO_genes)
 GO_KEGG_boxplots(top_DEG, "Long-term_depression", "Only_up_nic")
 
 ## Genes involved in SNARE interactions in vesicle transport
-GO_genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Smo up, nic down", "SNARE interactions in vesicular transport")
+GO_genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Smo up, nic down", "SNARE interactions in vesicular transport - Mus musculus (house mouse)")
 top_DEG<-extract_top_genes(GO_genes)
 GO_KEGG_boxplots(top_DEG, "SNARE_int_ves_transport", "smoUp_nicDown")
 
