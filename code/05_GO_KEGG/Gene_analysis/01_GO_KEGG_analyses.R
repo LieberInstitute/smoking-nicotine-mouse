@@ -403,7 +403,6 @@ GO_boxplots<- function (DEG_list, groups){
 
 
 
-
 ## Extract symbols of DEG Up/Down in Nic/Smo
 nic_smo_Up<-intersect(DEG_fitted_smo_vs_nic_up[[1]], DEG_fitted_smo_vs_nic_up[[2]])
 nic_smo_Down<-intersect(DEG_fitted_smo_vs_nic_down[[1]], DEG_fitted_smo_vs_nic_down[[2]])
@@ -429,9 +428,6 @@ GO_boxplots(nicUp_smoDown, "nicUp_smoDown")
 ## DEG Down in Nic and Up in Smo
 nicDown_smoUp<-extract_top_genes(nicDown_smoUp)
 GO_boxplots(nicDown_smoUp, "nicDown_smoUp")
-
-
-
 
 
 
@@ -479,14 +475,13 @@ GO_KEGG_boxplots<-function(DEG_list, description, cluster){
   options(warn = - 1)   
   plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]], plots[[6]], ncol=3)
   ggsave(here(paste("plots/05_GO_KEGG/Gene_analysis/Top", length(DEG_list), "_", description,"_boxplots_",cluster, 
-                    ".pdf", sep="")), width = 40, height = 25, units = "cm") 
+                    ".pdf", sep="")), width = 40, height = 20, units = "cm") 
   
 }
 
 
 
-## Boxplots 
-
+## Boxplots for genes up/down in nic/smo clusters with enriched terms
 
 ## 1. Cellular components
 
@@ -502,6 +497,16 @@ GO_KEGG_boxplots(top_DEG, "SNARE_complex", "smoUp_nicDown")
 GO_genes<-GO_KEGG_genes("goList_smo", "CC", "up", "SNARE complex")
 top_DEG<-extract_top_genes(GO_genes)
 GO_KEGG_boxplots(top_DEG, "SNARE_complex", "up_smo")
+
+## Genes of the SMN−Sm protein complex
+GO_genes<-GO_KEGG_genes("goList_intersections", "CC", "Smo up, nic up", "SMN-Sm protein complex")
+top_DEG<-extract_top_genes(GO_genes)
+GO_KEGG_boxplots(top_DEG, "SMN_Sm_protein_complex", "smoUp_nicUp")
+
+## Genes of the postsynaptic endosome
+GO_genes<-GO_KEGG_genes("goList_intersections", "CC", "Smo up, nic up", "postsynaptic endosome")
+top_DEG<-extract_top_genes(GO_genes)
+GO_KEGG_boxplots(top_DEG, "postsynaptic_endosome", "smoUp_nicUp")
 
 
 ## Genes in asymmetric synapses
