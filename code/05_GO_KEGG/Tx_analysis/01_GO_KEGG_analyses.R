@@ -101,8 +101,8 @@ save(intersections, file="processed-data/05_GO_KEGG/Tx_analysis/intersections_tx
 GO_KEGG<- function(sigGeneList, geneUniverse, name){
   
   if (name=="intersections"){
-    height=10.5
-    width=8.5
+    height=7
+    width=7.5
   }
   else if (substr(name,1,14)=="DE_comparisons"){
     height=13
