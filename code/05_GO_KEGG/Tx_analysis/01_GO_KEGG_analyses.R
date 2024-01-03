@@ -101,16 +101,16 @@ save(intersections, file="processed-data/05_GO_KEGG/Tx_analysis/intersections_tx
 GO_KEGG<- function(sigGeneList, geneUniverse, name){
   
   if (name=="intersections"){
-    height=17
-    width=15
+    height=10.5
+    width=8.5
   }
   else if (substr(name,1,14)=="DE_comparisons"){
     height=13
     width=11
   }
   else {
-    height=8.5
-    width=9.5
+    height=8
+    width=7
   }
   
   ## Do GO 
@@ -129,7 +129,7 @@ GO_KEGG<- function(sigGeneList, geneUniverse, name){
   ## Save
   if(!is.null(goBP_Adj)){
     pdf(paste("plots/05_GO_KEGG/Tx_analysis/GO_BP_", name, ".pdf", sep=""), height = height, width = width)
-    print(dotplot(goBP_Adj, title="GO Enrichment Analysis: Biological processes"))
+    print(dotplot(goBP_Adj, title="GO Enrichment Analysis: Biological processes", font.size=9))
     dev.off()
   }
   
@@ -150,7 +150,7 @@ GO_KEGG<- function(sigGeneList, geneUniverse, name){
   ## Save
   if (!is.null(goMF_Adj)){
     pdf(paste("plots/05_GO_KEGG/Tx_analysis/GO_MF_", name, ".pdf", sep=""), height = height, width = width)
-    print(dotplot(goMF_Adj, title="GO Enrichment Analysis: Molecular function"))
+    print(dotplot(goMF_Adj, title="GO Enrichment Analysis: Molecular function", font.size=9))
     dev.off()
   }
   
@@ -171,7 +171,7 @@ GO_KEGG<- function(sigGeneList, geneUniverse, name){
   ## Save
   if(!is.null(goCC_Adj)){
     pdf(paste("plots/05_GO_KEGG/Tx_analysis/GO_CC_", name, ".pdf", sep=""), height = height, width = width)
-    print(dotplot(goCC_Adj, title="GO Enrichment Analysis: Cellular components"))
+    print(dotplot(goCC_Adj, title="GO Enrichment Analysis: Cellular components", font.size=9))
     dev.off()
   }
   
@@ -190,7 +190,7 @@ GO_KEGG<- function(sigGeneList, geneUniverse, name){
   ## Save
   if(!is.null(kegg_Adj)){
     pdf(paste("plots/05_GO_KEGG/Tx_analysis/KEGG_", name, ".pdf", sep=""), height = height, width = width)
-    print(dotplot(kegg_Adj, title="KEGG Enrichment Analysis"))
+    print(dotplot(kegg_Adj, title="KEGG Enrichment Analysis", font.size=9))
     dev.off()
   }
   
