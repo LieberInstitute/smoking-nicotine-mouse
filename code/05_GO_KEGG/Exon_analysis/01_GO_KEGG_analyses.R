@@ -304,20 +304,13 @@ GO_KEGG_no_exons_genes("smoking")
 
 
 
-## 1.1 Boxplots of exons' genes 
+ ## 1.1 Boxplots of exons' genes 
 
 ### 1.1.1 Genes in GO and KEGG descriptions
 
 vGene_smo<-results_pups_smoking_fitted[[1]][[2]]
 vGene_nic<-results_pups_nicotine_fitted[[1]][[2]]
-## Regress out residuals 
-formula<- ~ Group + Sex + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr + 
-  overallMapRate + mitoRate
-model<- model.matrix(formula, data=colData(rse_gene_brain_pups_smoking))
-vGene_smo$E<-cleaningY(vGene_smo$E, model, P=2)
 rownames(vGene_nic$E)<-vGene_nic$genes$Symbol
-model<- model.matrix(formula, data=colData(rse_gene_brain_pups_nicotine))
-vGene_nic$E<-cleaningY(vGene_nic$E, model, P=2)
 rownames(vGene_smo$E)<-vGene_smo$genes$Symbol
 
 
@@ -357,25 +350,30 @@ DEG_GO_boxplot <- function(DEgene){
                                                    "logFC"]), digits = 3)
   
   ## Boxplot for each DE gene
+  ## Boxplot for each DE gene
   p <-ggplot(data=as.data.frame(df), aes(x=Group,y=Gene_counts)) + 
-    geom_boxplot(outlier.color = "#FFFFFFFF") +
-    geom_jitter(aes(color=Group), position=position_jitter(0.2)) +
-    theme_classic() +
-    labs(x = "Experiment", y = "logcounts - covariates",
+    geom_boxplot(outlier.color = "#FFFFFFFF", width=0.35) +
+    geom_jitter(aes(color=Group), shape=16, position=position_jitter(0.2), size=2.1) +
+    theme_bw() +
+    labs(x = "Experiment", y = "lognorm counts",
          title = paste(DEgene, ensemblID, sep=" - "),
          subtitle=" ") +
-    theme(plot.margin=unit (c (1,1.5,1,1), 'cm'), legend.position = "none",
-          plot.title = element_text(hjust=0.5, size=10, face="bold"), 
-          plot.subtitle = element_text(size=17)) +
-    scale_color_manual(values = c("orangered", "Dodgerblue")) +
+    scale_color_manual(values=c("Control" = "seashell3", "Experimental" = "orange3")) +
+    scale_x_discrete(labels=c("Control"="Ctrl","Experimental"="Expt")) +
     facet_wrap(~ Expt, scales = "free") +
-    scale_x_discrete(labels=c("Ctrl", "Expt"))
+    scale_x_discrete(labels=c("Ctrl", "Expt")) +
+    theme(plot.margin=unit (c (1,1.5,1,1), 'cm'), 
+          legend.position = "none",
+          plot.title = element_text(hjust=0.5, size=12, face="bold"), 
+          plot.subtitle = element_text(size=17), 
+          axis.title = element_text(size = (12)),
+          axis.text = element_text(size = 10.5)) 
   
   p <-ggdraw(p) + 
-    draw_label(paste("FDR:", q_value_nic), x = 0.35, y = 0.87, size=9, color = "darkslategray") +
-    draw_label(paste("FC:", FC_nic), x = 0.35, y = 0.84, size=9, color = "darkslategray") +
-    draw_label(paste("FDR:", q_value_smo), x = 0.72, y = 0.87, size=9, color = "darkslategray") +
-    draw_label(paste("FC:", FC_smo), x = 0.71, y = 0.84, size=9, color = "darkslategray") 
+    draw_label(paste("FDR:", q_value_nic), x = 0.35, y = 0.83, size=9, color = "darkslategray") +
+    draw_label(paste("FC:", FC_nic), x = 0.35, y = 0.80, size=9, color = "darkslategray") +
+    draw_label(paste("FDR:", q_value_smo), x = 0.72, y = 0.83, size=9, color = "darkslategray") +
+    draw_label(paste("FC:", FC_smo), x = 0.71, y = 0.80, size=9, color = "darkslategray") 
   
   return(p)
   
@@ -484,7 +482,7 @@ GO_KEGG_boxplots<-function(DEG_list, description, cluster){
   options(warn = - 1)   
   plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]], plots[[6]], ncol=3)
   ggsave(here(paste("plots/05_GO_KEGG/Exon_analysis/Top", length(DEG_list), "_", description,"_boxplots_",cluster, 
-                    ".pdf", sep="")), width = 40, height = 25, units = "cm") 
+                    ".pdf", sep="")), width = 40, height = 20, units = "cm") 
   
 }
 
@@ -507,20 +505,6 @@ GO_KEGG_boxplots(top_DEG, "regulation_of_synaptic_plasticity", "smo_up")
 
 ## 2. Cellular components
 
-## Genes in secretory vesicles
-GO_genes<-GO_KEGG_genes("goList_global", "CC", "up", "secretory vesicle")
-top_DEG<-extract_top_genes(GO_genes)
-GO_KEGG_boxplots(top_DEG, "secretory_vesicle", "up")
-
-GO_genes<-GO_KEGG_genes("goList_smo", "CC", "up", "secretory vesicle")
-top_DEG<-extract_top_genes(GO_genes)
-GO_KEGG_boxplots(top_DEG, "secretory_vesicle", "smo_up")
-
-GO_genes<-GO_KEGG_genes("goList_intersections", "CC", "Only up smo", "secretory vesicle")
-top_DEG<-extract_top_genes(GO_genes)
-GO_KEGG_boxplots(top_DEG, "secretory_vesicle", "intersections_smo_up")
-
-
 ## Genes in transport vesicles
 GO_genes<-GO_KEGG_genes("goList_global", "CC", "up", "transport vesicle")
 top_DEG<-extract_top_genes(GO_genes)
@@ -535,26 +519,6 @@ top_DEG<-extract_top_genes(GO_genes)
 GO_KEGG_boxplots(top_DEG, "transport_vesicle", "intersections_smo_up")
 
 
-## Genes in postsynaptic specialization
-GO_genes<-GO_KEGG_genes("goList_global", "CC", "up", "postsynaptic specialization")
-top_DEG<-extract_top_genes(GO_genes)
-GO_KEGG_boxplots(top_DEG, "postsynaptic_specialization", "up")
-
-GO_genes<-GO_KEGG_genes("goList_smo", "CC", "up", "postsynaptic specialization")
-top_DEG<-extract_top_genes(GO_genes)
-GO_KEGG_boxplots(top_DEG, "postsynaptic_specialization", "smo_up")
-
-
-## Genes in asymmetric synapses
-GO_genes<-GO_KEGG_genes("goList_global", "CC", "up", "asymmetric synapse")
-top_DEG<-extract_top_genes(GO_genes)
-GO_KEGG_boxplots(top_DEG, "asymmetric_synapse", "up")
-
-GO_genes<-GO_KEGG_genes("goList_smo", "CC", "up", "asymmetric synapse")
-top_DEG<-extract_top_genes(GO_genes)
-GO_KEGG_boxplots(top_DEG, "asymmetric_synapse", "smo_up")
-
-
 ## Genes in exocytic vesicles
 GO_genes<-GO_KEGG_genes("goList_global", "CC", "up", "exocytic vesicle")
 top_DEG<-extract_top_genes(GO_genes)
@@ -567,12 +531,6 @@ GO_KEGG_boxplots(top_DEG, "exocytic_vesicle", "smo_up")
 GO_genes<-GO_KEGG_genes("goList_intersections", "CC", "Only up smo", "exocytic vesicle")
 top_DEG<-extract_top_genes(GO_genes)
 GO_KEGG_boxplots(top_DEG, "exocytic_vesicle", "intersections_smo_up")
-
-
-## Genes in secretory granules
-GO_genes<-GO_KEGG_genes("goList_intersections", "CC", "Only up smo", "secretory granule")
-top_DEG<-extract_top_genes(GO_genes)
-GO_KEGG_boxplots(top_DEG, "secretory_granule", "intersections_smo_up")
 
 
 ## Genes in the SNARE complex
@@ -614,16 +572,6 @@ GO_KEGG_boxplots(top_DEG, "postsynaptic_specialization", "Smo_up_Smo_down")
 
 ## 3. Molecular function
 
-## Genes with voltage−gated ion channel activity
-GO_genes<-GO_KEGG_genes("goList_smo", "MF", "up", "voltage-gated ion channel activity")
-top_DEG<-extract_top_genes(GO_genes)
-GO_KEGG_boxplots(top_DEG, "voltage−gated_ion_channel_activity", "smo_up")
-
-GO_genes<-GO_KEGG_genes("goList_intersections", "MF", "Only up smo", "voltage-gated ion channel activity")
-top_DEG<-extract_top_genes(GO_genes)
-GO_KEGG_boxplots(top_DEG, "voltage−gated_ion_channel_activity", "only_smo_up")
-
-
 ## Genes with voltage−gated channel activity
 GO_genes<-GO_KEGG_genes("goList_smo", "MF", "up", "voltage-gated channel activity")
 top_DEG<-extract_top_genes(GO_genes)
@@ -642,12 +590,6 @@ GO_KEGG_boxplots(top_DEG, "gated_channel_activity", "smo_up")
 GO_genes<-GO_KEGG_genes("goList_intersections", "MF", "Only up smo", "gated channel activity")
 top_DEG<-extract_top_genes(GO_genes)
 GO_KEGG_boxplots(top_DEG, "gated_channel_activity", "only_smo_up")
-
-
-## Genes with voltage−gated cation channel activity
-GO_genes<-GO_KEGG_genes("goList_intersections", "MF", "Only up smo", "voltage-gated cation channel activity")
-top_DEG<-extract_top_genes(GO_genes)
-GO_KEGG_boxplots(top_DEG, "voltage−gated_cation_channel_activity", "only_smo_up")
 
 
 
