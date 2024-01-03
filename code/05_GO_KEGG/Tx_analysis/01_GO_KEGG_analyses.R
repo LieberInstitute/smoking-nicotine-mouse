@@ -418,14 +418,7 @@ compare_DE("smoking")
 
 vGene_smo<-results_pups_smoking_fitted[[1]][[2]]
 vGene_nic<-results_pups_nicotine_fitted[[1]][[2]]
-## Regress out residuals 
-formula<- ~ Group + Sex + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr + 
-  overallMapRate + mitoRate
-model<- model.matrix(formula, data=colData(rse_gene_brain_pups_smoking))
-vGene_smo$E<-cleaningY(vGene_smo$E, model, P=2)
 rownames(vGene_nic$E)<-vGene_nic$genes$Symbol
-model<- model.matrix(formula, data=colData(rse_gene_brain_pups_nicotine))
-vGene_nic$E<-cleaningY(vGene_nic$E, model, P=2)
 rownames(vGene_smo$E)<-vGene_smo$genes$Symbol
 
 
@@ -466,24 +459,28 @@ DEG_GO_boxplot <- function(DEgene){
   
   ## Boxplot for each DE gene
   p <-ggplot(data=as.data.frame(df), aes(x=Group,y=Gene_counts)) + 
-    geom_boxplot(outlier.color = "#FFFFFFFF") +
-    geom_jitter(aes(color=Group), position=position_jitter(0.2)) +
-    theme_classic() +
-    labs(x = "Experiment", y = "logcounts - covariates",
+    geom_boxplot(outlier.color = "#FFFFFFFF", width=0.35) +
+    geom_jitter(aes(color=Group), shape=16, position=position_jitter(0.2), size=2.1) +
+    theme_bw() +
+    labs(x = "Experiment", y = "lognorm counts",
          title = paste(DEgene, ensemblID, sep=" - "),
          subtitle=" ") +
-    theme(plot.margin=unit (c (1,1.5,1,1), 'cm'), legend.position = "none",
-          plot.title = element_text(hjust=0.5, size=10, face="bold"), 
-          plot.subtitle = element_text(size=17)) +
-    scale_color_manual(values = c("orangered", "Dodgerblue")) +
+    scale_color_manual(values=c("Control" = "seashell3", "Experimental" = "orange3")) +
+    scale_x_discrete(labels=c("Control"="Ctrl","Experimental"="Expt")) +
     facet_wrap(~ Expt, scales = "free") +
-    scale_x_discrete(labels=c("Ctrl", "Expt"))
+    scale_x_discrete(labels=c("Ctrl", "Expt")) +
+    theme(plot.margin=unit (c (1,1.5,1,1), 'cm'), 
+          legend.position = "none",
+          plot.title = element_text(hjust=0.5, size=12, face="bold"), 
+          plot.subtitle = element_text(size=17), 
+          axis.title = element_text(size = (12)),
+          axis.text = element_text(size = 10.5)) 
   
   p <-ggdraw(p) + 
-    draw_label(paste("FDR:", q_value_nic), x = 0.35, y = 0.87, size=9, color = "darkslategray") +
-    draw_label(paste("FC:", FC_nic), x = 0.35, y = 0.84, size=9, color = "darkslategray") +
-    draw_label(paste("FDR:", q_value_smo), x = 0.72, y = 0.87, size=9, color = "darkslategray") +
-    draw_label(paste("FC:", FC_smo), x = 0.71, y = 0.84, size=9, color = "darkslategray") 
+    draw_label(paste("FDR:", q_value_nic), x = 0.35, y = 0.83, size=9, color = "darkslategray") +
+    draw_label(paste("FC:", FC_nic), x = 0.35, y = 0.80, size=9, color = "darkslategray") +
+    draw_label(paste("FDR:", q_value_smo), x = 0.72, y = 0.83, size=9, color = "darkslategray") +
+    draw_label(paste("FC:", FC_smo), x = 0.71, y = 0.80, size=9, color = "darkslategray") 
   
   return(p)
   
@@ -597,7 +594,7 @@ GO_KEGG_boxplots<-function(DEG_list, description, cluster){
   options(warn = - 1)   
   plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]], plots[[6]], ncol=3)
   ggsave(here(paste("plots/05_GO_KEGG/Tx_analysis/Top", length(DEG_list), "_", description,"_boxplots_",cluster, 
-                    ".pdf", sep="")), width = 40, height = 25, units = "cm") 
+                    ".pdf", sep="")), width = 40, height = 20, units = "cm") 
   
 }
 
@@ -606,20 +603,6 @@ GO_KEGG_boxplots<-function(DEG_list, description, cluster){
 ## Boxplots 
 
 ## 1. Cellular components
-
-## Genes in glutamatergic synapses
-GO_genes<-GO_KEGG_genes("goList_global", "CC", "up", "glutamatergic synapse")
-top_DEG<-extract_top_genes(GO_genes)
-GO_KEGG_boxplots(top_DEG, "glutamatergic_synapse", "up")
-
-GO_genes<-GO_KEGG_genes("goList_smo", "CC", "up", "glutamatergic synapse")
-top_DEG<-extract_top_genes(GO_genes)
-GO_KEGG_boxplots(top_DEG, "glutamatergic_synapse", "smo_up")
-
-GO_genes<-GO_KEGG_genes("goList_intersections", "CC", "Only up smo", "glutamatergic synapse")
-top_DEG<-extract_top_genes(GO_genes)
-GO_KEGG_boxplots(top_DEG, "glutamatergic_synapse", "Only_up_smo")
-
 
 ## Genes in SNARE complex
 GO_genes<-GO_KEGG_genes("goList_global", "CC", "up", "SNARE complex")
@@ -653,45 +636,45 @@ GO_KEGG_boxplots(top_DEG, "transport_vesicle", "Only_up_smo")
 ## 2. Pathways
 
 ## Genes involved in Pathways of neurodegeneration − multiple diseases
-GO_genes<-GO_KEGG_genes("goList_global", "KEGG", "up", "Pathways of neurodegeneration - multiple diseases")
+GO_genes<-GO_KEGG_genes("goList_global", "KEGG", "up", "Pathways of neurodegeneration - multiple diseases - Mus musculus (house mouse)")
 top_DEG<-extract_top_genes(GO_genes)
 GO_KEGG_boxplots(top_DEG, "Neurodegeneration", "up")
 
-GO_genes<-GO_KEGG_genes("goList_smo", "KEGG", "up", "Pathways of neurodegeneration - multiple diseases")
+GO_genes<-GO_KEGG_genes("goList_smo", "KEGG", "up", "Pathways of neurodegeneration - multiple diseases - Mus musculus (house mouse)")
 top_DEG<-extract_top_genes(GO_genes)
 GO_KEGG_boxplots(top_DEG, "Neurodegeneration", "smo_up")
 
 
 ## Genes involved in Parkinson disease
-GO_genes<-GO_KEGG_genes("goList_global", "KEGG", "up", "Parkinson disease")
+GO_genes<-GO_KEGG_genes("goList_global", "KEGG", "up", "Parkinson disease - Mus musculus (house mouse)")
 top_DEG<-extract_top_genes(GO_genes)
 GO_KEGG_boxplots(top_DEG, "Parkinson_disease", "up")
 
-GO_genes<-GO_KEGG_genes("goList_smo", "KEGG", "up", "Parkinson disease")
+GO_genes<-GO_KEGG_genes("goList_smo", "KEGG", "up", "Parkinson disease - Mus musculus (house mouse)")
 top_DEG<-extract_top_genes(GO_genes)
 GO_KEGG_boxplots(top_DEG, "Parkinson_disease", "smo_up")
  
-GO_genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only up smo", "Parkinson disease")
+GO_genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only up smo", "Parkinson disease - Mus musculus (house mouse)")
 top_DEG<-extract_top_genes(GO_genes)
 GO_KEGG_boxplots(top_DEG, "Parkinson_disease", "Only_up_smo")
 
 
 ## Genes involved in Prion disease
-GO_genes<-GO_KEGG_genes("goList_global", "KEGG", "up", "Prion disease")
+GO_genes<-GO_KEGG_genes("goList_global", "KEGG", "up", "Prion disease - Mus musculus (house mouse)")
 top_DEG<-extract_top_genes(GO_genes)
 GO_KEGG_boxplots(top_DEG, "Prion_disease", "up")
 
-GO_genes<-GO_KEGG_genes("goList_smo", "KEGG", "up", "Prion disease")
+GO_genes<-GO_KEGG_genes("goList_smo", "KEGG", "up", "Prion disease - Mus musculus (house mouse)")
 top_DEG<-extract_top_genes(GO_genes)
 GO_KEGG_boxplots(top_DEG, "Prion_disease", "smo_up")
 
-GO_genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only up smo", "Prion disease")
+GO_genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only up smo", "Prion disease - Mus musculus (house mouse)")
 top_DEG<-extract_top_genes(GO_genes)
 GO_KEGG_boxplots(top_DEG, "Prion_disease", "Only_up_smo")
 
 
 ## Genes involved in Huntington disease
-GO_genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only up smo", "Huntington disease")
+GO_genes<-GO_KEGG_genes("goList_intersections", "KEGG", "Only up smo", "Huntington disease - Mus musculus (house mouse)")
 top_DEG<-extract_top_genes(GO_genes)
 GO_KEGG_boxplots(top_DEG, "Huntington_disease", "Only_up_smo")
 
