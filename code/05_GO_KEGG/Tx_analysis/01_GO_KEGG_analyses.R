@@ -105,8 +105,8 @@ GO_KEGG<- function(sigGeneList, geneUniverse, name){
     width=7.5
   }
   else if (substr(name,1,14)=="DE_comparisons"){
-    height=13
-    width=11
+    height=8.1
+    width=7.7
   }
   else {
     height=8
