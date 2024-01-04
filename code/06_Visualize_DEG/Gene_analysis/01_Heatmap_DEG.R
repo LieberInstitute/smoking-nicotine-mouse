@@ -4,7 +4,6 @@
 library(here)
 library(SummarizedExperiment)
 library(stats)
-library(jaffelab)
 library(pheatmap)
 library(rlang)
 library(sessioninfo)
@@ -25,15 +24,15 @@ load(here("processed-data/05_GO_KEGG/Gene_analysis/intersections.Rdata"))
 
 ## Manually determine coloring for plot annotation of all heatmaps
 ann_colors = list()
-ann_colors[["Sex"]]=c("F"="#FF99CC", "M"="#99CCFF")
-ann_colors[["Group"]]=c("Control"="#FFFF66", "Experimental"="#FF9933")
+ann_colors[["Sex"]]=c("F"="hotpink1", "M"="dodgerblue")
+ann_colors[["Group"]]=c("Ctrl"="seashell3", "Expt"="orange3")
 ann_colors[["FDR nic"]]=c("0.01-0.05"="#9900CC", "<0.01"="#CC99FF")
 ann_colors[["FDR smo"]]=c("0.01-0.05"="#FF33FF", "<0.01"="#FF99FF")
 ann_colors[["FC smo"]]=c(">=1"="#00CC66", "<1"="#CCFF99")
-ann_colors[["FC nic"]]=c(">=1"="#CC6600", "<1"="#FFCC99")
-ann_colors[["Significance"]]=c("Nic only"="#9900CC", "Smo only"="#FF33FF", "Both"="#33FF33")
-ann_colors[["Expt & Group"]]=c("Nicotine Control"="#FF9999", "Nicotine Experimental"="#FF0066", 
-                               "Smoking Control"="#99CC99", "Smoking Experimental"="#669966")
+ann_colors[["FC nic"]]=c(">=1"="#00CC66", "<1"="#CCFF99")
+ann_colors[["Significance"]]=c("Nic only"="navajowhite2", "Smo only"="thistle3", "Both"="deeppink3")
+ann_colors[["Expt & Group"]]=c("Nicotine Control"="lightblue3", "Nicotine Experimental"="skyblue3", 
+                               "Smoking Control"="lightsalmon1", "Smoking Experimental"="salmon3")
 
 
 
@@ -58,21 +57,15 @@ DEG_heatmaps<- function(rse, results, de_genes, filename){
   ## Retain lognorm counts of DEG only
   vGene_DEG <-vGene$E[which(vGene$genes$ensemblID %in% DEG), ]
   
-  ## Remove technical variables' contributions 
-  formula<- ~ Group + Sex + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr +
-    overallMapRate + mitoRate
-  model<- model.matrix(formula, data=colData(rse))
-  vGene_DEG<-cleaningY(vGene_DEG, model, P=2)
-  
   ## Center the data to make differences more evident
   vGene_DEG<-(vGene_DEG-rowMeans(vGene_DEG))/rowSds(vGene_DEG)
-  
   
   
   ## Samples' info
   ann_cols <- as.data.frame(vGene$targets[, c("Group", "Sex")])
   rownames(ann_cols) <- vGene$targets$SAMPLE_ID
   colnames(ann_cols) <- c("Group", "Sex")
+  ann_cols$Group <- gsub('Experimental', 'Expt', gsub('Control', 'Ctrl', ann_cols$Group))
   
   ## Genes' info
   ## FDRs
@@ -89,7 +82,8 @@ DEG_heatmaps<- function(rse, results, de_genes, filename){
   FCs<-data.frame("FC"=apply(FCs, 1, function(x){if(x>1|x==1){paste(">=1")} else {paste("<1")}}))
   FCs[, paste("FC", name)]<-FCs$FC
   FCs$FC<-NULL
-  ann_rows<-cbind(FDRs, FCs)
+  ## Ignore FDRs
+  ann_rows<-FCs
   
   ## Join annotation info
   anns<-list("Group"=ann_cols$Group, "Sex"=ann_cols$Sex)
@@ -108,12 +102,16 @@ DEG_heatmaps<- function(rse, results, de_genes, filename){
   
   
   if (filename=="nicotine"){
-    width=9
-    height=8
+    width=6.5
+    height=5.5
+    cellwidth=5
+    cellheight=0.25
   }
   else {
-    width=13
-    height=12
+    width=8.5
+    height=8
+    cellwidth=2.5
+    cellheight=0.06
   }
   
   
@@ -125,11 +123,14 @@ DEG_heatmaps<- function(rse, results, de_genes, filename){
     color=my_palette,
     cluster_rows = TRUE,
     show_rownames = FALSE,
+    show_colnames = FALSE,
     cluster_cols = TRUE,
     annotation_col = ann_cols,
     annotation_row = ann_rows,
     annotation_colors = ann_colors, 
-    fontsize=8.5, 
+    cellwidth = cellwidth,
+    cellheight = cellheight,
+    fontsize=11, 
     width = width,
     height = height,
     filename=paste("plots/06_Heatmap_DEG/Gene_analysis/Heatmap_DEG_", filename, ".pdf", sep="")
@@ -169,14 +170,6 @@ nic_vs_smo_heatmaps<- function(DEG_list, option, filename){
     ## Extract lognorm counts of the genes
     vGene_DEG_nic <-vGene_nic$E[which(vGene_nic$genes$ensemblID %in% DEG_list$ensemblID), ]
     vGene_DEG_smo <-vGene_smo$E[which(vGene_smo$genes$ensemblID %in% DEG_list$ensemblID), ]
-    
-    ## Remove technical variables' contributions 
-    formula<- ~ Group + Sex + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr +
-      overallMapRate + mitoRate
-    model_nic<- model.matrix(formula, data=colData(rse_gene_brain_pups_nicotine))
-    vGene_DEG_nic<-cleaningY(vGene_DEG_nic, model_nic, P=2)
-    model_smo<- model.matrix(formula, data=colData(rse_gene_brain_pups_smoking))
-    vGene_DEG_smo<-cleaningY(vGene_DEG_smo, model_smo, P=2)
     
     ## Center the data
     vGene_DEG_smo<-(vGene_DEG_smo-rowMeans(vGene_DEG_smo))/rowSds(vGene_DEG_smo)
@@ -228,10 +221,11 @@ nic_vs_smo_heatmaps<- function(DEG_list, option, filename){
                        check.names=FALSE)
     
     FCs<-cbind(FC_nic, FC_smo)
-    ann_rows<-cbind("Significance"=FDRs$Significance, FCs)
+    # (Ignore FDRs)
+    ann_rows<-FCs
     
-    ## Join annotation info
-    anns<-list("Expt & Group"=ann_cols$`Expt & Group`, "Sex"=ann_cols$Sex, "Significance"=ann_rows$Significance,
+    ## Join annotation info 
+    anns<-list("Expt & Group"=ann_cols$`Expt & Group`, "Sex"=ann_cols$Sex,
                "FC nic"=ann_rows$`FC nic`, "FC smo"=ann_rows$`FC smo`)
     
     
@@ -256,9 +250,9 @@ nic_vs_smo_heatmaps<- function(DEG_list, option, filename){
       annotation_col = ann_cols,
       annotation_row = ann_rows,
       annotation_colors = ann_colors, 
-      fontsize=8, 
-      width = 16,
-      height = 14,
+      fontsize=10, 
+      width = 13,
+      height = 11,
       filename=paste("plots/06_Heatmap_DEG/Gene_analysis/Heatmap_", filename, "_DEG.pdf", sep="")
     )
   }
@@ -285,12 +279,6 @@ nic_vs_smo_heatmaps<- function(DEG_list, option, filename){
     
     ## Extract lognorm counts of the genes
     vGene_DEG <-vGene$E[which(vGene$genes$ensemblID %in% DEG_list$ensemblID), ]
-   
-    ## Remove technical variables' contributions 
-    formula<- ~ Group + Sex + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr +
-      overallMapRate + mitoRate
-    model<- model.matrix(formula, data=colData(rse))
-    vGene_DEG<-cleaningY(vGene_DEG, model, P=2)
     
     ## Center the data to make differences more evident
     vGene_DEG<-(vGene_DEG-rowMeans(vGene_DEG))/rowSds(vGene_DEG)
@@ -300,6 +288,7 @@ nic_vs_smo_heatmaps<- function(DEG_list, option, filename){
     ## Samples' info
     ann_cols <- as.data.frame(vGene$targets[, c("Group", "Sex")])
     rownames(ann_cols) <- vGene$targets$SAMPLE_ID
+    ann_cols$Group <- gsub('Experimental', 'Expt', gsub('Control', 'Ctrl', ann_cols$Group))
     
     ## Genes' info
     ## FDRs
@@ -347,8 +336,8 @@ nic_vs_smo_heatmaps<- function(DEG_list, option, filename){
       annotation_row = ann_rows,
       annotation_colors = ann_colors, 
       fontsize=8, 
-      width = 12,
-      height = 11,
+      width = 15,
+      height = 13,
       filename=paste("plots/06_Heatmap_DEG/Gene_analysis/Heatmap_", filename, "_DEG_", option, ".pdf", sep="")
     )  
   }
@@ -482,7 +471,6 @@ nic_vs_smo_heatmaps(DEG_list, option, name)
 
 option<-"nic_and_smo"
 nic_vs_smo_heatmaps(DEG_list, option, name)
-
 
 
 
