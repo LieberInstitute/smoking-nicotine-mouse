@@ -25,6 +25,8 @@ load(here("processed-data/04_DEA/Gene_analysis/de_genes_pups_smoking_fitted.Rdat
 load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_smoking_fitted.Rdata"))
 load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_smoking_interaction.Rdata"))
 
+load(here("processed-data/04_DEA/Gene_analysis/top_genes_results.Rdata"))
+
 ## Pup brain Tx data 
 load(here("processed-data/04_DEA/Tx_analysis/top_tx_nic.Rdata"))
 load(here("processed-data/04_DEA/Tx_analysis/top_tx_smo.Rdata"))
@@ -916,7 +918,7 @@ save(top_genes_adults_nicotine_fitted, file="processed-data/04_DEA/Gene_analysis
 ################################################################
 ##  Smoking adult mouse brain vs Smoking human adult brain 
 ################################################################
-adultHuman_adultSmoMouse_data <- t_stat_plot_mouse_in_human(age_mouse = "adults", tissue_mouse = "brain", expt_mouse = "smoking", age_human = "adult")
+adultHuman_adultNicMouse_data <- t_stat_plot_mouse_in_human(age_mouse = "adults", tissue_mouse = "brain", expt_mouse = "smoking", age_human = "adult")
 ## "9 out of 772 genes in smoking adult mouse brain (p<0.05) replicate in smoking human adult brain (also p<0.05 and same logFC direction) - 1.17%"
 save(adultHuman_adultSmoMouse_data, file="processed-data/04_DEA/Gene_analysis/adultHuman_adultSmoMouse_data.Rdata")
 top_genes_adults_smoking_fitted$replication_in_adultHumanBrain <- apply(top_genes_adults_smoking_fitted, 1, function(x){adultHuman_adultSmoMouse_data[match(x["ensemblID"], adultHuman_adultSmoMouse_data$mmusculus_homolog_ensembl_gene), "DE"]})
@@ -932,6 +934,28 @@ save(adultHuman_bloodMouse_data, file="processed-data/04_DEA/Gene_analysis/adult
 top_genes_blood_smoking_fitted$replication_in_adultHumanBrain <- apply(top_genes_blood_smoking_fitted, 1, function(x){adultHuman_bloodMouse_data[match(x["ensemblID"], adultHuman_bloodMouse_data$mmusculus_homolog_ensembl_gene), "DE"]})
 save(top_genes_blood_smoking_fitted, file="processed-data/04_DEA/Gene_analysis/top_genes_blood_smoking_fitted.Rdata")
 
+
+## Condensate results in human and mice
+human_and_mice_DGE_results <- cbind(prenatalHuman_pupNicMouse_data[,c("mmusculus_homolog_ensembl_gene", "mmusculus_homolog_associated_gene_name", 
+                                                                      "human_ensembl_gene_id", "gene_symbol_human", 
+                                                                      "logFC_human", "t_human", "P.Value_human", "adj.P.Val_human")], 
+                                    adultHuman_bloodMouse_data[, c("logFC_human", "t_human", "P.Value_human", "adj.P.Val_human")], 
+                                    prenatalHuman_bloodMouse_data[,c("logFC_mouse", "t_mouse", "P.Value_mouse", "adj.P.Val_mouse")],
+                                    prenatalHuman_adultNicMouse_data[,c("logFC_mouse", "t_mouse", "P.Value_mouse", "adj.P.Val_mouse")],
+                                    prenatalHuman_adultSmoMouse_data[,c("logFC_mouse", "t_mouse", "P.Value_mouse", "adj.P.Val_mouse")],
+                                    prenatalHuman_pupNicMouse_data[,c("logFC_mouse", "t_mouse", "P.Value_mouse", "adj.P.Val_mouse")],
+                                    prenatalHuman_pupSmoMouse_data[,c("logFC_mouse", "t_mouse", "P.Value_mouse", "adj.P.Val_mouse")])
+
+colnames(human_and_mice_DGE_results)[5:32] <- c(paste0(c("logFC", "t", "P.Value", 'adj.P.Val'), '_human_prenatal_brain_smoking'),
+                                                paste0(c("logFC", "t", "P.Value", 'adj.P.Val'), '_human_adult_brain_smoking'),
+                                                paste0(c("logFC", "t", "P.Value", 'adj.P.Val'), '_mouse_blood_adult_smoking'),
+                                                paste0(c("logFC", "t", "P.Value", 'adj.P.Val'), '_mouse_brain_adult_nicotine'),
+                                                paste0(c("logFC", "t", "P.Value", 'adj.P.Val'), '_mouse_brain_adult_smoking'),
+                                                paste0(c("logFC", "t", "P.Value", 'adj.P.Val'), '_mouse_brain_pup_nicotine'),
+                                                paste0(c("logFC", "t", "P.Value", 'adj.P.Val'), '_mouse_brain_pup_smoking'))
+
+save(human_and_mice_DGE_results, file="processed-data/04_DEA/Gene_analysis/human_and_mice_DGE_results.Rdata")
+write.table(human_and_mice_DGE_results, file="processed-data/04_DEA/Gene_analysis/human_and_mice_DGE_results.csv", row.names = FALSE, col.names = TRUE, sep = '\t')
 
 
 
