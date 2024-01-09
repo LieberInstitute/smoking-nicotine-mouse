@@ -542,29 +542,20 @@ save(top_genes_pups_smoking_interaction,
 
 
 
-## Condense results for all genes
+## Condense results for all genes (don't take replication in human brain)
 
 top_genes_results <- cbind(top_genes_blood_smoking_fitted[, 1:13], 
-                           top_genes_blood_smoking_fitted[,c("logFC", "t", "P.Value", "adj.P.Val", 
-                                                             "replication_in_prenatalHumanBrain", "replication_in_adultHumanBrain")],
-                           top_genes_adults_nicotine_fitted[,c("logFC", "t", "P.Value", "adj.P.Val", "replication_in_blood", 
-                                                               "replication_in_prenatalHumanBrain", "replication_in_adultHumanBrain")],
-                           top_genes_adults_smoking_fitted[,c("logFC", "t", "P.Value", "adj.P.Val", "replication_in_blood", 
-                                                              "replication_in_prenatalHumanBrain", "replication_in_adultHumanBrain")],
-                           top_genes_pups_nicotine_fitted[,c("logFC", "t", "P.Value", "adj.P.Val", "replication_in_blood", 
-                                                             "replication_in_prenatalHumanBrain", "replication_in_adultHumanBrain")],
-                           top_genes_pups_smoking_fitted[,c("logFC", "t", "P.Value", "adj.P.Val", "replication_in_blood", 
-                                                            "replication_in_prenatalHumanBrain", "replication_in_adultHumanBrain")])
+                           top_genes_blood_smoking_fitted[,c("logFC", "t", "P.Value", "adj.P.Val")],
+                           top_genes_adults_nicotine_fitted[,c("logFC", "t", "P.Value", "adj.P.Val", "replication_in_blood")],
+                           top_genes_adults_smoking_fitted[,c("logFC", "t", "P.Value", "adj.P.Val", "replication_in_blood")],
+                           top_genes_pups_nicotine_fitted[,c("logFC", "t", "P.Value", "adj.P.Val", "replication_in_blood")],
+                           top_genes_pups_smoking_fitted[,c("logFC", "t", "P.Value", "adj.P.Val", "replication_in_blood")])
 
-colnames(top_genes_results)[14:47] <- c(paste0(c("logFC", "t", "P.Value", "adj.P.Val", "replication_in_prenatalHumanBrain", "replication_in_adultHumanBrain"), '_blood_adult_smoking'),
-                                        paste0(c("logFC", "t", "P.Value", "adj.P.Val", "replication_in_blood", "replication_in_prenatalHumanBrain", "replication_in_adultHumanBrain"),
-                                               '_brain_adult_nicotine'),
-                                        paste0(c("logFC", "t", "P.Value", "adj.P.Val", "replication_in_blood", "replication_in_prenatalHumanBrain", "replication_in_adultHumanBrain"),
-                                               '_brain_adult_smoking'),
-                                        paste0(c("logFC", "t", "P.Value", "adj.P.Val", "replication_in_blood", "replication_in_prenatalHumanBrain", "replication_in_adultHumanBrain"),
-                                               '_brain_pup_nicotine'),
-                                        paste0(c("logFC", "t", "P.Value", "adj.P.Val", "replication_in_blood", "replication_in_prenatalHumanBrain", "replication_in_adultHumanBrain"),
-                                               '_brain_pup_smoking'))
+colnames(top_genes_results)[14:37] <- c(paste0(c("logFC", "t", "P.Value", "adj.P.Val"), '_blood_adult_smoking'),
+                                        paste0(c("logFC", "t", "P.Value", "adj.P.Val", "replication_in_blood"), '_brain_adult_nicotine'),
+                                        paste0(c("logFC", "t", "P.Value", "adj.P.Val", "replication_in_blood"),'_brain_adult_smoking'),
+                                        paste0(c("logFC", "t", "P.Value", "adj.P.Val", "replication_in_blood"), '_brain_pup_nicotine'),
+                                        paste0(c("logFC", "t", "P.Value", "adj.P.Val", "replication_in_blood"),'_brain_pup_smoking'))
 
 save(top_genes_results, file="processed-data/04_DEA/Gene_analysis/top_genes_results.Rdata")
 write.table(top_genes_results, file = "processed-data/04_DEA/Gene_analysis/top_genes_results.csv", row.names = FALSE, col.names = TRUE, sep = '\t')
