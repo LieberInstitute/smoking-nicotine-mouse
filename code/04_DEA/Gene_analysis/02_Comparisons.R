@@ -1645,7 +1645,7 @@ colnames(TUD_EUR_MAGMA) <- TUD_EUR_MAGMA[1,]
 TUD_EUR_MAGMA <- TUD_EUR_MAGMA[-1,]
 
 ## TUD-EUR-H-MAGMA dataset contains neurobiologically relevant target genes: brain-related genes associated with TUD (p<9.44E-07),
-## specially expressed in certain cell-types or developmental stages of the brain. They were obtained with H-MAGMA.
+## especially expressed in certain cell-types or developmental stages of the brain. They were obtained with H-MAGMA.
 TUD_EUR_H_MAGMA <- as.data.frame(TUD_EUR_H_MAGMA)
 colnames(TUD_EUR_H_MAGMA) <- TUD_EUR_H_MAGMA[1,]
 TUD_EUR_H_MAGMA <- TUD_EUR_H_MAGMA[-1,]
@@ -1854,6 +1854,37 @@ overlapping_genes_TUD_EUR_S_PrediXcan <- venn_humanGWASGenes_vs_mouseDEG(TUD_EUR
 
 #####       5.7.1 TUD_EUR_S_PrediXcan affected human genes in FC vs mouse pup DEG       #####
 overlapping_genes_TUD_EUR_S_PrediXcan_FC <- venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_S_PrediXcan_FrontalCortex_associatedGenes, "TUD_EUR_S_PrediXcan_FrontalCortex_associatedGenes" , "Mouse homologs of human genes affected in frontal cortex by EUR-SNPs associated with TUD")
+
+
+## Compact results
+TUD_human_genes_vs_mouseDEGs <- rbind(
+  cbind(melt(overlapping_genes_TUD_multi_UKBB[c("Nic Overlapping Genes", "Smo Overlapping Genes")]), 'GWAS_metaAnalysis_Group'=rep('TUD_multi_UKBB', dim(melt(overlapping_genes_TUD_multi_UKBB[c("Nic Overlapping Genes", "Smo Overlapping Genes")]))[1]) ),
+  
+  cbind(melt(overlapping_genes_TUD_EUR_UKBB[c("Nic Overlapping Genes", "Smo Overlapping Genes")]), 'GWAS_metaAnalysis_Group'=rep('TUD_EUR_UKBB', dim(melt(overlapping_genes_TUD_EUR_UKBB[c("Nic Overlapping Genes", "Smo Overlapping Genes")]))[1]) ),
+  
+  cbind(melt(overlapping_genes_TUD_AA[c("Nic Overlapping Genes", "Smo Overlapping Genes")]), 'GWAS_metaAnalysis_Group'=rep('TUD_AA', dim(melt(overlapping_genes_TUD_AA[c("Nic Overlapping Genes", "Smo Overlapping Genes")]))[1]) ), 
+  
+  cbind(melt(overlapping_genes_TUD_EUR_MAGMA[c("Nic Overlapping Genes", "Smo Overlapping Genes")]), 'GWAS_metaAnalysis_Group'=rep('TUD_EUR_MAGMA', dim(melt(overlapping_genes_TUD_EUR_MAGMA[c("Nic Overlapping Genes", "Smo Overlapping Genes")]))[1]) ), 
+  
+  cbind(melt(overlapping_genes_TUD_EUR_H_MAGMA[c("Nic Overlapping Genes", "Smo Overlapping Genes")]), 'GWAS_metaAnalysis_Group'=rep('TUD_EUR_H_MAGMA', dim(melt(overlapping_genes_TUD_EUR_H_MAGMA[c("Nic Overlapping Genes", "Smo Overlapping Genes")]))[1]) ), 
+  
+  cbind(melt(overlapping_genes_TUD_EUR_H_MAGMA_fetal[c("Nic Overlapping Genes", "Smo Overlapping Genes")]), 'GWAS_metaAnalysis_Group'=rep('TUD_EUR_H_MAGMA_fetal', dim(melt(overlapping_genes_TUD_EUR_H_MAGMA_fetal[c("Nic Overlapping Genes", "Smo Overlapping Genes")]))[1]) ), 
+  
+  
+  cbind(melt(overlapping_genes_TUD_EUR_H_MAGMA_adult[c("Nic Overlapping Genes", "Smo Overlapping Genes")]), 'GWAS_metaAnalysis_Group'=rep('TUD_EUR_H_MAGMA_adult', dim(melt(overlapping_genes_TUD_EUR_H_MAGMA_adult[c("Nic Overlapping Genes", "Smo Overlapping Genes")]))[1]) ), 
+  
+  cbind(melt(overlapping_genes_TUD_EUR_S_MultiXcan[c("Nic Overlapping Genes", "Smo Overlapping Genes")]), 'GWAS_metaAnalysis_Group'=rep('TUD_EUR_S_MultiXcan', dim(melt(overlapping_genes_TUD_EUR_S_MultiXcan[c("Nic Overlapping Genes", "Smo Overlapping Genes")]))[1]) ), 
+  
+  cbind(melt(overlapping_genes_TUD_EUR_S_PrediXcan[c("Nic Overlapping Genes", "Smo Overlapping Genes")]), 'GWAS_metaAnalysis_Group'=rep('TUD_EUR_S_PrediXcan', dim(melt(overlapping_genes_TUD_EUR_S_PrediXcan[c("Nic Overlapping Genes", "Smo Overlapping Genes")]))[1]) ), 
+  
+  cbind(melt(overlapping_genes_TUD_EUR_S_PrediXcan_FC[c("Nic Overlapping Genes", "Smo Overlapping Genes")]), 'GWAS_metaAnalysis_Group'=rep('TUD_EUR_S_PrediXcan_FC', dim(melt(overlapping_genes_TUD_EUR_S_PrediXcan_FC[c("Nic Overlapping Genes", "Smo Overlapping Genes")]))[1]) )
+  )
+
+colnames(TUD_human_genes_vs_mouseDEGs) <- c('Gene', 'DE_condition', 'GWAS_metaAnalysis_Group')
+TUD_human_genes_vs_mouseDEGs$DE_condition <- sapply(TUD_human_genes_vs_mouseDEGs$DE_condition, function(x){strsplit(x, ' ')[[1]][1]})
+
+save(TUD_human_genes_vs_mouseDEGs, file="processed-data/04_DEA/Gene_analysis/TUD_human_genes_vs_mouseDEGs.Rdata")
+write.table(TUD_human_genes_vs_mouseDEGs, file = "processed-data/04_DEA/Gene_analysis/TUD_human_genes_vs_mouseDEGs.csv", row.names = FALSE, col.names = TRUE, sep = '\t')
 
 
 
