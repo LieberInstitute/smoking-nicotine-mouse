@@ -283,6 +283,12 @@ save(results_nic, file="processed-data/04_DEA/Tx_analysis/results_nic.Rdata")
 save(top_tx_nic, file="processed-data/04_DEA/Tx_analysis/top_tx_nic.Rdata")
 save(de_tx_nic, file="processed-data/04_DEA/Tx_analysis/de_tx_nic.Rdata")
 
+## Create csv with results of DE txs
+de_tx_nic <- de_tx_nic[,c(9, 10, 8, 7, 1, 3, 4, 5)]
+colnames(de_tx_nic)[3:4] <- c('gene_ensembl_id', 'gene_Symbol') 
+de_tx_nic <- de_tx_nic[order(de_tx_nic$adj.P.Val, decreasing = FALSE),]
+write.table(de_tx_nic, file = "processed-data/04_DEA/Tx_analysis/de_txs_brain_pup_nicotine.csv", row.names = FALSE, col.names = TRUE, sep = '\t')
+
 
 
 ##################################
@@ -299,6 +305,12 @@ de_tx_smo<-results_smo[[2]]
 save(results_smo, file="processed-data/04_DEA/Tx_analysis/results_smo.Rdata")
 save(top_tx_smo, file="processed-data/04_DEA/Tx_analysis/top_tx_smo.Rdata")
 save(de_tx_smo, file="processed-data/04_DEA/Tx_analysis/de_tx_smo.Rdata")
+
+## Create csv with results of DE txs
+de_tx_smo <- de_tx_smo[,c(9, 10, 8, 7, 1, 3, 4, 5)]
+colnames(de_tx_smo)[3:4] <- c('gene_ensembl_id', 'gene_Symbol') 
+de_tx_smo <- de_tx_smo[order(de_tx_smo$adj.P.Val, decreasing = FALSE),]
+write.table(de_tx_smo, file = "processed-data/04_DEA/Tx_analysis/de_txs_brain_pup_smoking.csv", row.names = FALSE, col.names = TRUE, sep = '\t')
 
 
 
