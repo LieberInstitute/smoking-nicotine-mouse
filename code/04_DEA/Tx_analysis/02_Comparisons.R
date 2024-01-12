@@ -120,17 +120,17 @@ add_DE_info_tx_vs_genes <-function(t_stats) {
   for (i in 1:dim(t_stats)[1]) {
     
     ## DE tx from DEG 
-    if (t_stats$adj.P.Val_tx[i]<0.05 && t_stats$adj.P.Val_genes[i]<0.05){
+    if (t_stats$adj.P.Val_tx[i]<0.05 && t_stats$adj.P.Val_gene[i]<0.05){
       DE<-append(DE, "sig Both")
     }
     
     ## DE tx only
-    else if (t_stats$adj.P.Val_tx[i]<0.05 && t_stats$adj.P.Val_genes[i]>=0.05){
+    else if (t_stats$adj.P.Val_tx[i]<0.05 && t_stats$adj.P.Val_gene[i]>=0.05){
       DE<-append(DE, "sig Tx")
     }
     
     ## DE genes only
-    else if(t_stats$adj.P.Val_tx[i]>=0.05 && t_stats$adj.P.Val_genes[i]<0.05){
+    else if(t_stats$adj.P.Val_tx[i]>=0.05 && t_stats$adj.P.Val_gene[i]<0.05){
       DE<-append(DE, "sig Gene")
     }
     
@@ -166,32 +166,40 @@ t_stat_tx_vs_genes<- function(expt){
   tx_genes<-tx_genes[which(tx_genes %in% top_genes$gencodeID)]
   
   ## Extract transcripts' info
-  t_stats<-top_tx[which(top_tx$ensembl_id %in% tx_genes), c("transcript_id", "adj.P.Val", "Symbol", 
-                                                                    "t", "ensembl_id", "logFC")]
-  colnames(t_stats)[2]<-"adj.P.Val_tx"
-  colnames(t_stats)[4]<-"t_tx"
-  colnames(t_stats)[6]<-"logFC_tx"
+  t_stats<-top_tx[which(top_tx$ensembl_id %in% tx_genes), c("transcript_id", "transcript_name", "ensembl_id", 
+                                                            "Symbol", "logFC", "t", "P.Value", "adj.P.Val")]
+  colnames(t_stats)[3] <- "gene_ensembl_id"
+  colnames(t_stats)[4] <- "gene_Symbol"
+  colnames(t_stats)[5] <- "logFC_tx"
+  colnames(t_stats)[6] <- "t_tx"
+  colnames(t_stats)[7] <- "P.Value_tx"
+  colnames(t_stats)[8] <- "adj.P.Val_tx"
   
   ## Add t-stats and FDRs of transcripts' genes 
   t_genes<-vector()
   FDRs<-vector()
   logFCs <- vector()
+  pvals <- vector()
   
   for (i in 1:dim(t_stats)[1]){
-    t<-top_genes[which(top_genes$gencodeID==t_stats$ensembl_id[i]), "t"]
-    FDR<-top_genes[which(top_genes$gencodeID==t_stats$ensembl_id[i]), "adj.P.Val"]
-    logFC <- top_genes[which(top_genes$gencodeID==t_stats$ensembl_id[i]), "logFC"]
+    t<-top_genes[which(top_genes$gencodeID==t_stats$gene_ensembl_id[i]), "t"]
+    FDR<-top_genes[which(top_genes$gencodeID==t_stats$gene_ensembl_id[i]), "adj.P.Val"]
+    logFC <- top_genes[which(top_genes$gencodeID==t_stats$gene_ensembl_id[i]), "logFC"]
+    pval<-top_genes[which(top_genes$gencodeID==t_stats$gene_ensembl_id[i]), "P.Value"]
     
     t_genes<-append(t_genes, t)
     FDRs<-append(FDRs, FDR)
     logFCs <- append(logFCs, logFC)
+    pvals <- append(pvals, pval)
+    
   }
-  t_stats$t_genes<-t_genes
-  t_stats$adj.P.Val_genes<-FDRs
-  t_stats$logFC_genes <- logFCs
+  t_stats$t_gene<-t_genes
+  t_stats$adj.P.Val_gene<-FDRs
+  t_stats$logFC_gene <- logFCs
+  t_stats$P.Value_gene <- pvals
   
   ## Correlation coeff between t-stats of genes and transcripts
-  rho <- cor(t_stats$t_tx, t_stats$t_genes, method = "spearman")
+  rho <- cor(t_stats$t_tx, t_stats$t_gene, method = "spearman")
   rho_anno = paste0("rho = ", format(round(rho, 2), nsmall = 2))
   
   cols <- c("coral2","pink", "lightgoldenrod3", "grey") 
@@ -216,7 +224,7 @@ t_stat_tx_vs_genes<- function(expt){
   
   #  ------- DE tx from non-DEG with |t-stat|>abs_t_tx ------- 
   if (expt == 'nicotine'){
-    paste0(t_stats[which(t_stats$DE=='sig Tx' & (abs(t_stats$t_tx)>abs_t_tx)), 'Symbol'], '-', 
+    paste0(t_stats[which(t_stats$DE=='sig Tx' & (abs(t_stats$t_tx)>abs_t_tx)), 'gene_Symbol'], '-', 
            t_stats[which(t_stats$DE=='sig Tx' & (abs(t_stats$t_tx)>abs_t_tx)), 'transcript_id'])
     de_txs_nonDEGs <- t_stats[which(t_stats$DE=='sig Tx' & (abs(t_stats$t_tx)>abs_t_tx)), 'transcript_id']
     # [1] "Phf3-ENSMUST00000185521.1"    "Trpc4-ENSMUST00000199359.1"   "Ankrd11-ENSMUST00000212937.1" "Bcl11a-ENSMUST00000124148.1" 
@@ -229,19 +237,19 @@ t_stat_tx_vs_genes<- function(expt){
   ## Take only Btf3, Srsf6, Cyhr1 and H13 txs for smo
   else {
    nonDEGs <- c("Btf3", "Srsf6", "Cyhr1", "H13")
-   paste0(t_stats[which(t_stats$DE=='sig Tx' & (abs(t_stats$t_tx)>abs_t_tx) & t_stats$Symbol %in% nonDEGs), 'Symbol'], '-', 
-          t_stats[which(t_stats$DE=='sig Tx' & (abs(t_stats$t_tx)>abs_t_tx) & t_stats$Symbol %in% nonDEGs), 'transcript_id'])
+   paste0(t_stats[which(t_stats$DE=='sig Tx' & (abs(t_stats$t_tx)>abs_t_tx) & t_stats$gene_Symbol %in% nonDEGs), 'gene_Symbol'], '-', 
+          t_stats[which(t_stats$DE=='sig Tx' & (abs(t_stats$t_tx)>abs_t_tx) & t_stats$gene_Symbol %in% nonDEGs), 'transcript_id'])
    # [1] "H13-ENSMUST00000125366.7"    "H13-ENSMUST00000089059.8"    "Srsf6-ENSMUST00000017065.14" "Btf3-ENSMUST00000022163.14"  "Cyhr1-ENSMUST00000081291.12"
    # [6] "Cyhr1-ENSMUST00000176274.1"    <- for smo
-   de_txs_nonDEGs <- t_stats[which(t_stats$DE=='sig Tx' & (abs(t_stats$t_tx)>abs_t_tx) & t_stats$Symbol %in% nonDEGs), 'transcript_id']
+   de_txs_nonDEGs <- t_stats[which(t_stats$DE=='sig Tx' & (abs(t_stats$t_tx)>abs_t_tx) & t_stats$gene_Symbol %in% nonDEGs), 'transcript_id']
   }
   
   
   #  ------- DE tx whose DEG have an opposite sign in logFC ------- 
   if (expt == 'nicotine'){
-    paste0(t_stats[which(t_stats$DE=='sig Both' & (sign(t_stats$logFC_tx)!=sign(t_stats$logFC_genes))), 'Symbol'], '-',
-           t_stats[which(t_stats$DE=='sig Both' & (sign(t_stats$logFC_tx)!=sign(t_stats$logFC_genes))), 'transcript_id'])
-    de_txs_DEGs <- t_stats[which(t_stats$DE=='sig Both' & (sign(t_stats$logFC_tx)!=sign(t_stats$logFC_genes))), 'transcript_id']
+    paste0(t_stats[which(t_stats$DE=='sig Both' & (sign(t_stats$logFC_tx)!=sign(t_stats$logFC_gene))), 'gene_Symbol'], '-',
+           t_stats[which(t_stats$DE=='sig Both' & (sign(t_stats$logFC_tx)!=sign(t_stats$logFC_gene))), 'transcript_id'])
+    de_txs_DEGs <- t_stats[which(t_stats$DE=='sig Both' & (sign(t_stats$logFC_tx)!=sign(t_stats$logFC_gene))), 'transcript_id']
     # [1] "Pnisr-ENSMUST00000148561.1"   "Dcun1d5-ENSMUST00000216770.1" "Dgcr8-ENSMUST00000115633.2"   <- for nic
   }
   else{
@@ -261,27 +269,27 @@ t_stat_tx_vs_genes<- function(expt){
   
   if (expt == 'nicotine'){
     ## Only DEGs and DE txs
-    paste0(t_stats[which(t_stats$ensembl_id %in% interest_genes & t_stats$adj.P.Val_genes< 0.05 & t_stats$adj.P.Val_tx<0.05), 'Symbol'], '-',
-           t_stats[which(t_stats$ensembl_id %in% interest_genes & t_stats$adj.P.Val_genes< 0.05 & t_stats$adj.P.Val_tx<0.05), 'transcript_id'])
-    de_txs_up_down_DEGs <- t_stats[which(t_stats$ensembl_id %in% interest_genes & t_stats$adj.P.Val_genes< 0.05 & t_stats$adj.P.Val_tx<0.05), 'transcript_id']
+    paste0(t_stats[which(t_stats$gene_ensembl_id %in% interest_genes & t_stats$adj.P.Val_gene< 0.05 & t_stats$adj.P.Val_tx<0.05), 'gene_Symbol'], '-',
+           t_stats[which(t_stats$gene_ensembl_id %in% interest_genes & t_stats$adj.P.Val_gene< 0.05 & t_stats$adj.P.Val_tx<0.05), 'transcript_id'])
+    de_txs_up_down_DEGs <- t_stats[which(t_stats$gene_ensembl_id %in% interest_genes & t_stats$adj.P.Val_gene< 0.05 & t_stats$adj.P.Val_tx<0.05), 'transcript_id']
     # [1] "Pnisr-ENSMUST00000029911.11"  "Pnisr-ENSMUST00000148561.1"   "Dcun1d5-ENSMUST00000215683.1" "Dcun1d5-ENSMUST00000216770.1"    <- for nic
   }
   else{
     ## DE txs from the DEGs Meaf6, Ivns1abp, Morf4l2, Sin3b and Ppp2r5c for smo
     DEGs <- c("Meaf6", "Ivns1abp", "Morf4l2", "Sin3b", "Ppp2r5c")
-    paste0(t_stats[which(t_stats$ensembl_id %in% interest_genes & t_stats$adj.P.Val_genes< 0.05 & t_stats$adj.P.Val_tx<0.05 & t_stats$Symbol %in% DEGs), 'Symbol'], '-',
-           t_stats[which(t_stats$ensembl_id %in% interest_genes & t_stats$adj.P.Val_genes< 0.05 & t_stats$adj.P.Val_tx<0.05 & t_stats$Symbol %in% DEGs), 'transcript_id'])
+    paste0(t_stats[which(t_stats$gene_ensembl_id %in% interest_genes & t_stats$adj.P.Val_gene< 0.05 & t_stats$adj.P.Val_tx<0.05 & t_stats$gene_Symbol %in% DEGs), 'gene_Symbol'], '-',
+           t_stats[which(t_stats$gene_ensembl_id %in% interest_genes & t_stats$adj.P.Val_gene< 0.05 & t_stats$adj.P.Val_tx<0.05 & t_stats$gene_Symbol %in% DEGs), 'transcript_id'])
     # [1] "Ivns1abp-ENSMUST00000023918.12" "Ivns1abp-ENSMUST00000111887.9"  "Meaf6-ENSMUST00000154689.7"     "Meaf6-ENSMUST00000184205.7"    
     # [5] "Sin3b-ENSMUST00000109950.4"     "Sin3b-ENSMUST00000004494.15"    "Sin3b-ENSMUST00000212095.1"     "Ppp2r5c-ENSMUST00000221715.1"  
     # [9] "Ppp2r5c-ENSMUST00000109832.2"   "Morf4l2-ENSMUST00000080411.12"  "Morf4l2-ENSMUST00000169418.7"   "Morf4l2-ENSMUST00000113095.7"  
-    de_txs_up_down_DEGs <- t_stats[which(t_stats$ensembl_id %in% interest_genes & t_stats$adj.P.Val_genes< 0.05 & t_stats$adj.P.Val_tx<0.05 & t_stats$Symbol %in% DEGs), 'transcript_id']
+    de_txs_up_down_DEGs <- t_stats[which(t_stats$gene_ensembl_id %in% interest_genes & t_stats$adj.P.Val_gene< 0.05 & t_stats$adj.P.Val_tx<0.05 & t_stats$gene_Symbol %in% DEGs), 'transcript_id']
   }
   
   tx_symbols<-vector()
   
   for (i in 1:dim(t_stats)[1]) {
     if (t_stats$transcript_id[i] %in% c(top_de_txs, de_txs_nonDEGs, de_txs_DEGs, de_txs_up_down_DEGs)){
-      tx_symbols <- append(tx_symbols, paste0(t_stats$Symbol[i], '-', t_stats$transcript_id[i]))
+      tx_symbols <- append(tx_symbols, paste0(t_stats$gene_Symbol[i], '-', t_stats$transcript_id[i]))
     }
     else {
       tx_symbols <- append(tx_symbols, NA)
@@ -292,7 +300,7 @@ t_stat_tx_vs_genes<- function(expt){
   ## Plot
   
   if(expt == 'nicotine'){
-    plot <- ggplot(t_stats, aes(x = t_genes, y = t_tx, color=DE, alpha=DE, label= tx_symbols)) +
+    plot <- ggplot(t_stats, aes(x = t_gene, y = t_tx, color=DE, alpha=DE, label= tx_symbols)) +
       geom_point(size = 1.2) +
       labs(x = "t-stats genes", 
            y = "t-stats tx",
@@ -335,7 +343,7 @@ t_stat_tx_vs_genes<- function(expt){
   }
   
   else{
-    plot <- ggplot(t_stats, aes(x = t_genes, y = t_tx, color=DE, alpha=DE, label= tx_symbols)) +
+    plot <- ggplot(t_stats, aes(x = t_gene, y = t_tx, color=DE, alpha=DE, label= tx_symbols)) +
       geom_point(size = 1.2) +
       labs(x = "t-stats genes", 
            y = "t-stats tx",
@@ -489,7 +497,7 @@ t_stat_tx_vs_genes<- function(expt){
             legend.title = element_text(size=12))
   }
 
-  
+  return(t_stats)
   plot
   ggsave(filename=paste("plots/04_DEA/02_Comparisons/Tx_analysis/t_stats_tx_vs_genes_", substr(expt,1,3), 
                         ".pdf", sep=""), height = 14.5, width = 18, units = "cm")
@@ -501,15 +509,19 @@ t_stat_tx_vs_genes<- function(expt){
 # Nicotine genes vs nicotine tx
 #####################################
 expt<-"nicotine"
-t_stat_tx_vs_genes(expt)
+t_stats_txs_vs_genes_nic <- t_stat_tx_vs_genes(expt)
+save(t_stats_txs_vs_genes_nic, file="processed-data/04_DEA/Tx_analysis/t_stats_txs_vs_genes_nic.Rdata")
+write.table(t_stats_txs_vs_genes_nic, file = "processed-data/04_DEA/Tx_analysis/t_stats_txs_vs_genes_nic.csv", row.names = FALSE, col.names = TRUE, sep = '\t')
+
 
 
 ##################################### 
 # Smoking genes vs smoking tx
 #####################################
 expt<-"smoking"
-t_stat_tx_vs_genes(expt)
-
+t_stats_txs_vs_genes_smo <- t_stat_tx_vs_genes(expt)
+save(t_stats_txs_vs_genes_smo, file="processed-data/04_DEA/Tx_analysis/t_stats_txs_vs_genes_smo.Rdata")
+write.table(t_stats_txs_vs_genes_smo, file = "processed-data/04_DEA/Tx_analysis/t_stats_txs_vs_genes_smo.csv", row.names = FALSE, col.names = TRUE, sep = '\t')
 
 
 
