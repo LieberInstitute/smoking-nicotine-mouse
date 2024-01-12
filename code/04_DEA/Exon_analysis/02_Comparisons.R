@@ -119,9 +119,9 @@ add_DE_info_exons_vs_genes <-function(t_stats) {
   for (i in 1:dim(t_stats)[1]) {
 
     ## DE exons in both genes and exons
-    if (t_stats$adj.P.Val_exons[i]<0.05 && t_stats$adj.P.Val_genes[i]<0.05){
+    if (t_stats$adj.P.Val_exon[i]<0.05 && t_stats$adj.P.Val_gene[i]<0.05){
       
-      if(abs(t_stats$logFC_exons[i])>0.25) {
+      if(abs(t_stats$logFC_exon[i])>0.25) {
         DE<-append(DE, "sig Both")
       }
       ## DE genes only
@@ -130,10 +130,10 @@ add_DE_info_exons_vs_genes <-function(t_stats) {
       } 
     }
     
-    else if(t_stats$adj.P.Val_exons[i]<0.05 && t_stats$adj.P.Val_genes[i]>=0.05){
+    else if(t_stats$adj.P.Val_exon[i]<0.05 && t_stats$adj.P.Val_gene[i]>=0.05){
       
       ## DE exons only
-      if(abs(t_stats$logFC_exons[i])>0.25) {
+      if(abs(t_stats$logFC_exon[i])>0.25) {
         DE<-append(DE, "sig Exon")
       }
       else{
@@ -141,7 +141,7 @@ add_DE_info_exons_vs_genes <-function(t_stats) {
       }
     }
     
-    else if(t_stats$adj.P.Val_exons[i]>=0.05 && t_stats$adj.P.Val_genes[i]<0.05){
+    else if(t_stats$adj.P.Val_exon[i]>=0.05 && t_stats$adj.P.Val_gene[i]<0.05){
       ## DE genes only
       DE<-append(DE, "sig Gene")
     }
@@ -171,27 +171,40 @@ t_stat_exons_vs_genes<- function(expt){
   exons_genes<-exons_genes[which(exons_genes %in% top_genes$ensemblID)]
   
   ## Extract exons' info
-  t_stats<-top_exons[which(top_exons$ensemblID %in% exons_genes), c("exon_libdID", "adj.P.Val", "Symbol", 
-                                                                    "t", "ensemblID", "logFC", "seqnames", 
-                                                                    "start", "end")]
-  colnames(t_stats)[2]<-"adj.P.Val_exons"
-  colnames(t_stats)[4]<-"t_exons"
-  colnames(t_stats)[6]<-"logFC_exons"
+  t_stats<-top_exons[which(top_exons$ensemblID %in% exons_genes), c("exon_gencodeID", "exon_libdID", "seqnames", "start", "end", "strand",
+                                                                    "ensemblID", "Symbol", "logFC", "t", "P.Value", "adj.P.Val")]
+  colnames(t_stats)[7] <- "gene_ensemblID"
+  colnames(t_stats)[8] <- "gene_Symbol"
+  colnames(t_stats)[9] <- "logFC_exon"
+  colnames(t_stats)[10] <- "t_exon"
+  colnames(t_stats)[11] <- "P.Value_exon"
+  colnames(t_stats)[12] <- "adj.P.Val_exon"
   
-  ## Add t-stats and FDRs of exons' genes
-  t_genes<-vector()
-  FDRs<-vector()
+  ## Add DE info  of exons' genes
+  logFCs <- vector()
+  t_genes <- vector()
+  pvals <- vector()
+  FDRs <- vector()
+  
   for (i in 1:dim(t_stats)[1]){
-    t<-top_genes[which(top_genes$ensemblID==t_stats$ensemblID[i]), "t"]
-    FDR<-top_genes[which(top_genes$ensemblID==t_stats$ensemblID[i]), "adj.P.Val"]
-    t_genes<-append(t_genes, t)
-    FDRs<-append(FDRs, FDR)
+    logFC <- top_genes[which(top_genes$ensemblID==t_stats$gene_ensemblID[i]), "logFC"]
+    t<-top_genes[which(top_genes$ensemblID==t_stats$gene_ensemblID[i]), "t"]
+    pval <- top_genes[which(top_genes$ensemblID==t_stats$gene_ensemblID[i]), "P.Value"]
+    FDR<-top_genes[which(top_genes$ensemblID==t_stats$gene_ensemblID[i]), "adj.P.Val"]
+    
+    logFCs <- append(logFCs, logFC)
+    t_genes <- append(t_genes, t)
+    pvals <- append(pvals, pval)
+    FDRs <- append(FDRs, FDR)
   }
-  t_stats$t_genes<-t_genes
-  t_stats$adj.P.Val_genes<-FDRs
+  
+  t_stats$logFC_gene <- logFCs
+  t_stats$t_gene <- t_genes
+  t_stats$P.Value_gene <- pvals
+  t_stats$adj.P.Val_gene <- FDRs
   
   ## Correlation coeff between t-stats of genes and exons
-  rho <- cor(t_stats$t_exons, t_stats$t_genes, method = "spearman")
+  rho <- cor(t_stats$t_exon, t_stats$t_gene, method = "spearman")
   rho_anno = paste0("rho = ", format(round(rho, 2), nsmall = 2))
   
   ## Colors
@@ -220,17 +233,17 @@ t_stat_exons_vs_genes<- function(expt){
   exon_symbols<-vector()
   for (i in 1:dim(t_stats)[1]) {
     
-    if (t_stats$DE[i]=="sig exon" & (abs(t_stats$t_exons[i])>6 | (t_stats$ensemblID[i] %in% interest_genes))) {
-      exon_symbols<-append(exon_symbols, paste(t_stats$Symbol[i], "-", t_stats$seqname[i], ":", t_stats$start[i], "-",
+    if (t_stats$DE[i]=="sig exon" & (abs(t_stats$t_exon[i])>6 | (t_stats$gene_ensemblID[i] %in% interest_genes))) {
+      exon_symbols<-append(exon_symbols, paste(t_stats$gene_Symbol[i], "-", t_stats$seqname[i], ":", t_stats$start[i], "-",
                                                t_stats$end[i], sep=""))
     }
     else if(t_stats$DE[i]=="sig Both"){
-      if ((t_stats$t_genes[i]< -3.5 & t_stats$t_exons[i]> 4) | (t_stats$t_genes[i]> 3 & t_stats$t_exons[i]< -4)){
-        exon_symbols<-append(exon_symbols, paste(t_stats$Symbol[i], "-", t_stats$seqname[i], ":", t_stats$start[i], "-",
+      if ((t_stats$t_gene[i]< -3.5 & t_stats$t_exon[i]> 4) | (t_stats$t_gene[i]> 3 & t_stats$t_exon[i]< -4)){
+        exon_symbols<-append(exon_symbols, paste(t_stats$gene_Symbol[i], "-", t_stats$seqname[i], ":", t_stats$start[i], "-",
                                                  t_stats$end[i], sep=""))
       }
-      else if((t_stats$ensemblID[i] %in% interest_genes) & (t_stats$adj.P.Val_genes[i] <0.01)){
-        exon_symbols<-append(exon_symbols, paste(t_stats$Symbol[i], "-", t_stats$seqname[i], ":", t_stats$start[i], "-",
+      else if((t_stats$gene_ensemblID[i] %in% interest_genes) & (t_stats$adj.P.Val_gene[i] <0.01)){
+        exon_symbols<-append(exon_symbols, paste(t_stats$gene_Symbol[i], "-", t_stats$seqname[i], ":", t_stats$start[i], "-",
                                                  t_stats$end[i], sep=""))        
       }
       else{
@@ -244,7 +257,7 @@ t_stat_exons_vs_genes<- function(expt){
   t_stats$exon_symbols<- exon_symbols
   
   ## Plot
-  plot <- ggplot(t_stats, aes(x = t_genes, y = t_exons, color=DE, alpha=DE)) +
+  plot <- ggplot(t_stats, aes(x = t_gene, y = t_exon, color=DE, alpha=DE)) +
     geom_point(size = 1.2) +
     labs(x = "t-stats genes", 
          y = "t-stats exons",
@@ -265,7 +278,7 @@ t_stat_exons_vs_genes<- function(expt){
           legend.text = element_text(size=11),
           legend.title = element_text(size=12))
     
-  
+  return(t_stats) 
   plot
   ggsave(filename=paste("plots/04_DEA/02_Comparisons/Exon_analysis/t_stats_global_", substr(expt,1,3), 
                         ".pdf", sep=""), height = 14.5, width = 18, units = "cm")
@@ -277,14 +290,18 @@ t_stat_exons_vs_genes<- function(expt){
 # Nicotine genes vs nicotine exons
 #####################################
 expt<-"nicotine"
-t_stat_exons_vs_genes(expt)
+t_stat_exons_vs_genes_nic <- t_stat_exons_vs_genes(expt)
+save(t_stat_exons_vs_genes_nic, file="processed-data/04_DEA/Tx_analysis/t_stat_exons_vs_genes_nic.Rdata")
+write.table(t_stat_exons_vs_genes_nic, file = "processed-data/04_DEA/Tx_analysis/t_stat_exons_vs_genes_nic.csv", row.names = FALSE, col.names = TRUE, sep = '\t')
 
 
 ##################################### 
 # Smoking genes vs smoking exons
 #####################################
 expt<-"smoking"
-t_stat_exons_vs_genes(expt)
+t_stat_exons_vs_genes_smo <- t_stat_exons_vs_genes(expt)
+save(t_stat_exons_vs_genes_smo, file="processed-data/04_DEA/Tx_analysis/t_stat_exons_vs_genes_smo.Rdata")
+write.table(t_stat_exons_vs_genes_smo, file = "processed-data/04_DEA/Tx_analysis/t_stat_exons_vs_genes_smo.csv", row.names = FALSE, col.names = TRUE, sep = '\t')
 
 
 
