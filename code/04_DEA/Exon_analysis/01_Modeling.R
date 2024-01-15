@@ -297,6 +297,12 @@ save(results_nic, file="processed-data/04_DEA/Exon_analysis/results_nic.Rdata")
 save(top_exons_nic, file="processed-data/04_DEA/Exon_analysis/top_exons_nic.Rdata")
 save(de_exons_nic, file="processed-data/04_DEA/Exon_analysis/de_exons_nic.Rdata")
 
+## Create csv with results of DE exons
+de_exons_nic <- de_exons_nic[,c('exon_gencodeID', 'seqnames', 'start',  'end', 'strand', 'gencodeID', 'Symbol', 'logFC', "t" , "P.Value", "adj.P.Val")]
+colnames(de_exons_nic)[7] <- 'gene_Symbol'
+de_exons_nic <- de_exons_nic[order(de_exons_nic$adj.P.Val, decreasing = FALSE),]
+write.table(de_exons_nic, file = "processed-data/04_DEA/Exon_analysis/de_exons_brain_pup_nicotine.csv", row.names = FALSE, col.names = TRUE, sep = '\t')
+
 
 
 ##################################
@@ -313,6 +319,12 @@ de_exons_smo<-results_smo[[2]]
 save(results_smo, file="processed-data/04_DEA/Exon_analysis/results_smo.Rdata")
 save(top_exons_smo, file="processed-data/04_DEA/Exon_analysis/top_exons_smo.Rdata")
 save(de_exons_smo, file="processed-data/04_DEA/Exon_analysis/de_exons_smo.Rdata")
+
+## Create csv with results of DE exons
+de_exons_smo <- de_exons_smo[,c('exon_gencodeID', 'seqnames', 'start',  'end', 'strand', 'gencodeID', 'Symbol', 'logFC', "t" , "P.Value", "adj.P.Val")]
+colnames(de_exons_smo)[7] <- 'gene_Symbol' 
+de_exons_smo <- de_exons_smo[order(de_exons_smo$adj.P.Val, decreasing = FALSE),]
+write.table(de_exons_smo, file = "processed-data/04_DEA/Exon_analysis/de_exons_brain_pup_smoking.csv", row.names = FALSE, col.names = TRUE, sep = '\t')
 
 
 
