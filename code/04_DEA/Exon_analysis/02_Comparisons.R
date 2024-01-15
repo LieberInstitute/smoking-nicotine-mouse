@@ -291,8 +291,8 @@ t_stat_exons_vs_genes<- function(expt){
 #####################################
 expt<-"nicotine"
 t_stat_exons_vs_genes_nic <- t_stat_exons_vs_genes(expt)
-save(t_stat_exons_vs_genes_nic, file="processed-data/04_DEA/Tx_analysis/t_stat_exons_vs_genes_nic.Rdata")
-write.table(t_stat_exons_vs_genes_nic, file = "processed-data/04_DEA/Tx_analysis/t_stat_exons_vs_genes_nic.csv", row.names = FALSE, col.names = TRUE, sep = '\t')
+save(t_stat_exons_vs_genes_nic, file="processed-data/04_DEA/Exon_analysis/t_stat_exons_vs_genes_nic.Rdata")
+write.table(t_stat_exons_vs_genes_nic, file = "processed-data/04_DEA/Exon_analysis/t_stat_exons_vs_genes_nic.csv", row.names = FALSE, col.names = TRUE, sep = '\t')
 
 
 ##################################### 
@@ -300,8 +300,8 @@ write.table(t_stat_exons_vs_genes_nic, file = "processed-data/04_DEA/Tx_analysis
 #####################################
 expt<-"smoking"
 t_stat_exons_vs_genes_smo <- t_stat_exons_vs_genes(expt)
-save(t_stat_exons_vs_genes_smo, file="processed-data/04_DEA/Tx_analysis/t_stat_exons_vs_genes_smo.Rdata")
-write.table(t_stat_exons_vs_genes_smo, file = "processed-data/04_DEA/Tx_analysis/t_stat_exons_vs_genes_smo.csv", row.names = FALSE, col.names = TRUE, sep = '\t')
+save(t_stat_exons_vs_genes_smo, file="processed-data/04_DEA/Exon_analysis/t_stat_exons_vs_genes_smo.Rdata")
+write.table(t_stat_exons_vs_genes_smo, file = "processed-data/04_DEA/Exon_analysis/t_stat_exons_vs_genes_smo.csv", row.names = FALSE, col.names = TRUE, sep = '\t')
 
 
 
