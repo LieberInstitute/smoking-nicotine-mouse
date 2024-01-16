@@ -174,7 +174,7 @@ apply_DEA<-function(RSE, name){
     de_jx<-top_jxns[which(top_jxns$adj.P.Val < 0.05),]
     print(paste(dim(de_jx)[1], "differentially expressed jxns", sep=" "))
     DE_boxplots(RSE, de_jx, vJxn)
-    return(list(results, de_jxns))
+    return(list(results, de_jx))
   }
   else {
     print("No differentially expressed jxns")
@@ -199,6 +199,15 @@ save(results_nic, file="processed-data/04_DEA/Jx_analysis/results_nic.Rdata")
 save(top_jxns_nic, file="processed-data/04_DEA/Jx_analysis/top_jxns_nic.Rdata")
 save(de_jxns_nic, file="processed-data/04_DEA/Jx_analysis/de_jxns_nic.Rdata")
 
+## Create csv with results of DE jxns
+de_jxns_nic <- cbind('jxn_ID'=rownames(de_jxns_nic), de_jxns_nic)
+de_jxns_nic <- de_jxns_nic[,c('jxn_ID', 'seqnames', 'start',  'end', 'strand', 'newGeneID', 'inGencode', 'inGencodeStart', 
+                              'inGencodeEnd', 'Class', 'isFusion', 'logFC', "t" , "P.Value", "adj.P.Val")]
+colnames(de_jxns_nic)[2] <- 'chr' 
+colnames(de_jxns_nic)[6] <- 'gencodeID' 
+de_jxns_nic <- de_jxns_nic[order(de_jxns_nic$adj.P.Val, decreasing = FALSE),]
+write.table(de_jxns_nic, file = "processed-data/04_DEA/Jx_analysis/de_jxns_brain_pup_nicotine.csv", row.names = FALSE, col.names = TRUE, sep = '\t')
+
 
 
 ##################################
@@ -215,6 +224,15 @@ de_jxns_smo<-results_smo[[2]]
 save(results_smo, file="processed-data/04_DEA/Jx_analysis/results_smo.Rdata")
 save(top_jxns_smo, file="processed-data/04_DEA/Jx_analysis/top_jxns_smo.Rdata")
 save(de_jxns_smo, file="processed-data/04_DEA/Jx_analysis/de_jxns_smo.Rdata")
+
+## Create csv with results of DE jxns
+de_jxns_smo <- cbind('jxn_ID'=rownames(de_jxns_smo), de_jxns_smo)
+de_jxns_smo <- de_jxns_smo[,c('jxn_ID', 'seqnames', 'start',  'end', 'strand', 'newGeneID', 'inGencode', 'inGencodeStart', 
+                              'inGencodeEnd', 'Class', 'isFusion', 'logFC', "t" , "P.Value", "adj.P.Val")]
+colnames(de_jxns_smo)[2] <- 'chr' 
+colnames(de_jxns_smo)[6] <- 'gencodeID' 
+de_jxns_smo <- de_jxns_smo[order(de_jxns_smo$adj.P.Val, decreasing = FALSE),]
+write.table(de_jxns_smo, file = "processed-data/04_DEA/Jx_analysis/de_jxns_brain_pup_smoking.csv", row.names = FALSE, col.names = TRUE, sep = '\t')
 
 
 
