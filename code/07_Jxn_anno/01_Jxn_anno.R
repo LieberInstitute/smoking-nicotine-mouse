@@ -78,7 +78,7 @@ table(rowData(rse_jx)[which(rowData(rse_jx)$Class=="InGen"), c("inGencodeStart",
 #   inGencodeStart TRUE
 #             TRUE  542
 
-## "Fusion" jxns span  multiple genes (start and end in jxns that can be known or unknown)
+## "Fusion" jxns span multiple genes (start and end in jxns that can be known or unknown)
 table(rowData(rse_jx)[which(rowData(rse_jx)$isFusion=="TRUE"), c("inGencodeStart", "inGencodeEnd")])
 #                 inGencodeEnd
 #   inGencodeStart FALSE TRUE
@@ -236,7 +236,7 @@ ggsave(here("plots/07_Jxn_anno/histograms_numberDEjxns.pdf"), width = 50, height
 
 
 
-## 1. Find the nearest, preceding and following genes of DE Novel jxns (without associated gene)
+## 1. Find the nearest, preceding and following genes of fully DE Novel jxns (without associated gene)
 
 ## Obtain novel DE jxns without associated gene
 ## Nicotine
@@ -306,6 +306,7 @@ NovelDEJxns_foundGenesIDs<- data.frame(
   expt=c(rep("Nicotine", length(names(novel_jxns_foundGenes[["DE_Novel_jxns_nic"]]))), rep("Smoking", length(names(novel_jxns_foundGenes[["DE_Novel_jxns_smo"]]))))
 )
 save(NovelDEJxns_foundGenesIDs, file="processed-data/07_Jxn_anno/NovelDEJxns_foundGenesIDs.Rdata")
+write.table(NovelDEJxns_foundGenesIDs, file = "processed-data/07_Jxn_anno/novel_DE_jnxs_genes.csv", row.names = FALSE, col.names = TRUE, sep = '\t')
 
 
 
