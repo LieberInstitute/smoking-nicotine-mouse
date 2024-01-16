@@ -18,6 +18,34 @@ load(here("processed-data/04_DEA/Jx_analysis/de_jxns_smo.Rdata"))
 
 
 
+## Explore meaning of variables 
+table(rowData(rse_jx)[, c("inGencodeStart", "inGencodeEnd", "inGencode")])
+
+## Jxns in Gencode have both start and end sites in Gencode
+## Jxns not in Gencode could have both sites in Gencode individually but not together (those are ExonSkip jxns)
+# , , inGencode = FALSE
+# 
+#                  inGencodeEnd
+# inGencodeStart   FALSE   TRUE
+#          FALSE  847606 579436
+#           TRUE    8342    142
+# 
+# , , inGencode = TRUE
+# 
+#                 inGencodeEnd
+# inGencodeStart  FALSE   TRUE
+#          FALSE      0      0
+#           TRUE      0    542
+
+## All InGen jxns are in Gencode and all jxns in Gencode have InGen class
+table(rowData(rse_jx)[, c( "inGencode","Class")])
+#                           Class
+# inGencode  AltStartEnd  ExonSkip   InGen    Novel
+#     FALSE       587778       142       0   847606
+#      TRUE            0         0     542       0
+
+
+
 ## Explore jxn classes
 
 ## "Novel" jxns have unknown (not in GENCODE) start and end sites
