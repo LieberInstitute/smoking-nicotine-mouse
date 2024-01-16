@@ -165,20 +165,20 @@ t_stat_exons_vs_genes<- function(expt){
   de_exons<-eval(parse_expr(paste("de_exons_", substr(expt,1,3), sep="")))
   
   ## Exons' genes
-  exons_genes<-unique(top_exons$ensemblID)
+  exons_genes<-unique(top_exons$gencodeID)
   
   ## Common genes
-  exons_genes<-exons_genes[which(exons_genes %in% top_genes$ensemblID)]
+  exons_genes<-exons_genes[which(exons_genes %in% top_genes$gencodeID)]
   
   ## Extract exons' info
-  t_stats<-top_exons[which(top_exons$ensemblID %in% exons_genes), c("exon_gencodeID", "exon_libdID", "seqnames", "start", "end", "strand",
-                                                                    "ensemblID", "Symbol", "logFC", "t", "P.Value", "adj.P.Val")]
-  colnames(t_stats)[7] <- "gene_ensemblID"
-  colnames(t_stats)[8] <- "gene_Symbol"
-  colnames(t_stats)[9] <- "logFC_exon"
-  colnames(t_stats)[10] <- "t_exon"
-  colnames(t_stats)[11] <- "P.Value_exon"
-  colnames(t_stats)[12] <- "adj.P.Val_exon"
+  t_stats<-top_exons[which(top_exons$gencodeID %in% exons_genes), c("exon_gencodeID", "seqnames", "start", "end", "strand",
+                                                                    "gencodeID", "Symbol", "logFC", "t", "P.Value", "adj.P.Val")]
+  colnames(t_stats)[2] <- "chr"
+  colnames(t_stats)[7] <- "gene_Symbol"
+  colnames(t_stats)[8] <- "logFC_exon"
+  colnames(t_stats)[9] <- "t_exon"
+  colnames(t_stats)[10] <- "P.Value_exon"
+  colnames(t_stats)[11] <- "adj.P.Val_exon"
   
   ## Add DE info  of exons' genes
   logFCs <- vector()
@@ -187,10 +187,10 @@ t_stat_exons_vs_genes<- function(expt){
   FDRs <- vector()
   
   for (i in 1:dim(t_stats)[1]){
-    logFC <- top_genes[which(top_genes$ensemblID==t_stats$gene_ensemblID[i]), "logFC"]
-    t<-top_genes[which(top_genes$ensemblID==t_stats$gene_ensemblID[i]), "t"]
-    pval <- top_genes[which(top_genes$ensemblID==t_stats$gene_ensemblID[i]), "P.Value"]
-    FDR<-top_genes[which(top_genes$ensemblID==t_stats$gene_ensemblID[i]), "adj.P.Val"]
+    logFC <- top_genes[which(top_genes$gencodeID==t_stats$gencodeID[i]), "logFC"]
+    t<-top_genes[which(top_genes$gencodeID==t_stats$gencodeID[i]), "t"]
+    pval <- top_genes[which(top_genes$gencodeID==t_stats$gencodeID[i]), "P.Value"]
+    FDR<-top_genes[which(top_genes$gencodeID==t_stats$gencodeID[i]), "adj.P.Val"]
     
     logFCs <- append(logFCs, logFC)
     t_genes <- append(t_genes, t)
@@ -223,8 +223,8 @@ t_stat_exons_vs_genes<- function(expt){
   ## and also label DE exons from genes with up and down exons
   
   ## Up and down exons' genes
-  exons_up_genes<-unique(de_exons[which(de_exons$logFC>0),"ensemblID"])
-  exons_down_genes<-unique(de_exons[which(de_exons$logFC<0),"ensemblID"])
+  exons_up_genes<-unique(de_exons[which(de_exons$logFC>0),"gencodeID"])
+  exons_down_genes<-unique(de_exons[which(de_exons$logFC<0),"gencodeID"])
   ## Genes with up and down exons
   interest_genes<-intersect(exons_up_genes, exons_down_genes)
   ## Retain only the exons' genes that were considered at the gene level
@@ -233,7 +233,7 @@ t_stat_exons_vs_genes<- function(expt){
   exon_symbols<-vector()
   for (i in 1:dim(t_stats)[1]) {
     
-    if (t_stats$DE[i]=="sig exon" & (abs(t_stats$t_exon[i])>6 | (t_stats$gene_ensemblID[i] %in% interest_genes))) {
+    if (t_stats$DE[i]=="sig exon" & (abs(t_stats$t_exon[i])>6 | (t_stats$gencodeID[i] %in% interest_genes))) {
       exon_symbols<-append(exon_symbols, paste(t_stats$gene_Symbol[i], "-", t_stats$seqname[i], ":", t_stats$start[i], "-",
                                                t_stats$end[i], sep=""))
     }
@@ -242,7 +242,7 @@ t_stat_exons_vs_genes<- function(expt){
         exon_symbols<-append(exon_symbols, paste(t_stats$gene_Symbol[i], "-", t_stats$seqname[i], ":", t_stats$start[i], "-",
                                                  t_stats$end[i], sep=""))
       }
-      else if((t_stats$gene_ensemblID[i] %in% interest_genes) & (t_stats$adj.P.Val_gene[i] <0.01)){
+      else if((t_stats$gencodeID[i] %in% interest_genes) & (t_stats$adj.P.Val_gene[i] <0.01)){
         exon_symbols<-append(exon_symbols, paste(t_stats$gene_Symbol[i], "-", t_stats$seqname[i], ":", t_stats$start[i], "-",
                                                  t_stats$end[i], sep=""))        
       }
@@ -291,6 +291,7 @@ t_stat_exons_vs_genes<- function(expt){
 #####################################
 expt<-"nicotine"
 t_stat_exons_vs_genes_nic <- t_stat_exons_vs_genes(expt)
+t_stat_exons_vs_genes_nic <- t_stat_exons_vs_genes_nic[,-17]
 save(t_stat_exons_vs_genes_nic, file="processed-data/04_DEA/Exon_analysis/t_stat_exons_vs_genes_nic.Rdata")
 write.table(t_stat_exons_vs_genes_nic, file = "processed-data/04_DEA/Exon_analysis/t_stat_exons_vs_genes_nic.csv", row.names = FALSE, col.names = TRUE, sep = '\t')
 
@@ -300,6 +301,7 @@ write.table(t_stat_exons_vs_genes_nic, file = "processed-data/04_DEA/Exon_analys
 #####################################
 expt<-"smoking"
 t_stat_exons_vs_genes_smo <- t_stat_exons_vs_genes(expt)
+t_stat_exons_vs_genes_smo <- t_stat_exons_vs_genes_smo[,-17]
 save(t_stat_exons_vs_genes_smo, file="processed-data/04_DEA/Exon_analysis/t_stat_exons_vs_genes_smo.Rdata")
 write.table(t_stat_exons_vs_genes_smo, file = "processed-data/04_DEA/Exon_analysis/t_stat_exons_vs_genes_smo.csv", row.names = FALSE, col.names = TRUE, sep = '\t')
 
