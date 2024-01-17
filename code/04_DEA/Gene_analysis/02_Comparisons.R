@@ -83,7 +83,7 @@ t_stat_plot <- function(top_genes1, top_genes2, name_1, name_2, model_name){
   rho_anno = paste0("rho = ", format(round(rho, 2), nsmall = 2))
   
   ## Colors and transparency
-  cols <- c("deeppink3", "thistle3","navajowhite2", "darkgrey") 
+  cols <- c("deeppink3", "thistle3","navajowhite3", "darkgrey") 
   names(cols)<-c("sig Both", paste0("sig ", name_1), paste0("sig ", name_2), "None")
   alphas <- c( 1, 1, 1,0.5)  
   names(alphas)<-c("sig Both", paste0("sig  ", name_1), paste0("sig ", name_2), "None")
@@ -104,7 +104,7 @@ t_stat_plot <- function(top_genes1, top_genes2, name_1, name_2, model_name){
          subtitle = rho_anno, 
          color = "Differential expression",
          parse = T) +
-    guides(alpha = 'none') + 
+    guides(alpha = 'none', color = guide_legend(override.aes = list(size=2))) + 
     theme_bw() +
     theme(plot.margin = unit(c(1,1,1,1), "cm"),
           axis.title = element_text(size = 12),
@@ -293,7 +293,7 @@ t_stat_plot_brain_blood_replication <- function(age_mouse, expt_mouse, feature){
            parse = T) +
       scale_color_manual(values = cols, labels=names(cols), drop = FALSE) + 
       scale_alpha_manual(values = alphas, labels=names(alphas), drop=FALSE) +
-      guides(alpha = 'none') + 
+      guides(alpha = 'none', color = guide_legend(override.aes = list(size=2))) + 
       geom_label_repel(aes(fontface = 'bold'), fill='white', color='black',
                        size=3.3,
                        max.overlaps = 15,
@@ -436,7 +436,7 @@ t_stat_plot_brain_blood_replication <- function(age_mouse, expt_mouse, feature){
            parse = T) +
       scale_color_manual(values = cols, labels=names(cols), drop = FALSE) + 
       scale_alpha_manual(values = alphas, labels=names(alphas), drop=FALSE) +
-      guides(alpha = 'none') + 
+      guides(alpha = 'none', color = guide_legend(override.aes = list(size=2))) + 
       geom_label_repel(aes(fontface = 'bold'), fill='white', color='black',
                        size=2,
                        max.overlaps = 3,
