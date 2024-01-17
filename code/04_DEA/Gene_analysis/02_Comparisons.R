@@ -1055,7 +1055,7 @@ t_stat_plot_human_in_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_
   }
   
   ## Colors and alphas for plot
-  cols <- c('blue', "deeppink3", "navajowhite2", "thistle3", "darkgrey") 
+  cols <- c('blue', "deeppink3", "yellow3", "thistle3", "darkgrey") 
   names(cols) <- c("Signif in both", "Replicating genes (FDR<0.1 in human, p<0.05 in mouse)", "Signif in human (FDR<0.1)", 
                    "Signif in mouse (FDR<0.05)", "ns genes")
   alphas <- c(1, 1, 1, 1, 0.5)  
@@ -1152,7 +1152,7 @@ t_stat_plot_human_in_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_
                      show.legend=FALSE) +
     scale_color_manual(values = cols, labels=names(cols), drop = FALSE) + 
     scale_alpha_manual(values = alphas, labels=names(alphas), drop=FALSE) +
-    guides(alpha = 'none') + 
+    guides(alpha = 'none', color = guide_legend(override.aes = list(size=2))) + 
     theme_bw() +
     theme(plot.margin = unit(c(1,1,1,1), "cm"),
           axis.title = element_text(size = 12),
