@@ -83,7 +83,7 @@ t_stat_plot <- function(top_genes1, top_genes2, name_1, name_2, model_name){
   rho_anno = paste0("rho = ", format(round(rho, 2), nsmall = 2))
   
   ## Colors and transparency
-  cols <- c("deeppink3", "thistle3","navajowhite3", "darkgrey") 
+  cols <- c("deeppink3", "thistle3","navajowhite2", "darkgrey") 
   names(cols)<-c("sig Both", paste0("sig ", name_1), paste0("sig ", name_2), "None")
   alphas <- c( 1, 1, 1,0.5)  
   names(alphas)<-c("sig Both", paste0("sig  ", name_1), paste0("sig ", name_2), "None")
