@@ -1,7 +1,10 @@
-raw-data/fastq
+raw-data/*
 processed-data/01_SPEAQeasy/pipeline_output
 processed-data/02_build_objects
-processed-data/03_EDA
+processed-data/03_EDA/*
+processed-data/04_DEA/*
+processed-data/05_GO_KEGG/*
+processed-data/07_Jxn_anno/*
 code/01_SPEAQeasy/.nextflow*
 .Rproj.user
 .Rhistory
