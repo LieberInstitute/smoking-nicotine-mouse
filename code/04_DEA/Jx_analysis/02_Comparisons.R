@@ -86,18 +86,18 @@ Novel_DEjxns_genes_smo <- novel_de_jxns_smo[which(!is.na(novel_de_jxns_smo))]
 
 ## Define groups of the nearest genes of Novel DE jxns without associated gene
 ## (No NAs)
-nearest_genes_nic <- unique(novel_jxns_foundGenes[["nearest_genes_nic"]]$geneIdVersion)
-nearest_genes_smo <- unique(novel_jxns_foundGenes[["nearest_genes_smo"]]$geneIdVersion)
+nearest_genes_nic <- unique(novel_jxns_foundGenes[["nearest_genes_nic"]])
+nearest_genes_smo <- unique(novel_jxns_foundGenes[["nearest_genes_smo"]])
 
 ## Define groups of the following genes of Novel DE jxns without associated gene
 ## (No NAs)
-following_genes_nic <- unique(novel_jxns_foundGenes[["following_genes_nic"]]$geneIdVersion)
-following_genes_smo <- unique(novel_jxns_foundGenes[["following_genes_smo"]]$geneIdVersion)
+following_genes_nic <- unique(novel_jxns_foundGenes[["following_genes_nic"]])
+following_genes_smo <- unique(novel_jxns_foundGenes[["following_genes_smo"]])
 
 ## Define groups of the preceding genes of Novel DE jxns without associated gene
 ## (No NAs)
-preceding_genes_nic <- unique(novel_jxns_foundGenes[["preceding_genes_nic"]]$geneIdVersion)
-preceding_genes_smo <- unique(novel_jxns_foundGenes[["preceding_genes_smo"]]$geneIdVersion)
+preceding_genes_nic <- unique(novel_jxns_foundGenes[["preceding_genes_nic"]])
+preceding_genes_smo <- unique(novel_jxns_foundGenes[["preceding_genes_smo"]])
 
 ## Define groups of AltStartEnd DE jxns' genes
 ## (No NAs)
