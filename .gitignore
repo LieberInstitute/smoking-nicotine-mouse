@@ -1,6 +1,7 @@
-raw-data/
-processed-data/01_SPEAQeasy
-processed-data/*
+raw-data/fastq
+processed-data/01_SPEAQeasy/pipeline_output
+processed-data/02_build_objects
+processed-data/03_EDA
 code/01_SPEAQeasy/.nextflow*
 .Rproj.user
 .Rhistory
