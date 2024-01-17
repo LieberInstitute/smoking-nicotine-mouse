@@ -53,4 +53,5 @@ Only at the gene level
 ## Internal 
 `TODO`
 * JHPCE locations:
-  * `/dcl01/lieber/ajaffe/lab/smokingMouse_Indirects`
+  * `/dcs05/lieber/marmaypag/smokingMouseGonzalez2023_LIBD001`
+  * (old location) `/dcl01/lieber/ajaffe/lab/smokingMouse_Indirects`
