@@ -25,6 +25,8 @@ load(here("processed-data/04_DEA/Gene_analysis/de_genes_pups_smoking_fitted.Rdat
 load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_smoking_fitted.Rdata"))
 load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_smoking_interaction.Rdata"))
 
+load(here("processed-data/04_DEA/Gene_analysis/top_genes_results.Rdata"))
+
 ## Pup brain Tx data 
 load(here("processed-data/04_DEA/Tx_analysis/top_tx_nic.Rdata"))
 load(here("processed-data/04_DEA/Tx_analysis/top_tx_smo.Rdata"))
@@ -62,7 +64,7 @@ add_DE_info <-function(top_genes1, top_genes2, name_1, name_2) {
     }
     
     else if (top_genes2$adj.P.Val[i]<0.05 && !top_genes1$adj.P.Val[i]<0.05) {
-      DE<-append(DE, paste("sig",name_2))
+      DE<-append(DE, paste("sig", name_2))
     }
     ## No DE genes in neither group
     else {
@@ -80,26 +82,35 @@ t_stat_plot <- function(top_genes1, top_genes2, name_1, name_2, model_name){
   rho <- cor(top_genes1$t, top_genes2$t, method = "spearman")
   rho_anno = paste0("rho = ", format(round(rho, 2), nsmall = 2))
   
+  ## Colors and transparency
+  cols <- c("deeppink3", "thistle3","navajowhite2", "darkgrey") 
+  names(cols)<-c("sig Both", paste0("sig ", name_1), paste0("sig ", name_2), "None")
+  alphas <- c( 1, 1, 1,0.5)  
+  names(alphas)<-c("sig Both", paste0("sig  ", name_1), paste0("sig ", name_2), "None")
+  
   ## Merge data
   t_stats<-data.frame(t1=top_genes1$t, t2=top_genes2$t)
   ## Add DE info for both groups
   t_stats$DEG<-add_DE_info(top_genes1, top_genes2, name_1, name_2)
-  
-  cols <- c("red", "#ffad73","#26b3ff", "dark grey") 
-  names(cols)<-c("sig Both", paste0("sig ", name_1), paste0("sig ", name_2), "None")
-  alphas <- c( 1, 1, 1,0.5)  
-  names(alphas)<-c("sig Both", paste0("sig ", name_1), paste0("sig ", name_2), "None")
+  t_stats$DEG <- factor(t_stats$DEG, levels=names(cols))
    
   plot <- ggplot(t_stats, aes(x = t1, y = t2, color=DEG, alpha=DEG)) +
-     geom_point(size = 1) +
+     geom_point(size = 1.5) +
+     scale_color_manual(values = cols, labels=names(cols), drop = FALSE) + 
+     scale_alpha_manual(values = alphas, labels=names(alphas), drop=FALSE) +
      labs(x = paste("t-stats", name_1), 
-          y = paste("t-stats", name_2),
-          title = model_name, 
-          subtitle = rho_anno, 
-          parse = T) +
-     theme_bw() +
-     scale_color_manual(values = cols) + 
-     scale_alpha_manual(values = alphas) 
+         y = paste("t-stats", name_2),
+         title = model_name, 
+         subtitle = rho_anno, 
+         color = "Differential expression",
+         parse = T) +
+    guides(alpha = 'none', color = guide_legend(override.aes = list(size=2))) + 
+    theme_bw() +
+    theme(plot.margin = unit(c(1,1,1,1), "cm"),
+          axis.title = element_text(size = 12),
+          axis.text = element_text(size = 10),
+          legend.text = element_text(size=11),
+          legend.title = element_text(size=12))
  return(plot)
 }
 
@@ -112,10 +123,10 @@ tstats_plots<-function(top_genes_pairs, name_1, name_2, models){
     p<-t_stat_plot(top_genes_pairs[[i]][[1]], top_genes_pairs[[i]][[2]], name_1, name_2, models[i])
     plots[[i]]<-p
   }
-  plot_grid(plots[[1]], plots[[2]], plots[[3]], ncol=2)
+  plot_grid(plots[[1]], plots[[2]], plots[[3]], ncol=2, align = 'hv')
   ggsave(filename=paste("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_",gsub(" ", "_", name_1), "_VS_",
                         gsub(" ", "_", name_2), ".pdf", sep=""), 
-                        height = 20, width = 25, units = "cm")
+                        height = 19, width = 27, units = "cm")
 }
 
 
@@ -170,6 +181,15 @@ t_stat_plot_brain_blood_replication <- function(age_mouse, expt_mouse, feature){
   ## Define blood dataset
   top_genes_blood <- top_genes_blood_smoking_fitted
   
+  ## Width of plot
+  if (age_mouse == "pups"){
+    width=22
+  }
+  else{
+    width=20.5
+  }
+  
+  # ----------------------------------------------------------------------------
   ## Compare blood genes vs brain genes
   if (feature=="genes"){
     
@@ -181,6 +201,20 @@ t_stat_plot_brain_blood_replication <- function(age_mouse, expt_mouse, feature){
     t_stats<-data.frame(ensemblID=rownames(top_genes_brain), gene_symbol=top_genes_brain$Symbol, t_blood=top_genes_blood$t, t_brain=top_genes_brain$t,
                         FDR_blood=top_genes_blood$adj.P.Val, FDR_brain=top_genes_brain$adj.P.Val, P.Val_blood=top_genes_blood$P.Value, P.Val_brain=top_genes_brain$P.Value,
                         logFC_blood=top_genes_blood$logFC, logFC_brain=top_genes_brain$logFC)
+    
+    ## Colors and alphas for plot
+    if (age_mouse=="pups"){
+      cols <- c("deeppink3", "thistle3", "darkgrey")
+      names(cols)<-c("Replicating genes (p<0.05 in blood, FDR<0.05 in brain)", "Signif in brain (FDR<0.05)", "ns genes")
+      alphas <- c(1, 1, 0.5)  
+      names(alphas)<-c("Replicating genes (p<0.05 in blood, FDR<0.05 in brain)", "Signif in brain (FDR<0.05)", "ns genes")
+    }
+    else {
+      cols <- c("deeppink3", "darkgrey") 
+      names(cols)<-c("Replicating genes (p<0.05 in blood and brain)", "ns genes")
+      alphas <- c(1, 0.3)  
+      names(alphas)<-c("Replicating genes (p<0.05 in blood and brain)", "ns genes")
+    }
    
     ## Add DE and replication info for each gene
     DE <-vector()
@@ -203,7 +237,7 @@ t_stat_plot_brain_blood_replication <- function(age_mouse, expt_mouse, feature){
         
         ## Non-significant genes 
         else {
-          DE<-append(DE, "n.s. genes")      
+          DE<-append(DE, "ns genes")      
         }
       }
       
@@ -216,30 +250,18 @@ t_stat_plot_brain_blood_replication <- function(age_mouse, expt_mouse, feature){
           DE<-append(DE, "Replicating genes (p<0.05 in blood and brain)")
         }
         else {
-          DE<-append(DE, "n.s. genes")      
+          DE<-append(DE, "ns genes")      
         }
       }
     }
     
     t_stats$DE<- DE
+    t_stats$DE <- factor(t_stats$DE, levels=names(cols))
     
     ## Correlation coeff between t-stats of blood vs brain genes 
     rho <- cor(t_stats$t_blood, t_stats$t_brain, method = "spearman")
     rho_anno = paste0("rho = ", format(round(rho, 2), nsmall = 2))
     
-    ## Colors and alphas for plot
-    if (age_mouse=="pups"){
-      cols <- c("red",   "#26b3ff", "dark grey") 
-      names(cols)<-c("Replicating genes (p<0.05 in blood, FDR<0.05 in brain)", "Signif in brain (FDR<0.05)", "n.s. genes")
-      alphas <- c(1, 1, 0.5)  
-      names(alphas)<-c("Replicating genes (p<0.05 in blood, FDR<0.05 in brain)", "Signif in brain (FDR<0.05)", "n.s. genes")
-    }
-    else {
-      cols <- c("red","dark grey") 
-      names(cols)<-c("Replicating genes (p<0.05 in blood and brain)", "n.s. genes")
-      alphas <- c(1, 0.5)  
-      names(alphas)<-c("Replicating genes (p<0.05 in blood and brain)", "n.s. genes")
-    }
     
     ## Add labels of interesting genes 
     
@@ -251,7 +273,7 @@ t_stat_plot_brain_blood_replication <- function(age_mouse, expt_mouse, feature){
     for (i in 1:dim(t_stats)[1]){
       ## Labels of the top 3 replicating genes
       if (t_stats$gene_symbol[i] %in% top_rep_genes){
-        label <- append(label, paste(t_stats$ensemblID[i], t_stats$gene_symbol[i], sep="-"))
+        label <- append(label,  t_stats$gene_symbol[i])
       }
       else{
         label <- append(label, NA)
@@ -262,23 +284,36 @@ t_stat_plot_brain_blood_replication <- function(age_mouse, expt_mouse, feature){
     
     ## Plot
     plot <- ggplot(t_stats, aes(x = t_brain, y = t_blood, color=DE, alpha=DE, label=label)) +
-      geom_point(size = 1) +
+      geom_point(size = 1.5) +
       labs(x = paste("t-stats in", capitalize(expt_mouse), substr(age_mouse, 1, nchar(age_mouse)-1), "brain"), 
            y = "t-stats in Smoking adult blood",
            title = paste(capitalize(expt_mouse), "mouse brain vs Smoking mouse blood", sep=" "), 
+           color = 'DE/Replication',
            subtitle = rho_anno, 
            parse = T) +
-      geom_label_repel(fill="white", size=2, max.overlaps = Inf,  
-                       box.padding = 0.2, 
+      scale_color_manual(values = cols, labels=names(cols), drop = FALSE) + 
+      scale_alpha_manual(values = alphas, labels=names(alphas), drop=FALSE) +
+      guides(alpha = 'none', color = guide_legend(override.aes = list(size=2))) + 
+      geom_label_repel(aes(fontface = 'bold'), fill='white', color='black',
+                       size=3.3,
+                       max.overlaps = 15,
+                       min.segment.length = unit(0, "cm"),
+                       point.padding = unit(0.1, "cm"),
+                       box.padding = 0.2,
+                       label.padding = 0.2,
+                       label.size = 0.2,
+                       nudge_y=0.9,
                        show.legend=FALSE) +
       theme_bw() +
-      scale_color_manual(values = cols) + 
-      scale_alpha_manual(values = alphas)
+      theme(plot.margin = unit(c(1,1,1,1), "cm"),
+            axis.title = element_text(size = 12),
+            axis.text = element_text(size = 10),
+            legend.text = element_text(size=11),
+            legend.title = element_text(size=12))
     
-    plot + theme(legend.text = element_text(size=8))
     plot
     ggsave(filename=paste("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_replication_", capitalize(expt_mouse), "_", substr(age_mouse, 1, nchar(age_mouse)-1),
-                          "_Brain_vs_Smoking_adult_Blood.pdf", sep=""), height = 12, width = 20, units = "cm")
+                          "_Brain_vs_Smoking_adult_Blood.pdf", sep=""), height = 12, width = width, units = "cm")
     
     
     ## Quantify the number of brain genes that replicate in blood
@@ -305,6 +340,7 @@ t_stat_plot_brain_blood_replication <- function(age_mouse, expt_mouse, feature){
 
   }
   
+  # ----------------------------------------------------------------------------
   ## Compare blood genes vs brain txs
   else {
     
@@ -334,7 +370,12 @@ t_stat_plot_brain_blood_replication <- function(age_mouse, expt_mouse, feature){
     t_stats$P.Val_gene<-P_val_tx_genes
     t_stats$logFC_gene<-logFC_tx_genes
   
-  
+    ## Colors and alphas for plot
+    cols <- c("deeppink3", "thistle3", "darkgrey") 
+    names(cols)<-c("Replicating txs (blood gene with p<0.05, brain tx with FDR<0.05)", "Signif txs in brain (FDR<0.05)", "ns txs")
+    alphas <- c(1, 1, 0.3)  
+    names(alphas)<-c("Replicating txs (blood gene with p<0.05, brain tx with FDR<0.05)", "Signif txs in brain (FDR<0.05)", "ns txs")
+    
     ## Add DE and replication info for each tx
     DE <-vector()
     for (i in 1:dim(t_stats)[1]) {
@@ -353,21 +394,16 @@ t_stat_plot_brain_blood_replication <- function(age_mouse, expt_mouse, feature){
       
       ## Non-significant txs
       else {
-        DE<-append(DE, "n.s. txs")      
+        DE<-append(DE, "ns txs")      
       }
     }
     
     t_stats$DE<- DE
+    t_stats$DE <- factor(t_stats$DE, levels=names(cols))
     
     ## Correlation coeff between t-stats of blood genes vs brain txs 
     rho <- cor(t_stats$t_gene, t_stats$t_tx, method = "spearman")
     rho_anno = paste0("rho = ", format(round(rho, 2), nsmall = 2))
-    
-    ## Colors and alphas for plot
-    cols <- c("red", "#26b3ff", "dark grey") 
-    names(cols)<-c("Replicating txs (blood gene with p<0.05, brain tx with FDR<0.05)", "Signif txs in brain (FDR<0.05)", "n.s. txs")
-    alphas <- c(1, 1, 0.5)  
-    names(alphas)<-c("Replicating txs (blood gene with p<0.05, brain tx with FDR<0.05)", "Signif txs in brain (FDR<0.05)", "n.s. txs")
     
     
     ## Add labels of interesting txs and their genes
@@ -391,23 +427,36 @@ t_stat_plot_brain_blood_replication <- function(age_mouse, expt_mouse, feature){
     
     ## Plot
     plot <- ggplot(t_stats, aes(x = t_tx, y = t_gene, color=DE, alpha=DE, label=label)) +
-      geom_point(size = 1) +
+      geom_point(size = 1.5) +
       labs(x = paste("t-stats of txs from", capitalize(expt_mouse), "pup brain"), 
            y = "t-stats of genes from Smoking adult blood",
            title = paste(capitalize(expt_mouse), "mouse brain vs Smoking mouse blood", sep=" "), 
            subtitle = rho_anno, 
+           color = 'DE/Replication',
            parse = T) +
-      geom_label_repel(fill="white", size=2, max.overlaps = Inf,  
-                       box.padding = 0.2, 
+      scale_color_manual(values = cols, labels=names(cols), drop = FALSE) + 
+      scale_alpha_manual(values = alphas, labels=names(alphas), drop=FALSE) +
+      guides(alpha = 'none', color = guide_legend(override.aes = list(size=2))) + 
+      geom_label_repel(aes(fontface = 'bold'), fill='white', color='black',
+                       size=2,
+                       max.overlaps = 3,
+                       min.segment.length = unit(0, "cm"),
+                       point.padding = unit(0.1, "cm"),
+                       box.padding = 0.2,
+                       label.padding = 0.2,
+                       label.size = 0.2,
+                       nudge_y=0.9,
                        show.legend=FALSE) +
       theme_bw() +
-      scale_color_manual(values = cols) + 
-      scale_alpha_manual(values = alphas)
+      theme(plot.margin = unit(c(1,1,1,1), "cm"),
+            axis.title = element_text(size = 12),
+            axis.text = element_text(size = 10),
+            legend.text = element_text(size=11),
+            legend.title = element_text(size=12))
     
-    plot + theme(legend.text = element_text(size=8))
     plot
     ggsave(filename=paste("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_replication_", capitalize(substr(expt_mouse, 1, 3)), 
-                          "PupBrain_Tx_vs_SmoAdultBlood_Genes.pdf", sep=""), height = 12, width = 20, units = "cm")
+                          "PupBrain_Tx_vs_SmoAdultBlood_Genes.pdf", sep=""), height = 12, width = width, units = "cm")
     
     
     ## Quantify the number of brain txs that replicate in blood
@@ -463,19 +512,17 @@ save(top_genes_pups_nicotine_fitted, file="processed-data/04_DEA/Gene_analysis/t
 
 
 
-
 ################### 1.2.2 Brain txs vs blood genes ###################
 
 ####### Smoking adult blood (genes) vs Smoking pup brain Txs #######
-Blood_vs_SmoPupBrainTx_data <- t_stat_plot_brain_blood_replication(age_mouse = NULL, expt_mouse = "smoking", feature = "txs")
+Blood_vs_SmoPupBrainTx_data <- t_stat_plot_brain_blood_replication(age_mouse = 'pups', expt_mouse = "smoking", feature = "txs")
 ## "112 out of 4059 DE txs in smoking pup brain (FDR<0.05) replicate in smoking adult blood genes (with p<0.05 and same logFC direction) - 2.76%"
 save(Blood_vs_SmoPupBrainTx_data, file="processed-data/04_DEA/Gene_analysis/Blood_vs_SmoPupBrainTx_data.Rdata")
                                   
 ####### Smoking adult blood (genes) vs Nicotine pup brain Txs #######
-Blood_vs_NicPupBrainTx_data <- t_stat_plot_brain_blood_replication(age_mouse = NULL, expt_mouse = "nicotine", feature = "txs")
+Blood_vs_NicPupBrainTx_data <- t_stat_plot_brain_blood_replication(age_mouse = 'pups', expt_mouse = "nicotine", feature = "txs")
 ## "9 out of 232 DE txs in nicotine pup brain (FDR<0.05) replicate in smoking adult blood genes (with p<0.05 and same logFC direction) - 3.88%"
 save(Blood_vs_NicPupBrainTx_data, file="processed-data/04_DEA/Gene_analysis/Blood_vs_NicPupBrainTx_data.Rdata")
-
 
 
 ## (See code below to search for mouse blood genes that replicate in human brain and human brain genes that replicate in mouse blood)
@@ -576,6 +623,7 @@ common_genes <- human_mouse_ids[which(human_mouse_ids$mmusculus_homolog_ensembl_
 common_genes$human_ensembl_gene_id <- common_genes$ensembl_gene_id
 common_genes$ensembl_gene_id <- NULL
 
+
 ## Create plots to check if mouse genes replicate (FDR<5% for pups and p-value<5% for adults) in human brain (with p-value<5% and same logFC sign)
 t_stat_plot_mouse_in_human <- function(age_mouse, expt_mouse, tissue_mouse, age_human){
   
@@ -615,6 +663,28 @@ t_stat_plot_mouse_in_human <- function(age_mouse, expt_mouse, tissue_mouse, age_
     human_mouse_data[i,] <- cbind(common_genes[i,], mouse_data, human_data)
   }
   
+  ## Width of plot
+  if (age_mouse == "pups"){
+    width=23
+  }
+  else{
+    width=21.5
+  }
+  
+  ## Colors and alphas for plot
+  if (age_mouse=="pups"){
+    cols <- c('blue', "deeppink3", "thistle3", "navajowhite2", "darkgrey") 
+    names(cols) <- c("Signif in both", "Replicating genes (p<0.05 in human, FDR<0.05 in mouse)", "Signif in mouse (FDR<0.05)", "Signif in human (FDR<0.1)", "ns genes")
+    alphas <- c(1, 1, 1, 1, 0.5)  
+    names(alphas) <- names(cols)
+  }
+  else {
+    cols <- c("blue", "deeppink3", "navajowhite2", "darkgrey") 
+    names(cols) <- c("Signif in both", "Replicating genes (p<0.05 in human and mouse)", "Signif in human (FDR<0.1)", "ns genes")
+    alphas <- c(1, 1, 1, 0.5)  
+    names(alphas) <- names(cols)
+  }
+  
   ## Add DE and replication info of each gene
   DE<-vector()
   for (i in 1:dim(human_mouse_data)[1]) {
@@ -645,7 +715,7 @@ t_stat_plot_mouse_in_human <- function(age_mouse, expt_mouse, tissue_mouse, age_
   
       ## Non-significant genes 
       else {
-        DE<-append(DE, "n.s. genes")      
+        DE<-append(DE, "ns genes")      
       }
     }
     
@@ -664,36 +734,23 @@ t_stat_plot_mouse_in_human <- function(age_mouse, expt_mouse, tissue_mouse, age_
         DE<-append(DE, "Replicating genes (p<0.05 in human and mouse)")
       }
       else {
-        DE<-append(DE, "n.s. genes")      
+        DE<-append(DE, "ns genes")      
       }
     }
   }
   
   human_mouse_data$DE<- DE
+  human_mouse_data$DE <- factor(human_mouse_data$DE, levels=names(cols))
   
   ## Correlation coeff between t-stats of genes in human and mouse
   rho <- cor(human_mouse_data$t_human, human_mouse_data$t_mouse, method = "spearman")
   rho_anno = paste0("rho = ", format(round(rho, 2), nsmall = 2))
   
-  ## Colors and alphas for plot
-  if (age_mouse=="pups"){
-    cols <- c("mediumorchid2", "#ffad73", "red", "#26b3ff", "dark grey") 
-    names(cols)<-c("Signif in both", "Signif in human (FDR<0.1)", "Replicating genes (p<0.05 in human, FDR<0.05 in mouse)","Signif in mouse (FDR<0.05)", "n.s. genes")
-    alphas <- c(1, 1, 1, 1, 0.5)  
-    names(alphas)<-c("Signif in both", "Signif in human (FDR<0.1)", "Replicating genes (p<0.05 in human, FDR<0.05 in mouse)","Signif in mouse (FDR<0.05)", "n.s. genes")
-  }
-  else {
-    cols <- c("mediumorchid2", "#ffad73", "red","dark grey") 
-    names(cols)<-c("Signif in both", "Signif in human (FDR<0.1)", "Replicating genes (p<0.05 in human and mouse)","n.s. genes")
-    alphas <- c(1, 1, 1, 0.5)  
-    names(alphas)<-c("Signif in both", "Signif in human (FDR<0.1)", "Replicating genes (p<0.05 in human and mouse)","n.s. genes")
-  }
-  
   
   ## Add labels of interesting genes 
 
   ## 3 most significant replicating genes in human
-  rep_genes <- human_mouse_data[which(human_mouse_data$DE==names(alphas)[3]),]
+  rep_genes <- human_mouse_data[which(human_mouse_data$DE==names(alphas)[2]),]
   top_rep_genes <- rep_genes[order(rep_genes$adj.P.Val_human),"gene_symbol_human"][1:3]
   
   label <- vector()
@@ -716,23 +773,37 @@ t_stat_plot_mouse_in_human <- function(age_mouse, expt_mouse, tissue_mouse, age_
   
   ## Plot
   plot <- ggplot(human_mouse_data, aes(x = t_mouse, y = t_human, color=DE, alpha=DE, label=label)) +
-    geom_point(size = 1) +
-    labs(x = paste("t-stats in", substr(age_mouse, 1, nchar(age_mouse)-1), "mouse", tissue_mouse), 
-         y = paste("t-stats in", age_human, "human brain"),
-         title = paste(capitalize(expt_mouse),"mouse vs Smoking human", sep=" "), 
-         subtitle = rho_anno, 
-         parse = T) +
-    geom_label_repel(fill="white", size=2, max.overlaps = Inf,  
-                     box.padding = 0.2, 
+    geom_point(size = 1.5) +
+    geom_label_repel(aes(fontface = 'bold'), fill='white', color='black',
+                     size=3.3,
+                     max.overlaps = 15,
+                     min.segment.length = unit(0, "cm"),
+                     point.padding = unit(0.1, "cm"),
+                     box.padding = 0.2,
+                     label.padding = 0.2,
+                     label.size = 0.2,
+                     nudge_y=0.9,
                      show.legend=FALSE) +
+    scale_color_manual(values = cols, labels=names(cols), drop = FALSE) + 
+    scale_alpha_manual(values = alphas, labels=names(alphas), drop=FALSE) +
+      labs(x = paste("t-stats in", substr(age_mouse, 1, nchar(age_mouse)-1), "mouse", tissue_mouse), 
+           y = paste("t-stats in", age_human, "human brain"),
+           title = paste(capitalize(expt_mouse),"mouse vs Smoking human", sep=" "), 
+           subtitle = rho_anno, 
+           color='DE/Replication',
+           parse = T) +
+    guides(alpha = 'none') + 
     theme_bw() +
-    scale_color_manual(values = cols) + 
-    scale_alpha_manual(values = alphas)
+    theme(plot.margin = unit(c(1,1,1,1), "cm"),
+          axis.title = element_text(size = 12),
+          axis.text = element_text(size = 10),
+          legend.text = element_text(size=11),
+          legend.title = element_text(size=12))
   
-  plot + theme(legend.text = element_text(size=8))
+  
   plot
   ggsave(filename=paste("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_", age_human, "_Human_vs_Mouse_", age_mouse, "_", substr(expt_mouse,1,3), "_", 
-                        tissue_mouse, ".pdf", sep=""), height = 12, width = 20, units = "cm")
+                        tissue_mouse, ".pdf", sep=""), height = 12, width = width, units = "cm")
   
   
   ## Quantify mouse genes that replicate in human
@@ -742,7 +813,7 @@ t_stat_plot_mouse_in_human <- function(age_mouse, expt_mouse, tissue_mouse, age_
   ## Total unique adult brain genes with p<0.05
   total_adults_P_val_genes=length(unique(top_genes[which(top_genes$P.Val<0.05),"ensemblID"]))
   ## Unique replicating genes 
-  rep_genes=length(unique(human_mouse_data[which(human_mouse_data$DE==names(alphas)[3]),"mmusculus_homolog_ensembl_gene"]))
+  rep_genes=length(unique(human_mouse_data[which(human_mouse_data$DE==names(alphas)[2]),"mmusculus_homolog_ensembl_gene"]))
   
   if (age_mouse=="pups"){
     ## Percentage 
@@ -778,7 +849,7 @@ save(top_genes_pups_nicotine_fitted, file="processed-data/04_DEA/Gene_analysis/t
 ##  Smoking mouse pup brain vs Smoking human prenatal brain 
 ################################################################
 prenatalHuman_pupSmoMouse_data <- t_stat_plot_mouse_in_human(age_mouse = "pups", tissue_mouse = "brain", expt_mouse = "smoking", age_human = "prenatal")
-## "267 out of 4165 DEG in smoking mouse pup brain (FDR<0.05) replicate in smoking human prenatal brain (with p<0.05 and same logFC direction) - 6.41%"
+## "266 out of 4165 DEG in smoking mouse pup brain (FDR<0.05) replicate in smoking human prenatal brain (with p<0.05 and same logFC direction) - 6.39%"
 save(prenatalHuman_pupSmoMouse_data, file="processed-data/04_DEA/Gene_analysis/prenatalHuman_pupSmoMouse_data.Rdata")
 top_genes_pups_smoking_fitted$replication_in_prenatalHumanBrain <- apply(top_genes_pups_smoking_fitted, 1, function(x){prenatalHuman_pupSmoMouse_data[match(x["ensemblID"], prenatalHuman_pupSmoMouse_data$mmusculus_homolog_ensembl_gene), "DE"]})
 save(top_genes_pups_smoking_fitted, file="processed-data/04_DEA/Gene_analysis/top_genes_pups_smoking_fitted.Rdata")
@@ -808,7 +879,7 @@ save(top_genes_adults_smoking_fitted, file="processed-data/04_DEA/Gene_analysis/
 ##  Smoking adult mouse blood vs Smoking human prenatal brain 
 ################################################################
 prenatalHuman_bloodMouse_data <- t_stat_plot_mouse_in_human(age_mouse = "adults", tissue_mouse = "blood", expt_mouse = "smoking", age_human = "prenatal")
-## "101 out of 1499 genes in smoking adult mouse blood (p<0.05) replicate in smoking human prenatal brain (also p<0.05 and same logFC direction) - 6.74%"
+## "100 out of 1499 genes in smoking adult mouse blood (p<0.05) replicate in smoking human prenatal brain (also p<0.05 and same logFC direction) - 6.67%"
 save(prenatalHuman_bloodMouse_data, file="processed-data/04_DEA/Gene_analysis/prenatalHuman_bloodMouse_data.Rdata")
 top_genes_blood_smoking_fitted$replication_in_prenatalHumanBrain <- apply(top_genes_blood_smoking_fitted, 1, function(x){prenatalHuman_bloodMouse_data[match(x["ensemblID"], prenatalHuman_bloodMouse_data$mmusculus_homolog_ensembl_gene), "DE"]})
 save(top_genes_blood_smoking_fitted, file="processed-data/04_DEA/Gene_analysis/top_genes_blood_smoking_fitted.Rdata")
@@ -847,7 +918,7 @@ save(top_genes_adults_nicotine_fitted, file="processed-data/04_DEA/Gene_analysis
 ################################################################
 ##  Smoking adult mouse brain vs Smoking human adult brain 
 ################################################################
-adultHuman_adultSmoMouse_data <- t_stat_plot_mouse_in_human(age_mouse = "adults", tissue_mouse = "brain", expt_mouse = "smoking", age_human = "adult")
+adultHuman_adultNicMouse_data <- t_stat_plot_mouse_in_human(age_mouse = "adults", tissue_mouse = "brain", expt_mouse = "smoking", age_human = "adult")
 ## "9 out of 772 genes in smoking adult mouse brain (p<0.05) replicate in smoking human adult brain (also p<0.05 and same logFC direction) - 1.17%"
 save(adultHuman_adultSmoMouse_data, file="processed-data/04_DEA/Gene_analysis/adultHuman_adultSmoMouse_data.Rdata")
 top_genes_adults_smoking_fitted$replication_in_adultHumanBrain <- apply(top_genes_adults_smoking_fitted, 1, function(x){adultHuman_adultSmoMouse_data[match(x["ensemblID"], adultHuman_adultSmoMouse_data$mmusculus_homolog_ensembl_gene), "DE"]})
@@ -863,6 +934,28 @@ save(adultHuman_bloodMouse_data, file="processed-data/04_DEA/Gene_analysis/adult
 top_genes_blood_smoking_fitted$replication_in_adultHumanBrain <- apply(top_genes_blood_smoking_fitted, 1, function(x){adultHuman_bloodMouse_data[match(x["ensemblID"], adultHuman_bloodMouse_data$mmusculus_homolog_ensembl_gene), "DE"]})
 save(top_genes_blood_smoking_fitted, file="processed-data/04_DEA/Gene_analysis/top_genes_blood_smoking_fitted.Rdata")
 
+
+## Condensate results in human and mice
+human_and_mice_DGE_results <- cbind(prenatalHuman_pupNicMouse_data[,c("mmusculus_homolog_ensembl_gene", "mmusculus_homolog_associated_gene_name", 
+                                                                      "human_ensembl_gene_id", "gene_symbol_human", 
+                                                                      "logFC_human", "t_human", "P.Value_human", "adj.P.Val_human")], 
+                                    adultHuman_bloodMouse_data[, c("logFC_human", "t_human", "P.Value_human", "adj.P.Val_human")], 
+                                    prenatalHuman_bloodMouse_data[,c("logFC_mouse", "t_mouse", "P.Value_mouse", "adj.P.Val_mouse")],
+                                    prenatalHuman_adultNicMouse_data[,c("logFC_mouse", "t_mouse", "P.Value_mouse", "adj.P.Val_mouse")],
+                                    prenatalHuman_adultSmoMouse_data[,c("logFC_mouse", "t_mouse", "P.Value_mouse", "adj.P.Val_mouse")],
+                                    prenatalHuman_pupNicMouse_data[,c("logFC_mouse", "t_mouse", "P.Value_mouse", "adj.P.Val_mouse")],
+                                    prenatalHuman_pupSmoMouse_data[,c("logFC_mouse", "t_mouse", "P.Value_mouse", "adj.P.Val_mouse")])
+
+colnames(human_and_mice_DGE_results)[5:32] <- c(paste0(c("logFC", "t", "P.Value", 'adj.P.Val'), '_human_prenatal_brain_smoking'),
+                                                paste0(c("logFC", "t", "P.Value", 'adj.P.Val'), '_human_adult_brain_smoking'),
+                                                paste0(c("logFC", "t", "P.Value", 'adj.P.Val'), '_mouse_blood_adult_smoking'),
+                                                paste0(c("logFC", "t", "P.Value", 'adj.P.Val'), '_mouse_brain_adult_nicotine'),
+                                                paste0(c("logFC", "t", "P.Value", 'adj.P.Val'), '_mouse_brain_adult_smoking'),
+                                                paste0(c("logFC", "t", "P.Value", 'adj.P.Val'), '_mouse_brain_pup_nicotine'),
+                                                paste0(c("logFC", "t", "P.Value", 'adj.P.Val'), '_mouse_brain_pup_smoking'))
+
+save(human_and_mice_DGE_results, file="processed-data/04_DEA/Gene_analysis/human_and_mice_DGE_results.Rdata")
+write.table(human_and_mice_DGE_results, file="processed-data/04_DEA/Gene_analysis/human_and_mice_DGE_results.csv", row.names = FALSE, col.names = TRUE, sep = '\t')
 
 
 
@@ -982,6 +1075,24 @@ t_stat_plot_human_in_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_
     human_mouse_data[i,] <- cbind(common_genes[i,], mouse_data, human_data)
   }
   
+  ## Colors and alphas for plot
+  cols <- c('blue', "deeppink3", "navajowhite2", "thistle3", "darkgrey") 
+  names(cols) <- c("Signif in both", "Replicating genes (FDR<0.1 in human, p<0.05 in mouse)", "Signif in human (FDR<0.1)", 
+                   "Signif in mouse (FDR<0.05)", "ns genes")
+  alphas <- c(1, 1, 1, 1, 0.5)  
+  names(alphas) <- names(cols)
+  
+  ## Width of plot
+  if (age_mouse == "pups"){
+    width=23
+  }
+  else if (tissue_mouse == "blood"){
+    width=22.5
+  }
+  else{
+    width=21.5
+  }
+  
   ## Add DE and replication info of each gene
   DE<-vector()
   for (i in 1:dim(human_mouse_data)[1]) {
@@ -1009,24 +1120,16 @@ t_stat_plot_human_in_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_
     
     ## Non-significant genes 
     else {
-      DE<-append(DE, "n.s. genes")      
+      DE<-append(DE, "ns genes")      
     }
   }
   
   human_mouse_data$DE<- DE
+  human_mouse_data$DE <- factor(human_mouse_data$DE, levels=names(cols))
   
   ## Correlation coeff between t-stats of genes in human and mouse
   rho <- cor(human_mouse_data$t_human, human_mouse_data$t_mouse, method = "spearman")
   rho_anno = paste0("rho = ", format(round(rho, 2), nsmall = 2))
-  
-  ## Colors and alphas for plot
-  cols <- c("mediumorchid2", "red", "#ffad73", "#26b3ff", "dark grey") 
-  names(cols)<-c("Signif in both", "Replicating genes (FDR<0.1 in human, p<0.05 in mouse)", "Signif in human (FDR<0.1)", 
-                 "Signif in mouse (FDR<0.05)", "n.s. genes")
-  alphas <- c(1, 1, 1, 1, 0.5)  
-  names(alphas)<-c("Signif in both", "Replicating genes (FDR<0.1 in human, p<0.05 in mouse)", "Signif in human (FDR<0.1)", 
-                   "Signif in mouse (FDR<0.05)", "n.s. genes")
-  
   
   ## Add labels of replicating human genes 
   rep_genes <- human_mouse_data[which(human_mouse_data$DE==names(alphas)[2]), "gene_symbol_human"]
@@ -1051,23 +1154,36 @@ t_stat_plot_human_in_mouse <- function(age_mouse, expt_mouse, tissue_mouse, age_
   
   ## Plot
   plot <- ggplot(human_mouse_data, aes(x = t_human, y = t_mouse, color=DE, alpha=DE, label=label)) +
-    geom_point(size = 1) +
+    geom_point(size = 1.5) +
     labs(x = paste("t-stats in", age_human, "human brain"), 
          y = paste("t-stats in", substr(age_mouse, 1, nchar(age_mouse)-1), "mouse", tissue_mouse),
          title = paste("Smoking human vs", capitalize(expt_mouse), "mouse", sep=" "), 
          subtitle = rho_anno, 
+         color='DE/Replication',
          parse = T) +
-    geom_label_repel(fill="white", size=2, max.overlaps = Inf,  
-                     box.padding = 0.2, 
+    geom_label_repel(aes(fontface = 'bold'), fill='white', color='black',
+                     size=3.3,
+                     max.overlaps = 15,
+                     min.segment.length = unit(0, "cm"),
+                     point.padding = unit(0.1, "cm"),
+                     box.padding = 0.2,
+                     label.padding = 0.2,
+                     label.size = 0.2,
+                     nudge_y=0.9,
                      show.legend=FALSE) +
+    scale_color_manual(values = cols, labels=names(cols), drop = FALSE) + 
+    scale_alpha_manual(values = alphas, labels=names(alphas), drop=FALSE) +
+    guides(alpha = 'none') + 
     theme_bw() +
-    scale_color_manual(values = cols) + 
-    scale_alpha_manual(values = alphas)
+    theme(plot.margin = unit(c(1,1,1,1), "cm"),
+          axis.title = element_text(size = 12),
+          axis.text = element_text(size = 10),
+          legend.text = element_text(size=11),
+          legend.title = element_text(size=12))
   
-  plot + theme(legend.text = element_text(size=8))
   plot
   ggsave(filename=paste("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_replication_", age_human, "_Human_in_Mouse_", age_mouse, "_", substr(expt_mouse,1,3), "_", 
-                        tissue_mouse, ".pdf", sep=""), height = 12, width = 20, units = "cm")
+                        tissue_mouse, ".pdf", sep=""), height = 12, width = width, units = "cm")
   
 }
 
@@ -1500,7 +1616,7 @@ venn_human_vs_mouse("adultHuman_bloodMouse_data", "adult", "smoking", "blood", "
 ## The following datasets contain genome-wide significant (GWS) lead SNPs (p<5.00E-08) in loci associated with TUD, as well as
 ## the nearest genes of those SNPs: 
 
-## TUD-multi+UKBB data resulted from a multi-ancestral GWAS meta-analysis of TUD cases and controls in individuals from 8 cohorts (including UKBB) with European (EUR), African American (AA) and Latin American (LA) ancestry.
+## TUD-multi+UKBB data resulted from a multi-ancestral GWAS meta-analysis of TUD cases and controls in individuals from 8 cohorts (including UKBB), with European (EUR), African American (AA) and Latin American (LA) ancestry.
 TUD_multi_UKBB <- as.data.frame(TUD_multi_UKBB)
 colnames(TUD_multi_UKBB) <- TUD_multi_UKBB[1,]
 TUD_multi_UKBB <- TUD_multi_UKBB[-1,]
@@ -1517,26 +1633,26 @@ TUD_AA <- as.data.frame(TUD_AA)
 colnames(TUD_AA) <- TUD_AA[1,]
 TUD_AA <- TUD_AA[-1,]
 
-## Of note: no GWS loci were identified in LA individuals from the single cohort used
+## Of note: no GWS loci were identified in LA individuals from the single cohort used.
 
 
 ## The next datasets contain information of significant genes associated with EUR-SNPs (candidate risk genes)
-## The SNPs were obtained from the TUD-EUR GWAS (that didn't add the UKBB cohort): 
+## The SNPs were obtained from the TUD-EUR GWAS (that didn't consider the UKBB cohort): 
 
-## TUD-EUR-MAGMA dataset has data of genes significantly associated with the SNPs (p<2.63E-06), obtained using MAGMA.
+## TUD-EUR-MAGMA dataset has data of genes significantly associated with TUD (p<2.63E-06), obtained using MAGMA.
 TUD_EUR_MAGMA <- as.data.frame(TUD_EUR_MAGMA)
 colnames(TUD_EUR_MAGMA) <- TUD_EUR_MAGMA[1,]
 TUD_EUR_MAGMA <- TUD_EUR_MAGMA[-1,]
 
-## TUD-EUR-H-MAGMA dataset contains neurobiologically relevant target genes: brain genes associated with TUD (p<9.44E-07),
-## including certain cell-types or developmental stages in which they're specifically expressed. They were obtained with H-MAGMA.
+## TUD-EUR-H-MAGMA dataset contains neurobiologically relevant target genes: brain-related genes associated with TUD (p<9.44E-07),
+## especially expressed in certain cell-types or developmental stages of the brain. They were obtained with H-MAGMA.
 TUD_EUR_H_MAGMA <- as.data.frame(TUD_EUR_H_MAGMA)
 colnames(TUD_EUR_H_MAGMA) <- TUD_EUR_H_MAGMA[1,]
 TUD_EUR_H_MAGMA <- TUD_EUR_H_MAGMA[-1,]
 ## Remove empty last line
 TUD_EUR_H_MAGMA <- TUD_EUR_H_MAGMA[-dim(TUD_EUR_H_MAGMA)[1],]
 
-## TUD-EUR-S-MultiXcan contains significant predicted genes whose expression is affected by the SNPs in brain tissues.
+## TUD-EUR-S-MultiXcan contains significant genes whose predicted expression is affected by the EUR-SNPs in brain regions.
 ## The analysis was performed using S-MultiXcan
 TUD_EUR_S_MultiXcan<- as.data.frame(TUD_EUR_S_MultiXcan)
 colnames(TUD_EUR_S_MultiXcan) <- TUD_EUR_S_MultiXcan[1,]
@@ -1544,7 +1660,7 @@ TUD_EUR_S_MultiXcan <- TUD_EUR_S_MultiXcan[-1,]
 ## Remove empty last line
 TUD_EUR_S_MultiXcan <- TUD_EUR_S_MultiXcan[-dim(TUD_EUR_S_MultiXcan)[1],]
 
-## TUD-EUR-S-PrediXcan has affected genes in specific brain regions, returned by S-PrediXcan. 
+## TUD-EUR-S-PrediXcan has affected genes by the EUR-SNPs in specific brain regions, returned by S-PrediXcan. 
 TUD_EUR_S_PrediXcan <- as.data.frame(TUD_EUR_S_PrediXcan)
 colnames(TUD_EUR_S_PrediXcan) <- TUD_EUR_S_PrediXcan[1,]
 TUD_EUR_S_PrediXcan<- TUD_EUR_S_PrediXcan[-1,]
@@ -1556,20 +1672,19 @@ TUD_EUR_S_PrediXcan<- TUD_EUR_S_PrediXcan[-1,]
 TUD_multi_UKBB_nearestGenes <- as.vector(na.omit(TUD_multi_UKBB$Nearest_Gene))
 TUD_EUR_UKBB_nearestGenes <- as.vector(na.omit(TUD_EUR_UKBB$Nearest_Gene))
 TUD_AA_nearestGenes <- as.vector(na.omit(TUD_AA$Nearest_Gene))
-
 ## Associated genes
 TUD_EUR_MAGMA_associatedGenes <- as.vector(na.omit(TUD_EUR_MAGMA$SYMBOL))
-## Associated brain genes
+## Neurobiologically relevant genes
 TUD_EUR_H_MAGMA_associatedGenes <- as.vector(na.omit(TUD_EUR_H_MAGMA$SYMBOL))
-## Associated genes specific of fetal human brain
+## Neurobiologically relevant genes of fetal human brain
 TUD_EUR_H_MAGMA_fetal_associatedGenes <- as.vector(na.omit(TUD_EUR_H_MAGMA[which(TUD_EUR_H_MAGMA$Type=="Fetal_brain"), "SYMBOL"]))
-## Associated genes specific of adult human brain
+## Neurobiologically relevant genes of adult human brain
 TUD_EUR_H_MAGMA_adult_associatedGenes <- as.vector(na.omit(TUD_EUR_H_MAGMA[which(TUD_EUR_H_MAGMA$Type=="Adult_brain"), "SYMBOL"]))
-## Affected genes in brain
+## Affected genes in brain regions
 TUD_EUR_S_MultiXcan_associatedGenes <- as.vector(na.omit(TUD_EUR_S_MultiXcan$gene_name))
+## Affected genes in specific brain regions
 TUD_EUR_S_PrediXcan_associatedGenes <- as.vector(na.omit(TUD_EUR_S_PrediXcan$`gene name`))
 ## Affected genes in frontal cortex (FC)
-TUD_EUR_S_MultiXcan_FrontalCortex_associatedGenes <- as.vector(na.omit(TUD_EUR_S_MultiXcan[which(TUD_EUR_S_MultiXcan$t_i_best=="Frontal_Cortex_BA9"), "gene_name"]))
 TUD_EUR_S_PrediXcan_FrontalCortex_associatedGenes <- as.vector(na.omit(TUD_EUR_S_PrediXcan[which(TUD_EUR_S_PrediXcan$tissue=="Brain Frontal Cortex BA9"), "gene name"]))
 
 
@@ -1582,8 +1697,21 @@ venn_humanGWASGenes_vs_mouseDEG <- function (human_dataset, name, human_genes_de
                              dataset    = "hsapiens_gene_ensembl",
                              attributes = c("mmusculus_homolog_associated_gene_name"),
                              filters    = "external_gene_name")
-  ## Remove empty chars  and repeated mouse genes 
+  ## Remove empty chars and repeated mouse genes 
   mouse_genes <- unique(human_mouse_genes$mmusculus_homolog_associated_gene_name[human_mouse_genes$mmusculus_homolog_associated_gene_name!=""])
+  
+  ## Save gene sets
+  ## Nic DEG vs mouse homologs 
+  nic_overlapping_genes <- intersect(mouse_genes, de_genes_pups_nicotine_fitted$Symbol)
+  ## Smo DEG vs mouse homologs 
+  smo_overlapping_genes <- intersect(mouse_genes, de_genes_pups_smoking_fitted$Symbol)
+  ## Compare nicotine and smoking overlapping genes 
+  nicOverl_vs_smoOverl_genes <- intersect(nic_overlapping_genes, smo_overlapping_genes)
+  
+  overlapping_genes <- list("Nic Overlapping Genes" = nic_overlapping_genes, 
+                            "Smo Overlapping Genes" = smo_overlapping_genes, 
+                            "Intersection of Nic and Smo Overlapping Genes" = nicOverl_vs_smoOverl_genes)
+  
   
   ## Venn diagrams
   nic_genes<-list(
@@ -1594,125 +1722,169 @@ venn_humanGWASGenes_vs_mouseDEG <- function (human_dataset, name, human_genes_de
     "Mouse homologs of TUD-associated human genes" = mouse_genes,
     "DEG in smoking mouse pups" = de_genes_pups_smoking_fitted$Symbol
     )
+  overl_genes <- list(
+    "Overlapping genes in nicotine" = nic_overlapping_genes,
+    "Overlapping genes in smoking" = smo_overlapping_genes
+  )
   
-  genes_lists<-list(nic_genes, smo_genes)
-  colors<-list(c("firebrick3", "brown1"), c("dodgerblue2", "deepskyblue1"))
+
+  
+  genes_lists<-list(nic_genes, smo_genes, overl_genes)
+  colors<-list(c("firebrick3", "brown1"), c("dodgerblue2", "deepskyblue1"), c("indianred2" , "skyblue2"))
   mouse_categories_nic <- c(human_genes_description, "Mouse Pup DEG in nicotine")
   mouse_categories_smo <- c(human_genes_description, "Mouse Pup DEG in smoking")
-  mouse_categories <- list(mouse_categories_nic, mouse_categories_smo)
+  overl_genes_categories <- c("Overlapping genes in nicotine", "Overlapping genes in smoking")
+  categories <- list(mouse_categories_nic, mouse_categories_smo, overl_genes_categories)
   
   if (name=="TUD_EUR_UKBB_nearestGenes"){
     margin =0.4
-    cat_cex = c(1, 1.2)
-    cat_dist = c(0.39, 0.05)
-    cat_pos = list(c(270,0), c(270,0))
+    cat_cex = list(c(1, 1.2), c(1, 1.2), c(1.2, 1.2))
+    cat_dist = list(c(0.39, 0.05), c(0.39, 0.05), c(0.15, 0.05))
+    cat_pos = list(c(270,0), c(270,0), c(90,0))
     cex = 1.6
   }
   else if (name=="TUD_AA_nearestGenes"){
     margin =0.6
-    cat_cex = c(1, 1.2)
-    cat_dist = c(0.42, 0.04)
+    cat_cex = list(c(1, 1.2), c(1, 1.2))
+    cat_dist = list(c(0.42, 0.04), c(0.42, 0.04))
     cat_pos = list(c(86,0), c(86,0))
     cex = 1
   }
   else if (name=="TUD_EUR_MAGMA_associatedGenes"){
     margin =0.4
-    cat_cex = c(1, 1.2)
-    cat_dist = c(0.3, 0.05)
-    cat_pos = list(c(270,0), c(270,0))
+    cat_cex = list(c(1, 1.2), c(1, 1.2), c(1.2, 1.2))
+    cat_dist = list(c(0.35, 0.05), c(0.35, 0.05), c(0.15, 0.05))
+    cat_pos = list(c(270,0), c(270,0), c(270,0))
     cex = 1.6
   }
   else if (name=="TUD_EUR_H_MAGMA_associatedGenes"){
     margin =0.4
-    cat_cex = c(1, 1.2)
-    cat_dist = c(0.34, 0.05)
-    cat_pos = list(c(270,0), c(270,0))
+    cat_cex = list(c(1, 1.2), c(1, 1.2), c(1.2, 1.2))
+    cat_dist = list(c(0.34, 0.05), c(0.34, 0.05), c(0.15, 0.05))
+    cat_pos = list(c(270,0), c(270,0), c(270,0))
     cex = 1.6
   }
-  else if (name=="TUD_EUR_H_MAGMA_fetal_associatedGenes" | name=="TUD_EUR_H_MAGMA_adult_associatedGenes"  | 
-           name=="TUD_EUR_S_PrediXcan_associatedGenes"){
+  else if (name=="TUD_EUR_H_MAGMA_fetal_associatedGenes" | name=="TUD_EUR_H_MAGMA_adult_associatedGenes"){
     margin =0.4
-    cat_cex = c(1.1, 1.2)
-    cat_dist = c(0.39, 0.05)
-    cat_pos = list(c(270,0), c(270,0))
+    cat_cex = list(c(1, 1.2), c(1, 1.2), c(1.2, 1.2))
+    cat_dist = list(c(0.25, 0.05), c(0.25, 0.05), c(0.15, 0.05))
+    cat_pos = list(c(270,0), c(270,0), c(270,0))
     cex = 1.6
   }
-  else if (name=="TUD_EUR_S_MultiXcan_associatedGenes"){
+  else if (name=="TUD_EUR_S_MultiXcan_associatedGenes" | name=="TUD_EUR_S_PrediXcan_associatedGenes"){
     margin =0.4
-    cat_cex = c(1.2, 1.2)
-    cat_dist = c(0.39, 0.05)
-    cat_pos = list(c(270,0), c(270,0))
+    cat_cex = list(c(1, 1.2), c(1, 1.2), c(1.2, 1.2))
+    cat_dist = list(c(0.39, 0.05), c(0.39, 0.05), c(0.15, 0.05))
+    cat_pos = list(c(270,0), c(270,0), c(270,0))
     cex = 1.6
-  }
-  else if (name=="TUD_EUR_S_MultiXcan_FrontalCortex_associatedGenes"){
-    margin = 0.8
-    cat_cex = c(1, 1.2)
-    cat_dist = c(0.64, 0.04)
-    cat_pos = list(c(90,0), c(90,0))
-    cex = 1
   }
   else if(name=="TUD_EUR_S_PrediXcan_FrontalCortex_associatedGenes"){
     margin = 0.8
-    cat_cex = c(1.1, 1.2)
-    cat_dist = c(0.65, 0.04)
-    cat_pos = list(c(90,0), c(270,0))
+    cat_cex = list(c(1, 1.2), c(1, 1.2), c(1.2, 1.2))
+    cat_dist = list(c(0.65, 0.04), c(0.65, 0.04), c(0.25, 0.05))
+    cat_pos = list(c(90,0), c(270,0), c(90,0))
     cex = 1
   }
   else {
     margin =0.4
-    cat_cex = c(0.9, 1.2)
-    cat_dist = c(0.36, 0.05)
-    cat_pos = list(c(260,0), c(260,0))
+    cat_cex = list(c(0.9, 1.2), c(0.9, 1.2), c(1.2, 1.2))
+    cat_dist = list(c(0.36, 0.05), c(0.36, 0.05), c(0.15, 0.05))
+    cat_pos = list(c(260,0), c(260,0), c(270,0))
     cex = 1.6
+  }
+  
+  if (name=="TUD_AA_nearestGenes"){
+    n_plots=2
+    height=15
+  }
+  else{
+    n_plots=3
+    height=29
   }
   
   plots<-list()
   pdf(file = paste("plots/04_DEA/02_Comparisons/Gene_analysis/Venn_", name, "_vs_MouseDEG.pdf", sep=""), 
-      height = 15, width = 29)
-  for (i in 1:length(genes_lists)){
+      height = height, width = 29)
+  for (i in 1:n_plots){
     v<-venn.diagram(genes_lists[[i]], fill=colors[[i]], alpha = rep(0.5, length(genes_lists[[i]])), 
-                    lwd=0, margin=margin, category.names = mouse_categories[[i]], cat.cex=cat_cex, cex=cex, height = 5, width = 12, units = "cm", 
-                    cat.dist=cat_dist, cat.pos= cat_pos[[i]], filename=NULL, disable.logging=TRUE)
+                    lwd=0, margin=margin, category.names = categories[[i]], cat.cex=cat_cex[[i]], cex=cex, height = 5, width = 10, units = "cm", 
+                    cat.dist=cat_dist[[i]], cat.pos= cat_pos[[i]], filename=NULL, disable.logging=TRUE)
     plots[[i]]<-v
   }
-  gridExtra::grid.arrange(plots[[1]], plots[[2]], ncol=2)
+  
+  if (name=="TUD_AA_nearestGenes"){
+    gridExtra::grid.arrange(plots[[1]], plots[[2]], ncol=2)
+  }
+  else {
+    gridExtra::grid.arrange(plots[[1]], plots[[2]], plots[[3]], ncol=2)    
+  }
   dev.off()
+  
+  return(overlapping_genes)
 }
 
 
 ## Plots
 
 ############### 5.1 TUD-multi+UKBB nearest human genes vs mouse pup DEG ###############
-venn_humanGWASGenes_vs_mouseDEG(TUD_multi_UKBB_nearestGenes, "TUD_multi_UKBB_nearestGenes" , "Mouse homologs of nearest human genes to GWS SNPs associated with TUD in EUR, AA & LA individuals")
+overlapping_genes_TUD_multi_UKBB <- venn_humanGWASGenes_vs_mouseDEG(TUD_multi_UKBB_nearestGenes, "TUD_multi_UKBB_nearestGenes" , "Mouse homologs of nearest human genes to GWS SNPs associated with TUD in EUR, AA & LA individuals")
 
 ############### 5.2 TUD-EUR+UKBB nearest human genes vs mouse pup DEG ###############
-venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_UKBB_nearestGenes, "TUD_EUR_UKBB_nearestGenes" , "Mouse homologs of nearest human genes to GWS SNPs associated with TUD in EUR individuals")
+overlapping_genes_TUD_EUR_UKBB <- venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_UKBB_nearestGenes, "TUD_EUR_UKBB_nearestGenes" , "Mouse homologs of nearest human genes to GWS SNPs associated with TUD in EUR individuals")
 
 ############### 5.3 TUD-AA nearest human genes vs mouse pup DEG ###############
-venn_humanGWASGenes_vs_mouseDEG(TUD_AA_nearestGenes, "TUD_AA_nearestGenes" , "Mouse homologs of nearest human genes to GWS SNPs associated with TUD in AA individuals")
+overlapping_genes_TUD_AA <- venn_humanGWASGenes_vs_mouseDEG(TUD_AA_nearestGenes, "TUD_AA_nearestGenes" , "Mouse homologs of nearest human genes to GWS SNPs associated with TUD in AA individuals")
 
 ############### 5.4 TUD-EUR-MAGMA associated human genes vs mouse pup DEG ###############
-venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_MAGMA_associatedGenes, "TUD_EUR_MAGMA_associatedGenes" , "Mouse homologs of human genes associated with EUR-SNPs related to TUD")
+overlapping_genes_TUD_EUR_MAGMA <- venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_MAGMA_associatedGenes, "TUD_EUR_MAGMA_associatedGenes" , "Mouse homologs of human genes associated with TUD based on their EUR-SNPs")
 
 ############### 5.5 TUD-EUR-H-MAGMA associated human genes vs mouse pup DEG ###############
-venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_H_MAGMA_associatedGenes, "TUD_EUR_H_MAGMA_associatedGenes" , "Mouse homologs of brain human genes associated with EUR-SNPs related to TUD")
+overlapping_genes_TUD_EUR_H_MAGMA <- venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_H_MAGMA_associatedGenes, "TUD_EUR_H_MAGMA_associatedGenes" , "Mouse homologs of neurobiologically relevant human genes associated with TUD")
 
 #####       5.5.1 TUD-EUR-H-MAGMA associated fetal human genes vs mouse pup DEG       #####
-venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_H_MAGMA_fetal_associatedGenes, "TUD_EUR_H_MAGMA_fetal_associatedGenes" , "Mouse homologs of fetal brain human genes associated with EUR-SNPs related to TUD")
+overlapping_genes_TUD_EUR_H_MAGMA_fetal <- venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_H_MAGMA_fetal_associatedGenes, "TUD_EUR_H_MAGMA_fetal_associatedGenes" , "Mouse homologs of fetal brain human genes associated with TUD")
 #####       5.5.2 TUD-EUR-H-MAGMA associated adult human genes vs mouse pup DEG       #####
-venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_H_MAGMA_adult_associatedGenes, "TUD_EUR_H_MAGMA_adult_associatedGenes" , "Mouse homologs of adult brain human genes associated with EUR-SNPs related to TUD")
+overlapping_genes_TUD_EUR_H_MAGMA_adult <- venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_H_MAGMA_adult_associatedGenes, "TUD_EUR_H_MAGMA_adult_associatedGenes" , "Mouse homologs of adult brain human genes associated with TUD")
 
 ############### 5.6 TUD_EUR_S_MultiXcan affected human genes vs mouse pup DEG ###############
-venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_S_MultiXcan_associatedGenes, "TUD_EUR_S_MultiXcan_associatedGenes" , "Mouse homologs of human genes affected in brain by EUR-SNPs related to TUD")
-
-#####       5.6.1 TUD_EUR_S_MultiXcan affected human genes in FC vs mouse pup DEG       #####
-venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_S_MultiXcan_FrontalCortex_associatedGenes, "TUD_EUR_S_MultiXcan_FrontalCortex_associatedGenes" , "Mouse homologs of human genes affected in frontal cortex by EUR-SNPs related to TUD")
+overlapping_genes_TUD_EUR_S_MultiXcan <- venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_S_MultiXcan_associatedGenes, "TUD_EUR_S_MultiXcan_associatedGenes" , "Mouse homologs of human genes affected in brain by EUR-SNPs associated with TUD")
 
 ############### 5.7 TUD_EUR_S_PrediXcan affected human genes vs mouse pup DEG ###############
-venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_S_PrediXcan_associatedGenes, "TUD_EUR_S_PrediXcan_associatedGenes" , "Mouse homologs of human genes affected in brain regions by EUR-SNPs related to TUD")
+overlapping_genes_TUD_EUR_S_PrediXcan <- venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_S_PrediXcan_associatedGenes, "TUD_EUR_S_PrediXcan_associatedGenes" , "Mouse homologs of human genes affected in brain regions by EUR-SNPs associated with TUD")
 
 #####       5.7.1 TUD_EUR_S_PrediXcan affected human genes in FC vs mouse pup DEG       #####
-venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_S_PrediXcan_FrontalCortex_associatedGenes, "TUD_EUR_S_PrediXcan_FrontalCortex_associatedGenes" , "Mouse homologs of human genes affected in frontal cortex by EUR-SNPs related to TUD")
+overlapping_genes_TUD_EUR_S_PrediXcan_FC <- venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_S_PrediXcan_FrontalCortex_associatedGenes, "TUD_EUR_S_PrediXcan_FrontalCortex_associatedGenes" , "Mouse homologs of human genes affected in frontal cortex by EUR-SNPs associated with TUD")
+
+
+## Compact results
+TUD_human_genes_vs_mouseDEGs <- rbind(
+  cbind(melt(overlapping_genes_TUD_multi_UKBB[c("Nic Overlapping Genes", "Smo Overlapping Genes")]), 'GWAS_metaAnalysis_Group'=rep('TUD_multi_UKBB', dim(melt(overlapping_genes_TUD_multi_UKBB[c("Nic Overlapping Genes", "Smo Overlapping Genes")]))[1]) ),
+  
+  cbind(melt(overlapping_genes_TUD_EUR_UKBB[c("Nic Overlapping Genes", "Smo Overlapping Genes")]), 'GWAS_metaAnalysis_Group'=rep('TUD_EUR_UKBB', dim(melt(overlapping_genes_TUD_EUR_UKBB[c("Nic Overlapping Genes", "Smo Overlapping Genes")]))[1]) ),
+  
+  cbind(melt(overlapping_genes_TUD_AA[c("Nic Overlapping Genes", "Smo Overlapping Genes")]), 'GWAS_metaAnalysis_Group'=rep('TUD_AA', dim(melt(overlapping_genes_TUD_AA[c("Nic Overlapping Genes", "Smo Overlapping Genes")]))[1]) ), 
+  
+  cbind(melt(overlapping_genes_TUD_EUR_MAGMA[c("Nic Overlapping Genes", "Smo Overlapping Genes")]), 'GWAS_metaAnalysis_Group'=rep('TUD_EUR_MAGMA', dim(melt(overlapping_genes_TUD_EUR_MAGMA[c("Nic Overlapping Genes", "Smo Overlapping Genes")]))[1]) ), 
+  
+  cbind(melt(overlapping_genes_TUD_EUR_H_MAGMA[c("Nic Overlapping Genes", "Smo Overlapping Genes")]), 'GWAS_metaAnalysis_Group'=rep('TUD_EUR_H_MAGMA', dim(melt(overlapping_genes_TUD_EUR_H_MAGMA[c("Nic Overlapping Genes", "Smo Overlapping Genes")]))[1]) ), 
+  
+  cbind(melt(overlapping_genes_TUD_EUR_H_MAGMA_fetal[c("Nic Overlapping Genes", "Smo Overlapping Genes")]), 'GWAS_metaAnalysis_Group'=rep('TUD_EUR_H_MAGMA_fetal', dim(melt(overlapping_genes_TUD_EUR_H_MAGMA_fetal[c("Nic Overlapping Genes", "Smo Overlapping Genes")]))[1]) ), 
+  
+  
+  cbind(melt(overlapping_genes_TUD_EUR_H_MAGMA_adult[c("Nic Overlapping Genes", "Smo Overlapping Genes")]), 'GWAS_metaAnalysis_Group'=rep('TUD_EUR_H_MAGMA_adult', dim(melt(overlapping_genes_TUD_EUR_H_MAGMA_adult[c("Nic Overlapping Genes", "Smo Overlapping Genes")]))[1]) ), 
+  
+  cbind(melt(overlapping_genes_TUD_EUR_S_MultiXcan[c("Nic Overlapping Genes", "Smo Overlapping Genes")]), 'GWAS_metaAnalysis_Group'=rep('TUD_EUR_S_MultiXcan', dim(melt(overlapping_genes_TUD_EUR_S_MultiXcan[c("Nic Overlapping Genes", "Smo Overlapping Genes")]))[1]) ), 
+  
+  cbind(melt(overlapping_genes_TUD_EUR_S_PrediXcan[c("Nic Overlapping Genes", "Smo Overlapping Genes")]), 'GWAS_metaAnalysis_Group'=rep('TUD_EUR_S_PrediXcan', dim(melt(overlapping_genes_TUD_EUR_S_PrediXcan[c("Nic Overlapping Genes", "Smo Overlapping Genes")]))[1]) ), 
+  
+  cbind(melt(overlapping_genes_TUD_EUR_S_PrediXcan_FC[c("Nic Overlapping Genes", "Smo Overlapping Genes")]), 'GWAS_metaAnalysis_Group'=rep('TUD_EUR_S_PrediXcan_FC', dim(melt(overlapping_genes_TUD_EUR_S_PrediXcan_FC[c("Nic Overlapping Genes", "Smo Overlapping Genes")]))[1]) )
+  )
+
+colnames(TUD_human_genes_vs_mouseDEGs) <- c('Gene', 'DE_condition', 'GWAS_metaAnalysis_Group')
+TUD_human_genes_vs_mouseDEGs$DE_condition <- sapply(TUD_human_genes_vs_mouseDEGs$DE_condition, function(x){strsplit(x, ' ')[[1]][1]})
+
+save(TUD_human_genes_vs_mouseDEGs, file="processed-data/04_DEA/Gene_analysis/TUD_human_genes_vs_mouseDEGs.Rdata")
+write.table(TUD_human_genes_vs_mouseDEGs, file = "processed-data/04_DEA/Gene_analysis/TUD_human_genes_vs_mouseDEGs.csv", row.names = FALSE, col.names = TRUE, sep = '\t')
 
 
 
@@ -1724,18 +1896,140 @@ venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_S_PrediXcan_FrontalCortex_associatedGene
 
 options(width = 120)
 session_info()
+
+# ─ Session info ───────────────────────────────────────────────────────────────────────────────────────────────────────
 # setting  value
-# version  R version 4.2.0 (2022-04-22 ucrt)
-# os       Windows 10 x64 (build 19044)
-# system   x86_64, mingw32
+# version  R version 4.3.0 (2023-04-21)
+# os       macOS Monterey 12.5.1
+# system   aarch64, darwin20
 # ui       RStudio
 # language (EN)
-# collate  Spanish_Mexico.utf8
-# ctype    Spanish_Mexico.utf8
+# collate  en_US.UTF-8
+# ctype    en_US.UTF-8
 # tz       America/Mexico_City
-# date     2022-09-22
-# rstudio  2022.02.3+492 Prairie Trillium (desktop)
-# pandoc   2.17.1.1 @ C:/Program Files/RStudio/bin/quarto/bin/ (via rmarkdown)
+# date     2023-12-21
+# rstudio  2023.06.1+524 Mountain Hydrangea (desktop)
+# pandoc   3.1.1 @ /Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/ (via rmarkdown)
+# 
+# ─ Packages ───────────────────────────────────────────────────────────────────────────────────────────────────────────
+# package              * version   date (UTC) lib source
+# AnnotationDbi          1.63.2    2023-07-03 [1] Bioconductor
+# backports              1.4.1     2021-12-13 [1] CRAN (R 4.3.0)
+# base64enc              0.1-3     2015-07-28 [1] CRAN (R 4.3.0)
+# Biobase              * 2.61.0    2023-06-02 [1] Bioconductor
+# BiocFileCache          2.9.1     2023-07-14 [1] Bioconductor
+# BiocGenerics         * 0.47.0    2023-06-02 [1] Bioconductor
+# biomaRt                2.57.1    2023-06-14 [1] Bioconductor
+# biomartr             * 1.0.7     2023-12-02 [1] CRAN (R 4.3.1)
+# Biostrings             2.69.2    2023-07-05 [1] Bioconductor
+# bit                    4.0.5     2022-11-15 [1] CRAN (R 4.3.0)
+# bit64                  4.0.5     2020-08-30 [1] CRAN (R 4.3.0)
+# bitops                 1.0-7     2021-04-24 [1] CRAN (R 4.3.0)
+# blob                   1.2.4     2023-03-17 [1] CRAN (R 4.3.0)
+# cachem                 1.0.8     2023-05-01 [1] CRAN (R 4.3.0)
+# cellranger             1.1.0     2016-07-27 [1] CRAN (R 4.3.0)
+# checkmate              2.2.0     2023-04-27 [1] CRAN (R 4.3.0)
+# cli                    3.6.1     2023-03-23 [1] CRAN (R 4.3.0)
+# cluster                2.1.4     2022-08-22 [1] CRAN (R 4.3.0)
+# colorspace             2.1-0     2023-01-23 [1] CRAN (R 4.3.0)
+# cowplot              * 1.1.1     2020-12-30 [1] CRAN (R 4.3.0)
+# crayon                 1.5.2     2022-09-29 [1] CRAN (R 4.3.0)
+# curl                   5.0.1     2023-06-07 [1] CRAN (R 4.3.0)
+# data.table             1.14.8    2023-02-17 [1] CRAN (R 4.3.0)
+# DBI                    1.1.3     2022-06-18 [1] CRAN (R 4.3.0)
+# dbplyr                 2.3.3     2023-07-07 [1] CRAN (R 4.3.0)
+# DelayedArray           0.26.6    2023-07-02 [1] Bioconductor
+# digest                 0.6.33    2023-07-07 [1] CRAN (R 4.3.0)
+# dplyr                  1.1.2     2023-04-20 [1] CRAN (R 4.3.0)
+# edgeR                * 3.43.7    2023-06-21 [1] Bioconductor
+# evaluate               0.21      2023-05-05 [1] CRAN (R 4.3.0)
+# fansi                  1.0.5     2023-10-08 [1] CRAN (R 4.3.1)
+# farver                 2.1.1     2022-07-06 [1] CRAN (R 4.3.0)
+# fastmap                1.1.1     2023-02-24 [1] CRAN (R 4.3.0)
+# filelock               1.0.2     2018-10-05 [1] CRAN (R 4.3.0)
+# foreign                0.8-84    2022-12-06 [1] CRAN (R 4.3.0)
+# Formula                1.2-5     2023-02-24 [1] CRAN (R 4.3.0)
+# fs                     1.6.3     2023-07-20 [1] CRAN (R 4.3.0)
+# gargle                 1.5.2     2023-07-20 [1] CRAN (R 4.3.0)
+# generics               0.1.3     2022-07-05 [1] CRAN (R 4.3.0)
+# GenomeInfoDb         * 1.37.2    2023-06-21 [1] Bioconductor
+# GenomeInfoDbData       1.2.10    2023-05-28 [1] Bioconductor
+# GenomicRanges        * 1.53.1    2023-06-02 [1] Bioconductor
+# ggplot2              * 3.4.4     2023-10-12 [1] CRAN (R 4.3.1)
+# ggrepel              * 0.9.3     2023-02-03 [1] CRAN (R 4.3.0)
+# glue                   1.6.2     2022-02-24 [1] CRAN (R 4.3.0)
+# googledrive            2.1.1     2023-06-11 [1] CRAN (R 4.3.0)
+# gridExtra            * 2.3       2017-09-09 [1] CRAN (R 4.3.0)
+# gtable                 0.3.4     2023-08-21 [1] CRAN (R 4.3.0)
+# here                 * 1.0.1     2020-12-13 [1] CRAN (R 4.3.0)
+# Hmisc                * 5.1-0     2023-05-08 [1] CRAN (R 4.3.0)
+# hms                    1.1.3     2023-03-21 [1] CRAN (R 4.3.0)
+# htmlTable              2.4.1     2022-07-07 [1] CRAN (R 4.3.0)
+# htmltools              0.5.5     2023-03-23 [1] CRAN (R 4.3.0)
+# htmlwidgets            1.6.2     2023-03-17 [1] CRAN (R 4.3.0)
+# httr                   1.4.6     2023-05-08 [1] CRAN (R 4.3.0)
+# IRanges              * 2.35.2    2023-06-23 [1] Bioconductor
+# jaffelab             * 0.99.32   2023-05-28 [1] Github (LieberInstitute/jaffelab@21e6574)
+# KEGGREST               1.41.0    2023-07-07 [1] Bioconductor
+# knitr                  1.43      2023-05-25 [1] CRAN (R 4.3.0)
+# labeling               0.4.3     2023-08-29 [1] CRAN (R 4.3.0)
+# lattice                0.21-8    2023-04-05 [1] CRAN (R 4.3.0)
+# lifecycle              1.0.3     2022-10-07 [1] CRAN (R 4.3.0)
+# limma                * 3.57.6    2023-06-21 [1] Bioconductor
+# locfit                 1.5-9.8   2023-06-11 [1] CRAN (R 4.3.0)
+# magrittr               2.0.3     2022-03-30 [1] CRAN (R 4.3.0)
+# MASS                   7.3-60    2023-05-04 [1] CRAN (R 4.3.0)
+# Matrix                 1.6-0     2023-07-08 [1] CRAN (R 4.3.0)
+# MatrixGenerics       * 1.13.0    2023-05-20 [1] Bioconductor
+# matrixStats          * 1.0.0     2023-06-02 [1] CRAN (R 4.3.0)
+# memoise                2.0.1     2021-11-26 [1] CRAN (R 4.3.0)
+# munsell                0.5.0     2018-06-12 [1] CRAN (R 4.3.0)
+# nlme                   3.1-162   2023-01-31 [1] CRAN (R 4.3.0)
+# nnet                   7.3-19    2023-05-03 [1] CRAN (R 4.3.0)
+# pillar                 1.9.0     2023-03-22 [1] CRAN (R 4.3.0)
+# pkgconfig              2.0.3     2019-09-22 [1] CRAN (R 4.3.0)
+# png                    0.1-8     2022-11-29 [1] CRAN (R 4.3.0)
+# prettyunits            1.1.1     2020-01-24 [1] CRAN (R 4.3.0)
+# progress               1.2.2     2019-05-16 [1] CRAN (R 4.3.0)
+# purrr                  1.0.1     2023-01-10 [1] CRAN (R 4.3.0)
+# R6                     2.5.1     2021-08-19 [1] CRAN (R 4.3.0)
+# rafalib              * 1.0.0     2015-08-09 [1] CRAN (R 4.3.0)
+# ragg                   1.2.5     2023-01-12 [1] CRAN (R 4.3.0)
+# rappdirs               0.3.3     2021-01-31 [1] CRAN (R 4.3.0)
+# RColorBrewer           1.1-3     2022-04-03 [1] CRAN (R 4.3.0)
+# Rcpp                   1.0.11    2023-07-06 [1] CRAN (R 4.3.0)
+# RCurl                  1.98-1.12 2023-03-27 [1] CRAN (R 4.3.0)
+# readxl               * 1.4.3     2023-07-06 [1] CRAN (R 4.3.0)
+# rlang                * 1.1.1     2023-04-28 [1] CRAN (R 4.3.0)
+# rmarkdown              2.23      2023-07-01 [1] CRAN (R 4.3.0)
+# rpart                  4.1.19    2022-10-21 [1] CRAN (R 4.3.0)
+# rprojroot              2.0.3     2022-04-02 [1] CRAN (R 4.3.0)
+# RSQLite                2.3.1     2023-04-03 [1] CRAN (R 4.3.0)
+# rstudioapi             0.15.0    2023-07-07 [1] CRAN (R 4.3.0)
+# S4Arrays               1.1.4     2023-06-02 [1] Bioconductor
+# S4Vectors            * 0.39.1    2023-06-02 [1] Bioconductor
+# scales                 1.2.1     2022-08-20 [1] CRAN (R 4.3.0)
+# segmented              1.6-4     2023-04-13 [1] CRAN (R 4.3.0)
+# sessioninfo          * 1.2.2     2021-12-06 [1] CRAN (R 4.3.0)
+# stringi                1.7.12    2023-01-11 [1] CRAN (R 4.3.0)
+# stringr                1.5.0     2022-12-02 [1] CRAN (R 4.3.0)
+# SummarizedExperiment * 1.30.2    2023-06-06 [1] Bioconductor
+# systemfonts            1.0.4     2022-02-11 [1] CRAN (R 4.3.0)
+# textshaping            0.3.6     2021-10-13 [1] CRAN (R 4.3.0)
+# tibble                 3.2.1     2023-03-20 [1] CRAN (R 4.3.0)
+# tidyselect             1.2.0     2022-10-10 [1] CRAN (R 4.3.0)
+# utf8                   1.2.4     2023-10-22 [1] CRAN (R 4.3.1)
+# vctrs                  0.6.4     2023-10-12 [1] CRAN (R 4.3.1)
+# withr                  2.5.1     2023-09-26 [1] CRAN (R 4.3.1)
+# xfun                   0.39      2023-04-20 [1] CRAN (R 4.3.0)
+# XML                    3.99-0.14 2023-03-19 [1] CRAN (R 4.3.0)
+# xml2                   1.3.5     2023-07-06 [1] CRAN (R 4.3.0)
+# XVector                0.41.1    2023-06-02 [1] Bioconductor
+# zlibbioc               1.47.0    2023-05-20 [1] Bioconductor
+# 
+# [1] /Library/Frameworks/R.framework/Versions/4.3-arm64/Resources/library
+# 
+# ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
 
 

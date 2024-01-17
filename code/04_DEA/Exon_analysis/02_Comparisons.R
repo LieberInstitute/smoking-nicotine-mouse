@@ -63,26 +63,35 @@ t_stat_plot <- function(top_exons1, top_exons2, name_1, name_2, title){
   rho <- cor(top_exons1$t, top_exons2$t, method = "spearman")
   rho_anno = paste0("rho = ", format(round(rho, 2), nsmall = 2))
   
+  ## Colors and alphas
+  cols <- c("deeppink3", "thistle3","navajowhite2", "darkgrey") 
+  names(cols) <- c("sig Both", "sig nic", "sig smo", "None")
+  alphas <- c( 1, 1, 1,0.5)  
+  names(alphas) <- names(cols)
+  
   ## Merge data
   t_stats<-data.frame(t1=top_exons1$t, t2=top_exons2$t)
   ## Add DE info for both groups
   t_stats$DE<-add_DE_info(top_exons1, top_exons2)
-  
-  cols <- c("red", "#ffad73","#26b3ff", "dark grey") 
-  names(cols)<-c("sig Both", "sig nic", "sig smo", "None")
-  alphas <- c( 1, 1, 1,0.5)  
-  names(alphas)<-c("sig Both", "sig nic", "sig smo", "None")
+  t_stats$DE <- factor(t_stats$DE, levels=names(cols))
   
   plot <- ggplot(t_stats, aes(x = t1, y = t2, color=DE, alpha=DE)) +
-    geom_point(size = 1) +
+    geom_point(size = 1.5) +
+    scale_color_manual(values = cols, labels=names(cols), drop = FALSE) + 
+    scale_alpha_manual(values = alphas, labels=names(alphas), drop=FALSE) +
     labs(x = paste("t-stats", name_1), 
          y = paste("t-stats", name_2),
          title = title, 
          subtitle = rho_anno, 
+         color = "Differential expression",
          parse = T) +
+    guides(alpha = 'none') + 
     theme_bw() +
-    scale_color_manual(values = cols) + 
-    scale_alpha_manual(values = alphas)
+    theme(plot.margin = unit(c(1,1,1,1), "cm"),
+          axis.title = element_text(size = 12),
+          axis.text = element_text(size = 10),
+          legend.text = element_text(size=11),
+          legend.title = element_text(size=12))
   
   plot
   ggsave(filename=paste("plots/04_DEA/02_Comparisons/Exon_analysis/t_stats_", gsub(" ", "_", title), 
@@ -110,31 +119,31 @@ add_DE_info_exons_vs_genes <-function(t_stats) {
   for (i in 1:dim(t_stats)[1]) {
 
     ## DE exons in both genes and exons
-    if (t_stats$adj.P.Val_exons[i]<0.05 && t_stats$adj.P.Val_genes[i]<0.05){
+    if (t_stats$adj.P.Val_exon[i]<0.05 && t_stats$adj.P.Val_gene[i]<0.05){
       
-      if(abs(t_stats$logFC_exons[i])>0.25) {
+      if(abs(t_stats$logFC_exon[i])>0.25) {
         DE<-append(DE, "sig Both")
       }
       ## DE genes only
       else {
-        DE<-append(DE, "sig gene")
+        DE<-append(DE, "sig Gene")
       } 
     }
     
-    else if(t_stats$adj.P.Val_exons[i]<0.05 && t_stats$adj.P.Val_genes[i]>=0.05){
+    else if(t_stats$adj.P.Val_exon[i]<0.05 && t_stats$adj.P.Val_gene[i]>=0.05){
       
       ## DE exons only
-      if(abs(t_stats$logFC_exons[i])>0.25) {
-        DE<-append(DE, "sig exon")
+      if(abs(t_stats$logFC_exon[i])>0.25) {
+        DE<-append(DE, "sig Exon")
       }
       else{
         DE<-append(DE, "None")
       }
     }
     
-    else if(t_stats$adj.P.Val_exons[i]>=0.05 && t_stats$adj.P.Val_genes[i]<0.05){
+    else if(t_stats$adj.P.Val_exon[i]>=0.05 && t_stats$adj.P.Val_gene[i]<0.05){
       ## DE genes only
-      DE<-append(DE, "sig gene")
+      DE<-append(DE, "sig Gene")
     }
       
     else {
@@ -156,37 +165,57 @@ t_stat_exons_vs_genes<- function(expt){
   de_exons<-eval(parse_expr(paste("de_exons_", substr(expt,1,3), sep="")))
   
   ## Exons' genes
-  exons_genes<-unique(top_exons$ensemblID)
+  exons_genes<-unique(top_exons$gencodeID)
   
   ## Common genes
-  exons_genes<-exons_genes[which(exons_genes %in% top_genes$ensemblID)]
+  exons_genes<-exons_genes[which(exons_genes %in% top_genes$gencodeID)]
   
   ## Extract exons' info
-  t_stats<-top_exons[which(top_exons$ensemblID %in% exons_genes), c("exon_libdID", "adj.P.Val", "Symbol", 
-                                                                    "t", "ensemblID", "logFC", "seqnames", 
-                                                                    "start", "end")]
-  colnames(t_stats)[2]<-"adj.P.Val_exons"
-  colnames(t_stats)[4]<-"t_exons"
-  colnames(t_stats)[6]<-"logFC_exons"
+  t_stats<-top_exons[which(top_exons$gencodeID %in% exons_genes), c("exon_gencodeID", "seqnames", "start", "end", "strand",
+                                                                    "gencodeID", "Symbol", "logFC", "t", "P.Value", "adj.P.Val")]
+  colnames(t_stats)[2] <- "chr"
+  colnames(t_stats)[7] <- "gene_Symbol"
+  colnames(t_stats)[8] <- "logFC_exon"
+  colnames(t_stats)[9] <- "t_exon"
+  colnames(t_stats)[10] <- "P.Value_exon"
+  colnames(t_stats)[11] <- "adj.P.Val_exon"
   
-  ## Add t-stats and FDRs of exons' genes
-  t_genes<-vector()
-  FDRs<-vector()
+  ## Add DE info  of exons' genes
+  logFCs <- vector()
+  t_genes <- vector()
+  pvals <- vector()
+  FDRs <- vector()
+  
   for (i in 1:dim(t_stats)[1]){
-    t<-top_genes[which(top_genes$ensemblID==t_stats$ensemblID[i]), "t"]
-    FDR<-top_genes[which(top_genes$ensemblID==t_stats$ensemblID[i]), "adj.P.Val"]
-    t_genes<-append(t_genes, t)
-    FDRs<-append(FDRs, FDR)
+    logFC <- top_genes[which(top_genes$gencodeID==t_stats$gencodeID[i]), "logFC"]
+    t<-top_genes[which(top_genes$gencodeID==t_stats$gencodeID[i]), "t"]
+    pval <- top_genes[which(top_genes$gencodeID==t_stats$gencodeID[i]), "P.Value"]
+    FDR<-top_genes[which(top_genes$gencodeID==t_stats$gencodeID[i]), "adj.P.Val"]
+    
+    logFCs <- append(logFCs, logFC)
+    t_genes <- append(t_genes, t)
+    pvals <- append(pvals, pval)
+    FDRs <- append(FDRs, FDR)
   }
-  t_stats$t_genes<-t_genes
-  t_stats$adj.P.Val_genes<-FDRs
+  
+  t_stats$logFC_gene <- logFCs
+  t_stats$t_gene <- t_genes
+  t_stats$P.Value_gene <- pvals
+  t_stats$adj.P.Val_gene <- FDRs
   
   ## Correlation coeff between t-stats of genes and exons
-  rho <- cor(t_stats$t_exons, t_stats$t_genes, method = "spearman")
+  rho <- cor(t_stats$t_exon, t_stats$t_gene, method = "spearman")
   rho_anno = paste0("rho = ", format(round(rho, 2), nsmall = 2))
   
+  ## Colors
+  cols <- c("coral2","pink", "turquoise", "grey") 
+  names(cols) <- c("sig Both","sig Gene", "sig Exon", "None")
+  alphas <- c( 1, 1, 1, 0.2)  
+  names(alphas) <- names(cols)
+  
   ## Add DE info for both groups
-  t_stats$DE<-add_DE_info_exons_vs_genes(t_stats)
+  t_stats$DE <- add_DE_info_exons_vs_genes(t_stats)
+  t_stats$DE <-  factor(t_stats$DE, levels=names(cols))
   
   
   ## Gene-exon symbols of DE exons with no DEG, 
@@ -194,8 +223,8 @@ t_stat_exons_vs_genes<- function(expt){
   ## and also label DE exons from genes with up and down exons
   
   ## Up and down exons' genes
-  exons_up_genes<-unique(de_exons[which(de_exons$logFC>0),"ensemblID"])
-  exons_down_genes<-unique(de_exons[which(de_exons$logFC<0),"ensemblID"])
+  exons_up_genes<-unique(de_exons[which(de_exons$logFC>0),"gencodeID"])
+  exons_down_genes<-unique(de_exons[which(de_exons$logFC<0),"gencodeID"])
   ## Genes with up and down exons
   interest_genes<-intersect(exons_up_genes, exons_down_genes)
   ## Retain only the exons' genes that were considered at the gene level
@@ -204,17 +233,17 @@ t_stat_exons_vs_genes<- function(expt){
   exon_symbols<-vector()
   for (i in 1:dim(t_stats)[1]) {
     
-    if (t_stats$DE[i]=="sig exon" & (abs(t_stats$t_exons[i])>6 | (t_stats$ensemblID[i] %in% interest_genes))) {
-      exon_symbols<-append(exon_symbols, paste(t_stats$Symbol[i], "-", t_stats$seqname[i], ":", t_stats$start[i], "-",
+    if (t_stats$DE[i]=="sig exon" & (abs(t_stats$t_exon[i])>6 | (t_stats$gencodeID[i] %in% interest_genes))) {
+      exon_symbols<-append(exon_symbols, paste(t_stats$gene_Symbol[i], "-", t_stats$seqname[i], ":", t_stats$start[i], "-",
                                                t_stats$end[i], sep=""))
     }
     else if(t_stats$DE[i]=="sig Both"){
-      if ((t_stats$t_genes[i]< -3.5 & t_stats$t_exons[i]> 4) | (t_stats$t_genes[i]> 3 & t_stats$t_exons[i]< -4)){
-        exon_symbols<-append(exon_symbols, paste(t_stats$Symbol[i], "-", t_stats$seqname[i], ":", t_stats$start[i], "-",
+      if ((t_stats$t_gene[i]< -3.5 & t_stats$t_exon[i]> 4) | (t_stats$t_gene[i]> 3 & t_stats$t_exon[i]< -4)){
+        exon_symbols<-append(exon_symbols, paste(t_stats$gene_Symbol[i], "-", t_stats$seqname[i], ":", t_stats$start[i], "-",
                                                  t_stats$end[i], sep=""))
       }
-      else if((t_stats$ensemblID[i] %in% interest_genes) & (t_stats$adj.P.Val_genes[i] <0.01)){
-        exon_symbols<-append(exon_symbols, paste(t_stats$Symbol[i], "-", t_stats$seqname[i], ":", t_stats$start[i], "-",
+      else if((t_stats$gencodeID[i] %in% interest_genes) & (t_stats$adj.P.Val_gene[i] <0.01)){
+        exon_symbols<-append(exon_symbols, paste(t_stats$gene_Symbol[i], "-", t_stats$seqname[i], ":", t_stats$start[i], "-",
                                                  t_stats$end[i], sep=""))        
       }
       else{
@@ -228,28 +257,31 @@ t_stat_exons_vs_genes<- function(expt){
   t_stats$exon_symbols<- exon_symbols
   
   ## Plot
-  cols <- c("red", "#ffad73","#26b3ff", "dark grey") 
-  names(cols)<-c("sig Both","sig exon", "sig gene", "None")
-  alphas <- c( 1, 1, 1,0.5)  
-  names(alphas)<-c("sig Both", "sig exon", "sig gene", "None")
-  
-  plot <- ggplot(t_stats, aes(x = t_genes, y = t_exons, color=DE, alpha=DE, label= exon_symbols)) +
-    geom_point(size = 1) +
+  plot <- ggplot(t_stats, aes(x = t_gene, y = t_exon, color=DE, alpha=DE)) +
+    geom_point(size = 1.2) +
     labs(x = "t-stats genes", 
          y = "t-stats exons",
          title = paste(capitalize(expt),"genes vs exons", sep=" "), 
          subtitle = rho_anno, 
          parse = T) +
-    geom_label_repel(fill="white", size=2, max.overlaps = Inf,  
-                     box.padding = 0.2, 
-                     show.legend=FALSE) +
+    ## Remove labels
+    # geom_label_repel(fill="white", size=2, max.overlaps = Inf,  
+    #                  box.padding = 0.2, 
+    #                  show.legend=FALSE) +
     theme_bw() +
-    scale_color_manual(values = cols) + 
-    scale_alpha_manual(values = alphas)
-  
+    guides(alpha = 'none') + 
+    scale_color_manual(values = cols, labels=names(cols), drop = FALSE) + 
+    scale_alpha_manual(values = alphas, labels=names(alphas), drop=FALSE) +
+    theme(plot.margin = unit(c(1,1,1,1), "cm"),
+          axis.title = element_text(size = 12),
+          axis.text = element_text(size = 10),
+          legend.text = element_text(size=11),
+          legend.title = element_text(size=12))
+    
+  return(t_stats) 
   plot
   ggsave(filename=paste("plots/04_DEA/02_Comparisons/Exon_analysis/t_stats_global_", substr(expt,1,3), 
-                        ".pdf", sep=""), height = 20, width = 25, units = "cm")
+                        ".pdf", sep=""), height = 14.5, width = 18, units = "cm")
 
 }
 
@@ -258,14 +290,20 @@ t_stat_exons_vs_genes<- function(expt){
 # Nicotine genes vs nicotine exons
 #####################################
 expt<-"nicotine"
-t_stat_exons_vs_genes(expt)
+t_stat_exons_vs_genes_nic <- t_stat_exons_vs_genes(expt)
+t_stat_exons_vs_genes_nic <- t_stat_exons_vs_genes_nic[,-17]
+save(t_stat_exons_vs_genes_nic, file="processed-data/04_DEA/Exon_analysis/t_stat_exons_vs_genes_nic.Rdata")
+write.table(t_stat_exons_vs_genes_nic, file = "processed-data/04_DEA/Exon_analysis/t_stat_exons_vs_genes_nic.csv", row.names = FALSE, col.names = TRUE, sep = '\t')
 
 
 ##################################### 
 # Smoking genes vs smoking exons
 #####################################
 expt<-"smoking"
-t_stat_exons_vs_genes(expt)
+t_stat_exons_vs_genes_smo <- t_stat_exons_vs_genes(expt)
+t_stat_exons_vs_genes_smo <- t_stat_exons_vs_genes_smo[,-17]
+save(t_stat_exons_vs_genes_smo, file="processed-data/04_DEA/Exon_analysis/t_stat_exons_vs_genes_smo.Rdata")
+write.table(t_stat_exons_vs_genes_smo, file = "processed-data/04_DEA/Exon_analysis/t_stat_exons_vs_genes_smo.csv", row.names = FALSE, col.names = TRUE, sep = '\t')
 
 
 
@@ -298,18 +336,24 @@ t_stat_tg<-function(expt){
   tg_te$tg<-as.numeric(tg_te$tg)
   tg_te$t<-as.numeric(tg_te$t)
   
+  cols <- c("pink", "grey") 
+  names(cols)<-c("sig Gene", "ns")
+  alphas <- c( 1,0.5)  
+  names(alphas)<-c("sig Gene", "ns")
+  
   ## Add DE info of genes
   DE<-vector()
   for (gene in tg_te$ensemblID){
     FDR=top_genes[which(top_genes$ensemblID==gene),"adj.P.Val"]
     if(FDR<0.05){
-      DE<-append(DE, "sig gene")
+      DE<-append(DE, "sig Gene")
     }
     else{
       DE<-append(DE, "ns")
     }
   }
   tg_te$DE<-DE
+  tg_te$DE <- factor(tg_te$DE, levels=names(cols))
   
   ## Add symbols of genes with the highest values of mean(|tg-te|)
   tg_te_ordered <- tg_te[order(-tg_te$t)[1:10], "ensemblID"]
@@ -326,26 +370,28 @@ t_stat_tg<-function(expt){
   tg_te$gene_symbols<-gene_symbols
   
   ## Plot
-  cols <- c("red", "dark grey") 
-  names(cols)<-c("sig gene", "ns")
-  alphas <- c( 1,0.5)  
-  names(alphas)<-c("sig gene", "ns")
   
   plot <- ggplot(tg_te, aes(x =tg, y = t, color=DE, alpha=DE, label=gene_symbols)) +
-    geom_point(size = 1) +
+    geom_point(size = 1.2) +
     labs(x = "t-stats of gene", 
          y = "mean of |tg-te|",
          title = paste(capitalize(expt),"genes", sep=" ")) +
-    geom_label_repel(fill="white", size=2, max.overlaps = Inf,
+    geom_label_repel(aes(alpha=NULL), fill="white", color='black', size=2, max.overlaps = Inf,
                      box.padding = 0.2,
                      show.legend=FALSE) +
     theme_bw() +
-    scale_color_manual(values = cols) + 
-    scale_alpha_manual(values = alphas)
+    guides(alpha = 'none') + 
+    scale_color_manual(values = cols, labels=names(cols), drop = FALSE) + 
+    scale_alpha_manual(values = alphas, labels=names(alphas), drop=FALSE) +
+    theme(plot.margin = unit(c(1,1,1,1), "cm"),
+          axis.title = element_text(size = 12),
+          axis.text = element_text(size = 10),
+          legend.text = element_text(size=11),
+          legend.title = element_text(size=12))
   
   plot
   ggsave(filename=paste("plots/04_DEA/02_Comparisons/Exon_analysis/t_stats_tg_", substr(expt,1,3), 
-                        ".pdf", sep=""), height = 20, width = 25, units = "cm")
+                        ".pdf", sep=""), height = 15, width = 20, units = "cm")
 }
 
 
@@ -384,6 +430,12 @@ t_stat_te<- function(expt){
   colnames(t_stats)[4]<-"te"
   colnames(t_stats)[6]<-"logFC_exons"
   
+  ## Plot
+  cols <- cols <- c("coral2","pink", "turquoise", "grey") 
+  names(cols)<-c("sig Both","sig Gene", "sig Exon", "None")
+  alphas <- c( 1, 1, 1, 0.5)  
+  names(alphas)<-c("sig Both", "sig Gene", "sig Exon", "None")
+  
   ## Add t-stats and FDRs of exons' genes
   t_genes<-vector()
   FDRs<-vector()
@@ -401,6 +453,7 @@ t_stat_te<- function(expt){
   
   ## Add DE info of exons (and exons' genes)
   t_stats$DE<-add_DE_info_exons_vs_genes(t_stats)
+  t_stats$DE <- factor(t_stats$DE, levels=names(cols))
   
   ## Add symbols of exons with the highest values of |te-tg|
   t_stats_ordered <- t_stats[order(-t_stats$t)[1:10], "exon_libdID"]
@@ -417,28 +470,27 @@ t_stat_te<- function(expt){
   }
   t_stats$exon_symbols<-exon_symbols
   
-  
-  ## Plot
-  cols <- c("red", "#ffad73","#26b3ff", "dark grey") 
-  names(cols)<-c("sig Both","sig exon", "sig gene", "None")
-  alphas <- c( 1, 1, 1,0.5)  
-  names(alphas)<-c("sig Both", "sig exon", "sig gene", "None")
-  
   plot <- ggplot(t_stats, aes(x =te, y = t, color=DE, alpha=DE, label=exon_symbols)) +
-    geom_point(size = 1) +
+    geom_point(size = 1.2) +
     labs(x = "t-stats of exon", 
          y = "|te-tg|",
          title = paste(capitalize(expt),"exons", sep=" ")) +
-    geom_label_repel(fill="white", size=2, max.overlaps = Inf,
+    geom_label_repel(aes(alpha=NULL), fill="white", color='black', size=2, max.overlaps = Inf,
                      box.padding = 0.2,
                      show.legend=FALSE) +
     theme_bw() +
-    scale_color_manual(values = cols) + 
-    scale_alpha_manual(values = alphas)
+    guides(alpha = 'none') + 
+    scale_color_manual(values = cols, labels=names(cols), drop = FALSE) + 
+    scale_alpha_manual(values = alphas, labels=names(alphas), drop=FALSE) +
+    theme(plot.margin = unit(c(1,1,1,1), "cm"),
+          axis.title = element_text(size = 12),
+          axis.text = element_text(size = 10),
+          legend.text = element_text(size=11),
+          legend.title = element_text(size=12))
   
   plot
   ggsave(filename=paste("plots/04_DEA/02_Comparisons/Exon_analysis/t_stats_te_", substr(expt,1,3), 
-                        ".pdf", sep=""), height = 20, width = 25, units = "cm")
+                        ".pdf", sep=""), height = 15, width = 20, units = "cm")
 }
 
 
@@ -469,17 +521,22 @@ create_boxplot<- function(counts, y, title, q_value, FC){
   ## Boxplot
   p<-ggplot(data=counts, 
             aes(x=Group,y=eval(parse_expr(y)))) + 
-    geom_boxplot(outlier.color = "#FFFFFFFF") +
+    geom_boxplot(outlier.color = "#FFFFFFFF", width=0.35) +
     geom_jitter(aes(colour=Group),shape=16, 
-                position=position_jitter(0.2)) +
-    theme_classic() +
-    labs(x = "Group", y = "norm counts",
+                position=position_jitter(0.2), size=2.1) +
+    theme_bw() +
+    labs(x = "Group", y = "lognorm counts",
          title = title,
          ## Add FDR and FC of genes and exons
-         subtitle=paste(" FDR:", q_value, "\n", "FC:", FC)) +
-    theme(plot.margin=unit (c (1,1.5,1,1), 'cm'), legend.position = "none",
-          plot.title = element_text(hjust=0.5, size=10, face="bold"), 
-          plot.subtitle = element_text(size = 9)) 
+         subtitle=paste(" FDR:", q_value, '          ', "FC:", FC)) +
+    scale_color_manual(values=c("Control" = "seashell3", "Experimental" = "orange3")) +
+    scale_x_discrete(labels=c("Control"="Ctrl","Experimental"="Expt")) +
+    theme(plot.margin=unit (c(0.4,0.4,0.4,0.4), 'cm'), 
+          legend.position = "none",
+          plot.title = element_text(hjust=0.5, size=12, face="bold"), 
+          plot.subtitle = element_text(size = 10),
+          axis.title = element_text(size = (12)),
+          axis.text = element_text(size = 10.5)) 
   
   print(p)
 }
@@ -496,11 +553,6 @@ gene_exons_boxplots<- function(expt, gene, exon1, exon2){
   ## Expression values of all genes
   vGene<-results_genes[[1]][[2]]
   rownames(vGene)<- vGene$genes$ensemblID
-  
-  ## Regress out residuals
-  formula<- ~ Group + Sex + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr + overallMapRate + mitoRate
-  model=model.matrix(formula, data=vGene$targets)
-  vGene$E<-cleaningY(vGene$E, model, P=2)
   
   ## Get ensembl ID and symbol of the gene
   if(! gene %in% rownames(vGene)){
@@ -569,12 +621,8 @@ gene_exons_boxplots<- function(expt, gene, exon1, exon2){
     }
   }
     
-  ## Expression values of that exons
+  ## Expression values of those exons
   vExon<-results_nic[[1]][[2]]
-  ## Regress out residuals
-  formula<- ~ Group + Sex + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr + overallMapRate + mitoRate
-  model=model.matrix(formula, data=vExon$targets)
-  vExon$E<-cleaningY(vExon$E, model, P=2)
   counts_exons<-vExon$E[which(rownames(vExon) %in% top_gene_exons[1:3]),]
   counts_exons<-t(counts_exons)
   
@@ -618,7 +666,7 @@ gene_exons_boxplots<- function(expt, gene, exon1, exon2){
   
   plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], ncol = 4)
   ggsave(here(paste("plots/04_DEA/02_Comparisons/Exon_analysis/Boxplots_", gene_symbol, ".pdf", sep="")), 
-         width = 35, height = 10, units = "cm")
+         width = 37, height = 10, units = "cm")
 
 }
 
@@ -1216,17 +1264,146 @@ venn_plot(DE_lists, colors, "intersections_DEG_VS_exons_genes", c("Only up in ni
 options(width = 120)
 session_info()
 
+# ─ Session info ───────────────────────────────────────────────────────────────────────────────────────────────────────
 # setting  value
-# version  R version 4.2.0 (2022-04-22 ucrt)
-# os       Windows 10 x64 (build 19044)
-# system   x86_64, mingw32
+# version  R version 4.3.0 (2023-04-21)
+# os       macOS Monterey 12.5.1
+# system   aarch64, darwin20
 # ui       RStudio
 # language (EN)
-# collate  Spanish_Mexico.utf8
-# ctype    Spanish_Mexico.utf8
+# collate  en_US.UTF-8
+# ctype    en_US.UTF-8
 # tz       America/Mexico_City
-# date     2022-11-19
-# rstudio  2022.07.2+576 Spotted Wakerobin (desktop)
-# pandoc   2.19.2 @ C:/Program Files/RStudio/bin/quarto/bin/tools/ (via rmarkdown)
+# date     2023-12-26
+# rstudio  2023.06.1+524 Mountain Hydrangea (desktop)
+# pandoc   3.1.1 @ /Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/ (via rmarkdown)
+# 
+# ─ Packages ───────────────────────────────────────────────────────────────────────────────────────────────────────────
+# package              * version   date (UTC) lib source
+# AnnotationDbi          1.63.2    2023-07-03 [1] Bioconductor
+# backports              1.4.1     2021-12-13 [1] CRAN (R 4.3.0)
+# base64enc              0.1-3     2015-07-28 [1] CRAN (R 4.3.0)
+# Biobase              * 2.61.0    2023-06-02 [1] Bioconductor
+# BiocFileCache          2.9.1     2023-07-14 [1] Bioconductor
+# BiocGenerics         * 0.47.0    2023-06-02 [1] Bioconductor
+# biomaRt                2.57.1    2023-06-14 [1] Bioconductor
+# biomartr             * 1.0.7     2023-12-02 [1] CRAN (R 4.3.1)
+# Biostrings             2.69.2    2023-07-05 [1] Bioconductor
+# bit                    4.0.5     2022-11-15 [1] CRAN (R 4.3.0)
+# bit64                  4.0.5     2020-08-30 [1] CRAN (R 4.3.0)
+# bitops                 1.0-7     2021-04-24 [1] CRAN (R 4.3.0)
+# blob                   1.2.4     2023-03-17 [1] CRAN (R 4.3.0)
+# cachem                 1.0.8     2023-05-01 [1] CRAN (R 4.3.0)
+# cellranger             1.1.0     2016-07-27 [1] CRAN (R 4.3.0)
+# checkmate              2.2.0     2023-04-27 [1] CRAN (R 4.3.0)
+# cli                    3.6.1     2023-03-23 [1] CRAN (R 4.3.0)
+# cluster                2.1.4     2022-08-22 [1] CRAN (R 4.3.0)
+# colorspace             2.1-0     2023-01-23 [1] CRAN (R 4.3.0)
+# cowplot              * 1.1.1     2020-12-30 [1] CRAN (R 4.3.0)
+# crayon                 1.5.2     2022-09-29 [1] CRAN (R 4.3.0)
+# curl                   5.0.1     2023-06-07 [1] CRAN (R 4.3.0)
+# data.table             1.14.8    2023-02-17 [1] CRAN (R 4.3.0)
+# DBI                    1.1.3     2022-06-18 [1] CRAN (R 4.3.0)
+# dbplyr                 2.3.3     2023-07-07 [1] CRAN (R 4.3.0)
+# DelayedArray           0.26.6    2023-07-02 [1] Bioconductor
+# digest                 0.6.33    2023-07-07 [1] CRAN (R 4.3.0)
+# dplyr                  1.1.2     2023-04-20 [1] CRAN (R 4.3.0)
+# edgeR                * 3.43.7    2023-06-21 [1] Bioconductor
+# evaluate               0.21      2023-05-05 [1] CRAN (R 4.3.0)
+# fansi                  1.0.5     2023-10-08 [1] CRAN (R 4.3.1)
+# farver                 2.1.1     2022-07-06 [1] CRAN (R 4.3.0)
+# fastmap                1.1.1     2023-02-24 [1] CRAN (R 4.3.0)
+# filelock               1.0.2     2018-10-05 [1] CRAN (R 4.3.0)
+# foreign                0.8-84    2022-12-06 [1] CRAN (R 4.3.0)
+# formatR                1.14      2023-01-17 [1] CRAN (R 4.3.0)
+# Formula                1.2-5     2023-02-24 [1] CRAN (R 4.3.0)
+# fs                     1.6.3     2023-07-20 [1] CRAN (R 4.3.0)
+# futile.logger        * 1.4.3     2016-07-10 [1] CRAN (R 4.3.0)
+# futile.options         1.0.1     2018-04-20 [1] CRAN (R 4.3.0)
+# gargle                 1.5.2     2023-07-20 [1] CRAN (R 4.3.0)
+# generics               0.1.3     2022-07-05 [1] CRAN (R 4.3.0)
+# GenomeInfoDb         * 1.37.2    2023-06-21 [1] Bioconductor
+# GenomeInfoDbData       1.2.10    2023-05-28 [1] Bioconductor
+# GenomicRanges        * 1.53.1    2023-06-02 [1] Bioconductor
+# ggplot2              * 3.4.4     2023-10-12 [1] CRAN (R 4.3.1)
+# ggrepel              * 0.9.3     2023-02-03 [1] CRAN (R 4.3.0)
+# glue                   1.6.2     2022-02-24 [1] CRAN (R 4.3.0)
+# googledrive            2.1.1     2023-06-11 [1] CRAN (R 4.3.0)
+# gridExtra            * 2.3       2017-09-09 [1] CRAN (R 4.3.0)
+# gtable                 0.3.4     2023-08-21 [1] CRAN (R 4.3.0)
+# here                 * 1.0.1     2020-12-13 [1] CRAN (R 4.3.0)
+# Hmisc                * 5.1-0     2023-05-08 [1] CRAN (R 4.3.0)
+# hms                    1.1.3     2023-03-21 [1] CRAN (R 4.3.0)
+# htmlTable              2.4.1     2022-07-07 [1] CRAN (R 4.3.0)
+# htmltools              0.5.5     2023-03-23 [1] CRAN (R 4.3.0)
+# htmlwidgets            1.6.2     2023-03-17 [1] CRAN (R 4.3.0)
+# httr                   1.4.6     2023-05-08 [1] CRAN (R 4.3.0)
+# IRanges              * 2.35.2    2023-06-23 [1] Bioconductor
+# jaffelab             * 0.99.32   2023-05-28 [1] Github (LieberInstitute/jaffelab@21e6574)
+# KEGGREST               1.41.0    2023-07-07 [1] Bioconductor
+# knitr                  1.43      2023-05-25 [1] CRAN (R 4.3.0)
+# labeling               0.4.3     2023-08-29 [1] CRAN (R 4.3.0)
+# lambda.r               1.2.4     2019-09-18 [1] CRAN (R 4.3.0)
+# lattice                0.21-8    2023-04-05 [1] CRAN (R 4.3.0)
+# lifecycle              1.0.3     2022-10-07 [1] CRAN (R 4.3.0)
+# limma                * 3.57.6    2023-06-21 [1] Bioconductor
+# locfit                 1.5-9.8   2023-06-11 [1] CRAN (R 4.3.0)
+# magrittr               2.0.3     2022-03-30 [1] CRAN (R 4.3.0)
+# MASS                   7.3-60    2023-05-04 [1] CRAN (R 4.3.0)
+# Matrix                 1.6-0     2023-07-08 [1] CRAN (R 4.3.0)
+# MatrixGenerics       * 1.13.0    2023-05-20 [1] Bioconductor
+# matrixStats          * 1.0.0     2023-06-02 [1] CRAN (R 4.3.0)
+# memoise                2.0.1     2021-11-26 [1] CRAN (R 4.3.0)
+# munsell                0.5.0     2018-06-12 [1] CRAN (R 4.3.0)
+# nlme                   3.1-162   2023-01-31 [1] CRAN (R 4.3.0)
+# nnet                   7.3-19    2023-05-03 [1] CRAN (R 4.3.0)
+# pillar                 1.9.0     2023-03-22 [1] CRAN (R 4.3.0)
+# pkgconfig              2.0.3     2019-09-22 [1] CRAN (R 4.3.0)
+# png                    0.1-8     2022-11-29 [1] CRAN (R 4.3.0)
+# prettyunits            1.1.1     2020-01-24 [1] CRAN (R 4.3.0)
+# progress               1.2.2     2019-05-16 [1] CRAN (R 4.3.0)
+# purrr                  1.0.1     2023-01-10 [1] CRAN (R 4.3.0)
+# R.methodsS3          * 1.8.2     2022-06-13 [1] CRAN (R 4.3.0)
+# R.oo                 * 1.25.0    2022-06-12 [1] CRAN (R 4.3.0)
+# R.utils              * 2.12.2    2022-11-11 [1] CRAN (R 4.3.0)
+# R6                     2.5.1     2021-08-19 [1] CRAN (R 4.3.0)
+# rafalib              * 1.0.0     2015-08-09 [1] CRAN (R 4.3.0)
+# ragg                   1.2.5     2023-01-12 [1] CRAN (R 4.3.0)
+# rappdirs               0.3.3     2021-01-31 [1] CRAN (R 4.3.0)
+# RColorBrewer           1.1-3     2022-04-03 [1] CRAN (R 4.3.0)
+# Rcpp                   1.0.11    2023-07-06 [1] CRAN (R 4.3.0)
+# RCurl                  1.98-1.12 2023-03-27 [1] CRAN (R 4.3.0)
+# readxl               * 1.4.3     2023-07-06 [1] CRAN (R 4.3.0)
+# rlang                * 1.1.1     2023-04-28 [1] CRAN (R 4.3.0)
+# rmarkdown              2.23      2023-07-01 [1] CRAN (R 4.3.0)
+# rpart                  4.1.19    2022-10-21 [1] CRAN (R 4.3.0)
+# rprojroot              2.0.3     2022-04-02 [1] CRAN (R 4.3.0)
+# RSQLite                2.3.1     2023-04-03 [1] CRAN (R 4.3.0)
+# rstudioapi             0.15.0    2023-07-07 [1] CRAN (R 4.3.0)
+# S4Arrays               1.1.4     2023-06-02 [1] Bioconductor
+# S4Vectors            * 0.39.1    2023-06-02 [1] Bioconductor
+# scales                 1.2.1     2022-08-20 [1] CRAN (R 4.3.0)
+# segmented              1.6-4     2023-04-13 [1] CRAN (R 4.3.0)
+# sessioninfo          * 1.2.2     2021-12-06 [1] CRAN (R 4.3.0)
+# stringi                1.7.12    2023-01-11 [1] CRAN (R 4.3.0)
+# stringr                1.5.0     2022-12-02 [1] CRAN (R 4.3.0)
+# SummarizedExperiment * 1.30.2    2023-06-06 [1] Bioconductor
+# systemfonts            1.0.4     2022-02-11 [1] CRAN (R 4.3.0)
+# textshaping            0.3.6     2021-10-13 [1] CRAN (R 4.3.0)
+# tibble                 3.2.1     2023-03-20 [1] CRAN (R 4.3.0)
+# tidyselect             1.2.0     2022-10-10 [1] CRAN (R 4.3.0)
+# utf8                   1.2.4     2023-10-22 [1] CRAN (R 4.3.1)
+# vctrs                  0.6.4     2023-10-12 [1] CRAN (R 4.3.1)
+# VennDiagram          * 1.7.3     2022-04-12 [1] CRAN (R 4.3.0)
+# withr                  2.5.1     2023-09-26 [1] CRAN (R 4.3.1)
+# xfun                   0.39      2023-04-20 [1] CRAN (R 4.3.0)
+# XML                    3.99-0.14 2023-03-19 [1] CRAN (R 4.3.0)
+# xml2                   1.3.5     2023-07-06 [1] CRAN (R 4.3.0)
+# XVector                0.41.1    2023-06-02 [1] Bioconductor
+# zlibbioc               1.47.0    2023-05-20 [1] Bioconductor
+# 
+# [1] /Library/Frameworks/R.framework/Versions/4.3-arm64/Resources/library
+# 
+# ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
 
