@@ -1,3 +1,5 @@
+## Ignore
+
 raw-data/*
 processed-data/01_SPEAQeasy/pipeline_output
 processed-data/02_build_objects
@@ -10,3 +12,6 @@ code/01_SPEAQeasy/.nextflow*
 .Rhistory
 .DS_Store
 
+## Control
+!raw-data/Maternal_Smoking_pheno.txt
+!raw-data/README.md
