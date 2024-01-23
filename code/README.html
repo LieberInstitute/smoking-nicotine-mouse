@@ -352,18 +352,18 @@ display: none;
 </div>
 
 
-<div id="script-summary" class="section level2">
-<h2>Script summary</h2>
-<div id="build-objects" class="section level3">
-<h3>1. Build objects</h3>
+<div id="script-summary" class="section level1">
+<h1>Script summary</h1>
+<div id="build-objects" class="section level2">
+<h2>1. Build objects</h2>
 <p>This initial part of the code builds the necessary objects to analyze
 in the EDA. * <em>01_add_sequencing_lane.R</em>: Add flowcell
 information of the samples * <em>02_build_objects.R</em>: Explore
 datasets, data cleaning, normalization and separation, and feature
 filtering</p>
 </div>
-<div id="exploratory-data-analysis" class="section level3">
-<h3>2. Exploratory Data Analysis</h3>
+<div id="exploratory-data-analysis" class="section level2">
+<h2>2. Exploratory Data Analysis</h2>
 <ul>
 <li><em>01_StudyDesign.R</em>: Compute the number of samples belonging
 to each pair/trio of sample phenotypes</li>
@@ -376,8 +376,8 @@ reduction</li>
 Explanatory variables and Variance partition</li>
 </ul>
 </div>
-<div id="differential-expression-analysis" class="section level3">
-<h3>3. Differential Expression Analysis</h3>
+<div id="differential-expression-analysis" class="section level2">
+<h2>3. Differential Expression Analysis</h2>
 <p>Separated in gene, tx, exon and jx level analyses *
 <em>01_Modeling.R</em>: Perform DEA * <em>02_Comparisons.R</em>: Create
 plots comparing t-stats of different groups of features and Venn
@@ -386,24 +386,30 @@ experiments and/or regulation directions. Analysis of blood vs brain
 biomarkers and comparisons of human vs mouse genes are within the gene
 analysis.</p>
 </div>
-<div id="go-kegg-analyses" class="section level3">
-<h3>4. GO &amp; KEGG analyses</h3>
+<div id="go-kegg-analyses" class="section level2">
+<h2>4. GO &amp; KEGG analyses</h2>
 <p>Separated in gene, tx and exon level analyses *
 <em>01_GO_KEGG_analyses.R</em>: Gene Ontology and KEGG enrichment
 analyses at the gene level</p>
 </div>
-<div id="deg-visualization" class="section level3">
-<h3>5. DEG visualization</h3>
+<div id="deg-visualization" class="section level2">
+<h2>5. DEG visualization</h2>
 <p>Only at the gene level * <em>01_Heatmap_DEG.R</em>: Create heatmaps
 of DEG</p>
 </div>
-<div id="junction-annotation" class="section level3">
-<h3>6. Junction annotation</h3>
+<div id="junction-annotation" class="section level2">
+<h2>6. Junction annotation</h2>
 <ul>
 <li><em>01_Jxn_anno.R</em>: Obtain novel DE jxns and explore potential
 novel isoforms</li>
 </ul>
 </div>
+</div>
+<div id="code-organization" class="section level1">
+<h1>Code organization</h1>
+<p>Files are organized following the structure from <a href="https://github.com/LieberInstitute/template_project">LieberInstitute/template_project</a>.
+Log files include the corresponding R session information with details
+about version numbers of the packages we used.</p>
 </div>
 
 
