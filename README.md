@@ -10,6 +10,10 @@ Original publication: *"Modeling the effects of smoking and nicotine exposures o
 
 ## Overview
 
+<style>
+body {
+text-align: justify}
+</style>
 This project consisted of a differential expression analysis involving 4 expression features: genes, exons, transcripts and exon-exon junctions. The main goal of this study was to explore the effects of prenatal smoking and nicotine exposures on the developing brain of mouse pups. As secondary objectives, this work evaluated the affected genes by each substance on adult brain in order to compare pup and adult results, and the effects of smoking exposure on adult blood and brain to search for overlapping biomarkers in both tissues. 
 
 ## Study design
@@ -23,34 +27,31 @@ This project consisted of a differential expression analysis involving 4 express
 
 ## Workflow
 
+<p align="center">
+  <img src= "plots/03_EDA/01_StudyDesign/Table_of_Analyses.png" width="1000" >
+</p>
+
+**Summary of analysis steps across gene expression feature levels**: 
+
+* **1. Data processing**: counts of genes, exons, and exon-exon junctions were normalized to CPM and log2-transformed; transcript expression values were only log2-scaled since they were already in TPM. Lowly-expressed features were removed using the indicated functions and samples were separated by tissue and age in order to create subsets of the data for downstream analyses. 
+
+* **2. Exploratory Data Analysis (EDA)**: QC metrics of the samples were examined and used to filter the poor quality ones. Sample level effects were explored through dimensionality reduction methods and segregated samples in PCA plots were removed from the datasets. Gene level effects were evaluated with analyses of variance partition. 
+
+* **3. Differential Expression Analysis (DEA)**: with the relevant variables identified in the previous steps, the DEA was performed at the gene level for nicotine and smoking experiments in adult and pup brain samples, and for smoking in adult blood samples; DEA at the rest of the levels was performed for both exposures in pup brain only. DE signals of the genes in the different conditions, ages, tissues and species (1 human results from [Semick et al. 2020](https://www.nature.com/articles/s41380-018-0223-1)) were contrasted, as well as the DE signals of exons and transcripts vs those of their genes. We also analyzed the mean expression of significant and non-significant genes with and without DE features. Then, all resultant DEGs and DE features (and their genes) were compared by direction of regulation (up or down) between and within experiments (nicotine/smoking); mouse DEGs were also compared against 2human genes associated with TUD from [Toikumo et al. 2023](https://www.medrxiv.org/content/10.1101/2023.03.27.23287713v2). 
+
+* **4. Functional Enrichment Analysis**: we obtained the GO & KEGG terms significantly enriched in our clusters of DEGs and genes of DE transcripts and exons.
+
+* **5. DGE visualization**: the log2-normalized expression of DEGs was represented in heatmaps in order to distinguish the groups of up and downregulated genes.
+
+* **6. Novel junction gene annotation**: for uncharacterized DE junctions with no annotated gene, their nearest, preceding and following genes were determined. See Materials and Methods for complete details. 
+
+<p style="line-height:80%">
+<font size="1.5"> 
+Abbreviations: Jxn: junction; Tx(s): transcript(s); CPM: counts per million; TPM: transcripts per million; TMM: Trimmed Mean of M-Values; TMMwsp: TMM with singleton pairing; QC: quality control; PC: principal component; DEA: differential expression analysis; DE: differential expression/differentially expressed; FC: fold-change; FDR: false discovery rate; DEG: differentially expressed genes; TUD: tobacco use disorder; DGE: differential gene expression.
+</font>
+</p>
+
 See [code](code/) for script summary. 
-
-### 1. Build objects
-This initial part of the code builds the necessary objects to analyze in the EDA. 
-* *01_add_sequencing_lane.R*: Add flowcell information of the samples
-* *02_build_objects.R*: Explore datasets, data cleaning, normalization and separation, and feature filtering
-
-### 2. Exploratory Data Analysis
-* *01_StudyDesign.R*: Compute the number of samples belonging to each pair/trio of sample phenotypes
-* *02_QC.R*: Explore the relatioships between QC metrics and sample phenotypes, plot QC metrics per sample and sample filtering by QC
-* *03_PCA_MDS.R*: Explore sample effects: Dimensionality reduction
-* *04_Expl_Var_partition.R*: Explore gene level effects: Explanatory variables and Variance partition
-
-### 3. Differential Expression Analysis
-Separated in gene, tx, exon and jx level analyses
-* *01_Modeling.R*: Perform DEA 
-* *02_Comparisons.R*: Create plots comparing t-stats of different groups of features and Venn diagrams to quantify the number of common DE features between different experiments and/or regulation directions. Analysis of blood vs brain biomarkers and comparisons of human vs mouse genes are within the gene analysis. 
-
-### 4. GO & KEGG analyses
-Separated in gene, tx and exon level analyses
-* *01_GO_KEGG_analyses.R*: Gene Ontology and KEGG enrichment analyses at the gene level
-
-### 5. DEG visualization
-Only at the gene level
-* *01_Heatmap_DEG.R*: Create heatmaps of DEG 
-
-### 6. Junction annotation
-* *01_Jxn_anno.R*: Obtain novel DE jxns and explore potential novel isoforms
 
 
 # Supplementary Tables
