@@ -354,30 +354,56 @@ display: none;
 
 <div id="script-summary" class="section level1">
 <h1>Script summary</h1>
-<div id="build-objects" class="section level2">
-<h2>1. Build objects</h2>
-<p>This initial part of the code builds the necessary objects to analyze
-in the EDA. * <em>01_add_sequencing_lane.R</em>: Add flowcell
-information of the samples * <em>02_build_objects.R</em>: Explore
-datasets, data cleaning, normalization and separation, and feature
-filtering</p>
-</div>
-<div id="exploratory-data-analysis" class="section level2">
-<h2>2. Exploratory Data Analysis</h2>
+<div id="speaqeasy" class="section level2">
+<h2>01. SPEAQeasy</h2>
+<p>Run <a href="https://doi.org/10.1186/s12859-021-04142-3"><em>SPEAQeasy</em></a>
+pipeline for quantification of expression features.</p>
 <ul>
-<li><em>01_StudyDesign.R</em>: Compute the number of samples belonging
-to each pair/trio of sample phenotypes</li>
-<li><em>02_QC.R</em>: Explore the relatioships between QC metrics and
-sample phenotypes, plot QC metrics per sample and sample filtering by
-QC</li>
-<li><em>03_PCA_MDS.R</em>: Explore sample effects: Dimensionality
-reduction</li>
-<li><em>04_Expl_Var_partition.R</em>: Explore gene level effects:
-Explanatory variables and Variance partition</li>
+<li><p><a href="code/01_SPEAQeasy/01_make_manifest.R">01_make_manifest.R</a>:
+construct a manifest listing sample IDs and associated raw FASTQ
+files.</p></li>
+<li><p><a href="code/01_SPEAQeasy/02_run_pipeline.sh">02_run_pipeline.sh</a>:
+invoke <em>SPEAQeasy</em> to align data, quantify features, and produce
+<a href="https://www.bioconductor.org/packages/devel/bioc/vignettes/SummarizedExperiment/inst/doc/SummarizedExperiment.html"><code>RangedSummarizedExperiment</code></a>
+objects for downstream analysis.</p></li>
 </ul>
 </div>
-<div id="differential-expression-analysis" class="section level2">
-<h2>3. Differential Expression Analysis</h2>
+<div id="build-objects" class="section level2">
+<h2>02. Build objects</h2>
+<p>This initial part of the code builds the necessary objects to analyze
+in downstream steps.</p>
+<ul>
+<li><p><a href="code/02_build_objects/01_add_sequencing_lane.R">01_add_sequencing_lane.R</a>:
+Extract flowcell information of the samples.</p></li>
+<li><p><a href="code/02_build_objects/02_build_objects.R">02_build_objects.R</a>:
+Explore, clean, correct and format data. Here raw counts are
+log-normalized, lowly-expressed features filtered out and datasets
+separated by tissue and age.</p></li>
+</ul>
+</div>
+<div id="exploratory-data-analysis-eda" class="section level2">
+<h2>03. Exploratory Data Analysis (EDA)</h2>
+<ul>
+<li><p><a href="code/03_EDA/01_StudyDesign.R">01_StudyDesign.R</a>:
+Compute the number of samples belonging to each pair/triad of sample
+phenotypes.</p></li>
+<li><p><a href="code/03_EDA/02_QC.R">02_QC.R</a>: Evaluate and compare
+quality control (QC) metrics of sample groups; explore the relationships
+between QC metrics, and sample filtering by QC, followed by examination
+of QC metrics of samples that were kept and removed.</p></li>
+<li><p><a href="code/03_EDA/03_PCA_MDS.R">03_PCA_MDS.R</a>: Perform
+Principal Component Analysis (PCA) and Multidimensional Scaling Analysis
+(MDS) to explore sample-level variability in gene expression and
+identify drivers of such variation. QC metrics of segregated samples in
+PCA plots were further analyzed and those samples were removed if turned
+out to be poor-quality.</p></li>
+<li><p><a href="code/03_EDA/04_Expl_Var_partition.R">04_Expl_Var_partition.R</a>:
+Explore gene-level effects: Explanatory variables and Variance
+partition.</p></li>
+</ul>
+</div>
+<div id="differential-expression-analysis-dea" class="section level2">
+<h2>04. Differential Expression Analysis (DEA)</h2>
 <p>Separated in gene, tx, exon and jx level analyses *
 <em>01_Modeling.R</em>: Perform DEA * <em>02_Comparisons.R</em>: Create
 plots comparing t-stats of different groups of features and Venn
@@ -386,19 +412,19 @@ experiments and/or regulation directions. Analysis of blood vs brain
 biomarkers and comparisons of human vs mouse genes are within the gene
 analysis.</p>
 </div>
-<div id="go-kegg-analyses" class="section level2">
-<h2>4. GO &amp; KEGG analyses</h2>
+<div id="functionl-enrichment-analysis-go-kegg" class="section level2">
+<h2>05. Functionl Enrichment Analysis (GO &amp; KEGG)</h2>
 <p>Separated in gene, tx and exon level analyses *
 <em>01_GO_KEGG_analyses.R</em>: Gene Ontology and KEGG enrichment
 analyses at the gene level</p>
 </div>
-<div id="deg-visualization" class="section level2">
-<h2>5. DEG visualization</h2>
+<div id="dge-visualization" class="section level2">
+<h2>06. DGE visualization</h2>
 <p>Only at the gene level * <em>01_Heatmap_DEG.R</em>: Create heatmaps
 of DEG</p>
 </div>
-<div id="junction-annotation" class="section level2">
-<h2>6. Junction annotation</h2>
+<div id="novel-de-junction-gene-annotation" class="section level2">
+<h2>07. Novel DE junction gene annotation</h2>
 <ul>
 <li><em>01_Jxn_anno.R</em>: Obtain novel DE jxns and explore potential
 novel isoforms</li>
@@ -408,8 +434,8 @@ novel isoforms</li>
 <div id="code-organization" class="section level1">
 <h1>Code organization</h1>
 <p>Files are organized following the structure from <a href="https://github.com/LieberInstitute/template_project">LieberInstitute/template_project</a>.
-Log files include the corresponding R session information with details
-about version numbers of the packages we used.</p>
+Scripts include the R session information with details about version
+numbers of the packages we used.</p>
 </div>
 
 
