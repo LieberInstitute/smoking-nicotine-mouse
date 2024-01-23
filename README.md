@@ -10,10 +10,6 @@ Original publication: *"Modeling the effects of smoking and nicotine exposures o
 
 ## Overview
 
-<style>
-body {
-text-align: justify}
-</style>
 This project consisted of a differential expression analysis involving 4 expression features: genes, exons, transcripts and exon-exon junctions. The main goal of this study was to explore the effects of prenatal smoking and nicotine exposures on the developing brain of mouse pups. As secondary objectives, this work evaluated the affected genes by each substance on adult brain in order to compare pup and adult results, and the effects of smoking exposure on adult blood and brain to search for overlapping biomarkers in both tissues. 
 
 ## Study design
