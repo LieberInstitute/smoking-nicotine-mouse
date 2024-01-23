@@ -2,19 +2,21 @@ smokingMouse
 ================
 
 ## Citation
-Code used to generate results for the writting: *"Modeling the effects of smoking and nicotine exposures on the developing brain"*
-`TODO`
+Code used to generate results for the paper: *"Modeling the effects of smoking and nicotine exposures on the developing brain"*
+`DOI:TODO`
 
 ## Overview
 
-This project consists of a differential expression analysis involving 4 data types: genes, exons, transcripts and junctions. The main goal of this study was to explore the effects of smoking and nicotine exposures on the developing brain of mice pups. As secondary objectives, this work evaluated the affected genes by each substance on adult brain in order to compare pup and adult results, and the effects of smoking on adult blood and brain to search for overlapping biomarkers in both tissues. 
+This project consisted of a differential expression analysis involving 4 expression features: genes, exons, transcripts and exon-exon junctions. The main goal of this study was to explore the effects of prenatal smoking and nicotine exposures on the developing brain of mouse pups. As secondary objectives, this work evaluated the affected genes by each substance on adult brain in order to compare pup and adult results, and the effects of smoking exposure on adult blood and brain to search for overlapping biomarkers in both tissues. 
 
 ## Study design
  
-36 pregnant mice and 35 not pregnant female adults were administered nicotine (n=12), exposed to cigarette smoke (n=24) or controls (n=35) and RNA sequencing experiments were performed on frontal cortices of all the resultant 137 P0 pups and on frontal cortices (n=47) and blood (n=24) from the 71 adults, totaling 208 samples. Of the total pup samples, 19 were born to mice that were administered nicotine, 46 to mice exposed to smoking and the remaining 72 to control mice.
+<p align="center">
+  <img src= "plots/03_EDA/01_StudyDesign/Study_design_fig.png" width="800" >
+</p>
 
+**Experimental design of the study.** **A)** 21 pregnant mice and 26 nonpregnant female adults were either administered nicotine (n=12), exposed to cigarette smoke (n=12), or used as controls (n=23; 11 nicotine controls and 12 smoking controls). A total of 137 pups were born to pregnant mice: 19 were born to mice that were administered nicotine, 46 to mice exposed to smoking, and the remaining 72 to control mice (23 to nicotine controls and 49 to smoking controls). Samples from frontal cortices of all P0 pups (n=137: 42 of nicotine and 95 of the smoking experiment) and adults (n=47: 23 of nicotine and 24 of the smoking experiment) were obtained, as well as blood samples from the smoking-exposed and smoking control adults (n=24), totaling 208 bulk RNA-seq samples. Number of donors and RNA-seq samples are indicated in the figure. **B)** RNA was extracted from such samples and RNA-seq experiments were performed, obtaining expression counts for genes, exons, transcripts and exon-exon junctions.
 
-<img src="https://s3.us-west-2.amazonaws.com/secure.notion-static.com/618bb981-d4c7-4caa-8a1c-5af4cc0cfb83/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230131%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230131T012754Z&X-Amz-Expires=86400&X-Amz-Signature=ee963a83bf64bc83fdd1ee01bf22428c0d0ef8d47e1dfb1a01e78f9bf31be85e&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject" width="600px" align="center" />
 
 ## Script summary
 
