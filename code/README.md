@@ -92,7 +92,7 @@ Separated in gene, transcript (Tx), exon and exon-exon junction (Jx) level analy
 
 * At the [transcript](04_DEA/Tx_analysis) and [exon](04_DEA/Exon_analysis) levels:
 
-  * [01_Modeling.R](04_DEA/Tx_analysis/01_Modeling.R) for txs and [01_Modeling.R](04_DEA/Tx_analysis/01_Modeling.R) for exons: Perform differential expression analysis applying only the fitted model for: 
+  * [01_Modeling.R](04_DEA/Tx_analysis/01_Modeling.R) for txs and [01_Modeling.R](04_DEA/Exon_analysis/01_Modeling.R) for exons: Perform differential expression analysis applying only the fitted model for: 
     * Nicotine-exposed vs nicotine control pup brain
     * Smoking-exposed vs smoking control pup brain  
     
@@ -115,12 +115,12 @@ Separated in gene, transcript (Tx), exon and exon-exon junction (Jx) level analy
     Boxplots of expression lognorm counts of relevant genes and their txs/exons in the nicotine and smoking experiments. 
    
     Venn diagrams comparing:
-      * Up/downregulated nicotine DE txs/exons vs up/down smoking DE txs/exons
-      * Up/downregulated nicotine/smoking DE txs'/exons' genes vs up/down nicotine/smoking DE txs'/exons' genes
-      * DE txs'/exons' genes vs DEGs, with both features up/down in nicotine/smoking
+      * Up/downregulated nicotine vs up/down smoking DE txs/exons
+      * Up & downregulated nicotine vs up & down smoking DE txs/exons
+      * Genes of up/downregulated nicotine/smoking DE txs/exons
       * DE txs'/exons' genes vs DEGs, with both features up/down in nicotine or smoking only, up/down in both experiments, up in nicotine and down in smoking, and up in smoking and down in nicotine
-      * Compare DE txs' genes vs DE exons' genes vs DEGs in the same groups as above (up/down in either nic/smo only or in both experimets)
-      * Tobacco Use Disorder (TUD) associated human genes vs mouse pup DEGs 
+      * Compare DE txs' genes vs DE exons' genes vs DEGs in the same groups as above (up/down in either nic/smo only or in both experimets, or with different regulation directions in nic and smo)
+
 
     
 
@@ -133,10 +133,11 @@ Separated in gene, transcript (Tx), exon and exon-exon junction (Jx) level analy
     
   * [02_Comparisons.R](04_DEA/Jx_analysis/02_Comparisons.R): 
   
-    Plot 
+    Venn diagrams comparing:
+      * Up/downregulated nicotine vs up/down smoking DE txs/exons    
     
 
-
+ 
 
 ## 05. Functionl Enrichment Analysis (GO & KEGG)
 Separated in gene, transcript (Tx), exon and exon-exon junction (Jx) level analyses.
