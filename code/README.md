@@ -33,15 +33,15 @@ This part of the code builds the necessary objects to analyze in downstream step
 
 
 ## 04. Differential Expression Analysis (DEA)
-Separated in gene, transcript (Tx), [exon](04_DEA/Exon_analysis) and [exon-exon junction](04_DEA/Jx_analysis) (Jx) level analyses. For each the following two scripts contain:
+Separated in gene, transcript (Tx), exon and exon-exon junction (Jx) level analyses. For each the following two scripts contain:
 
 * At the [gene](04_DEA/Gene_analysis) level:
-  * [01_Modeling.R](04_DEA/Gene_analysis/01_Modeling.R): Perform differential expression analysis using [`limma`](https://bioconductor.org/packages/release/bioc/html/limma.html) separately for the 5 experimental groups: 
-    * Smoking-exposed vs smoking controls in adult blood
-    * Nicotine-exposed vs nicotine controls in adult brain
-    * Smoking-exposed vs smoking controls in adult brain
-    * Nicotine-exposed vs nicotine controls in pup brain
-    * Smoking-exposed vs smoking controls in pup brain  
+  * [01_Modeling.R](04_DEA/Gene_analysis/01_Modeling.R): Perform differential expression analysis using [`limma`](https://bioconductor.org/packages/release/bioc/html/limma.html), separately for the 5 experimental groups: 
+    * Smoking-exposed vs smoking control adult blood
+    * Nicotine-exposed vs nicotine control adult brain
+    * Smoking-exposed vs smoking control adult brain
+    * Nicotine-exposed vs nicotine control pup brain
+    * Smoking-exposed vs smoking control pup brain  
     
     3 models were applied for each group: 
     * Naive model: gene expression is modeled by the following covariates: ~ `Group` + `plate` + `flowcell` + `QC metrics`
@@ -49,7 +49,9 @@ Separated in gene, transcript (Tx), [exon](04_DEA/Exon_analysis) and [exon-exon 
     * Interaction model: gene expression is modeled by: ~ [`Group*Sex` (for pups) or `Group*Pregancy` (for adults)] + `plate` + `flowcell` + `QC metrics`
     
 
-  * [02_Comparisons.R](04_DEA/Gene_analysis/02_Comparisons.R): Create plots comparing the moderated *t*-stats of genes in:
+  * [02_Comparisons.R](04_DEA/Gene_analysis/02_Comparisons.R): 
+  
+    Create plots comparing the moderated *t*-stats of the genes in:
    
     **Analysis of blood vs brain biomarkers**
       * Smoking-exposed adult blood vs smoking/nicotine-exposed adult/pup brain 
@@ -69,26 +71,70 @@ Separated in gene, transcript (Tx), [exon](04_DEA/Exon_analysis) and [exon-exon 
       * Nicotine-exposed pup brain in naive model vs nicotine-exposed pup brain in fitted model
       
     **Human vs mouse genes** 
-      * Nicotine-exposed adult/pup brain vs smoking-exposed human prenatal/adult brain 
-      * Smoking-exposed adult/pup brain vs smoking-exposed human prenatal/adult brain 
-      * Smoking-exposed adult blood vs smoking-exposed human prenatal/adult brain 
+      * Nicotine-exposed mouse adult/pup brain vs smoking-exposed human prenatal/adult brain 
+      * Smoking-exposed mouse adult/pup brain vs smoking-exposed human prenatal/adult brain 
+      * Smoking-exposed mouse adult blood vs smoking-exposed human prenatal/adult brain 
       
-        → search for human brain genes that replicate in mouse brain/blood and viceversa
+        → search for human brain genes that replicate in mouse brain/blood and vice versa
 
      Venn diagrams to quantify the number of:
       * Nicotine/smoking DEGs in the naive vs fitted model 
       * Naive/fitted model DEGs in nicotine vs smoking
       * Up/downregulated nicotine/smoking DEGs in the naive vs fitted model 
       * Up/downregulated nicotine DEGs vs up/down smoking DEGs (from either naive or fitted model or from only one model)
-      * Nicotine/smoking naive/fitted DEGs 
-      * Up/downregulated nicotine/smoking DEGs (from the fitted model only)
+      * Nicotine naive & fitted DEGs vs smoking naive & fitted DEGs
+      * Up & downregulated nicotine DEGs vs up & down smoking DEGs (from the fitted model only)
       * All nicotine vs smoking DEGs (from any model)
-      * Mouse replicating genes in human
+      * Mouse genes replicating in human
+      * Tobacco Use Disorder (TUD)-associated human genes vs mouse pup DEGs 
+
+
+
+* At the [transcript](04_DEA/Tx_analysis) and [exon](04_DEA/Exon_analysis) levels:
+
+  * [01_Modeling.R](04_DEA/Tx_analysis/01_Modeling.R) for txs and [01_Modeling.R](04_DEA/Tx_analysis/01_Modeling.R) for exons: Perform differential expression analysis applying only the fitted model for: 
+    * Nicotine-exposed vs nicotine control pup brain
+    * Smoking-exposed vs smoking control pup brain  
+    
+    
+  * [02_Comparisons.R](04_DEA/Tx_analysis/02_Comparisons.R) for txs and [02_Comparisons.R](04_DEA/Exon_analysis/02_Comparisons.R) for exons: 
+  
+    Plot the moderated *t*-stats of txs/exons in:
+    
+    **Compare experiments**
+      * Smoking-exposed pup brain vs nicotine-exposed pup brain
+      
+    **Compare expression features**
+      * Moderated *t*-stats of txs/exons in nicotine/smoking-exposed pup brain vs moderated *t*-stats of their genes in the same experiment
+      
+    For exons only:
+      * Moderated *t*-stats of genes in nicotine/smoking-exposed pup brain vs mean of |*t*-stats of the gene - *t*-stats of the gene's exons|
+      * Moderated *t*-stats of exons in nicotine/smoking-exposed pup brain vs |*t*-stats of the exon's gene - *t*-stats of the exon|
+      
+      
+    Boxplots of expression lognorm counts of relevant genes and their txs/exons in the nicotine and smoking experiments. 
+   
+    Venn diagrams comparing:
+      * Up/downregulated nicotine DE txs/exons vs up/down smoking DE txs/exons
+      * Up/downregulated nicotine/smoking DE txs'/exons' genes vs up/down nicotine/smoking DE txs'/exons' genes
+      * DE txs'/exons' genes vs DEGs, with both features up/down in nicotine/smoking
+      * DE txs'/exons' genes vs DEGs, with both features up/down in nicotine or smoking only, up/down in both experiments, up in nicotine and down in smoking, and up in smoking and down in nicotine
+      * Compare DE txs' genes vs DE exons' genes vs DEGs in the same groups as above (up/down in either nic/smo only or in both experimets)
       * Tobacco Use Disorder (TUD) associated human genes vs mouse pup DEGs 
 
     
 
-* At the [transcript](04_DEA/Tx_analysis) level:
+
+* At the [exon-exon junction](04_DEA/Jx_analysis) level:
+
+  * [01_Modeling.R](04_DEA/Jx_analysis/01_Modeling.R): Differential expression analysis for junctions applying the fitted model for: 
+    * Nicotine-exposed vs nicotine control pup brain
+    * Smoking-exposed vs smoking control pup brain 
+    
+  * [02_Comparisons.R](04_DEA/Jx_analysis/02_Comparisons.R): 
+  
+    Plot 
+    
 
 
 

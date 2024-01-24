@@ -1130,7 +1130,7 @@ DEG_nic_vs_Exons_nic <-list(
   "DE exons' genes"=union(nic_down_genes, nic_up_genes)
 )
 
-## Smo DEGs vs mo exons' genes
+## Smo DEGs vs smo exons' genes
 DEG_smo_vs_Exons_smo <-list(
   "DEG"= union(smo_DEG_down, smo_DEG_up),
   "DE exons' genes"=union(smo_down_genes, smo_up_genes)
