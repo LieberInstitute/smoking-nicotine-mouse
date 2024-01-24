@@ -470,17 +470,18 @@ nicotine-exposed pup brain.</strong></p>
 <p>Metadata of DE exon-exon junctions in the nicotine pup brain,
 including for each:</p>
 <ul>
-<li>if both the donor and acceptor sites together are known and
+<li>if both its donor and acceptor sites together are known and
 annotated in GENCODE M25 (<code>inGencode</code> variable);</li>
-<li>if its donor or acceptor site is annotated in GENCODE M25
-(<code>inGencodeStart</code> and <code>inGencodeEnd</code> variables,
-respectively);</li>
-<li>the junction class: <em>Novel</em> (if both start and end sites are
-unknown, also known as fully novel junctions), <em>InGen</em> (already
-annotated in GENCODE M25), <em>AltStartEnd</em> (if it has only one
-known site), or <em>ExonSkip</em> (with sites from non-successive exons,
-both known individually but not together), and</li>
-<li>if they were fusion junctions, meaning that they connect exons from
+<li>if its donor and acceptor sites are individually annotated in
+GENCODE M25 (<code>inGencodeStart</code> and <code>inGencodeEnd</code>
+variables, respectively);</li>
+<li>the junction <code>Class</code>: <em>Novel</em> (if both start and
+end sites are unknown, also known as fully novel junctions),
+<em>InGen</em> (already annotated in GENCODE M25), <em>AltStartEnd</em>
+(if it has only one known site), or <em>ExonSkip</em> (with sites from
+non-successive exons, both known individually but not together),
+and</li>
+<li>if it is a fusion junction, meaning that it connects exons from
 different genes (<code>isFusion</code> variable).</li>
 </ul>
 <p>Their logFC, moderated <em>t</em>-stats, <em>p</em>-value and
