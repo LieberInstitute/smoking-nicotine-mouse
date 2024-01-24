@@ -36,7 +36,7 @@ This part of the code builds the necessary objects to analyze in downstream step
 Separated in gene, transcript (tx), exon, and exon-exon junction (jx) level analyses. For each the following two scripts contain:
 
 * At the [gene](04_DEA/Gene_analysis) level:
-  * [01_Modeling.R](04_DEA/Gene_analysis/01_Modeling.R): perform differential expression analysis using [`limma`](https://bioconductor.org/packages/release/bioc/html/limma.html), separately for the 5 experimental groups: 
+  * [01_Modeling.R](04_DEA/Gene_analysis/01_Modeling.R): perform differential expression analysis using [_limma_](https://bioconductor.org/packages/release/bioc/html/limma.html), separately for the 5 experimental groups: 
     * Smoking-exposed vs smoking control adult blood
     * Nicotine-exposed vs nicotine control adult brain
     * Smoking-exposed vs smoking control adult brain

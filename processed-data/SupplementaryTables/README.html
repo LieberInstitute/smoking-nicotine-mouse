@@ -352,301 +352,170 @@ display: none;
 </div>
 
 
-<div id="script-summary" class="section level1">
-<h1>Script summary</h1>
-<div id="speaqeasy" class="section level2">
-<h2>01. SPEAQeasy</h2>
-<p>Run <a href="https://doi.org/10.1186/s12859-021-04142-3"><em>SPEAQeasy</em></a>
-pipeline for quantification of expression features.</p>
-<ul>
-<li><p><a href="01_SPEAQeasy/01_make_manifest.R">01_make_manifest.R</a>:
-construct a manifest listing sample IDs and associated raw FASTQ
-files.</p></li>
-<li><p><a href="01_SPEAQeasy/02_run_pipeline.sh">02_run_pipeline.sh</a>:
-invoke <em>SPEAQeasy</em> to align data, quantify features, and produce
-<a href="https://www.bioconductor.org/packages/devel/bioc/vignettes/SummarizedExperiment/inst/doc/SummarizedExperiment.html"><code>RangedSummarizedExperiment</code></a>
-objects for downstream analysis.</p></li>
-</ul>
+<div id="supplementary-tables" class="section level1">
+<h1>Supplementary Tables</h1>
+<div id="supplementary-table-1" class="section level2">
+<h2><a href="TableS1_DEGs_brain_pup_nicotine.tsv">Supplementary Table
+1</a></h2>
+<p>DEGs in the nicotine-exposed pup brain. Metadata of DEGs in the
+nicotine pup brain and their logFC, moderated t-stats, p-value and
+adjusted p-value for DE. The statistics were computed with
+<code>topTable()</code> from <a href="https://bioconductor.org/packages/release/bioc/html/limma.html"><em>limma</em></a>;
+see its documentation for the definition of the variable names.</p>
 </div>
-<div id="build-objects" class="section level2">
-<h2>02. Build objects</h2>
-<p>This part of the code builds the necessary objects to analyze in
-downstream steps.</p>
-<ul>
-<li><p><a href="02_build_objects/01_add_sequencing_lane.R">01_add_sequencing_lane.R</a>:
-extract flowcell information of the samples.</p></li>
-<li><p><a href="02_build_objects/02_build_objects.R">02_build_objects.R</a>:
-explore, clean, correct and format data. Here raw counts of genes, exons
-and exon-exon junctions were log-normalized, and transcripts-per-million
-(TPM) of transcripts were log-scaled; lowly-expressed features were
-filtered out, and datasets separated by tissue and age.</p></li>
-</ul>
+<div id="supplementary-table-2" class="section level2">
+<h2>Supplementary Table 2</h2>
+<p>DEGs in the smoking-exposed pup brain. Same as in <a href="TableS1_DEGs_brain_pup_nicotine.tsv"><strong>Table S1</strong></a>
+but for DEGs in the smoking pup brain.</p>
 </div>
-<div id="exploratory-data-analysis-eda" class="section level2">
-<h2>03. Exploratory Data Analysis (EDA)</h2>
-<ul>
-<li><p><a href="03_EDA/01_StudyDesign.R">01_StudyDesign.R</a>: compute
-the number of samples belonging to each pair/triad of sample
-phenotypes.</p></li>
-<li><p><a href="03_EDA/02_QC.R">02_QC.R</a>: evaluate and compare
-quality control (QC) metrics of sample groups; explore the relationships
-between QC metrics, and sample filtering by QC, followed by examination
-of QC metrics of samples that were kept and removed.</p></li>
-<li><p><a href="03_EDA/03_PCA_MDS.R">03_PCA_MDS.R</a>: perform Principal
-Component Analysis (PCA) and Multidimensional Scaling Analysis (MDS) to
-explore sample-level variability in gene expression and identify drivers
-of such variation. QC metrics of segregated samples in PCA plots were
-further analyzed and those samples were removed if turned out to be
-poor-quality.</p></li>
-<li><p><a href="03_EDA/04_Expl_Var_partition.R">04_Expl_Var_partition.R</a>:
-assess correlation between explanatory sample variables and explore
-their individual or joint contributions on the expression variation of
-each gene to select main contributing variables to be included in the
-models for differential expression.</p></li>
-</ul>
+<div id="supplementary-table-3" class="section level2">
+<h2>Supplementary Table 3</h2>
+<p>Differential gene expression results for the complete gene dataset.
+Gene-level metadata and the logFC, moderated t-stats, p-value and
+adjusted p-value for DE of each gene in the 5 experimental groups:
+smoking-exposed adult blood, and smoking/nicotine-exposed adult/pup
+brain. Also included are the replication results of the genes in mouse
+blood. The statistics were computed with <code>topTable()</code> from <a href="https://bioconductor.org/packages/release/bioc/html/limma.html"><em>limma</em></a>;
+see its documentation for the definition of the variable names.</p>
 </div>
-<div id="differential-expression-analysis-dea" class="section level2">
-<h2>04. Differential Expression Analysis (DEA)</h2>
-<p>Separated in gene, transcript (tx), exon, and exon-exon junction (jx)
-level analyses. For each the following two scripts contain:</p>
-<ul>
-<li><p>At the <a href="04_DEA/Gene_analysis">gene</a> level:</p>
-<ul>
-<li><p><a href="04_DEA/Gene_analysis/01_Modeling.R">01_Modeling.R</a>:
-perform differential expression analysis using <a href="https://bioconductor.org/packages/release/bioc/html/limma.html"><em>limma</em></a>,
-separately for the 5 experimental groups:</p>
-<ul>
-<li>Smoking-exposed vs smoking control adult blood</li>
-<li>Nicotine-exposed vs nicotine control adult brain</li>
-<li>Smoking-exposed vs smoking control adult brain</li>
-<li>Nicotine-exposed vs nicotine control pup brain</li>
-<li>Smoking-exposed vs smoking control pup brain</li>
-</ul>
-<p>3 models were applied for each group:</p>
-<ul>
-<li>Naive model: gene expression is modeled by the following covariates:
-~ <code>Group</code> + <code>plate</code> + <code>flowcell</code> +
-<code>QC metrics</code></li>
-<li>Fitted model: gene expression is modeled by: ~ <code>Group</code> +
-[<code>Sex</code> (for pups) or <code>Pregnancy</code> (for adults)] +
-<code>plate</code> + <code>flowcell</code> +
-<code>QC metrics</code></li>
-<li>Interaction model: gene expression is modeled by: ~
-[<code>Group*Sex</code> (for pups) or <code>Group*Pregancy</code> (for
-adults)] + <code>plate</code> + <code>flowcell</code> +
-<code>QC metrics</code></li>
-</ul>
-<p><code>QC metrics</code> refer to any of <code>rRNA_rate</code>,
-<code>overallMapRate</code>, <code>totalAssignedGene</code>,
-<code>ERCCsumLogErr</code> and <code>mitoRate</code>. See <a href="../processed-data/SupplementaryTables/TableS17_sample_variable_dict.tsv">TableS17</a>
-for the definition of these variables.</p></li>
-<li><p><a href="04_DEA/Gene_analysis/02_Comparisons.R">02_Comparisons.R</a>:</p>
-<p>Create plots comparing the moderated <em>t</em>-stats of the genes
-in:</p>
-<p><strong>Analysis of blood vs brain biomarkers</strong></p>
-<ul>
-<li><p>Smoking-exposed adult blood vs smoking/nicotine-exposed adult/pup
-brain</p>
-<p>→ search for brain genes (and pup brain transcripts) replicating in
-blood</p></li>
-</ul>
-<p><strong>Compare experiments</strong></p>
-<ul>
-<li>Smoking-exposed pup brain vs nicotine-exposed pup brain</li>
-<li>Smoking-exposed adult brain vs nicotine-exposed adult brain</li>
-</ul>
-<p><strong>Compare ages</strong></p>
-<ul>
-<li>Smoking-exposed pup brain vs smoking-exposed adult brain</li>
-<li>Nicotine-exposed pup brain vs nicotine-exposed adult brain</li>
-</ul>
-<p><strong>Compare models for differential expression</strong></p>
-<ul>
-<li>Smoking-exposed pup brain in naive model vs smoking-exposed pup
-brain in fitted model</li>
-<li>Nicotine-exposed pup brain in naive model vs nicotine-exposed pup
-brain in fitted model</li>
-</ul>
-<p><strong>Human vs mouse genes</strong></p>
-<ul>
-<li><p>Nicotine-exposed mouse adult/pup brain vs smoking-exposed human
-prenatal/adult brain</p></li>
-<li><p>Smoking-exposed mouse adult/pup brain vs smoking-exposed human
-prenatal/adult brain</p></li>
-<li><p>Smoking-exposed mouse adult blood vs smoking-exposed human
-prenatal/adult brain</p>
-<p>→ search for human brain genes that replicate in mouse brain/blood
-and vice versa</p></li>
-</ul>
-<p>Venn diagrams to quantify the number of:</p>
-<ul>
-<li>Nicotine/smoking DEGs in the naive vs fitted model</li>
-<li>Naive/fitted model DEGs in nicotine vs smoking</li>
-<li>Up/downregulated nicotine/smoking DEGs in the naive vs fitted
-model</li>
-<li>Up/downregulated nicotine DEGs vs up/down smoking DEGs (from either
-naive or fitted model or from only one model)</li>
-<li>Nicotine naive &amp; fitted DEGs vs smoking naive &amp; fitted
-DEGs</li>
-<li>Up &amp; downregulated nicotine DEGs vs up &amp; down smoking DEGs
-(from the fitted model only)</li>
-<li>All nicotine vs smoking DEGs (from any model)</li>
-<li>Mouse genes replicating in human</li>
-<li>Tobacco Use Disorder (TUD)-associated human genes vs mouse pup
-DEGs</li>
-</ul></li>
-</ul></li>
-<li><p>At the <a href="04_DEA/Tx_analysis">transcript</a> and <a href="04_DEA/Exon_analysis">exon</a> levels:</p>
-<ul>
-<li><p><a href="04_DEA/Tx_analysis/01_Modeling.R">01_Modeling.R</a> for
-txs and <a href="04_DEA/Exon_analysis/01_Modeling.R">01_Modeling.R</a>
-for exons: perform differential expression analysis applying only the
-fitted model for:</p>
-<ul>
-<li>Nicotine-exposed vs nicotine control pup brain</li>
-<li>Smoking-exposed vs smoking control pup brain</li>
-</ul></li>
-<li><p><a href="04_DEA/Tx_analysis/02_Comparisons.R">02_Comparisons.R</a> for txs
-and <a href="04_DEA/Exon_analysis/02_Comparisons.R">02_Comparisons.R</a>
-for exons:</p>
-<p><strong>Compare experiments</strong></p>
-<p>Plot the moderated <em>t</em>-stats of txs/exons in:</p>
-<ul>
-<li>Smoking-exposed pup brain vs nicotine-exposed pup brain</li>
-</ul>
-<p><strong>Compare expression features</strong></p>
-<ul>
-<li>Plot moderated <em>t</em>-stats of txs/exons in
-nicotine/smoking-exposed pup brain vs moderated <em>t</em>-stats of
-their genes in the same experiment</li>
-</ul>
-<p>For exons only:</p>
-<ul>
-<li>Plot moderated <em>t</em>-stats of genes in nicotine/smoking-exposed
-pup brain vs mean of |<em>t</em>-stats of the gene - <em>t</em>-stats of
-the gene’s exons|</li>
-<li>Plot moderated <em>t</em>-stats of exons in nicotine/smoking-exposed
-pup brain vs |<em>t</em>-stats of the exon’s gene - <em>t</em>-stats of
-the exon|</li>
-</ul>
-<p>Boxplots of expression lognorm counts of relevant genes and their
-txs/exons in the nicotine and smoking experiments.</p>
-<p>Venn diagrams comparing:</p>
-<ul>
-<li>Up/downregulated nicotine vs up/down smoking DE txs/exons</li>
-<li>Up &amp; downregulated nicotine vs up &amp; down smoking DE
-txs/exons</li>
-<li>Genes of up/downregulated nicotine/smoking DE txs/exons</li>
-<li>DE txs’/exons’ genes vs DEGs, with both features up/down in nicotine
-or smoking only, up/down in both experiments, up in nicotine and down in
-smoking, and up in smoking and down in nicotine</li>
-<li>Compare DE txs’ genes vs DE exons’ genes vs DEGs in the same groups
-as above (up/down in either nic/smo only or in both experimets, or with
-different regulation directions in nic and smo)</li>
-</ul></li>
-</ul></li>
-<li><p>At the <a href="04_DEA/Jx_analysis">exon-exon junction</a>
-level:</p>
-<ul>
-<li><p><a href="04_DEA/Jx_analysis/01_Modeling.R">01_Modeling.R</a>:
-differential expression analysis for junctions applying the fitted model
-for:</p>
-<ul>
-<li>Nicotine-exposed vs nicotine control pup brain</li>
-<li>Smoking-exposed vs smoking control pup brain</li>
-</ul></li>
-<li><p><a href="04_DEA/Jx_analysis/02_Comparisons.R">02_Comparisons.R</a>:</p>
-<p>Venn diagrams comparing:</p>
-<ul>
-<li>DEGs vs DE txs’ genes vs DE exons’ genes vs all DE jxns’ genes in
-nicotine and smoking</li>
-<li>DEGs vs DE txs’ genes vs DE exons’ genes vs the genes associated
-with novel DE jxns in nicotine and smoking</li>
-<li>DEGs vs DE txs’ genes vs DE exons’ genes vs the nearest, preceding
-and following genes to novel DE jxns (without assigned gene), in
-nicotine and smoking</li>
-<li>DEGs vs DE txs’ genes vs DE exons’ genes vs the genes of
-<em>AltStartEnd</em>, <em>InGen</em>, and <em>ExonSkip</em> DE jxns, in
-nicotine and smoking. See <a href="../processed-data/SupplementaryTables/">description of
-Supplementary Tables</a> for an explanation of these exon-exon junction
-classes</li>
-</ul>
-<p>Explore the mean expression and logFC of DEGs and non-DE genes with
-and without DE features in nicotine and smoking.</p></li>
-</ul></li>
-</ul>
+<div id="supplementary-table-4" class="section level2">
+<h2>Supplementary Table 4</h2>
+<p>Differentially expressed transcripts in the nicotine-exposed pup
+brain. Metadata of DE transcripts in the nicotine pup brain and their
+logFC, moderated t-stats, p-value and adjusted p-value. The statistics
+were computed with <code>topTable()</code> from <a href="https://bioconductor.org/packages/release/bioc/html/limma.html"><em>limma</em></a>;
+see its documentation for the definition of the variable names.</p>
 </div>
-<div id="functional-enrichment-analysis-go-kegg-terms" class="section level2">
-<h2>05. Functional Enrichment Analysis (GO &amp; KEGG terms)</h2>
-<p>Separated in gene, transcript (tx) and exon-level analyses.</p>
-<ul>
-<li>At the <a href="05_GO_KEGG/Gene_analysis">gene</a> level:
-<ul>
-<li><a href="05_GO_KEGG/Gene_analysis/01_GO_KEGG_analyses.R">01_GO_KEGG_analyses.R</a>:
-<ul>
-<li>Overrepresentation analysis (ORA) of GO and KEGG terms for clusters
-of up and downregulated DEGs in nicotine and smoking pup brain (from
-fitted models only).</li>
-<li>Expression lognorm counts of the most significant genes within each
-cluster or in a certain enriched term (biological process (BP),
-molecular function (MF), cellular component (CC) or pathway (KEGG)) of
-interest were examined in boxplots.</li>
-</ul></li>
-</ul></li>
-<li>At the <a href="05_GO_KEGG/Tx_analysis">transcript</a> level:
-<ul>
-<li><a href="05_GO_KEGG/Tx_analysis/01_GO_KEGG_analyses.R">01_GO_KEGG_analyses.R</a>:
-<ul>
-<li>ORA of GO and KEGG terms for clusters of up and downregulated DE
-txs’ genes in nicotine and smoking pup brain</li>
-<li>ORA of GO and KEGG terms for DE txs’ genes not considered or non-DE
-at gene level in the nicotine and smoking pup brain</li>
-<li>ORA of GO and KEGG terms for DEGs and non-DE genes with DE exon
-and/or DE txs in the nicotine and smoking pup brain</li>
-<li>Create boxplots with lognorm counts of the most significant genes
-(with DE txs) in enriched terms of interest</li>
-</ul></li>
-</ul></li>
-<li>At the <a href="05_GO_KEGG/Exon_analysis">exon</a> level:
-<ul>
-<li><a href="05_GO_KEGG/Exon_analysis/01_GO_KEGG_analyses.R">01_GO_KEGG_analyses.R</a>:
-<ul>
-<li>ORA of GO and KEGG terms for clusters of up and downregulated DE
-exons’ genes in nicotine and smoking pup brain</li>
-<li>Create boxplots with lognorm counts of the most significant genes
-(with DE exons) in enriched terms of interest</li>
-</ul></li>
-</ul></li>
-</ul>
+<div id="supplementary-table-5" class="section level2">
+<h2>Supplementary Table 5</h2>
+<p>Differentially expressed transcripts in the smoking-exposed pup
+brain. Same as in Table S4 but for DE transcripts in the smoking pup
+brain.</p>
 </div>
-<div id="dge-visualization" class="section level2">
-<h2>06. DGE visualization</h2>
-<p>Only at the gene level.</p>
-<ul>
-<li><a href="06_Visualize_DEG/Gene_analysis/01_Heatmap_DEG.R">01_Heatmap_DEG.R</a>:
-visualize gene expression patterns of all/up/downregulated pup brain
-DEGs in the nicotine and smoking experiments (from fitted models only)
-through heatmaps.</li>
-</ul>
+<div id="supplementary-table-6" class="section level2">
+<h2>Supplementary Table 6</h2>
+<p>Differential expression of transcripts vs genes for the nicotine
+experiment in pup brain. DE statistics (logFC, moderated t-stats,
+p-value and adjusted p-value) for transcripts and their respective genes
+in nicotine-exposed pup brain samples, and if transcripts and genes were
+both or solely DE. Only transcripts of genes present in the gene dataset
+are shown. The statistics were computed with <code>topTable()</code>
+from <a href="https://bioconductor.org/packages/release/bioc/html/limma.html"><em>limma</em></a>;
+see its documentation for the definition of the variable names.</p>
 </div>
-<div id="novel-de-junction-gene-annotation" class="section level2">
-<h2>07. Novel DE junction gene annotation</h2>
-<ul>
-<li><a href="07_Jxn_anno/01_Jxn_anno.R">01_Jxn_anno.R</a>: here we
-explore jxn classes and their annotation in GENCODE M25; we quantify
-total and per-gene numbers of DE jxns from each class in nicotine and
-smoking. We search the nearest, preceding and following genes of fully
-novel DE jxns (without associated gene) in nicotine and smoking pup
-brain.</li>
-</ul>
+<div id="supplementary-table-7" class="section level2">
+<h2>Supplementary Table 7</h2>
+<p>Differential expression of transcripts vs genes for the smoking
+experiment in pup brain. Same as in Table S6 but for the smoking
+experiment.</p>
 </div>
-<div id="sra-submission" class="section level2">
-<h2>08. SRA submission</h2>
-<ul>
-<li><a href="08_SRA/01_metadata.R">01_metadata.R</a> and <a href="08_SRA/02_biosample.R">02_biosample.R</a>: prepare metadata files
-as part of the upload of raw bulk RNA-seq FASTQ data to the Sequence
-Read.</li>
-</ul>
+<div id="supplementary-table-8" class="section level2">
+<h2>Supplementary Table 8</h2>
+<p>Differentially expressed exons in the nicotine-exposed pup brain.
+Metadata of DE exons in the nicotine pup brain and their logFC,
+moderated t-stats, p-value and adjusted p-value. The statistics were
+computed with <code>topTable()</code> from <a href="https://bioconductor.org/packages/release/bioc/html/limma.html"><em>limma</em></a>;
+see its documentation for the definition of the variable names.</p>
+</div>
+<div id="supplementary-table-9" class="section level2">
+<h2>Supplementary Table 9</h2>
+<p>Differentially expressed exons in the smoking-exposed pup brain. Same
+as in Table S8 but for DE exons in the smoking pup brain.</p>
+</div>
+<div id="supplementary-table-10" class="section level2">
+<h2>Supplementary Table 10</h2>
+<p>Differential expression of exons vs genes for the nicotine experiment
+in pup brain. logFC, moderated t-stats, p-value and adjusted p-value for
+exons and their respective genes in nicotine-exposed pup brain samples,
+as well as if exons and genes were both DE or not. Only exons of genes
+present in the gene dataset are shown. The statistics were computed with
+<code>topTable()</code> from <a href="https://bioconductor.org/packages/release/bioc/html/limma.html"><em>limma</em></a>;
+see its documentation for the definition of the variable names.</p>
+</div>
+<div id="supplementary-table-11" class="section level2">
+<h2>Supplementary Table 11</h2>
+<p>Differential expression of exons vs genes for the smoking experiment
+in pup brain. Same as in Table S10 but for the smoking experiment.</p>
+</div>
+<div id="supplementary-table-12" class="section level2">
+<h2>Supplementary Table 12</h2>
+<p>Differentially expressed exon-exon junctions in the nicotine-exposed
+pup brain. Metadata of DE exon-exon junctions in the nicotine pup brain,
+including for each: * if both the donor and acceptor sites together are
+known and annotated in GENCODE (<code>inGencode</code> variable); * if
+its donor or acceptor site is annotated in GENCODE (‘inGencodeStart’ and
+‘inGencodeEnd’ variables, respectively); * the junction class: Novel (if
+both start and end sites are unknown, also known as fully novel
+junctions), InGen (already annotated in GENCODE), AltStartEnd (if it has
+only one known site), or ExonSkip (with sites from non-successive exons,
+both known individually but not together), and</p>
+<p>*if they were fusion junctions, meaning that they connect exons from
+different genes (‘isFusion’ variable).</p>
+<p>Their logFC, moderated t-stats, p-value and adjusted p-value are
+provided. These statistics were computed with <code>topTable()</code>
+from <a href="https://bioconductor.org/packages/release/bioc/html/limma.html"><em>limma</em></a>;
+see its documentation for the definition of the variable names.</p>
+</div>
+<div id="supplementary-table-13" class="section level2">
+<h2>Supplementary Table 13</h2>
+<p>Differentially expressed exon-exon junctions in the smoking-exposed
+pup brain. Same as in Table S12 but for DE exon-exon junctions in the
+smoking pup brain.</p>
+</div>
+<div id="supplementary-table-14" class="section level2">
+<h2>Supplementary Table 14</h2>
+<p>Associated genes of fully novel DE exon-exon junctions in pup bain.
+Nearest, following and preceding genes of the fully novel DE exon-exon
+junctions without assigned gene in the nicotine and smoking-exposed pup
+brains.</p>
+</div>
+<div id="supplementary-table-15" class="section level2">
+<h2>Supplementary Table 15</h2>
+<p>Differential gene expression results for gene pairs of mouse-human
+homologs. The logFC, moderated t-stats, p-value and adjusted p-value for
+the human gene in smoking prenatal and adult human brain, and for the
+mouse gene in the 5 experimental mice groups (as in Table S3) are
+presented. Only mouse genes with human homolog(s) present in the human
+dataset from (21) are considered.</p>
+</div>
+<div id="supplementary-table-16" class="section level2">
+<h2>Supplementary Table 16</h2>
+<p>Mouse DEGs in pup brain with human homologs TUD-associated. Pup brain
+DEGs in the nicotine and smoking conditions with human homologous genes
+that were the nearest genes of genome-wide significant (GWS) lead SNPs
+in loci associated with TUD, obtained from a multi-ancestral GWAS
+meta-analysis of TUD cases and controls in individuals from 8 cohorts
+(including UKBB), with European (EUR), African American (AA) and Latin
+American (LA) ancestry (TUD-multi+UKBB dataset), and from a
+within-ancestry GWAS meta-analysis in EUR individuals from 5 cohorts,
+including UKBB data (TUD-EUR+UKBB dataset). As well as human genes
+significantly associated with TUD in EUR individuals (TUD-EUR-MAGMA
+dataset); neurobiologically relevant target human genes associated with
+TUD (TUD-EUR-H-MAGMA dataset), especially expressed in prenatal
+(TUD-EUR-H-MAGMA-prenatal dataset) and adult brain
+(TUD-EUR-H-MAGMA-adult dataset); human genes whose expression is
+predicted to be affected by the EUR-SNPs across multiple brain regions
+(TUD-EUR-S-MultiXcan dataset) and in specific brain regions
+(TUD-EUR-S-PrediXcan dataset), including the frontal cortex
+(TUD-EUR-S-PrediXcan-FC dataset). See more details of these
+TUD-associated human genes in the original publication (21).</p>
+</div>
+<div id="supplementary-table-17" class="section level2">
+<h2>Supplementary Table 17</h2>
+<p>Dictionary of sample variables. Description of the sample variables
+used throughout this project.</p>
+</div>
+<div id="supplementary-table-18" class="section level2">
+<h2>Supplementary Table 18</h2>
+<p>Study design. Number of samples from each pair of sample-level
+variables. See Table S17 for sample variable description</p>
+</div>
+<div id="supplementary-table-19" class="section level2">
+<h2>Supplementary Table 19</h2>
+<p>Samples used for downstream analyses. Number of samples from each
+pair of sample-level variables after sample filtering based on QC
+metrics and PCA plots. See Table S17 for sample variable
+description.</p>
 </div>
 </div>
 
