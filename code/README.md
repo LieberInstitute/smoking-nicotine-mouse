@@ -16,7 +16,7 @@ This part of the code builds the necessary objects to analyze in downstream step
 
 * [01_add_sequencing_lane.R](02_build_objects/01_add_sequencing_lane.R): Extract flowcell information of the samples.
 
-* [02_build_objects.R](02_build_objects/02_build_objects.R): Explore, clean, correct and format data. Here raw counts are log-normalized, lowly-expressed features filtered out and datasets separated by tissue and age. 
+* [02_build_objects.R](02_build_objects/02_build_objects.R): Explore, clean, correct and format data. Here raw counts of genes, exons and exon-exon junctions were log-normalized, and transcripts-per-million (TPM) of transcripts were log-scaled; lowly-expressed features were filtered out, and datasets separated by tissue and age. 
 
 
 
@@ -144,7 +144,7 @@ Separated in gene, transcript (tx), exon and exon-exon junction (jx) level analy
 
  
 
-## 05. Functionl Enrichment Analysis (GO & KEGG)
+## 05. Functional Enrichment Analysis (GO & KEGG terms)
 Separated in gene, transcript (tx) and exon-level analyses.
 
 * At the [gene](05_GO_KEGG/Gene_analysis) level:
@@ -157,24 +157,28 @@ Separated in gene, transcript (tx) and exon-level analyses.
     * ORA of GO and KEGG terms for clusters of up and downregulated DE txs' genes in nicotine and smoking pup brain
     * ORA of GO and KEGG terms for DE txs' genes not considered or non-DE at gene level in the nicotine and smoking pup brain
     * ORA of GO and KEGG terms for DEGs and non-DE genes with DE exon and/or DE txs in the nicotine and smoking pup brain
-    * Boxplots with lognorm counts of the most significant genes (with DE txs) in enriched terms of interest 
+    * Create boxplots with lognorm counts of the most significant genes (with DE txs) in enriched terms of interest 
 
 * At the [exon](05_GO_KEGG/Exon_analysis) level:
   * [01_GO_KEGG_analyses.R](05_GO_KEGG/Exon_analysis/01_GO_KEGG_analyses.R): 
     * ORA of GO and KEGG terms for clusters of up and downregulated DE exons' genes in nicotine and smoking pup brain 
-    * Boxplots with lognorm counts of the most significant genes (with DE exons) in enriched terms of interest 
+    * Create boxplots with lognorm counts of the most significant genes (with DE exons) in enriched terms of interest 
 
 
 
 ## 06. DGE visualization
 Only at the gene level. 
-
-* *01_Heatmap_DEG.R*: Create heatmaps of DEG 
+ 
+* [01_Heatmap_DEG.R](06_Visualize_DEG/01_Heatmap_DEG.R): visualize gene expression patterns of all/up/downregulated pup brain DEGs in the nicotine and smoking experiments (from fitted models only) through heatmaps, as well as specific groups of DEGs: up/down in only one experiment or in both.
 
 
 
 ## 07. Novel DE junction gene annotation
-* *01_Jxn_anno.R*: Obtain novel DE jxns and explore potential novel isoforms
+* [01_Jxn_anno.R](07_Jxn_anno/01_Jxn_anno.R): Obtain novel DE jxns and explore potential novel isoforms
+
+
+## 08. SRA submission
+
 
 
 
