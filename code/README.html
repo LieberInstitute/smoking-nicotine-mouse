@@ -376,9 +376,10 @@ downstream steps.</p>
 <li><p><a href="02_build_objects/01_add_sequencing_lane.R">01_add_sequencing_lane.R</a>:
 Extract flowcell information of the samples.</p></li>
 <li><p><a href="02_build_objects/02_build_objects.R">02_build_objects.R</a>:
-Explore, clean, correct and format data. Here raw counts are
-log-normalized, lowly-expressed features filtered out and datasets
-separated by tissue and age.</p></li>
+Explore, clean, correct and format data. Here raw counts of genes, exons
+and exon-exon junctions were log-normalized, and transcripts-per-million
+(TPM) of transcripts were log-scaled; lowly-expressed features were
+filtered out, and datasets separated by tissue and age.</p></li>
 </ul>
 </div>
 <div id="exploratory-data-analysis-eda" class="section level2">
@@ -406,7 +407,7 @@ models for differential expression.</p></li>
 </div>
 <div id="differential-expression-analysis-dea" class="section level2">
 <h2>04. Differential Expression Analysis (DEA)</h2>
-<p>Separated in gene, transcript (tx), exon and exon-exon junction (jx)
+<p>Separated in gene, transcript (tx), exon, and exon-exon junction (jx)
 level analyses. For each the following two scripts contain:</p>
 <ul>
 <li><p>At the <a href="04_DEA/Gene_analysis">gene</a> level:</p>
@@ -434,7 +435,11 @@ separately for the 5 experimental groups:</p>
 [<code>Group*Sex</code> (for pups) or <code>Group*Pregancy</code> (for
 adults)] + <code>plate</code> + <code>flowcell</code> +
 <code>QC metrics</code></li>
-</ul></li>
+</ul>
+<p><code>QC metrics</code> refer to any of <code>rRNA_rate</code>,
+<code>overallMapRate</code>, <code>totalAssignedGene</code>,
+<code>ERCCsumLogErr</code> and <code>mitoRate</code>. See <a href="../processed-data/SupplementaryTables/TableS17_sample_variable_dict.tsv">TableS17</a>
+for the definition of these variables.</p></li>
 <li><p><a href="04_DEA/Gene_analysis/02_Comparisons.R">02_Comparisons.R</a>:</p>
 <p>Create plots comparing the moderated <em>t</em>-stats of the genes
 in:</p>
@@ -571,8 +576,8 @@ and without DE features in nicotine and smoking.</p></li>
 </ul></li>
 </ul>
 </div>
-<div id="functionl-enrichment-analysis-go-kegg" class="section level2">
-<h2>05. Functionl Enrichment Analysis (GO &amp; KEGG)</h2>
+<div id="functional-enrichment-analysis-go-kegg-terms" class="section level2">
+<h2>05. Functional Enrichment Analysis (GO &amp; KEGG terms)</h2>
 <p>Separated in gene, transcript (tx) and exon-level analyses.</p>
 <ul>
 <li>At the <a href="05_GO_KEGG/Gene_analysis">gene</a> level:
@@ -598,8 +603,8 @@ txs’ genes in nicotine and smoking pup brain</li>
 at gene level in the nicotine and smoking pup brain</li>
 <li>ORA of GO and KEGG terms for DEGs and non-DE genes with DE exon
 and/or DE txs in the nicotine and smoking pup brain</li>
-<li>Boxplots with lognorm counts of the most significant genes (with DE
-txs) in enriched terms of interest</li>
+<li>Create boxplots with lognorm counts of the most significant genes
+(with DE txs) in enriched terms of interest</li>
 </ul></li>
 </ul></li>
 <li>At the <a href="05_GO_KEGG/Exon_analysis">exon</a> level:
@@ -608,8 +613,8 @@ txs) in enriched terms of interest</li>
 <ul>
 <li>ORA of GO and KEGG terms for clusters of up and downregulated DE
 exons’ genes in nicotine and smoking pup brain</li>
-<li>Boxplots with lognorm counts of the most significant genes (with DE
-exons) in enriched terms of interest</li>
+<li>Create boxplots with lognorm counts of the most significant genes
+(with DE exons) in enriched terms of interest</li>
 </ul></li>
 </ul></li>
 </ul>
@@ -618,15 +623,22 @@ exons) in enriched terms of interest</li>
 <h2>06. DGE visualization</h2>
 <p>Only at the gene level.</p>
 <ul>
-<li><em>01_Heatmap_DEG.R</em>: Create heatmaps of DEG</li>
+<li><a href="06_Visualize_DEG/01_Heatmap_DEG.R">01_Heatmap_DEG.R</a>:
+visualize gene expression patterns of all/up/downregulated pup brain
+DEGs in the nicotine and smoking experiments (from fitted models only)
+through heatmaps, as well as specific groups of DEGs: up/down in only
+one experiment or in both.</li>
 </ul>
 </div>
 <div id="novel-de-junction-gene-annotation" class="section level2">
 <h2>07. Novel DE junction gene annotation</h2>
 <ul>
-<li><em>01_Jxn_anno.R</em>: Obtain novel DE jxns and explore potential
-novel isoforms</li>
+<li><a href="07_Jxn_anno/01_Jxn_anno.R">01_Jxn_anno.R</a>: Obtain novel
+DE jxns and explore potential novel isoforms</li>
 </ul>
+</div>
+<div id="sra-submission" class="section level2">
+<h2>08. SRA submission</h2>
 </div>
 </div>
 <div id="code-organization" class="section level1">

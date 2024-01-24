@@ -48,7 +48,7 @@ Separated in gene, transcript (tx), exon, and exon-exon junction (jx) level anal
     * Fitted model: gene expression is modeled by: ~ `Group` + [`Sex` (for pups) or `Pregnancy` (for adults)] + `plate` + `flowcell` + `QC metrics`
     * Interaction model: gene expression is modeled by: ~ [`Group*Sex` (for pups) or `Group*Pregancy` (for adults)] + `plate` + `flowcell` + `QC metrics`
     
-    See [TableS17](../processed-data/SupplementaryTables/TableS17_sample_variable_dict.tsv) for the definition of these variables.
+    `QC metrics` refer to any of `rRNA_rate`, `overallMapRate`, `totalAssignedGene`, `ERCCsumLogErr` and `mitoRate`. See [TableS17](../processed-data/SupplementaryTables/TableS17_sample_variable_dict.tsv) for the definition of these variables.
 
   * [02_Comparisons.R](04_DEA/Gene_analysis/02_Comparisons.R): 
   
