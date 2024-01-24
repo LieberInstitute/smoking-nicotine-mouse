@@ -63,7 +63,7 @@ Metadata of DE exon-exon junctions in the nicotine pup brain, including for each
 
   * if both the donor and acceptor sites together are known and annotated in GENCODE M25 (`inGencode` variable); 
   * if its donor or acceptor site is annotated in GENCODE M25 (`inGencodeStart` and `inGencodeEnd` variables, respectively); 
-  * the junction class: *Novel* (if both start and end sites are unknown, also known as fully novel junctions), *InGen* (already annotated in GENCODE M25), *AltStartEnd* (if it has only one known site), or *ExonSkip* (with sites from non-successive exons, both known individually but not together), and
+  * the junction `Class`: *Novel* (if both start and end sites are unknown, also known as fully novel junctions), *InGen* (already annotated in GENCODE M25), *AltStartEnd* (if it has only one known site), or *ExonSkip* (with sites from non-successive exons, both known individually but not together), and
   * if they were fusion junctions, meaning that they connect exons from different genes (`isFusion` variable). 
 
   Their logFC, moderated *t*-stats, *p*-value and adjusted *p*-value are provided. These statistics were computed with `topTable()` from [_limma_](https://bioconductor.org/packages/release/bioc/html/limma.html); see its documentation for the definition of the variable names.
