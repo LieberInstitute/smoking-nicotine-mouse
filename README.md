@@ -58,6 +58,8 @@ See [processed-data/SupplementaryTables](processed-data/SupplementaryTables/) to
 ## Data access
 `TODO`
 
+## File organization
+Files are organized following the structure from [LieberInstitute/template_project](https://github.com/LieberInstitute/template_project). Scripts include the R session information with details about version numbers of the packages we used.
 
 ## Internal 
 * JHPCE locations:
