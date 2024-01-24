@@ -101,7 +101,7 @@ Description of the sample variables used throughout this project.
 ## [Supplementary Table 18](TableS18_study_design.tsv)
 **Study design.**
 
-Number of samples from each pair of sample-level variables. See Table S17 for sample variable description
+Number of samples from each pair of sample-level variables. See [**Table S17**](TableS17_sample_variable_dict.tsv) for sample variable description.
 
 
 ## [Supplementary Table 19](TableS19_study_design_afterSampleFilters.tsv)
