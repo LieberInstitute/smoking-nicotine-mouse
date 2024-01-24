@@ -513,12 +513,14 @@ smoking-exposed pup brains.</p>
 <p><strong>Differential gene expression results for gene pairs of
 mouse-human homologs.</strong></p>
 <p>The logFC, moderated <em>t</em>-stats, <em>p</em>-value and adjusted
-<em>p</em>-value for the human gene in smoking prenatal and adult human
-brain, and for the mouse gene in the 5 experimental mice groups (as in
-<a href="TableS3_DEA_results_all_genes.tsv"><strong>Table
-S3</strong></a>) are presented. Only mouse genes with human homolog(s)
+<em>p</em>-value for the human gene in smoking-exposed prenatal and
+adult human brain, and for the mouse gene in the 5 experimental mice
+groups (as in <a href="TableS3_DEA_results_all_genes.tsv"><strong>Table
+S3</strong></a>), are presented. Only mouse genes with human homolog(s)
 present in the human dataset from <a href="https://www.nature.com/articles/s41380-018-0223-1">Semick et
-al. 2020</a> are considered.</p>
+al. 2020</a> are considered. The DE statistics were computed with
+<code>topTable()</code> from <a href="https://bioconductor.org/packages/release/bioc/html/limma.html"><em>limma</em></a>;
+see its documentation for the definition of the variable names.</p>
 </div>
 <div id="supplementary-table-16" class="section level2">
 <h2><a href="TableS16_TUD_human_genes_vs_mouseDEGs.tsv">Supplementary
@@ -527,10 +529,10 @@ Table 16</a></h2>
 TUD-associated.</strong></p>
 <p>Pup brain DEGs in the nicotine and smoking conditions with human
 homologous genes that were the nearest genes of genome-wide significant
-(GWS) lead SNPs in loci associated with TUD, obtained from a
-multi-ancestral GWAS meta-analysis of TUD cases and controls in
-individuals from 8 cohorts (including UKBB), with European (EUR),
-African American (AA) and Latin American (LA) ancestry
+(GWS) lead SNPs in loci associated with Tobacco Use Disorder (TUD),
+obtained from a multi-ancestral GWAS meta-analysis of TUD cases and
+controls in individuals from 8 cohorts (including UKBB), with European
+(EUR), African American (AA) and Latin American (LA) ancestry
 (<em>TUD-multi+UKBB</em> dataset), and from a within-ancestry GWAS
 meta-analysis in EUR individuals from 5 cohorts, including UKBB data
 (<em>TUD-EUR+UKBB</em> dataset). As well as human genes significantly
