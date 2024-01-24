@@ -102,7 +102,8 @@ Separated in gene, transcript (tx), exon, and exon-exon junction (jx) level anal
   
     
     **Compare experiments**
-    Plot the moderated *t*-stats of txs/exons in:
+    
+     Plot the moderated *t*-stats of txs/exons in:
       * Smoking-exposed pup brain vs nicotine-exposed pup brain
       
     **Compare expression features**
