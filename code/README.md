@@ -33,7 +33,7 @@ This part of the code builds the necessary objects to analyze in downstream step
 
 
 ## 04. Differential Expression Analysis (DEA)
-Separated in gene, transcript (tx), exon and exon-exon junction (jx) level analyses. For each the following two scripts contain:
+Separated in gene, transcript (tx), exon, and exon-exon junction (jx) level analyses. For each the following two scripts contain:
 
 * At the [gene](04_DEA/Gene_analysis) level:
   * [01_Modeling.R](04_DEA/Gene_analysis/01_Modeling.R): Perform differential expression analysis using [`limma`](https://bioconductor.org/packages/release/bioc/html/limma.html), separately for the 5 experimental groups: 
@@ -48,6 +48,7 @@ Separated in gene, transcript (tx), exon and exon-exon junction (jx) level analy
     * Fitted model: gene expression is modeled by: ~ `Group` + [`Sex` (for pups) or `Pregnancy` (for adults)] + `plate` + `flowcell` + `QC metrics`
     * Interaction model: gene expression is modeled by: ~ [`Group*Sex` (for pups) or `Group*Pregancy` (for adults)] + `plate` + `flowcell` + `QC metrics`
     
+    See [TableS17](processed-data/SupplementaryTables/TableS17_sample_variable_dict.tsv) for the definition of these variables.
 
   * [02_Comparisons.R](04_DEA/Gene_analysis/02_Comparisons.R): 
   
