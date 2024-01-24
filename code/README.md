@@ -171,8 +171,7 @@ Separated in gene, transcript (tx) and exon-level analyses.
 ## 06. DGE visualization
 Only at the gene level. 
  
-* [01_Heatmap_DEG.R](06_Visualize_DEG/01_Heatmap_DEG.R): visualize gene expression patterns of all/up/downregulated pup brain DEGs in the nicotine and smoking experiments (from fitted models only) through heatmaps, as well as specific groups of DEGs: up/down in only one experiment or in both.
-
+* [01_Heatmap_DEG.R](06_Visualize_DEG/Gene_analysis/01_Heatmap_DEG.R): visualize gene expression patterns of all/up/downregulated pup brain DEGs in the nicotine and smoking experiments (from fitted models only) through heatmaps.
 
 
 ## 07. Novel DE junction gene annotation
