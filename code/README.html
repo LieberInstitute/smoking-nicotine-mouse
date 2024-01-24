@@ -406,7 +406,7 @@ models for differential expression.</p></li>
 </div>
 <div id="differential-expression-analysis-dea" class="section level2">
 <h2>04. Differential Expression Analysis (DEA)</h2>
-<p>Separated in gene, transcript (Tx), exon and exon-exon junction (Jx)
+<p>Separated in gene, transcript (tx), exon and exon-exon junction (jx)
 level analyses. For each the following two scripts contain:</p>
 <ul>
 <li><p>At the <a href="04_DEA/Gene_analysis">gene</a> level:</p>
@@ -504,25 +504,25 @@ fitted model for:</p>
 <li><p><a href="04_DEA/Tx_analysis/02_Comparisons.R">02_Comparisons.R</a> for txs
 and <a href="04_DEA/Exon_analysis/02_Comparisons.R">02_Comparisons.R</a>
 for exons:</p>
-<p>Plot the moderated <em>t</em>-stats of txs/exons in:</p>
-<p><strong>Compare experiments</strong></p>
+<p><strong>Compare experiments</strong> Plot the moderated
+<em>t</em>-stats of txs/exons in:</p>
 <ul>
 <li>Smoking-exposed pup brain vs nicotine-exposed pup brain</li>
 </ul>
 <p><strong>Compare expression features</strong></p>
 <ul>
-<li>Moderated <em>t</em>-stats of txs/exons in nicotine/smoking-exposed
-pup brain vs moderated <em>t</em>-stats of their genes in the same
-experiment</li>
+<li>Plot moderated <em>t</em>-stats of txs/exons in
+nicotine/smoking-exposed pup brain vs moderated <em>t</em>-stats of
+their genes in the same experiment</li>
 </ul>
 <p>For exons only:</p>
 <ul>
-<li>Moderated <em>t</em>-stats of genes in nicotine/smoking-exposed pup
-brain vs mean of |<em>t</em>-stats of the gene - <em>t</em>-stats of the
-gene’s exons|</li>
-<li>Moderated <em>t</em>-stats of exons in nicotine/smoking-exposed pup
-brain vs |<em>t</em>-stats of the exon’s gene - <em>t</em>-stats of the
-exon|</li>
+<li>Plot moderated <em>t</em>-stats of genes in nicotine/smoking-exposed
+pup brain vs mean of |<em>t</em>-stats of the gene - <em>t</em>-stats of
+the gene’s exons|</li>
+<li>Plot moderated <em>t</em>-stats of exons in nicotine/smoking-exposed
+pup brain vs |<em>t</em>-stats of the exon’s gene - <em>t</em>-stats of
+the exon|</li>
 </ul>
 <p>Boxplots of expression lognorm counts of relevant genes and their
 txs/exons in the nicotine and smoking experiments.</p>
@@ -553,18 +553,65 @@ for:</p>
 <li><p><a href="04_DEA/Jx_analysis/02_Comparisons.R">02_Comparisons.R</a>:</p>
 <p>Venn diagrams comparing:</p>
 <ul>
-<li>Up/downregulated nicotine vs up/down smoking DE txs/exons</li>
-</ul></li>
+<li>DEGs vs DE txs’ genes vs DE exons’ genes vs all DE jxns’ genes in
+nicotine and smoking</li>
+<li>DEGs vs DE txs’ genes vs DE exons’ genes vs the genes associated
+with novel DE jxns in nicotine and smoking</li>
+<li>DEGs vs DE txs’ genes vs DE exons’ genes vs the nearest, preceding
+and following genes to novel DE jxns (without assigned gene), in
+nicotine and smoking</li>
+<li>DEGs vs DE txs’ genes vs DE exons’ genes vs the genes of
+<em>AltStartEnd</em>, <em>InGen</em>, and <em>ExonSkip</em> DE jxns, in
+nicotine and smoking. See <a href="../processed-data/SupplementaryTables/">description of
+Supplementary Tables</a> for an explanation of these exon-exon junction
+classes</li>
+</ul>
+<p>Explore the mean expression and logFC of DEGs and non-DE genes with
+and without DE features in nicotine and smoking.</p></li>
 </ul></li>
 </ul>
 </div>
 <div id="functionl-enrichment-analysis-go-kegg" class="section level2">
 <h2>05. Functionl Enrichment Analysis (GO &amp; KEGG)</h2>
-<p>Separated in gene, transcript (Tx), exon and exon-exon junction (Jx)
-level analyses.</p>
+<p>Separated in gene, transcript (tx) and exon-level analyses.</p>
 <ul>
-<li><em>01_GO_KEGG_analyses.R</em>: Gene Ontology and KEGG enrichment
-analyses at the gene level</li>
+<li>At the <a href="05_GO_KEGG/Gene_analysis">gene</a> level:
+<ul>
+<li><a href="05_GO_KEGG/Gene_analysis/01_GO_KEGG_analyses.R">01_GO_KEGG_analyses.R</a>:
+<ul>
+<li>Overrepresentation analysis (ORA) of GO and KEGG terms for clusters
+of up and downregulated DEGs in nicotine and smoking pup brain (from
+fitted models only).</li>
+<li>Expression lognorm counts of the most significant genes within each
+cluster or in a certain enriched term (biological process (BP),
+molecular function (MF), cellular component (CC) or pathway (KEGG)) of
+interest were examined in boxplots.</li>
+</ul></li>
+</ul></li>
+<li>At the <a href="05_GO_KEGG/Tx_analysis">transcript</a> level:
+<ul>
+<li><a href="05_GO_KEGG/Tx_analysis/01_GO_KEGG_analyses.R">01_GO_KEGG_analyses.R</a>:
+<ul>
+<li>ORA of GO and KEGG terms for clusters of up and downregulated DE
+txs’ genes in nicotine and smoking pup brain</li>
+<li>ORA of GO and KEGG terms for DE txs’ genes not considered or non-DE
+at gene level in the nicotine and smoking pup brain</li>
+<li>ORA of GO and KEGG terms for DEGs and non-DE genes with DE exon
+and/or DE txs in the nicotine and smoking pup brain</li>
+<li>Boxplots with lognorm counts of the most significant genes (with DE
+txs) in enriched terms of interest</li>
+</ul></li>
+</ul></li>
+<li>At the <a href="05_GO_KEGG/Exon_analysis">exon</a> level:
+<ul>
+<li><a href="05_GO_KEGG/Exon_analysis/01_GO_KEGG_analyses.R">01_GO_KEGG_analyses.R</a>:
+<ul>
+<li>ORA of GO and KEGG terms for clusters of up and downregulated DE
+exons’ genes in nicotine and smoking pup brain</li>
+<li>Boxplots with lognorm counts of the most significant genes (with DE
+exons) in enriched terms of interest</li>
+</ul></li>
+</ul></li>
 </ul>
 </div>
 <div id="dge-visualization" class="section level2">

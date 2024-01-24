@@ -33,7 +33,7 @@ This part of the code builds the necessary objects to analyze in downstream step
 
 
 ## 04. Differential Expression Analysis (DEA)
-Separated in gene, transcript (Tx), exon and exon-exon junction (Jx) level analyses. For each the following two scripts contain:
+Separated in gene, transcript (tx), exon and exon-exon junction (jx) level analyses. For each the following two scripts contain:
 
 * At the [gene](04_DEA/Gene_analysis) level:
   * [01_Modeling.R](04_DEA/Gene_analysis/01_Modeling.R): Perform differential expression analysis using [`limma`](https://bioconductor.org/packages/release/bioc/html/limma.html), separately for the 5 experimental groups: 
@@ -134,15 +134,35 @@ Separated in gene, transcript (Tx), exon and exon-exon junction (Jx) level analy
   * [02_Comparisons.R](04_DEA/Jx_analysis/02_Comparisons.R): 
   
     Venn diagrams comparing:
-      * Up/downregulated nicotine vs up/down smoking DE txs/exons    
-    
+      * DEGs vs DE txs' genes vs DE exons' genes vs all DE jxns' genes in nicotine and smoking
+      * DEGs vs DE txs' genes vs DE exons' genes vs the genes associated with novel DE jxns in nicotine and smoking
+      * DEGs vs DE txs' genes vs DE exons' genes vs the nearest, preceding and following genes to novel DE jxns (without assigned gene), in nicotine and smoking
+      * DEGs vs DE txs' genes vs DE exons' genes vs the genes of *AltStartEnd*, *InGen*, and *ExonSkip* DE jxns, in nicotine and smoking. See [description of Supplementary Tables](../processed-data/SupplementaryTables/) for an explanation of these exon-exon junction classes
+      
+
+    Explore the mean expression and logFC of DEGs and non-DE genes with and without DE features in nicotine and smoking.   
 
  
 
 ## 05. Functionl Enrichment Analysis (GO & KEGG)
-Separated in gene, transcript (Tx), exon and exon-exon junction (Jx) level analyses.
+Separated in gene, transcript (tx) and exon-level analyses.
 
-* *01_GO_KEGG_analyses.R*: Gene Ontology and KEGG enrichment analyses at the gene level
+* At the [gene](05_GO_KEGG/Gene_analysis) level:
+  * [01_GO_KEGG_analyses.R](05_GO_KEGG/Gene_analysis/01_GO_KEGG_analyses.R): 
+    * Overrepresentation analysis (ORA) of GO and KEGG terms for clusters of up and downregulated DEGs in nicotine and smoking pup brain (from fitted models only). 
+    * Expression lognorm counts of the most significant genes within each cluster or in a certain enriched term (biological process (BP), molecular function (MF), cellular component (CC) or pathway (KEGG)) of interest were examined in boxplots. 
+  
+* At the [transcript](05_GO_KEGG/Tx_analysis) level:
+  * [01_GO_KEGG_analyses.R](05_GO_KEGG/Tx_analysis/01_GO_KEGG_analyses.R): 
+    * ORA of GO and KEGG terms for clusters of up and downregulated DE txs' genes in nicotine and smoking pup brain
+    * ORA of GO and KEGG terms for DE txs' genes not considered or non-DE at gene level in the nicotine and smoking pup brain
+    * ORA of GO and KEGG terms for DEGs and non-DE genes with DE exon and/or DE txs in the nicotine and smoking pup brain
+    * Boxplots with lognorm counts of the most significant genes (with DE txs) in enriched terms of interest 
+
+* At the [exon](05_GO_KEGG/Exon_analysis) level:
+  * [01_GO_KEGG_analyses.R](05_GO_KEGG/Exon_analysis/01_GO_KEGG_analyses.R): 
+    * ORA of GO and KEGG terms for clusters of up and downregulated DE exons' genes in nicotine and smoking pup brain 
+    * Boxplots with lognorm counts of the most significant genes (with DE exons) in enriched terms of interest 
 
 
 
