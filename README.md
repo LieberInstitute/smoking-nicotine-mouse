@@ -56,7 +56,8 @@ See [processed-data/SupplementaryTables](processed-data/SupplementaryTables/) to
 
 
 ## Data access
-`TODO`
+See [raw-data access](raw-data/) section for more information about how to access the original datasets that were used in this analysis. 
+
 
 ## File organization
 Files are organized following the structure from [LieberInstitute/template_project](https://github.com/LieberInstitute/template_project). Scripts include the R session information with details about version numbers of the packages we used.
