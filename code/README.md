@@ -14,21 +14,21 @@ Run [_SPEAQeasy_](https://doi.org/10.1186/s12859-021-04142-3) pipeline for quant
 ## 02. Build objects
 This part of the code builds the necessary objects to analyze in downstream steps.
 
-* [01_add_sequencing_lane.R](02_build_objects/01_add_sequencing_lane.R): Extract flowcell information of the samples.
+* [01_add_sequencing_lane.R](02_build_objects/01_add_sequencing_lane.R): extract flowcell information of the samples.
 
-* [02_build_objects.R](02_build_objects/02_build_objects.R): Explore, clean, correct and format data. Here raw counts of genes, exons and exon-exon junctions were log-normalized, and transcripts-per-million (TPM) of transcripts were log-scaled; lowly-expressed features were filtered out, and datasets separated by tissue and age. 
+* [02_build_objects.R](02_build_objects/02_build_objects.R): explore, clean, correct and format data. Here raw counts of genes, exons and exon-exon junctions were log-normalized, and transcripts-per-million (TPM) of transcripts were log-scaled; lowly-expressed features were filtered out, and datasets separated by tissue and age. 
 
 
 
 ## 03. Exploratory Data Analysis (EDA)
 
-* [01_StudyDesign.R](03_EDA/01_StudyDesign.R): Compute the number of samples belonging to each pair/triad of sample phenotypes.
+* [01_StudyDesign.R](03_EDA/01_StudyDesign.R): compute the number of samples belonging to each pair/triad of sample phenotypes.
 
-* [02_QC.R](03_EDA/02_QC.R): Evaluate and compare quality control (QC) metrics of sample groups; explore the relationships between QC metrics, and sample filtering by QC, followed by examination of QC metrics of samples that were kept and removed.
+* [02_QC.R](03_EDA/02_QC.R): evaluate and compare quality control (QC) metrics of sample groups; explore the relationships between QC metrics, and sample filtering by QC, followed by examination of QC metrics of samples that were kept and removed.
 
-* [03_PCA_MDS.R](03_EDA/03_PCA_MDS.R): Perform Principal Component Analysis (PCA) and Multidimensional Scaling Analysis (MDS) to explore sample-level variability in gene expression and identify drivers of such variation. QC metrics of segregated samples in PCA plots were further analyzed and those samples were removed if turned out to be poor-quality. 
+* [03_PCA_MDS.R](03_EDA/03_PCA_MDS.R): perform Principal Component Analysis (PCA) and Multidimensional Scaling Analysis (MDS) to explore sample-level variability in gene expression and identify drivers of such variation. QC metrics of segregated samples in PCA plots were further analyzed and those samples were removed if turned out to be poor-quality. 
 
-* [04_Expl_Var_partition.R](03_EDA/04_Expl_Var_partition.R): Assess correlation between explanatory sample variables and explore their individual or joint contributions on the expression variation of each gene to select main contributing variables to be included in the models for differential expression. 
+* [04_Expl_Var_partition.R](03_EDA/04_Expl_Var_partition.R): assess correlation between explanatory sample variables and explore their individual or joint contributions on the expression variation of each gene to select main contributing variables to be included in the models for differential expression. 
 
 
 
@@ -36,7 +36,7 @@ This part of the code builds the necessary objects to analyze in downstream step
 Separated in gene, transcript (tx), exon, and exon-exon junction (jx) level analyses. For each the following two scripts contain:
 
 * At the [gene](04_DEA/Gene_analysis) level:
-  * [01_Modeling.R](04_DEA/Gene_analysis/01_Modeling.R): Perform differential expression analysis using [`limma`](https://bioconductor.org/packages/release/bioc/html/limma.html), separately for the 5 experimental groups: 
+  * [01_Modeling.R](04_DEA/Gene_analysis/01_Modeling.R): perform differential expression analysis using [`limma`](https://bioconductor.org/packages/release/bioc/html/limma.html), separately for the 5 experimental groups: 
     * Smoking-exposed vs smoking control adult blood
     * Nicotine-exposed vs nicotine control adult brain
     * Smoking-exposed vs smoking control adult brain
@@ -93,7 +93,7 @@ Separated in gene, transcript (tx), exon, and exon-exon junction (jx) level anal
 
 * At the [transcript](04_DEA/Tx_analysis) and [exon](04_DEA/Exon_analysis) levels:
 
-  * [01_Modeling.R](04_DEA/Tx_analysis/01_Modeling.R) for txs and [01_Modeling.R](04_DEA/Exon_analysis/01_Modeling.R) for exons: Perform differential expression analysis applying only the fitted model for: 
+  * [01_Modeling.R](04_DEA/Tx_analysis/01_Modeling.R) for txs and [01_Modeling.R](04_DEA/Exon_analysis/01_Modeling.R) for exons: perform differential expression analysis applying only the fitted model for: 
     * Nicotine-exposed vs nicotine control pup brain
     * Smoking-exposed vs smoking control pup brain  
     
@@ -129,7 +129,7 @@ Separated in gene, transcript (tx), exon, and exon-exon junction (jx) level anal
 
 * At the [exon-exon junction](04_DEA/Jx_analysis) level:
 
-  * [01_Modeling.R](04_DEA/Jx_analysis/01_Modeling.R): Differential expression analysis for junctions applying the fitted model for: 
+  * [01_Modeling.R](04_DEA/Jx_analysis/01_Modeling.R): differential expression analysis for junctions applying the fitted model for: 
     * Nicotine-exposed vs nicotine control pup brain
     * Smoking-exposed vs smoking control pup brain 
     
@@ -175,11 +175,11 @@ Only at the gene level.
 
 
 ## 07. Novel DE junction gene annotation
-* [01_Jxn_anno.R](07_Jxn_anno/01_Jxn_anno.R): Obtain novel DE jxns and explore potential novel isoforms
+* [01_Jxn_anno.R](07_Jxn_anno/01_Jxn_anno.R): here we explore jxn classes and their annotation in GENCODE M25; we quantify total and per-gene numbers of DE jxns from each class in nicotine and smoking. We search the nearest, preceding and following genes of fully novel DE jxns (without associated gene) in nicotine and smoking pup brain. 
 
 
 ## 08. SRA submission
-
+* [01_metadata.R](08_SRA/01_metadata.R) and [02_biosample.R](08_SRA/02_biosample.R): prepare metadata files as part of the upload of raw bulk RNA-seq FASTQ data to the Sequence Read.
 
 
 
