@@ -52,7 +52,7 @@ See [code](code/) for script summary.
 
 ## Supplementary Tables
 
-See [processed-data/SupplementaryTables](processed-data/SupplementaryTables/) to access and see a description of all supplementary tables generated in this study, including GitHub permalinks to the scripts in which they were created.
+See [processed-data/SupplementaryTables](processed-data/SupplementaryTables/) to access and see the description of all supplementary tables generated in this study, including GitHub permalinks to the script lines in which they were created.
 
 
 ## Data access
