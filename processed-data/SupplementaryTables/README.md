@@ -84,7 +84,7 @@ Nearest, following and preceding genes of the fully novel DE exon-exon junctions
 ## [Supplementary Table 15](TableS15_human_vs_mice_results.tsv)
 **Differential gene expression results for gene pairs of mouse-human homologs.**
 
-The logFC, moderated *t*-stats, *p*-value and adjusted *p*-value for the human gene in smoking prenatal and adult human brain, and for the mouse gene in the 5 experimental mice groups (as in [**Table S3**](TableS3_DEA_results_all_genes.tsv)) are presented. Only mouse genes with human homolog(s) present in the human dataset from [Semick et al. 2020](https://www.nature.com/articles/s41380-018-0223-1) are considered. 
+The logFC, moderated *t*-stats, *p*-value and adjusted *p*-value for the human gene in smoking-exposed prenatal and adult human brain, and for the mouse gene in the 5 experimental mice groups (as in [**Table S3**](TableS3_DEA_results_all_genes.tsv)) are presented. Only mouse genes with human homolog(s) present in the human dataset from [Semick et al. 2020](https://www.nature.com/articles/s41380-018-0223-1) are considered. The DE statistics were computed with `topTable()` from [_limma_](https://bioconductor.org/packages/release/bioc/html/limma.html); see its documentation for the definition of the variable names.
 
 
 ## [Supplementary Table 16](TableS16_TUD_human_genes_vs_mouseDEGs.tsv)
