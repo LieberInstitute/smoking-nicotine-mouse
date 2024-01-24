@@ -139,7 +139,7 @@ Separated in gene, transcript (tx), exon, and exon-exon junction (jx) level anal
       * DEGs vs DE txs' genes vs DE exons' genes vs all DE jxns' genes in nicotine and smoking
       * DEGs vs DE txs' genes vs DE exons' genes vs the genes associated with novel DE jxns in nicotine and smoking
       * DEGs vs DE txs' genes vs DE exons' genes vs the nearest, preceding and following genes to novel DE jxns (without assigned gene), in nicotine and smoking
-      * DEGs vs DE txs' genes vs DE exons' genes vs the genes of *AltStartEnd*, *InGen*, and *ExonSkip* DE jxns, in nicotine and smoking. See [description of Supplementary Tables](../processed-data/SupplementaryTables/) for an explanation of these exon-exon junction classes
+      * DEGs vs DE txs' genes vs DE exons' genes vs the genes of *AltStartEnd*, *InGen*, and *ExonSkip* DE jxns, in nicotine and smoking. See [caption of Supplementary Table 12](../processed-data/SupplementaryTables/) for an explanation of these exon-exon junction classes.
       
 
     Explore the mean expression and logFC of DEGs and non-DE genes with and without DE features in nicotine and smoking.   
