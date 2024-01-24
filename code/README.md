@@ -99,17 +99,17 @@ Separated in gene, transcript (Tx), exon and exon-exon junction (Jx) level analy
     
   * [02_Comparisons.R](04_DEA/Tx_analysis/02_Comparisons.R) for txs and [02_Comparisons.R](04_DEA/Exon_analysis/02_Comparisons.R) for exons: 
   
-    Plot the moderated *t*-stats of txs/exons in:
     
     **Compare experiments**
+    Plot the moderated *t*-stats of txs/exons in:
       * Smoking-exposed pup brain vs nicotine-exposed pup brain
       
     **Compare expression features**
-      * Moderated *t*-stats of txs/exons in nicotine/smoking-exposed pup brain vs moderated *t*-stats of their genes in the same experiment
+      * Plot moderated *t*-stats of txs/exons in nicotine/smoking-exposed pup brain vs moderated *t*-stats of their genes in the same experiment
       
     For exons only:
-      * Moderated *t*-stats of genes in nicotine/smoking-exposed pup brain vs mean of |*t*-stats of the gene - *t*-stats of the gene's exons|
-      * Moderated *t*-stats of exons in nicotine/smoking-exposed pup brain vs |*t*-stats of the exon's gene - *t*-stats of the exon|
+      * Plot moderated *t*-stats of genes in nicotine/smoking-exposed pup brain vs mean of |*t*-stats of the gene - *t*-stats of the gene's exons|
+      * Plot moderated *t*-stats of exons in nicotine/smoking-exposed pup brain vs |*t*-stats of the exon's gene - *t*-stats of the exon|
       
       
     Boxplots of expression lognorm counts of relevant genes and their txs/exons in the nicotine and smoking experiments. 
