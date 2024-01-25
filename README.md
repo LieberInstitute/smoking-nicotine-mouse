@@ -39,7 +39,7 @@ This project consisted of a differential expression analysis involving 4 express
 
 * **5. DGE visualization**: the log2-normalized expression of DEGs was represented in heatmaps in order to distinguish the groups of up and downregulated genes.
 
-* **6. Novel junction gene annotation**: for uncharacterized DE junctions with no annotated gene, their nearest, preceding and following genes were determined. See Materials and Methods for complete details. 
+* **6. Novel junction gene annotation**: for uncharacterized DE junctions with no annotated gene, their nearest, preceding and following genes were determined. 
 
 <p style="line-height:80%">
 <font size="1.5"> 
