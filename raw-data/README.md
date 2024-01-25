@@ -2,7 +2,7 @@
 # Raw data access
 
 
-## RSE objects
+## Public access
 
 Through the [_smokingMouse_](https://bioconductor.org/packages/release/data/experiment/html/smokingMouse.html) Bioconductor data package, we offer free open access to all generated and analyzed  [`RangedSummarizedExperiment`](https://www.bioconductor.org/packages/devel/bioc/vignettes/SummarizedExperiment/inst/doc/SummarizedExperiment.html) (RSE) objects containing:
 
