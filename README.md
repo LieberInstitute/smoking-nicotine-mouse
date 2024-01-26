@@ -1,5 +1,5 @@
-smokingMouse 
-================
+smoking-nicotine-mouse 
+======================
 
 `Zenodo DOI:TODO`
 
