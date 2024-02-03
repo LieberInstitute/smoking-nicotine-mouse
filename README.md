@@ -66,7 +66,8 @@ See [processed-data/SupplementaryTables](processed-data/SupplementaryTables/) to
 
 
 ## Data access
-See [raw-data access](raw-data/) section for more information about how to access the original datasets that were used in this analysis. 
+Original RNA-seq datasets that were used in this analysis are provided through the [_smokingMouse_](https://bioconductor.org/packages/release/data/experiment/html/smokingMouse.html) Bioconductor data package. 
+See [raw-data access](raw-data/) section for more detailas about this package contents and additional information about internal LIBD access. 
 
 
 ## File organization
