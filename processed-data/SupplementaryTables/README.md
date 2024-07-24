@@ -4,7 +4,7 @@
 
 **DEGs in the nicotine-exposed pup brain.**
 
-Metadata of DEGs in the nicotine pup brain and their logFC, moderated *t*-stats, *p*-value and adjusted *p*-value for DE. The statistics were computed with `topTable()` from [_limma_](https://bioconductor.org/packages/release/bioc/html/limma.html); see its documentation for the definition of the variable names. Data from this table were used to create volcano plots in **Figure 3A**.
+Metadata of DEGs in the nicotine pup brain and their logFC, moderated *t*-stats, *p*-value and adjusted *p*-value for DE. The statistics were computed with `topTable()` from [_limma_](https://bioconductor.org/packages/release/bioc/html/limma.html); see its documentation for the definition of the variable names. Data from this table were used to create volcano plots in **Figure 2A**.
 
 Created [here](https://github.com/LieberInstitute/smokingMouse_Indirects/blob/5bbf5b3e272f7bff90975f23446f281479608818/code/04_DEA/Gene_analysis/01_Modeling.R#L468).
 
@@ -13,7 +13,7 @@ Created [here](https://github.com/LieberInstitute/smokingMouse_Indirects/blob/5b
 ## [Supplementary Table 2](TableS2_DEGs_brain_pup_smoking.tsv)
 **DEGs in the smoking-exposed pup brain.** 
 
-Same as in [**Table S1**](TableS1_DEGs_brain_pup_nicotine.tsv) but for DEGs in the smoking pup brain. Data from this table were used to create volcano plots in **Figure 3B**.
+Same as in [**Table S1**](TableS1_DEGs_brain_pup_nicotine.tsv) but for DEGs in the smoking pup brain. Data from this table were used to create volcano plots in **Figure 2B**.
 
 Created [here](https://github.com/LieberInstitute/smokingMouse_Indirects/blob/5bbf5b3e272f7bff90975f23446f281479608818/code/04_DEA/Gene_analysis/01_Modeling.R#L524).
 
@@ -22,7 +22,7 @@ Created [here](https://github.com/LieberInstitute/smokingMouse_Indirects/blob/5b
 ## [Supplementary Table 3](TableS3_DEA_results_all_genes.tsv)
 **Differential gene expression results for the complete gene dataset.** 
 
-Gene-level metadata and the logFC, moderated *t*-stats, *p*-value and adjusted *p*-value for DE of each gene in the 5 experimental groups: smoking-exposed adult blood, and smoking/nicotine-exposed adult/pup brain. Also included are the replication results of the genes in mouse blood. The statistics were computed with `topTable()` from [_limma_](https://bioconductor.org/packages/release/bioc/html/limma.html); see its documentation for the definition of the variable names. Scatter plots of *t*-stats in **Figure 3C** and **Figure 5A-B** can be reproduced with the data provided in this table.
+Gene-level metadata and the logFC, moderated *t*-stats, *p*-value and adjusted *p*-value for DE of each gene in the 5 experimental groups: smoking-exposed adult blood, and smoking/nicotine-exposed adult/pup brain. Also included are the replication results of the genes in mouse blood. The statistics were computed with `topTable()` from [_limma_](https://bioconductor.org/packages/release/bioc/html/limma.html); see its documentation for the definition of the variable names. Scatter plots of *t*-stats in **Figure 2C** and **Figure 5A-B** can be reproduced with the data provided in this table.
 
 Created [here](https://github.com/LieberInstitute/smokingMouse_Indirects/blob/5bbf5b3e272f7bff90975f23446f281479608818/code/04_DEA/Gene_analysis/01_Modeling.R#L561).
 
