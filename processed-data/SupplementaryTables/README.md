@@ -22,7 +22,7 @@ Created [here](https://github.com/LieberInstitute/smokingMouse_Indirects/blob/5b
 ## [Supplementary Table 3](TableS3_DEA_results_all_genes.tsv)
 **Differential gene expression results for the complete gene dataset.** 
 
-Gene-level metadata and the logFC, moderated *t*-stats, *p*-value and adjusted *p*-value for DE of each gene in the 5 experimental groups: smoking-exposed adult blood, and smoking/nicotine-exposed adult/pup brain. Also included are the replication results of the genes in mouse blood. The statistics were computed with `topTable()` from [_limma_](https://bioconductor.org/packages/release/bioc/html/limma.html); see its documentation for the definition of the variable names. Scatter plots of *t*-stats in **Figure 2C** and **Figure 5A-B** can be reproduced with the data provided in this table.
+Gene-level metadata and the logFC, moderated *t*-stats, *p*-value and adjusted *p*-value for DE of each gene in the 5 experimental groups: smoking-exposed adult blood, and smoking/nicotine-exposed adult/pup brain. Also included are the replication results of the genes in mouse blood. The statistics were computed with `topTable()` from [_limma_](https://bioconductor.org/packages/release/bioc/html/limma.html); see its documentation for the definition of the variable names. Scatter plots of *t*-stats in **Figure 2C**, **Figure 4** and **Figure 5A-B** can be reproduced with the data provided in this table.
 
 Created [here](https://github.com/LieberInstitute/smokingMouse_Indirects/blob/5bbf5b3e272f7bff90975f23446f281479608818/code/04_DEA/Gene_analysis/01_Modeling.R#L561).
 
@@ -49,7 +49,7 @@ Created [here](https://github.com/LieberInstitute/smokingMouse_Indirects/blob/5b
 ## [Supplementary Table 6](TableS6_DE_txs_vs_genes_nic.tsv)
 **Differential expression of transcripts vs genes for the nicotine experiment in pup brain.**
 
-DE statistics (logFC, moderated *t*-stats, *p*-value and adjusted *p*-value) for transcripts and their respective genes in nicotine-exposed pup brain samples, and if transcripts and genes were both or solely DE. Only transcripts of genes present in the gene dataset are shown. The statistics were computed with `topTable()` from [_limma_](https://bioconductor.org/packages/release/bioc/html/limma.html); see its documentation for the definition of the variable names. Scatter plot of nicotine *t*-stats in **Figure 4A** can be reproduced with the data contained in this table.  
+DE statistics (logFC, moderated *t*-stats, *p*-value and adjusted *p*-value) for transcripts and their respective genes in nicotine-exposed pup brain samples, and if transcripts and genes were both or solely DE. Only transcripts of genes present in the gene dataset are shown. The statistics were computed with `topTable()` from [_limma_](https://bioconductor.org/packages/release/bioc/html/limma.html); see its documentation for the definition of the variable names. Scatter plot of nicotine *t*-stats in **Figure 3A** can be reproduced with the data contained in this table.  
 
 Created [here](https://github.com/LieberInstitute/smokingMouse_Indirects/blob/5bbf5b3e272f7bff90975f23446f281479608818/code/04_DEA/Tx_analysis/02_Comparisons.R#L514).
 
@@ -58,7 +58,7 @@ Created [here](https://github.com/LieberInstitute/smokingMouse_Indirects/blob/5b
 ## [Supplementary Table 7](TableS7_DE_txs_vs_genes_smo.tsv)
 **Differential expression of transcripts vs genes for the smoking experiment in pup brain.**
 
-Same as in [**TableS6**](TableS6_DE_txs_vs_genes_nic.tsv) but for the smoking experiment. Scatter plot of smoking *t*-stats in **Figure 4A** can be reproduced with the data contained in this table. 
+Same as in [**TableS6**](TableS6_DE_txs_vs_genes_nic.tsv) but for the smoking experiment. Scatter plot of smoking *t*-stats in **Figure 3A** can be reproduced with the data contained in this table. 
 
 Created [here](https://github.com/LieberInstitute/smokingMouse_Indirects/blob/5bbf5b3e272f7bff90975f23446f281479608818/code/04_DEA/Tx_analysis/02_Comparisons.R#L524).
 
@@ -85,7 +85,7 @@ Created [here](https://github.com/LieberInstitute/smokingMouse_Indirects/blob/5b
 ## [Supplementary Table 10](TableS10_DE_exons_vs_genes_nic.tsv)
 **Differential expression of exons vs genes for the nicotine experiment in pup brain.**
 
-logFC, moderated *t*-stats, *p*-value and adjusted *p*-value for exons and their respective genes in nicotine-exposed pup brain samples, as well as if exons and genes were both DE or not. Only exons of genes present in the gene dataset are shown. The statistics were computed with `topTable()` from [_limma_](https://bioconductor.org/packages/release/bioc/html/limma.html); see its documentation for the definition of the variable names. Scatter plot of nicotine *t*-stats in **Figure 4B** can be reproduced with the data contained in this table. 
+logFC, moderated *t*-stats, *p*-value and adjusted *p*-value for exons and their respective genes in nicotine-exposed pup brain samples, as well as if exons and genes were both DE or not. Only exons of genes present in the gene dataset are shown. The statistics were computed with `topTable()` from [_limma_](https://bioconductor.org/packages/release/bioc/html/limma.html); see its documentation for the definition of the variable names. Scatter plot of nicotine *t*-stats in **Figure 3B** can be reproduced with the data contained in this table. 
 
 Created [here](https://github.com/LieberInstitute/smokingMouse_Indirects/blob/5bbf5b3e272f7bff90975f23446f281479608818/code/04_DEA/Exon_analysis/02_Comparisons.R#L296).
 
@@ -94,7 +94,7 @@ Created [here](https://github.com/LieberInstitute/smokingMouse_Indirects/blob/5b
 ## [Supplementary Table 11](TableS11_DE_exons_vs_genes_smo.tsv)
 **Differential expression of exons vs genes for the smoking experiment in pup brain.**
 
-Same as in [**Table S10**](TableS10_DE_exons_vs_genes_nic.tsv) but for the smoking experiment. Scatter plot of smoking *t*-stats in **Figure 4B** can be reproduced with the data contained in this table. 
+Same as in [**Table S10**](TableS10_DE_exons_vs_genes_nic.tsv) but for the smoking experiment. Scatter plot of smoking *t*-stats in **Figure 3B** can be reproduced with the data contained in this table. 
 
 Created [here](https://github.com/LieberInstitute/smokingMouse_Indirects/blob/5bbf5b3e272f7bff90975f23446f281479608818/code/04_DEA/Exon_analysis/02_Comparisons.R#L306).
 
