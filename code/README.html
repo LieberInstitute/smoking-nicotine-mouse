@@ -376,10 +376,10 @@ downstream steps.</p>
 <li><p><a href="02_build_objects/01_add_sequencing_lane.R">01_add_sequencing_lane.R</a>:
 extract flowcell information of the samples.</p></li>
 <li><p><a href="02_build_objects/02_build_objects.R">02_build_objects.R</a>:
-explore, clean, correct and format data. Here raw counts of genes, exons
-and exon-exon junctions were log-normalized, and transcripts-per-million
-(TPM) of transcripts were log-scaled; lowly-expressed features were
-filtered out, and datasets separated by tissue and age.</p></li>
+explore, clean, correct, and format data. Here raw counts of genes,
+exons, and exon-exon junctions were log-normalized, and transcripts per
+million (TPM) of transcripts were log-scaled; lowly-expressed features
+were filtered out, and datasets separated by tissue and age.</p></li>
 </ul>
 </div>
 <div id="exploratory-data-analysis-eda" class="section level2">
@@ -387,15 +387,17 @@ filtered out, and datasets separated by tissue and age.</p></li>
 <ul>
 <li><p><a href="03_EDA/01_StudyDesign.R">01_StudyDesign.R</a>: compute
 the number of samples belonging to each pair/triad of sample
-phenotypes.</p></li>
+variables.</p></li>
 <li><p><a href="03_EDA/02_QC.R">02_QC.R</a>: evaluate and compare
-quality control (QC) metrics of sample groups; explore the relationships
-between QC metrics, and sample filtering by QC, followed by examination
-of QC metrics of samples that were kept and removed.</p></li>
+quality control (QC) metrics across sample groups; explore the
+relationships between QC metrics, and sample filtering by QC, followed
+by examination of QC metrics of samples that were kept and
+removed.</p></li>
 <li><p><a href="03_EDA/03_PCA_MDS.R">03_PCA_MDS.R</a>: perform Principal
 Component Analysis (PCA) and Multidimensional Scaling Analysis (MDS) to
-explore sample-level variability in gene expression and identify drivers
-of such variation. QC metrics of segregated samples in PCA plots were
+explore sample-level variability in gene expression (at the 4 expression
+feature levels: genes, txs, exons, and jxns) and identify drivers of
+such variation. QC metrics of segregated samples in PCA plots were
 further analyzed and those samples were removed if turned out to be
 poor-quality.</p></li>
 <li><p><a href="03_EDA/04_Expl_Var_partition.R">04_Expl_Var_partition.R</a>:
@@ -416,11 +418,12 @@ level analyses. For each the following two scripts contain:</p>
 perform differential expression analysis using <a href="https://bioconductor.org/packages/release/bioc/html/limma.html"><em>limma</em></a>,
 separately for the 5 experimental groups:</p>
 <ul>
-<li>Smoking-exposed vs smoking control adult blood</li>
-<li>Nicotine-exposed vs nicotine control adult brain</li>
-<li>Smoking-exposed vs smoking control adult brain</li>
-<li>Nicotine-exposed vs nicotine control pup brain</li>
-<li>Smoking-exposed vs smoking control pup brain</li>
+<li>Nicotine exposure vs vehicle exposure in pup brain</li>
+<li>Smoking exposure vs smoking control in pup brain</li>
+<li>Nicotine administration vs vehicle administration in adult
+brain</li>
+<li>Smoking exposure vs smoking control in adult brain</li>
+<li>Smoking exposure vs smoking control in adult blood</li>
 </ul>
 <p>3 models were applied for each group:</p>
 <ul>
@@ -438,17 +441,17 @@ adults)] + <code>plate</code> + <code>flowcell</code> +
 </ul>
 <p><code>QC metrics</code> refer to any of <code>rRNA_rate</code>,
 <code>overallMapRate</code>, <code>totalAssignedGene</code>,
-<code>ERCCsumLogErr</code> and <code>mitoRate</code>. See <a href="../processed-data/SupplementaryTables/TableS17_sample_variable_dict.tsv">TableS17</a>
+<code>ERCCsumLogErr</code> and <code>mitoRate</code>. See <a href="../processed-data/SupplementaryTables/TableS18_sample_variable_dict.tsv">TableS18</a>
 for the definition of these variables.</p></li>
 <li><p><a href="04_DEA/Gene_analysis/02_Comparisons.R">02_Comparisons.R</a>:</p>
 <p>Create plots comparing the moderated <em>t</em>-stats of the genes
-in:</p>
-<p><strong>Analysis of blood vs brain biomarkers</strong></p>
+in:<br />
+<strong>Analysis of blood vs brain biomarkers</strong></p>
 <ul>
 <li><p>Smoking-exposed adult blood vs smoking/nicotine-exposed adult/pup
 brain</p>
 <p>→ search for brain genes (and pup brain transcripts) replicating in
-blood</p></li>
+blood.</p></li>
 </ul>
 <p><strong>Compare experiments</strong></p>
 <ul>
@@ -462,10 +465,10 @@ blood</p></li>
 </ul>
 <p><strong>Compare models for differential expression</strong></p>
 <ul>
-<li>Smoking-exposed pup brain in naive model vs smoking-exposed pup
-brain in fitted model</li>
-<li>Nicotine-exposed pup brain in naive model vs nicotine-exposed pup
-brain in fitted model</li>
+<li>Smoking-exposed pup brain under the naive model vs smoking-exposed
+pup brain under the fitted model</li>
+<li>Nicotine-exposed pup brain under the naive model vs nicotine-exposed
+pup brain under the fitted model</li>
 </ul>
 <p><strong>Human vs mouse genes</strong></p>
 <ul>
@@ -476,7 +479,7 @@ prenatal/adult brain</p></li>
 <li><p>Smoking-exposed mouse adult blood vs smoking-exposed human
 prenatal/adult brain</p>
 <p>→ search for human brain genes that replicate in mouse brain/blood
-and vice versa</p></li>
+and vice versa.</p></li>
 </ul>
 <p>Venn diagrams to quantify the number of:</p>
 <ul>
@@ -503,8 +506,8 @@ txs and <a href="04_DEA/Exon_analysis/01_Modeling.R">01_Modeling.R</a>
 for exons: perform differential expression analysis applying only the
 fitted model for:</p>
 <ul>
-<li>Nicotine-exposed vs nicotine control pup brain</li>
-<li>Smoking-exposed vs smoking control pup brain</li>
+<li>Nicotine exposure vs vehicle exposure in pup brain</li>
+<li>Smoking exposure vs smoking control in pup brain</li>
 </ul></li>
 <li><p><a href="04_DEA/Tx_analysis/02_Comparisons.R">02_Comparisons.R</a> for txs
 and <a href="04_DEA/Exon_analysis/02_Comparisons.R">02_Comparisons.R</a>
@@ -552,8 +555,8 @@ level:</p>
 differential expression analysis for junctions applying the fitted model
 for:</p>
 <ul>
-<li>Nicotine-exposed vs nicotine control pup brain</li>
-<li>Smoking-exposed vs smoking control pup brain</li>
+<li>Nicotine exposure vs vehicle exposure in pup brain</li>
+<li>Smoking exposure vs smoking control in pup brain</li>
 </ul></li>
 <li><p><a href="04_DEA/Jx_analysis/02_Comparisons.R">02_Comparisons.R</a>:</p>
 <p>Venn diagrams comparing:</p>
@@ -562,14 +565,14 @@ for:</p>
 nicotine and smoking</li>
 <li>DEGs vs DE txs’ genes vs DE exons’ genes vs the genes associated
 with novel DE jxns in nicotine and smoking</li>
-<li>DEGs vs DE txs’ genes vs DE exons’ genes vs the nearest, preceding
+<li>DEGs vs DE txs’ genes vs DE exons’ genes vs the nearest, preceding,
 and following genes to novel DE jxns (without assigned gene), in
 nicotine and smoking</li>
 <li>DEGs vs DE txs’ genes vs DE exons’ genes vs the genes of
 <em>AltStartEnd</em>, <em>InGen</em>, and <em>ExonSkip</em> DE jxns, in
-nicotine and smoking. See <a href="../processed-data/SupplementaryTables/">description of
-Supplementary Tables</a> for an explanation of these exon-exon junction
-classes</li>
+nicotine and smoking. See <a href="../processed-data/SupplementaryTables/">caption of Supplementary
+Table 14</a> for an explanation of these exon-exon junction
+classes.</li>
 </ul>
 <p>Explore the mean expression and logFC of DEGs and non-DE genes with
 and without DE features in nicotine and smoking.</p></li>
@@ -578,18 +581,18 @@ and without DE features in nicotine and smoking.</p></li>
 </div>
 <div id="functional-enrichment-analysis-go-kegg-terms" class="section level2">
 <h2>05. Functional Enrichment Analysis (GO &amp; KEGG terms)</h2>
-<p>Separated in gene, transcript (tx) and exon-level analyses.</p>
+<p>Separated in gene, transcript (tx), and exon-level analyses.</p>
 <ul>
 <li>At the <a href="05_GO_KEGG/Gene_analysis">gene</a> level:
 <ul>
 <li><a href="05_GO_KEGG/Gene_analysis/01_GO_KEGG_analyses.R">01_GO_KEGG_analyses.R</a>:
 <ul>
-<li>Overrepresentation analysis (ORA) of GO and KEGG terms for clusters
-of up and downregulated DEGs in nicotine and smoking pup brain (from
-fitted models only).</li>
+<li>Overrepresentation analysis (ORA) of GO and KEGG terms among
+clusters of up and downregulated DEGs in nicotine and smoking pup brain
+(from fitted models only).</li>
 <li>Expression lognorm counts of the most significant genes within each
 cluster or in a certain enriched term (biological process (BP),
-molecular function (MF), cellular component (CC) or pathway (KEGG)) of
+molecular function (MF), cellular component (CC), or pathway (KEGG)) of
 interest were examined in boxplots.</li>
 </ul></li>
 </ul></li>
@@ -597,24 +600,24 @@ interest were examined in boxplots.</li>
 <ul>
 <li><a href="05_GO_KEGG/Tx_analysis/01_GO_KEGG_analyses.R">01_GO_KEGG_analyses.R</a>:
 <ul>
-<li>ORA of GO and KEGG terms for clusters of up and downregulated DE
-txs’ genes in nicotine and smoking pup brain</li>
-<li>ORA of GO and KEGG terms for DE txs’ genes not considered or non-DE
-at gene level in the nicotine and smoking pup brain</li>
-<li>ORA of GO and KEGG terms for DEGs and non-DE genes with DE exon
-and/or DE txs in the nicotine and smoking pup brain</li>
+<li>ORA of GO and KEGG terms among clusters of up and downregulated DE
+txs’ genes in nicotine and smoking pup brain.</li>
+<li>ORA of GO and KEGG terms among DE txs’ genes not considered or
+non-DE at gene level in the nicotine and smoking pup brain.</li>
+<li>ORA of GO and KEGG terms among DEGs and non-DE genes with DE exon
+and/or DE txs in the nicotine and smoking pup brain.</li>
 <li>Create boxplots with lognorm counts of the most significant genes
-(with DE txs) in enriched terms of interest</li>
+(with DE txs) in enriched terms of interest.</li>
 </ul></li>
 </ul></li>
 <li>At the <a href="05_GO_KEGG/Exon_analysis">exon</a> level:
 <ul>
 <li><a href="05_GO_KEGG/Exon_analysis/01_GO_KEGG_analyses.R">01_GO_KEGG_analyses.R</a>:
 <ul>
-<li>ORA of GO and KEGG terms for clusters of up and downregulated DE
-exons’ genes in nicotine and smoking pup brain</li>
+<li>ORA of GO and KEGG terms among clusters of up and downregulated DE
+exons’ genes in nicotine and smoking pup brain.</li>
 <li>Create boxplots with lognorm counts of the most significant genes
-(with DE exons) in enriched terms of interest</li>
+(with DE exons) in enriched terms of interest.</li>
 </ul></li>
 </ul></li>
 </ul>
@@ -635,7 +638,7 @@ through heatmaps.</li>
 <li><a href="07_Jxn_anno/01_Jxn_anno.R">01_Jxn_anno.R</a>: here we
 explore jxn classes and their annotation in GENCODE M25; we quantify
 total and per-gene numbers of DE jxns from each class in nicotine and
-smoking. We search the nearest, preceding and following genes of fully
+smoking. We search the nearest, preceding, and following genes of fully
 novel DE jxns (without associated gene) in nicotine and smoking pup
 brain.</li>
 </ul>
@@ -645,7 +648,7 @@ brain.</li>
 <ul>
 <li><a href="08_SRA/01_metadata.R">01_metadata.R</a> and <a href="08_SRA/02_biosample.R">02_biosample.R</a>: prepare metadata files
 as part of the upload of raw bulk RNA-seq FASTQ data to the Sequence
-Read.</li>
+Read. TODO</li>
 </ul>
 </div>
 </div>
