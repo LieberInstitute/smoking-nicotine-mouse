@@ -7,10 +7,10 @@
 Through the [_smokingMouse_](https://bioconductor.org/packages/release/data/experiment/html/smokingMouse.html) Bioconductor data package, we offer free open access to all generated and analyzed  [`RangedSummarizedExperiment`](https://www.bioconductor.org/packages/devel/bioc/vignettes/SummarizedExperiment/inst/doc/SummarizedExperiment.html) (RSE) objects containing:
 
 * The raw expression counts and lognorm counts of genes, exons, and exon-exon junctions, and the transcripts per million (TMP) and log-TPM of transcripts, across the 208 mouse samples from pup and adult brain, and adult blood. 
-* Sample-level metadata (what's contained in [Maternal_Smoking_pheno.txt](Maternal_Smoking_pheno.txt)) and quality control metrics
-* Feature information 
+* Sample-level metadata (what's contained in [Maternal_Smoking_pheno.txt](Maternal_Smoking_pheno.txt)) and quality control metrics.
+* Information of gene expression features. 
 
-The results of the DEA for smoking exposure in human postmortem prenatal and adult prefrontal cortices from [Semick et al. 2020](https://www.nature.com/articles/s41380-018-0223-1) are also accessible.
+The results of the DEA for smoking exposure in human postmortem prenatal and adult prefrontal cortices from [Semick et al., 2020](https://www.nature.com/articles/s41380-018-0223-1) are also accessible.
 
 See more details of the provided datasets and how to access them in the [_smokingMouse_ ](http://research.libd.org/smokingMouse/) web page.
 
