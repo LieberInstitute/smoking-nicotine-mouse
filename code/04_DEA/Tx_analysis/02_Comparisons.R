@@ -146,7 +146,7 @@ add_DE_info_tx_vs_genes <-function(t_stats) {
 
 ## Create plots of t-stats of tx vs genes
 
-t_stat_tx_vs_genes<- function(expt){
+t_stat_tx_vs_genes<- function(expt, labels){
   
   top_tx<-eval(parse_expr(paste("top_tx_", substr(expt,1,3), sep="")))
   top_genes<-eval(parse_expr(paste("top_genes_pups_", expt, "_fitted", sep="")))
@@ -297,9 +297,11 @@ t_stat_tx_vs_genes<- function(expt){
   }
   t_stats$tx_symbols<-tx_symbols
   
+  
   ## Plot
   
-  if(expt == 'nicotine'){
+  ## Without tx labels
+  if (labels==FALSE){
     plot <- ggplot(t_stats, aes(x = t_gene, y = t_tx, color=DE, alpha=DE, label= tx_symbols)) +
       geom_point(size = 1.2) +
       labs(x = "t-stats genes", 
@@ -307,30 +309,6 @@ t_stat_tx_vs_genes<- function(expt){
            title = paste(capitalize(expt),"genes vs tx", sep=" "), 
            subtitle = rho_anno, 
            parse = T) +
-      geom_label_repel(data=subset(t_stats, !tx_symbols %in% c('Trpc4-ENSMUST00000199359.1', 'Dgcr8-ENSMUST00000115633.2')), 
-                       aes(fontface = 'bold'), fill='white',
-                       size=2.8,
-                       max.overlaps = Inf,
-                       min.segment.length = unit(0, "cm"),
-                       point.padding = unit(0.1, "cm"),
-                       box.padding = 0.2,
-                       label.padding = 0.2,
-                       label.size = 0.2,
-                       nudge_y=0.8,
-                       nudge_x = 1,
-                       show.legend=FALSE) +
-      geom_label_repel(data=subset(t_stats, tx_symbols %in% c('Trpc4-ENSMUST00000199359.1', 'Dgcr8-ENSMUST00000115633.2')), 
-                       aes(fontface = 'bold'), fill='white',
-                       size=2.8,
-                       max.overlaps = Inf,
-                       min.segment.length = unit(0, "cm"),
-                       point.padding = unit(0.1, "cm"),
-                       box.padding = 0.2,
-                       label.padding = 0.2,
-                       label.size = 0.2,
-                       nudge_y=-1.9,
-                       nudge_x = -1,
-                       show.legend=FALSE) +
       theme_bw() +
       guides(alpha = 'none') + 
       scale_color_manual(values = cols, labels=names(cols), drop = FALSE) + 
@@ -340,66 +318,89 @@ t_stat_tx_vs_genes<- function(expt){
             axis.text = element_text(size = 10),
             legend.text = element_text(size=11),
             legend.title = element_text(size=12))
+    plot
+    ggsave(filename=paste("plots/04_DEA/02_Comparisons/Tx_analysis/t_stats_tx_vs_genes_", substr(expt,1,3), 
+                          "_without_labels.pdf", sep=""), height = 14.5, width = 18, units = "cm")
   }
   
   else{
-    plot <- ggplot(t_stats, aes(x = t_gene, y = t_tx, color=DE, alpha=DE, label= tx_symbols)) +
-      geom_point(size = 1.2) +
-      labs(x = "t-stats genes", 
-           y = "t-stats tx",
-           title = paste(capitalize(expt),"genes vs tx", sep=" "), 
-           subtitle = rho_anno, 
-           parse = T) +
-      ## Label only the most significant DE txs per gene
-      geom_label_repel(data=subset(t_stats, tx_symbols %in% c('Btf3-ENSMUST00000022163.14', 'Cyhr1-ENSMUST00000176274.1')),
-                       aes(fontface = 'bold'), fill='white',
-                       size=2.8,
-                       max.overlaps = Inf,
-                       min.segment.length = unit(0, "cm"),
-                       point.padding = unit(0.1, "cm"),
-                       box.padding = 0.2,
-                       label.padding = 0.2,
-                       label.size = 0.2,
-                       nudge_y= 3.8,
-                       nudge_x = -3,
-                       show.legend=FALSE) +
-      geom_label_repel(data=subset(t_stats, tx_symbols %in% c('Srsf6-ENSMUST00000017065.14')),
-                       aes(fontface = 'bold'), fill='white',
-                       size=2.8,
-                       max.overlaps = Inf,
-                       min.segment.length = unit(0, "cm"),
-                       point.padding = unit(0.1, "cm"),
-                       box.padding = 0.2,
-                       label.padding = 0.2,
-                       label.size = 0.2,
-                       nudge_y= -3,
-                       nudge_x = 3.5,
-                       show.legend=FALSE) +
-    geom_label_repel(data=subset(t_stats, tx_symbols %in% c('Ppp2r5c-ENSMUST00000221715.1')),
-                     aes(fontface = 'bold'), fill='white',
-                     size=2.8,
-                     max.overlaps = Inf,
-                     min.segment.length = unit(0, "cm"),
-                     point.padding = unit(0.1, "cm"),
-                     box.padding = 0.2,
-                     label.padding = 0.2,
-                     label.size = 0.2,
-                     nudge_y= 2,
-                     nudge_x = -2,
-                     show.legend=FALSE) +
-      geom_label_repel(data=subset(t_stats, tx_symbols %in% c('Ivns1abp-ENSMUST00000111887.9')),
-                       aes(fontface = 'bold'), fill='white',
-                       size=2.8,
-                       max.overlaps = Inf,
-                       min.segment.length = unit(0, "cm"),
-                       point.padding = unit(0.1, "cm"),
-                       box.padding = 0.2,
-                       label.padding = 0.2,
-                       label.size = 0.2,
-                       nudge_y= 0,
-                       nudge_x = -2,
-                       show.legend=FALSE) +
-      geom_label_repel(data=subset(t_stats, tx_symbols %in% c('Meaf6-ENSMUST00000184205.7')),
+    if(expt == 'nicotine'){
+      plot <- ggplot(t_stats, aes(x = t_gene, y = t_tx, color=DE, alpha=DE, label= tx_symbols)) +
+        geom_point(size = 1.2) +
+        labs(x = "t-stats genes", 
+             y = "t-stats tx",
+             title = paste(capitalize(expt),"genes vs tx", sep=" "), 
+             subtitle = rho_anno, 
+             parse = T) +
+        geom_label_repel(data=subset(t_stats, !tx_symbols %in% c('Trpc4-ENSMUST00000199359.1', 'Dgcr8-ENSMUST00000115633.2')), 
+                         aes(fontface = 'bold'), fill='white',
+                         size=2.8,
+                         max.overlaps = Inf,
+                         min.segment.length = unit(0, "cm"),
+                         point.padding = unit(0.1, "cm"),
+                         box.padding = 0.2,
+                         label.padding = 0.2,
+                         label.size = 0.2,
+                         nudge_y=0.8,
+                         nudge_x = 1,
+                         show.legend=FALSE) +
+        geom_label_repel(data=subset(t_stats, tx_symbols %in% c('Trpc4-ENSMUST00000199359.1', 'Dgcr8-ENSMUST00000115633.2')), 
+                         aes(fontface = 'bold'), fill='white',
+                         size=2.8,
+                         max.overlaps = Inf,
+                         min.segment.length = unit(0, "cm"),
+                         point.padding = unit(0.1, "cm"),
+                         box.padding = 0.2,
+                         label.padding = 0.2,
+                         label.size = 0.2,
+                         nudge_y=-1.9,
+                         nudge_x = -1,
+                         show.legend=FALSE) +
+        theme_bw() +
+        guides(alpha = 'none') + 
+        scale_color_manual(values = cols, labels=names(cols), drop = FALSE) + 
+        scale_alpha_manual(values = alphas, labels=names(alphas), drop=FALSE) +
+        theme(plot.margin = unit(c(1,1,1,1), "cm"),
+              axis.title = element_text(size = 12),
+              axis.text = element_text(size = 10),
+              legend.text = element_text(size=11),
+              legend.title = element_text(size=12))
+    }
+    
+    else{
+      plot <- ggplot(t_stats, aes(x = t_gene, y = t_tx, color=DE, alpha=DE, label= tx_symbols)) +
+        geom_point(size = 1.2) +
+        labs(x = "t-stats genes", 
+             y = "t-stats tx",
+             title = paste(capitalize(expt),"genes vs tx", sep=" "), 
+             subtitle = rho_anno, 
+             parse = T) +
+        ## Label only the most significant DE txs per gene
+        geom_label_repel(data=subset(t_stats, tx_symbols %in% c('Btf3-ENSMUST00000022163.14', 'Cyhr1-ENSMUST00000176274.1')),
+                         aes(fontface = 'bold'), fill='white',
+                         size=2.8,
+                         max.overlaps = Inf,
+                         min.segment.length = unit(0, "cm"),
+                         point.padding = unit(0.1, "cm"),
+                         box.padding = 0.2,
+                         label.padding = 0.2,
+                         label.size = 0.2,
+                         nudge_y= 3.8,
+                         nudge_x = -3,
+                         show.legend=FALSE) +
+        geom_label_repel(data=subset(t_stats, tx_symbols %in% c('Srsf6-ENSMUST00000017065.14')),
+                         aes(fontface = 'bold'), fill='white',
+                         size=2.8,
+                         max.overlaps = Inf,
+                         min.segment.length = unit(0, "cm"),
+                         point.padding = unit(0.1, "cm"),
+                         box.padding = 0.2,
+                         label.padding = 0.2,
+                         label.size = 0.2,
+                         nudge_y= -3,
+                         nudge_x = 3.5,
+                         show.legend=FALSE) +
+      geom_label_repel(data=subset(t_stats, tx_symbols %in% c('Ppp2r5c-ENSMUST00000221715.1')),
                        aes(fontface = 'bold'), fill='white',
                        size=2.8,
                        max.overlaps = Inf,
@@ -409,72 +410,46 @@ t_stat_tx_vs_genes<- function(expt){
                        label.padding = 0.2,
                        label.size = 0.2,
                        nudge_y= 2,
-                       nudge_x = 1,
+                       nudge_x = -2,
                        show.legend=FALSE) +
-      geom_label_repel(data=subset(t_stats, tx_symbols %in% c('Mt2-ENSMUST00000034214.7', 'Sin3b-ENSMUST00000109950.4',
-                                                              'Ppp2r5c-ENSMUST00000109832.2')),
-                       aes(fontface = 'bold'), fill='white',
-                       size=2.8,
-                       max.overlaps = Inf,
-                       min.segment.length = unit(0, "cm"),
-                       point.padding = unit(0.1, "cm"),
-                       box.padding = 0.2,
-                       label.padding = 0.2,
-                       label.size = 0.2,
-                       nudge_y= 0.2,
-                       nudge_x = 0.1,
-                       show.legend=FALSE) +
-    geom_label_repel(data=subset(t_stats, tx_symbols %in% c('Meaf6-ENSMUST00000154689.7')),
-                     aes(fontface = 'bold'), fill='white',
-                     size=2.8,
-                     max.overlaps = Inf,
-                     min.segment.length = unit(0, "cm"),
-                     point.padding = unit(0.1, "cm"),
-                     box.padding = 0.2,
-                     label.padding = 0.2,
-                     label.size = 0.2,
-                     nudge_y= -0.5,
-                     nudge_x = 0.1,
-                     show.legend=FALSE) +
-      geom_label_repel(data=subset(t_stats, tx_symbols %in% c('Morf4l2-ENSMUST00000169418.7')),
-                       aes(fontface = 'bold'), fill='white',
-                       size=2.8,
-                       max.overlaps = Inf,
-                       min.segment.length = unit(0, "cm"),
-                       point.padding = unit(0.1, "cm"),
-                       box.padding = 0.2,
-                       label.padding = 0.2,
-                       label.size = 0.2,
-                       nudge_y= -0.01,
-                       nudge_x = 0.5,
-                       show.legend=FALSE) +
-      geom_label_repel(data=subset(t_stats, tx_symbols %in% c('Morf4l2-ENSMUST00000080411.12', 
-                                                              'Sin3b-ENSMUST00000004494.15')),
-                       aes(fontface = 'bold'), fill='white',
-                       size=2.8,
-                       max.overlaps = Inf,
-                       min.segment.length = unit(0, "cm"),
-                       point.padding = unit(0.1, "cm"),
-                       box.padding = 0.2,
-                       label.padding = 0.2,
-                       label.size = 0.2,
-                       nudge_y= -0.9,
-                       nudge_x = 0.5,
-                       show.legend=FALSE) +
-      geom_label_repel(data=subset(t_stats, tx_symbols %in% c('Top2a-ENSMUST00000068031.7', 'Ccnb2-ENSMUST00000034742.7',
-                                                              'Ivns1abp-ENSMUST00000023918.12')),
-                       aes(fontface = 'bold'), fill='white',
-                       size=2.8,
-                       max.overlaps = Inf,
-                       min.segment.length = unit(0, "cm"),
-                       point.padding = unit(0.1, "cm"),
-                       box.padding = 0.2,
-                       label.padding = 0.2,
-                       label.size = 0.2,
-                       nudge_y= -1.8,
-                       nudge_x = -3,
-                       show.legend=FALSE) +
-      geom_label_repel(data=subset(t_stats, tx_symbols %in% c('H13-ENSMUST00000089059.8')),
+        geom_label_repel(data=subset(t_stats, tx_symbols %in% c('Ivns1abp-ENSMUST00000111887.9')),
+                         aes(fontface = 'bold'), fill='white',
+                         size=2.8,
+                         max.overlaps = Inf,
+                         min.segment.length = unit(0, "cm"),
+                         point.padding = unit(0.1, "cm"),
+                         box.padding = 0.2,
+                         label.padding = 0.2,
+                         label.size = 0.2,
+                         nudge_y= 0,
+                         nudge_x = -2,
+                         show.legend=FALSE) +
+        geom_label_repel(data=subset(t_stats, tx_symbols %in% c('Meaf6-ENSMUST00000184205.7')),
+                         aes(fontface = 'bold'), fill='white',
+                         size=2.8,
+                         max.overlaps = Inf,
+                         min.segment.length = unit(0, "cm"),
+                         point.padding = unit(0.1, "cm"),
+                         box.padding = 0.2,
+                         label.padding = 0.2,
+                         label.size = 0.2,
+                         nudge_y= 2,
+                         nudge_x = 1,
+                         show.legend=FALSE) +
+        geom_label_repel(data=subset(t_stats, tx_symbols %in% c('Mt2-ENSMUST00000034214.7', 'Sin3b-ENSMUST00000109950.4',
+                                                                'Ppp2r5c-ENSMUST00000109832.2')),
+                         aes(fontface = 'bold'), fill='white',
+                         size=2.8,
+                         max.overlaps = Inf,
+                         min.segment.length = unit(0, "cm"),
+                         point.padding = unit(0.1, "cm"),
+                         box.padding = 0.2,
+                         label.padding = 0.2,
+                         label.size = 0.2,
+                         nudge_y= 0.2,
+                         nudge_x = 0.1,
+                         show.legend=FALSE) +
+      geom_label_repel(data=subset(t_stats, tx_symbols %in% c('Meaf6-ENSMUST00000154689.7')),
                        aes(fontface = 'bold'), fill='white',
                        size=2.8,
                        max.overlaps = Inf,
@@ -484,23 +459,75 @@ t_stat_tx_vs_genes<- function(expt){
                        label.padding = 0.2,
                        label.size = 0.2,
                        nudge_y= -0.5,
-                       nudge_x = -6,
+                       nudge_x = 0.1,
                        show.legend=FALSE) +
-      theme_bw() +
-      guides(alpha = 'none') + 
-      scale_color_manual(values = cols, labels=names(cols), drop = FALSE) + 
-      scale_alpha_manual(values = alphas, labels=names(alphas), drop=FALSE) +
-      theme(plot.margin = unit(c(1,1,1,1), "cm"),
-            axis.title = element_text(size = 12),
-            axis.text = element_text(size = 10),
-            legend.text = element_text(size=11),
-            legend.title = element_text(size=12))
+        geom_label_repel(data=subset(t_stats, tx_symbols %in% c('Morf4l2-ENSMUST00000169418.7')),
+                         aes(fontface = 'bold'), fill='white',
+                         size=2.8,
+                         max.overlaps = Inf,
+                         min.segment.length = unit(0, "cm"),
+                         point.padding = unit(0.1, "cm"),
+                         box.padding = 0.2,
+                         label.padding = 0.2,
+                         label.size = 0.2,
+                         nudge_y= -0.01,
+                         nudge_x = 0.5,
+                         show.legend=FALSE) +
+        geom_label_repel(data=subset(t_stats, tx_symbols %in% c('Morf4l2-ENSMUST00000080411.12', 
+                                                                'Sin3b-ENSMUST00000004494.15')),
+                         aes(fontface = 'bold'), fill='white',
+                         size=2.8,
+                         max.overlaps = Inf,
+                         min.segment.length = unit(0, "cm"),
+                         point.padding = unit(0.1, "cm"),
+                         box.padding = 0.2,
+                         label.padding = 0.2,
+                         label.size = 0.2,
+                         nudge_y= -0.9,
+                         nudge_x = 0.5,
+                         show.legend=FALSE) +
+        geom_label_repel(data=subset(t_stats, tx_symbols %in% c('Top2a-ENSMUST00000068031.7', 'Ccnb2-ENSMUST00000034742.7',
+                                                                'Ivns1abp-ENSMUST00000023918.12')),
+                         aes(fontface = 'bold'), fill='white',
+                         size=2.8,
+                         max.overlaps = Inf,
+                         min.segment.length = unit(0, "cm"),
+                         point.padding = unit(0.1, "cm"),
+                         box.padding = 0.2,
+                         label.padding = 0.2,
+                         label.size = 0.2,
+                         nudge_y= -1.8,
+                         nudge_x = -3,
+                         show.legend=FALSE) +
+        geom_label_repel(data=subset(t_stats, tx_symbols %in% c('H13-ENSMUST00000089059.8')),
+                         aes(fontface = 'bold'), fill='white',
+                         size=2.8,
+                         max.overlaps = Inf,
+                         min.segment.length = unit(0, "cm"),
+                         point.padding = unit(0.1, "cm"),
+                         box.padding = 0.2,
+                         label.padding = 0.2,
+                         label.size = 0.2,
+                         nudge_y= -0.5,
+                         nudge_x = -6,
+                         show.legend=FALSE) +
+        theme_bw() +
+        guides(alpha = 'none') + 
+        scale_color_manual(values = cols, labels=names(cols), drop = FALSE) + 
+        scale_alpha_manual(values = alphas, labels=names(alphas), drop=FALSE) +
+        theme(plot.margin = unit(c(1,1,1,1), "cm"),
+              axis.title = element_text(size = 12),
+              axis.text = element_text(size = 10),
+              legend.text = element_text(size=11),
+              legend.title = element_text(size=12))
+    }
+    
+    plot
+    ggsave(filename=paste("plots/04_DEA/02_Comparisons/Tx_analysis/t_stats_tx_vs_genes_", substr(expt,1,3), 
+                          ".pdf", sep=""), height = 14.5, width = 18, units = "cm")
   }
 
   return(t_stats)
-  plot
-  ggsave(filename=paste("plots/04_DEA/02_Comparisons/Tx_analysis/t_stats_tx_vs_genes_", substr(expt,1,3), 
-                        ".pdf", sep=""), height = 14.5, width = 18, units = "cm")
   
 }
 
@@ -509,7 +536,8 @@ t_stat_tx_vs_genes<- function(expt){
 # Nicotine genes vs nicotine tx
 #####################################
 expt<-"nicotine"
-t_stats_txs_vs_genes_nic <- t_stat_tx_vs_genes(expt)
+t_stat_tx_vs_genes(expt, labels = FALSE)
+t_stats_txs_vs_genes_nic <- t_stat_tx_vs_genes(expt, labels = TRUE)
 save(t_stats_txs_vs_genes_nic, file="processed-data/04_DEA/Tx_analysis/t_stats_txs_vs_genes_nic.Rdata")
 write.table(t_stats_txs_vs_genes_nic, file = "processed-data/04_DEA/Tx_analysis/t_stats_txs_vs_genes_nic.csv", row.names = FALSE, col.names = TRUE, sep = '\t')
 
@@ -519,6 +547,7 @@ write.table(t_stats_txs_vs_genes_nic, file = "processed-data/04_DEA/Tx_analysis/
 # Smoking genes vs smoking tx
 #####################################
 expt<-"smoking"
+t_stat_tx_vs_genes(expt, labels = FALSE)
 t_stats_txs_vs_genes_smo <- t_stat_tx_vs_genes(expt)
 save(t_stats_txs_vs_genes_smo, file="processed-data/04_DEA/Tx_analysis/t_stats_txs_vs_genes_smo.Rdata")
 write.table(t_stats_txs_vs_genes_smo, file = "processed-data/04_DEA/Tx_analysis/t_stats_txs_vs_genes_smo.csv", row.names = FALSE, col.names = TRUE, sep = '\t')

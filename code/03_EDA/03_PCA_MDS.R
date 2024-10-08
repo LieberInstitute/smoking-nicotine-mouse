@@ -58,7 +58,7 @@ colors = list("Group"=c("Control" = "seashell3", "Experimental" = "orange3"),
                            "HKCTMDSXX" = "tomato", "HK7JHDSXX"="seagreen3", "HKCJCDSXX"="palevioletred2")
 )
 
-## Colors to highlight poor QC plots
+## Colors to highlight poor QC samples
 poorQC_samples_colors <- c("Sample_FE3P2"="magenta2", "Sample_4067"="darkorange2", "Sample_FC41"="blue", 
                            "Sample_P2_fe2_022019"='cyan2', "Sample_P1_fe3_021819"='purple2', "Sample_P7_fe3_021719"='green1')
 

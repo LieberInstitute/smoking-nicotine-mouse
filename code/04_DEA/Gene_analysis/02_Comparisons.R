@@ -610,14 +610,14 @@ adultGene[adultGene == ""] <- NA
 fetalGene$ensemblID <- rownames(fetalGene)
 adultGene$ensemblID <- rownames(adultGene)
 
-## Find the homologous genes for human in mouse
+## Find the orthologous genes for human in mouse
 human_mouse_ids<-biomart(genes  = fetalGene$ensemblID,
                  mart       = "ENSEMBL_MART_ENSEMBL",
                  dataset    = "hsapiens_gene_ensembl",
                  attributes = c("mmusculus_homolog_ensembl_gene", "mmusculus_homolog_associated_gene_name"),
                  filters    = "ensembl_gene_id")
 
-## Common genes in human homologs and mouse datasets
+## Common genes in human orthologs and mouse datasets
 ## (All mouse datasets contain the same genes in the same order)
 common_genes <- human_mouse_ids[which(human_mouse_ids$mmusculus_homolog_ensembl_gene %in% top_genes_pups_nicotine_fitted$ensemblID),]
 common_genes$human_ensembl_gene_id <- common_genes$ensembl_gene_id
@@ -964,7 +964,7 @@ replication_human_in_mouse<- function(age_mouse, expt_mouse, tissue_mouse, age_h
   de_genes_human <- humanGene[which(humanGene$adj.P.Val<0.1),]
   colnames(de_genes_human) <- paste(colnames(de_genes_human), "human", sep="_")
   
-  ## Add the IDs of the homologous genes in mouse
+  ## Add the IDs of the orthologous genes in mouse
   mouse_ensemblIDs <- vector()
   mouse_gene_names <- vector()
   for (i in 1:dim(de_genes_human)[1]){
@@ -975,7 +975,7 @@ replication_human_in_mouse<- function(age_mouse, expt_mouse, tissue_mouse, age_h
   }
   de_genes_human <- cbind(de_genes_human, "ensemblID_mouse"=mouse_ensemblIDs, "gene_name_mouse"=mouse_gene_names)
   
-  ## Mouse data of human DEG homologs
+  ## Mouse data of human DEG orthologs
   mouse_data <- data.frame(matrix(ncol = 4, nrow = nrow(de_genes_human)))
   colnames(mouse_data) <- c("t_mouse", "adj.P.Val_mouse", "P.Value_mouse", "logFC_mouse")
   for (i in 1:nrow(de_genes_human)){
@@ -1480,9 +1480,9 @@ venn_plot(DEG_lists, colors, "all_DEG")
 ################################################################################
 ## (Mouse genes are from fitted models only)
 
-## Note: each circle represents the number of unique gene pairs (mouse-human homologs), with p<0.05 in adult mouse / FDR<0.05 in mouse pups, 
+## Note: each circle represents the number of unique gene pairs (mouse-human orthologs), with p<0.05 in adult mouse / FDR<0.05 in mouse pups, 
 ## p<0.05 in prenatal/adult human brain and the same logFC sign in both species. Therefore, the intersection contains the replicating genes. 
-## (Consider that some human genes could be associated with >1 mouse homolog gene and the other way around)
+## (Consider that some human genes could be associated with >1 mouse ortholog gene and the other way around)
 
 ## Compare genes from different mouse and human datasets
 
@@ -1670,7 +1670,7 @@ TUD_EUR_S_PrediXcan_FrontalCortex_associatedGenes <- as.vector(na.omit(TUD_EUR_S
 ## Create Venn diagrams
 venn_humanGWASGenes_vs_mouseDEG <- function (human_dataset, name, human_genes_description){
   
-  ## Obtain the homologs of human genes in mouse
+  ## Obtain the orthologs of human genes in mouse
   human_mouse_genes<-biomart(genes  = human_dataset,
                              mart       = "ENSEMBL_MART_ENSEMBL",
                              dataset    = "hsapiens_gene_ensembl",
@@ -1680,9 +1680,9 @@ venn_humanGWASGenes_vs_mouseDEG <- function (human_dataset, name, human_genes_de
   mouse_genes <- unique(human_mouse_genes$mmusculus_homolog_associated_gene_name[human_mouse_genes$mmusculus_homolog_associated_gene_name!=""])
   
   ## Save gene sets
-  ## Nic DEG vs mouse homologs 
+  ## Nic DEG vs mouse orthologs 
   nic_overlapping_genes <- intersect(mouse_genes, de_genes_pups_nicotine_fitted$Symbol)
-  ## Smo DEG vs mouse homologs 
+  ## Smo DEG vs mouse orthologs 
   smo_overlapping_genes <- intersect(mouse_genes, de_genes_pups_smoking_fitted$Symbol)
   ## Compare nicotine and smoking overlapping genes 
   nicOverl_vs_smoOverl_genes <- intersect(nic_overlapping_genes, smo_overlapping_genes)
