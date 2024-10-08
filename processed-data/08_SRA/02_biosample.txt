@@ -1,10 +1,10 @@
 **** Job starts ****
-Tue Oct  8 02:09:48 PM EDT 2024
+Tue Oct  8 02:21:47 PM EDT 2024
 **** JHPCE info ****
 User: neagles
-Job id: 10067040
+Job id: 10067168
 Job name: 02_biosample
-Node name: compute-159
+Node name: compute-169
 Task id: 
 Loading conda_R/4.4
 
@@ -86,4 +86,4 @@ here() starts at /dcs05/lieber/marmaypag/smokingMouseGonzalez2023_LIBD001
 
 ──────────────────────────────────────────────────────────────────────────────
 **** Job ends ****
-Tue Oct  8 02:09:49 PM EDT 2024
+Tue Oct  8 02:21:49 PM EDT 2024

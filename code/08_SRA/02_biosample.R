@@ -24,7 +24,10 @@ pheno_df = read_tsv(pheno_path, show_col_types = FALSE) |>
             SAMPLE_ID, '^(F.*?)-blood$', 'Sample_\\1_blood'
         ),
         organism = 'mus musculus',
-        isolate = sprintf('%s-exposed %s group', Expt, tolower(Group)),
+        isolate = sprintf(
+            '%s-exposure %s group (sample %s)', Expt, tolower(Group),
+            sample_name
+        ),
         collection_date = ifelse(
             is.na(date),
             'not collected',

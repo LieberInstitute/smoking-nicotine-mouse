@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -p shared
+#SBATCH -p katun
 #SBATCH --mem=3G
 #SBATCH --job-name=02_biosample
 #SBATCH -c 1
