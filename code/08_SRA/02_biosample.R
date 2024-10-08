@@ -38,11 +38,12 @@ pheno_df = read_tsv(pheno_path, show_col_types = FALSE) |>
         ),
         geo_loc_name = 'United States: Baltimore, MD',
         sex = ifelse(Sex == "M", 'male', 'female'),
+        biomaterial_provider = 'Lieber Institute for Brain Development: 855 North Wolfe Street, Suite 300, 3rd Floor, Baltimore, MD 21205',
         treatment = Expt
     ) |>
     select(
         sample_name, organism, isolate, dev_stage, collection_date,
-        geo_loc_name, sex, tissue, treatment
+        geo_loc_name, sex, tissue, biomaterial_provider, treatment
     )
 
 #   Phenotype data and manifest should include same set of sample IDs
