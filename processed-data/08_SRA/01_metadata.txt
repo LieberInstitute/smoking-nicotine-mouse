@@ -1,10 +1,10 @@
 **** Job starts ****
-Tue Oct  8 03:04:11 PM EDT 2024
+Tue Oct 15 04:00:52 PM EDT 2024
 **** JHPCE info ****
 User: neagles
-Job id: 10067826
+Job id: 10116522
 Job name: 01_metadata
-Node name: compute-168
+Node name: compute-169
 Task id: 
 Loading conda_R/4.4
 
@@ -36,7 +36,7 @@ FASTQ files occupy a total of 1159.9GB.
  collate  en_US.UTF-8
  ctype    en_US.UTF-8
  tz       US/Eastern
- date     2024-10-08
+ date     2024-10-15
  pandoc   3.1.13 @ /jhpce/shared/community/core/conda_R/4.4/bin/pandoc
 
 ─ Packages ───────────────────────────────────────────────────────────────────
@@ -87,4 +87,4 @@ FASTQ files occupy a total of 1159.9GB.
 
 ──────────────────────────────────────────────────────────────────────────────
 **** Job ends ****
-Tue Oct  8 03:04:18 PM EDT 2024
+Tue Oct 15 04:00:56 PM EDT 2024

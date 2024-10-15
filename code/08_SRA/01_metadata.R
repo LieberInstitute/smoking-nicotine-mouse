@@ -5,6 +5,7 @@ library(sessioninfo)
 man_path = here('processed-data', '01_SPEAQeasy', 'samples.manifest')
 pheno_path = here('raw-data', 'Maternal_Smoking_pheno.txt')
 out_path = here('processed-data', '08_SRA', 'metadata.tsv')
+fastq_dir = here('raw-data', 'fastq')
 design_description_text = paste(
     "Animals",
     "Wild type male and female mice (C57BL/6J; stock # 000664, Jackson Laboratories) were purchased and used for timed breeding. 6 week old female mice were paired with male mice. Copulation plugs were checked daily and male mice were removed upon identification of plugs. Female mice were monitored for pregnancy, and separated upon pregnancy confirmation. Pups were euthanized by decapitation on the first day following birth, e.g. postnatal day 0 (P0).  Pregnant dams were euthanized by decapitation and trunk blood was collected into a heparinized tube. Brains were rapidly extracted from the skull and the frontal cortex was dissected from the brain over wet ice on a steel block using a scalpel. Frontal cortical tissue was snap frozen in chilled 2-methylbutane. Samples were transferred to tubes and placed on dry ice and stored at -80°C until further processing for RNA extraction. All experiments and procedures were approved by the Johns Hopkins Animal Care and Use Committee and in accordance with the Guide for the Care and Use of Laboratory Animals.",
@@ -56,11 +57,38 @@ meta_df = read.table(
         filename2
     )
 
+#   We actually want to use the FASTQ soft links under 'fastq_dir' for upload
+#   since the directory structure is flat (an SRA requirement). Form a table
+#   of links and destination files
+fastq_mapping = tibble(
+        link_path = list.files(fastq_dir, full.names = TRUE)
+    ) |>
+    mutate(dest_path = Sys.readlink(link_path))
+
+#   'meta_df' (from the SPEAQeasy manifest) should refer to the same set of
+#   FASTQs as are present under 'fastq_dir'
+stopifnot(
+    setequal(fastq_mapping$dest_path, c(meta_df$filename, meta_df$filename2))
+)
+
+#   Use the symbolic links, not actual files
+meta_df = meta_df |>
+    mutate(
+        filename = fastq_mapping$link_path[
+            match(filename, fastq_mapping$dest_path)
+        ],
+        filename2 = fastq_mapping$link_path[
+            match(filename2, fastq_mapping$dest_path)
+        ]
+    )
+
 #   Also check disk usage (to make sure we comply with SRA requirements)
 disk_usage = sapply(
     c(meta_df$filename, meta_df$filename2),
     function(x) {
-        as.integer(system(sprintf('du -k %s | cut -f 1', x), intern = TRUE))
+        as.integer(
+            system(sprintf('du -k $(readlink %s) | cut -f 1', x), intern = TRUE)
+        )
     }
 )
 message(
