@@ -1,0 +1,11 @@
+**** Job starts ****
+Tue Oct 15 04:17:52 PM EDT 2024
+**** JHPCE info ****
+User: neagles
+Job id: 10116596
+Job name: 03_upload_fastq
+Node name: transfer-01
+Partial Completion: 213810518K bytes transferred in 18849 seconds
+ (92922K bits/sec), in 114 files, 1 directory; 35 files failed.
+
+Session Stop  (Error: Mandatory management socket localhost:40829, Connection reset by peer (server))
