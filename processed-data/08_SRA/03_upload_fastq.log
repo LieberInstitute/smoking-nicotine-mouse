@@ -1,0 +1,44 @@
+**** Job starts ****
+Tue Oct 15 04:17:52 PM EDT 2024
+**** JHPCE info ****
+User: neagles
+Job id: 10116596
+Job name: 03_upload_fastq
+Node name: transfer-01
+Partial Completion: 213810518K bytes transferred in 18849 seconds
+ (92922K bits/sec), in 114 files, 1 directory; 35 files failed.
+
+Session Stop  (Error: Mandatory management socket localhost:40829, Connection reset by peer (server))
+**** Job starts ****
+Wed Oct 16 08:51:50 AM EDT 2024
+**** JHPCE info ****
+User: neagles
+Job id: 10122831
+Job name: 03_upload_fastq
+Node name: transfer-01
+Partial Completion: 540894786K bytes transferred in 45611 seconds
+ (97147K bits/sec), in 308 files, 1 directory; 36 files failed.
+
+Session Stop  (Error: Cannot write to management socket localhost:35072, Connection reset by peer (server))
+**** Job starts ****
+Fri Oct 18 03:54:09 PM EDT 2024
+**** JHPCE info ****
+User: neagles
+Job id: 10139076
+Job name: 03_upload_fastq
+Node name: transfer-01
+Partial Completion: 239640128K bytes transferred in 20270 seconds
+ (96844K bits/sec), in 394 files, 1 directory; 38 files failed.
+
+Session Stop  (Error: Mandatory management socket localhost:43793, Connection reset by peer (server))
+**** Job starts ****
+Mon Oct 21 09:36:36 AM EDT 2024
+**** JHPCE info ****
+User: neagles
+Job id: 10152006
+Job name: 03_upload_fastq
+Node name: transfer-01
+Completed: 165062387K bytes transferred in 14025 seconds
+ (96411K bits/sec), in 416 files, 1 directory.
+**** Job ends ****
+Mon Oct 21 01:30:24 PM EDT 2024
