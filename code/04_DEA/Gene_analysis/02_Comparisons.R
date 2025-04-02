@@ -1,5 +1,5 @@
 
-## 1.2 Comparison of DEG 
+## 1.2 Comparison of DEGs 
 
 load(here("processed-data/04_DEA/Gene_analysis/top_genes_blood_smoking_naive.Rdata"))
 load(here("processed-data/04_DEA/Gene_analysis/top_genes_blood_smoking_fitted.Rdata"))
@@ -24,6 +24,18 @@ load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_smoking_naive.Rdat
 load(here("processed-data/04_DEA/Gene_analysis/de_genes_pups_smoking_fitted.Rdata"))
 load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_smoking_fitted.Rdata"))
 load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_smoking_interaction.Rdata"))
+
+load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_nicotine_females.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_nicotine_males.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/de_genes_pups_nicotine_sex.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_nicotine_sex.Rdata"))
+
+load(here("processed-data/04_DEA/Gene_analysis/de_genes_pups_smoking_females.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_smoking_females.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/de_genes_pups_smoking_males.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_smoking_males.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/de_genes_pups_smoking_sex.Rdata"))
+load(here("processed-data/04_DEA/Gene_analysis/top_genes_pups_smoking_sex.Rdata"))
 
 load(here("processed-data/04_DEA/Gene_analysis/top_genes_results.Rdata"))
 
@@ -120,9 +132,15 @@ tstats_plots<-function(top_genes_pairs, name_1, name_2, models){
   
   plots<-list()
   for (i in 1:length(top_genes_pairs)){
+    
     p<-t_stat_plot(top_genes_pairs[[i]][[1]], top_genes_pairs[[i]][[2]], name_1, name_2, models[i])
     plots[[i]]<-p
   }
+  
+  if(length(top_genes_pairs) == 2){
+    plots[[3]] = NA
+  }
+  
   plot_grid(plots[[1]], plots[[2]], plots[[3]], ncol=2, align = 'hv')
   ggsave(filename=paste("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_",gsub(" ", "_", name_1), "_VS_",
                         gsub(" ", "_", name_2), ".pdf", sep=""), 
@@ -550,8 +568,34 @@ models<-c("Naive model", "Fitted model", "Interaction model")
 tstats_plots(top_genes_pairs,  "Smoking pups", "Nicotine pups", models)
 
 
+###############################################
+# 3. Compare sexes - Female vs Male pup genes
+###############################################
+
+####### Nicotine/Smoking (vs Ctrl) effects on Female pups vs Male pups  #######
+top_genes_pairs<-list(list(top_genes_pups_nicotine_females, top_genes_pups_nicotine_males),
+                      list(top_genes_pups_smoking_females, top_genes_pups_smoking_males))
+tstats_plots(top_genes_pairs,  "Female pups", "Male pups", c("Nicotine pups", "Smoking pups"))
+
+####### Nicotine/Smoking (vs Ctrl) effects on Female pups vs all pups  #######
+top_genes_pairs<-list(list(top_genes_pups_nicotine_females, top_genes_pups_nicotine_fitted),
+                      list(top_genes_pups_smoking_females, top_genes_pups_smoking_fitted))
+tstats_plots(top_genes_pairs,  "Female pups", "All pups", c("Nicotine pups", "Smoking pups"))
+
+####### Nicotine/Smoking (vs Ctrl) effects on Male pups vs all pups  #######
+top_genes_pairs<-list(list(top_genes_pups_nicotine_males, top_genes_pups_nicotine_fitted),
+                      list(top_genes_pups_smoking_males, top_genes_pups_smoking_fitted))
+tstats_plots(top_genes_pairs,  "Male pups", "All pups", c("Nicotine pups", "Smoking pups"))
+
+####### Nicotine/Smoking (vs Ctrl) effects vs Sex effects in all pups  #######
+top_genes_pairs<-list(list(top_genes_pups_nicotine_sex, top_genes_pups_nicotine_fitted),
+                      list(top_genes_pups_smoking_sex, top_genes_pups_smoking_fitted))
+tstats_plots(top_genes_pairs,  "Sex effects", "Exposure effects", c("Nicotine pups", "Smoking pups"))
+
+
+
 ########################################
-# 3. Compare ages - Pup vs adult genes
+# 4. Compare ages - Pup vs adult genes
 ########################################
 
 ####### Smoking pups vs smoking adults #######
@@ -571,7 +615,7 @@ tstats_plots(top_genes_pairs,  "Nicotine pups", "Nicotine adults", models)
 
 
 ####################################################
-# 4. Compare models - Naive vs fitted model genes
+# 5. Compare models - Naive vs fitted model genes
 ####################################################
 
 ####### Naive vs fitted models for nicotine pups #######
@@ -590,13 +634,13 @@ ggsave("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_Naive_VS_Fitted_Smokin
 
 
 ################################################################################
-##           5. Compare human brain vs mouse brain/blood genes
+##           6. Compare human brain vs mouse brain/blood genes
 ################################################################################
 ## Samples from prenatal and adult human brain were exposed to smoking 
 ## Compare mouse genes from fitted models only
 
 
-################### 5.1 Mouse genes that replicate in human #################### 
+################### 6.1 Mouse genes that replicate in human #################### 
 
 ## Genes in prenatal and adult human brain are the same
 setdiff(rownames(fetalGene), rownames(adultGene))
@@ -938,7 +982,7 @@ write.table(human_and_mice_DGE_results, file="processed-data/04_DEA/Gene_analysi
 
 
 
-################### 5.2 Human genes that replicate in mouse #################### 
+################### 6.2 Human genes that replicate in mouse #################### 
 
 ## Obtain human brain genes that replicate (FDR<10%) in mouse blood or brain (with p-value<5% and same logFC sign)
 replication_human_in_mouse<- function(age_mouse, expt_mouse, tissue_mouse, age_human){
