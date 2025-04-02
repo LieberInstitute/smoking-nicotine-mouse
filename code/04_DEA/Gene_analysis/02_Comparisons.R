@@ -1315,7 +1315,6 @@ save(human_genes_in_mouse, file="processed-data/04_DEA/Gene_analysis/human_genes
 venn_plot<-function(DEG_lists, colors, filename){
   
   plots<-list()
-  pdf(file = paste("plots/04_DEA/02_Comparisons/Gene_analysis/Venn_", filename, ".pdf", sep=""))
   for (i in 1:length(DEG_lists)){
      v<-venn.diagram(DEG_lists[[i]], fill=colors[[i]], alpha = rep(0.5, length(DEG_lists[[i]])), 
                      lwd =0, margin=0.2, cat.cex=0.6, cex=0.6, height = 35, width = 35, units = "cm", 
@@ -1324,17 +1323,15 @@ venn_plot<-function(DEG_lists, colors, filename){
   }
   
   if (i==4){
-    gridExtra::grid.arrange(plots[[1]], plots[[2]], plots[[3]], plots[[4]], ncol=2)
-    dev.off()
+    plot_grid(plots[[1]], plots[[2]], plots[[3]], plots[[4]], ncol=2)
   }
   else if (i==3){
-    gridExtra::grid.arrange(plots[[1]], plots[[2]], plots[[3]], ncol=2)
-    dev.off()
+    plot_grid(plots[[1]], plots[[2]], plots[[3]], ncol=2)
   }
   else {
-    gridExtra::grid.arrange(plots[[1]], plots[[2]], ncol=2)
-    dev.off()
+    plot_grid(plots[[1]], plots[[2]], ncol=2)
   }
+  ggsave(filename = paste("plots/04_DEA/02_Comparisons/Gene_analysis/Venn_", filename, ".pdf", sep=""), width = 6, height = 6)
 }
 
 
@@ -1372,7 +1369,73 @@ venn_plot(DEG_lists, colors, "model_smo_and_nic")
 
 
 ################################################################################
-##              2. Venn diagrams for Up and Down regulated DEG
+##                  2. Compare Female VS Male DEGs
+################################################################################
+
+## Smoking DEGs in F vs M
+DEG_smoking_F_vs_M <-list(
+  "Smoking DEGs in F"=de_genes_pups_smoking_females$Symbol,
+  "Smoking DEGs in M"=de_genes_pups_smoking_males$Symbol)
+
+## Smoking DEGs in F vs all pups
+DEG_smoking_F_vs_all <-list(
+  "Smoking DEGs in F"=de_genes_pups_smoking_females$Symbol,
+  "Smoking DEGs in all"=de_genes_pups_smoking_fitted$Symbol)
+
+## Smoking DEGs in M vs all pups
+DEG_smoking_M_vs_all <-list(
+  "Smoking DEGs in M"=de_genes_pups_smoking_males$Symbol,
+  "Smoking DEGs in all"=de_genes_pups_smoking_fitted$Symbol)
+
+## Smoking DEGs in F vs M vs all pups
+DEG_smoking_F_vs_M_vs_all <-list(
+  "Smoking DEGs in F"=de_genes_pups_smoking_females$Symbol,
+  "Smoking DEGs in M"=de_genes_pups_smoking_males$Symbol,
+  "Smoking DEGs in all"=de_genes_pups_smoking_fitted$Symbol)
+
+DEG_lists<-list(DEG_smoking_F_vs_M, DEG_smoking_F_vs_all, 
+                DEG_smoking_M_vs_all, DEG_smoking_F_vs_M_vs_all)
+colors<-list(c("plum2", "lightskyblue"), c("plum2", "tan"), 
+             c("lightskyblue", "tan"), c("plum2", "lightskyblue", "tan"))
+venn_plot(DEG_lists, colors, "females_vs_males")
+
+## No nicotine DEGs in females or males only
+
+
+
+################################################################################
+##                  3. Compare Exposure VS Sex DEGs
+################################################################################
+
+## Nicotine exposure DEGs (not adjusting for Sex) vs Sex DEGs 
+DEG_nicotine_naive_vs_sex <-list(
+  "Nicotine naive DEGs"=de_genes_pups_nicotine_naive$Symbol,
+  "Sex DEGs"=de_genes_pups_nicotine_sex$Symbol)
+## Smoking exposure DEGs (not adjusting for Sex) vs Sex DEGs 
+DEG_smoking_naive_vs_sex <-list(
+  "Smoking naive DEGs"=de_genes_pups_smoking_naive$Symbol,
+  "Sex DEGs"=de_genes_pups_smoking_sex$Symbol)
+
+## Nicotine exposure DEGs (adjusting for Sex) vs Sex DEGs 
+DEG_nicotine_vs_sex <-list(
+  "Nicotine DEGs"=de_genes_pups_nicotine_fitted$Symbol,
+  "Sex DEGs"=de_genes_pups_nicotine_sex$Symbol)
+## Smoking exposure DEGs (adjusting for Sex) vs Sex DEGs 
+DEG_smoking_vs_sex <-list(
+  "Smoking DEGs"=de_genes_pups_smoking_fitted$Symbol,
+  "Sex DEGs"=de_genes_pups_smoking_sex$Symbol)
+
+
+DEG_lists<-list(DEG_nicotine_naive_vs_sex, DEG_smoking_naive_vs_sex, 
+                DEG_nicotine_vs_sex, DEG_smoking_vs_sex)
+colors<-list(c("palegreen2", "orchid1"), c("lightsalmon", "purple1"), 
+             c("yellow3", "orchid1"), c("slategray3", "purple1"))
+venn_plot(DEG_lists, colors, "exposure_vs_sex")
+
+
+
+################################################################################
+##              4. Venn diagrams for Up and Down regulated DEGs
 ################################################################################
 
 ## Genes of each group
@@ -1489,7 +1552,7 @@ venn_plot(DEG_lists, colors, "Fitted_smo_VS_nic_Up_and_Down")
 
 
 ################################################################################
-##              3. Compare all 4 groups of DEG (by expt and model)
+##              5. Compare all 4 groups of DEGs (by expt and model)
 ################################################################################
 
 DEG_all<-list(
@@ -1520,7 +1583,7 @@ venn_plot(DEG_lists, colors, "all_DEG")
 
 
 ################################################################################
-##          4.  Venn diagrams of mouse replicating genes in human
+##            6. Venn diagrams of mouse replicating genes in human
 ################################################################################
 ## (Mouse genes are from fitted models only)
 
@@ -1630,7 +1693,7 @@ venn_human_vs_mouse("adultHuman_bloodMouse_data", "adult", "smoking", "blood", "
 
 
 ################################################################################################
-##      5. Venn diagrams of Tobacco Use Disorder (TUD) associated human genes vs mouse DEG 
+##     7. Venn diagrams of Tobacco Use Disorder (TUD) associated human genes vs mouse DEGs 
 ################################################################################################
 ## (Mouse pup DEG are from fitted models only)
 
@@ -1849,33 +1912,33 @@ venn_humanGWASGenes_vs_mouseDEG <- function (human_dataset, name, human_genes_de
 
 ## Plots
 
-############### 5.1 TUD-multi+UKBB nearest human genes vs mouse pup DEG ###############
+############### 7.1 TUD-multi+UKBB nearest human genes vs mouse pup DEG ###############
 overlapping_genes_TUD_multi_UKBB <- venn_humanGWASGenes_vs_mouseDEG(TUD_multi_UKBB_nearestGenes, "TUD_multi_UKBB_nearestGenes" , "Mouse homologs of nearest human genes to GWS SNPs associated with TUD in EUR, AA & LA individuals")
 
-############### 5.2 TUD-EUR+UKBB nearest human genes vs mouse pup DEG ###############
+############### 7.2 TUD-EUR+UKBB nearest human genes vs mouse pup DEG ###############
 overlapping_genes_TUD_EUR_UKBB <- venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_UKBB_nearestGenes, "TUD_EUR_UKBB_nearestGenes" , "Mouse homologs of nearest human genes to GWS SNPs associated with TUD in EUR individuals")
 
-############### 5.3 TUD-AA nearest human genes vs mouse pup DEG ###############
+############### 7.3 TUD-AA nearest human genes vs mouse pup DEG ###############
 overlapping_genes_TUD_AA <- venn_humanGWASGenes_vs_mouseDEG(TUD_AA_nearestGenes, "TUD_AA_nearestGenes" , "Mouse homologs of nearest human genes to GWS SNPs associated with TUD in AA individuals")
 
-############### 5.4 TUD-EUR-MAGMA associated human genes vs mouse pup DEG ###############
+############### 7.4 TUD-EUR-MAGMA associated human genes vs mouse pup DEG ###############
 overlapping_genes_TUD_EUR_MAGMA <- venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_MAGMA_associatedGenes, "TUD_EUR_MAGMA_associatedGenes" , "Mouse homologs of human genes associated with TUD based on their EUR-SNPs")
 
-############### 5.5 TUD-EUR-H-MAGMA associated human genes vs mouse pup DEG ###############
+############### 7.5 TUD-EUR-H-MAGMA associated human genes vs mouse pup DEG ###############
 overlapping_genes_TUD_EUR_H_MAGMA <- venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_H_MAGMA_associatedGenes, "TUD_EUR_H_MAGMA_associatedGenes" , "Mouse homologs of neurobiologically relevant human genes associated with TUD")
 
-#####       5.5.1 TUD-EUR-H-MAGMA associated fetal human genes vs mouse pup DEG       #####
+#####       7.5.1 TUD-EUR-H-MAGMA associated fetal human genes vs mouse pup DEG       #####
 overlapping_genes_TUD_EUR_H_MAGMA_fetal <- venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_H_MAGMA_fetal_associatedGenes, "TUD_EUR_H_MAGMA_fetal_associatedGenes" , "Mouse homologs of fetal brain human genes associated with TUD")
-#####       5.5.2 TUD-EUR-H-MAGMA associated adult human genes vs mouse pup DEG       #####
+#####       7.5.2 TUD-EUR-H-MAGMA associated adult human genes vs mouse pup DEG       #####
 overlapping_genes_TUD_EUR_H_MAGMA_adult <- venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_H_MAGMA_adult_associatedGenes, "TUD_EUR_H_MAGMA_adult_associatedGenes" , "Mouse homologs of adult brain human genes associated with TUD")
 
-############### 5.6 TUD_EUR_S_MultiXcan affected human genes vs mouse pup DEG ###############
+############### 7.6 TUD_EUR_S_MultiXcan affected human genes vs mouse pup DEG ###############
 overlapping_genes_TUD_EUR_S_MultiXcan <- venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_S_MultiXcan_associatedGenes, "TUD_EUR_S_MultiXcan_associatedGenes" , "Mouse homologs of human genes affected in brain by EUR-SNPs associated with TUD")
 
-############### 5.7 TUD_EUR_S_PrediXcan affected human genes vs mouse pup DEG ###############
+############### 7.7 TUD_EUR_S_PrediXcan affected human genes vs mouse pup DEG ###############
 overlapping_genes_TUD_EUR_S_PrediXcan <- venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_S_PrediXcan_associatedGenes, "TUD_EUR_S_PrediXcan_associatedGenes" , "Mouse homologs of human genes affected in brain regions by EUR-SNPs associated with TUD")
 
-#####       5.7.1 TUD_EUR_S_PrediXcan affected human genes in FC vs mouse pup DEG       #####
+#####       7.7.1 TUD_EUR_S_PrediXcan affected human genes in FC vs mouse pup DEG       #####
 overlapping_genes_TUD_EUR_S_PrediXcan_FC <- venn_humanGWASGenes_vs_mouseDEG(TUD_EUR_S_PrediXcan_FrontalCortex_associatedGenes, "TUD_EUR_S_PrediXcan_FrontalCortex_associatedGenes" , "Mouse homologs of human genes affected in frontal cortex by EUR-SNPs associated with TUD")
 
 
