@@ -1337,24 +1337,24 @@ venn_plot<-function(DEG_lists, colors, filename){
 
 
 ################################################################################
-##                  1. Compare naive VS fitted models DEG 
+##     1. Compare naive VS fitted models DEGs, and Smoking VS Nicotine DEGs
 ################################################################################
 
-## Nicotine DEG
+## Nicotine DEGs
 DEG_nic_naive_vs_fitted <-list(
   "Nicotine naive"=de_genes_pups_nicotine_naive$Symbol,
   "Nicotine fitted"=de_genes_pups_nicotine_fitted$Symbol)
-## Smoking DEG
+## Smoking DEGs
 DEG_smo_naive_vs_fitted <-list(
   "Smoking naive"=de_genes_pups_smoking_naive$Symbol,
   "Smoking fitted"=de_genes_pups_smoking_fitted$Symbol)
 
-## Compare smoking VS nicotine DEG
+## Compare smoking VS nicotine DEGs
 ## Naive model DEG
 DEG_naive_smo_vs_nic <-list(
   "Nicotine naive"=de_genes_pups_nicotine_naive$Symbol,
   "Smoking naive"=de_genes_pups_smoking_naive$Symbol)
-## Fitted model DEG
+## Fitted model DEGs
 DEG_fitted_smo_vs_nic <-list(
   "Nicotine fitted"=de_genes_pups_nicotine_fitted$Symbol,
   "Smoking fitted"=de_genes_pups_smoking_fitted$Symbol)

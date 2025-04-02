@@ -63,6 +63,16 @@ Separated in gene, transcript (tx), exon, and exon-exon junction (jx) level anal
     **Compare experiments**
       * Smoking-exposed pup brain vs nicotine-exposed pup brain
       * Smoking-exposed adult brain vs nicotine-exposed adult brain
+          
+    **Compare sexes**
+      * Smoking-exposed female pup brains vs smoking-exposed male pup brains
+      * Nicotine-exposed female pup brains vs nicotine-exposed male pup brains
+      * Smoking-exposed female pup brains vs smoking-exposed all pup brains
+      * Nicotine-exposed female pup brains vs nicotine-exposed all pup brains
+      * Smoking-exposed male pup brains vs smoking-exposed all pup brains
+      * Nicotine-exposed male pup brains vs nicotine-exposed all pup brains
+      * Smoking-exposed pup brains vs female-vs-male pup brains
+      * Nicotine-exposed pup brains vs female-vs-male pup brains
       
     **Compare ages**     
       * Smoking-exposed pup brain vs smoking-exposed adult brain
@@ -80,8 +90,10 @@ Separated in gene, transcript (tx), exon, and exon-exon junction (jx) level anal
         → search for human brain genes that replicate in mouse brain/blood and vice versa.  
     
     Venn diagrams to quantify the number of:
-      * Nicotine/smoking DEGs in the naive vs fitted model 
+      * Nicotine/smoking DEGs in the naive vs fitted models 
       * Naive/fitted model DEGs in nicotine vs smoking
+      * Smoking DEGs in female vs male vs all pups
+      * Nicotine/smoking DEGs vs Sex DEGs in pups
       * Up/downregulated nicotine/smoking DEGs in the naive vs fitted model 
       * Up/downregulated nicotine DEGs vs up/down smoking DEGs (from either naive or fitted model or from only one model)
       * Nicotine naive & fitted DEGs vs smoking naive & fitted DEGs
