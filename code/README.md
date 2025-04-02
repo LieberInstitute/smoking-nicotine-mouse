@@ -45,8 +45,10 @@ Separated in gene, transcript (tx), exon, and exon-exon junction (jx) level anal
     
     3 models were applied for each group: 
     * Naive model: gene expression is modeled by the following covariates: ~ `Group` + `plate` + `flowcell` + `QC metrics`
-    * Fitted model: gene expression is modeled by: ~ `Group` + [`Sex` (for pups) or `Pregnancy` (for adults)] + `plate` + `flowcell` + `QC metrics`
-    * Interaction model: gene expression is modeled by: ~ [`Group*Sex` (for pups) or `Group*Pregancy` (for adults)] + `plate` + `flowcell` + `QC metrics`
+    * Adjusted model: gene expression is modeled by: ~ `Group` + [`Sex` (for pups) or `Pregnancy` (for adults)] + `plate` + `flowcell` + `QC metrics`
+    * Interaction model: gene expression is modeled by: ~ [`Group*Sex` + `Group` + `Sex` (for pups) or `Group*Pregnancy` + `Group` + `Pregnancy` (for adults)] + `plate` + `flowcell` + `QC metrics`
+    
+    In addition, transcriptomic sex differences in pup brain in the nicotine and smoking experiments, were tested with differential expression analysis for `Sex` adjusting for `Group` and the same covariates, and testing differential expression for `Group` in female and male pups separately.
     
     `QC metrics` refer to any of `rRNA_rate`, `overallMapRate`, `totalAssignedGene`, `ERCCsumLogErr` and `mitoRate`. See [TableS18](../processed-data/SupplementaryTables/TableS18_sample_variable_dict.tsv) for the definition of these variables.
 

@@ -430,15 +430,22 @@ brain</li>
 <li>Naive model: gene expression is modeled by the following covariates:
 ~ <code>Group</code> + <code>plate</code> + <code>flowcell</code> +
 <code>QC metrics</code></li>
-<li>Fitted model: gene expression is modeled by: ~ <code>Group</code> +
-[<code>Sex</code> (for pups) or <code>Pregnancy</code> (for adults)] +
+<li>Adjusted model: gene expression is modeled by: ~ <code>Group</code>
++ [<code>Sex</code> (for pups) or <code>Pregnancy</code> (for adults)] +
 <code>plate</code> + <code>flowcell</code> +
 <code>QC metrics</code></li>
 <li>Interaction model: gene expression is modeled by: ~
-[<code>Group*Sex</code> (for pups) or <code>Group*Pregancy</code> (for
-adults)] + <code>plate</code> + <code>flowcell</code> +
-<code>QC metrics</code></li>
+[<code>Group*Sex</code> + <code>Group</code> + <code>Sex</code> (for
+pups) or <code>Group*Pregnancy</code> + <code>Group</code> +
+<code>Pregnancy</code> (for adults)] + <code>plate</code> +
+<code>flowcell</code> + <code>QC metrics</code></li>
 </ul>
+<p>In addition, transcriptomic sex differences in pup brain in the
+nicotine and smoking experiments, were tested with differential
+expression analysis for <code>Sex</code> adjusting for
+<code>Group</code> and the same covariates, and testing differential
+expression for <code>Group</code> in female and male pups
+separately.</p>
 <p><code>QC metrics</code> refer to any of <code>rRNA_rate</code>,
 <code>overallMapRate</code>, <code>totalAssignedGene</code>,
 <code>ERCCsumLogErr</code> and <code>mitoRate</code>. See <a href="../processed-data/SupplementaryTables/TableS18_sample_variable_dict.tsv">TableS18</a>
