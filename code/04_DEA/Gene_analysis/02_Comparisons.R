@@ -90,9 +90,12 @@ add_DE_info <-function(top_genes1, top_genes2, name_1, name_2) {
 ## Compare t-stats of genes from different groups of samples
 t_stat_plot <- function(top_genes1, top_genes2, name_1, name_2, model_name){
   
-  ## Correlation coeff
-  rho <- cor(top_genes1$t, top_genes2$t, method = "spearman")
-  rho_anno = paste0("rho = ", format(round(rho, 2), nsmall = 2))
+  ## Spearman's correlation coeff and pval
+  res = cor.test(top_genes1$t, top_genes2$t, method="spearman", exact = T)
+  res = data.frame(rho = res$estimate, rho_p = res$p.value)
+  res$rho_p  <- ifelse(res$rho_p == 0, 2.2e-16, res$rho_p)
+  rho_anno = paste0("rho = ", format(round(res$rho, 2), nsmall = 2), "\n", 
+                    "p = ", signif(res$rho_p, digits = 2))
   
   ## Colors and transparency
   cols <- c("deeppink3", "thistle3","navajowhite2", "darkgrey") 
@@ -276,10 +279,11 @@ t_stat_plot_brain_blood_replication <- function(age_mouse, expt_mouse, feature){
     t_stats$DE<- DE
     t_stats$DE <- factor(t_stats$DE, levels=names(cols))
     
-    ## Correlation coeff between t-stats of blood vs brain genes 
-    rho <- cor(t_stats$t_blood, t_stats$t_brain, method = "spearman")
-    rho_anno = paste0("rho = ", format(round(rho, 2), nsmall = 2))
-    
+    ## Spearman's correlation coeff between t-stats of blood vs brain genes 
+    res = cor.test(t_stats$t_blood, t_stats$t_brain, method="spearman")
+    res = data.frame(rho = res$estimate, rho_p = res$p.value)
+    rho_anno = paste0("rho = ", format(round(res$rho, 2), nsmall = 2), "\n", 
+                      "p = ", signif(res$rho_p, digits = 2))
     
     ## Add labels of interesting genes 
     
@@ -530,7 +534,7 @@ save(top_genes_pups_nicotine_fitted, file="processed-data/04_DEA/Gene_analysis/t
 
 
 
-################### 1.2.2 Brain txs vs blood genes ###################
+################### 1.2.2 Brain txs vs blood genes ################### (not rerun for Review 1 round)
 
 ####### Smoking adult blood (genes) vs Smoking pup brain Txs #######
 Blood_vs_SmoPupBrainTx_data <- t_stat_plot_brain_blood_replication(age_mouse = 'pups', expt_mouse = "smoking", feature = "txs")
