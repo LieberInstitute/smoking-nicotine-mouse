@@ -534,7 +534,7 @@ save(top_genes_pups_nicotine_fitted, file="processed-data/04_DEA/Gene_analysis/t
 
 
 
-################### 1.2.2 Brain txs vs blood genes ################### (not rerun for Review 1 round)
+################### 1.2.2 Brain txs vs blood genes ################### (not rerun for Review 1 round - not pval added)
 
 ####### Smoking adult blood (genes) vs Smoking pup brain Txs #######
 Blood_vs_SmoPupBrainTx_data <- t_stat_plot_brain_blood_replication(age_mouse = 'pups', expt_mouse = "smoking", feature = "txs")
@@ -638,7 +638,7 @@ ggsave("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_Naive_VS_Fitted_Smokin
 
 
 ################################################################################
-##           6. Compare human brain vs mouse brain/blood genes
+##           6. Compare human brain vs mouse brain/blood genes TODOOOOOOOOOOOOOO
 ################################################################################
 ## Samples from prenatal and adult human brain were exposed to smoking 
 ## Compare mouse genes from fitted models only
@@ -672,7 +672,10 @@ common_genes$human_ensembl_gene_id <- common_genes$ensembl_gene_id
 common_genes$ensembl_gene_id <- NULL
 
 
-## Create plots to check if mouse genes replicate (FDR<5% for pups and p-value<5% for adults) in human brain (with p-value<5% and same logFC sign)
+## Create plots to check if mouse genes replicate:
+## Original approach: FDR<5% for pups and p-value<5% for adults, in human brain with p-value<5% and same logFC sign
+## Review 1 approach copied from Gabriel Hoffman in https://github.com/CommonMindConsortium/covarr-de/blob/9665ba4cab4b2b23f9411cbb735a41c24f8116f7/common_functions/common_functions.R#L113C1-L138C91
+ 
 t_stat_plot_mouse_in_human <- function(age_mouse, expt_mouse, tissue_mouse, age_human){
   
   ## Define mouse dataset
@@ -791,9 +794,11 @@ t_stat_plot_mouse_in_human <- function(age_mouse, expt_mouse, tissue_mouse, age_
   human_mouse_data$DE <- factor(human_mouse_data$DE, levels=names(cols))
   
   ## Correlation coeff between t-stats of genes in human and mouse
-  rho <- cor(human_mouse_data$t_human, human_mouse_data$t_mouse, method = "spearman")
-  rho_anno = paste0("rho = ", format(round(rho, 2), nsmall = 2))
-  
+  res <- cor(human_mouse_data$t_human, human_mouse_data$t_mouse, method = "spearman")
+  res = data.frame(rho = res$estimate, rho_p = res$p.value)
+  res$rho_p  <- ifelse(res$rho_p == 0, 2.2e-16, res$rho_p)
+  rho_anno = paste0("rho = ", format(round(res$rho, 2), nsmall = 2), "\n", 
+                    "p = ", signif(res$rho_p, digits = 2))
   
   ## Add labels of interesting genes 
 
@@ -818,6 +823,37 @@ t_stat_plot_mouse_in_human <- function(age_mouse, expt_mouse, tissue_mouse, age_
   }
   
   human_mouse_data$label <- label
+  
+  ## Replication rate pi_1:
+  ## Subset to 
+  p = with(df, P.Value.y[adj.P.Val.x < 0.05])
+  n.de.x = length(p)
+  if( n.de.x > 0){
+    pi_discovery_x = tryCatch( 
+      1 - qvalue(p)$pi0, 
+      error = function(e){
+        # must have a p-value > 0.95 to work
+        1 - qvalue(c(1,p))$pi0
+      })
+  }else{
+    pi_discovery_x = 0
+  }
+  
+  p = with(df, P.Value.x[adj.P.Val.y < 0.05])
+  n.de.y = length(p)
+  if( n.de.y > 0){
+    pi_discovery_y = tryCatch( 
+      1 - qvalue(p)$pi0, 
+      error = function(e){
+        NA
+      })
+  }else{
+    pi_discovery_y = 0
+  }
+  
+  tab_pi = data.frame(Discovery = names(resList), pi1 = c(pi_discovery_x, pi_discovery_y))
+  
+  
   
   ## Plot
   plot <- ggplot(human_mouse_data, aes(x = t_mouse, y = t_human, color=DE, alpha=DE, label=label)) +
