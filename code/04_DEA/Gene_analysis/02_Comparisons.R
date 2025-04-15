@@ -672,9 +672,9 @@ common_genes$human_ensembl_gene_id <- common_genes$ensembl_gene_id
 common_genes$ensembl_gene_id <- NULL
 
 
-## Create plots to check if mouse genes replicate:
-## Original approach: FDR<5% for pups and p-value<5% for adults, in human brain with p-value<5% and same logFC sign
-## Review 1 approach copied from Gabriel Hoffman in https://github.com/CommonMindConsortium/covarr-de/blob/9665ba4cab4b2b23f9411cbb735a41c24f8116f7/common_functions/common_functions.R#L113C1-L138C91
+## Create plots to check if mouse genes replicatein human:
+##  - Original approach: FDR<5% for pups and p-value<5% for adults, in human brain with p-value<5% and same logFC sign
+##  - Review 1 approach copied from Gabriel Hoffman in https://github.com/CommonMindConsortium/covarr-de/blob/9665ba4cab4b2b23f9411cbb735a41c24f8116f7/common_functions/common_functions.R#L113C1-L138C91
  
 t_stat_plot_mouse_in_human <- function(age_mouse, expt_mouse, tissue_mouse, age_human){
   
@@ -794,7 +794,7 @@ t_stat_plot_mouse_in_human <- function(age_mouse, expt_mouse, tissue_mouse, age_
   human_mouse_data$DE <- factor(human_mouse_data$DE, levels=names(cols))
   
   ## Correlation coeff between t-stats of genes in human and mouse
-  res <- cor(human_mouse_data$t_human, human_mouse_data$t_mouse, method = "spearman")
+  res <- cor.test(human_mouse_data$t_human, human_mouse_data$t_mouse, method = "spearman")
   res = data.frame(rho = res$estimate, rho_p = res$p.value)
   res$rho_p  <- ifelse(res$rho_p == 0, 2.2e-16, res$rho_p)
   rho_anno = paste0("rho = ", format(round(res$rho, 2), nsmall = 2), "\n", 
@@ -824,36 +824,27 @@ t_stat_plot_mouse_in_human <- function(age_mouse, expt_mouse, tissue_mouse, age_
   
   human_mouse_data$label <- label
   
-  ## Replication rate pi_1:
-  ## Subset to 
-  p = with(df, P.Value.y[adj.P.Val.x < 0.05])
-  n.de.x = length(p)
-  if( n.de.x > 0){
-    pi_discovery_x = tryCatch( 
+  
+  ## Compute replication rate π1 = 1 - π0 with π0 = m0/m (see PMID: 12883005)
+  
+  ## Human pvals of mouse DEGs/nominally signif genes 
+  if(age_mouse == "pups"){
+    p = human_mouse_data[human_mouse_data$adj.P.Val_mouse < 0.05, "P.Value_human"]
+  } else{
+    p = human_mouse_data[human_mouse_data$P.Value_mouse < 0.05, "P.Value_human"]
+  }
+  m = length(p)
+  if(m > 0){
+    pi1 = tryCatch( 
       1 - qvalue(p)$pi0, 
       error = function(e){
         # must have a p-value > 0.95 to work
         1 - qvalue(c(1,p))$pi0
       })
   }else{
-    pi_discovery_x = 0
+    pi1 = 0
   }
-  
-  p = with(df, P.Value.x[adj.P.Val.y < 0.05])
-  n.de.y = length(p)
-  if( n.de.y > 0){
-    pi_discovery_y = tryCatch( 
-      1 - qvalue(p)$pi0, 
-      error = function(e){
-        NA
-      })
-  }else{
-    pi_discovery_y = 0
-  }
-  
-  tab_pi = data.frame(Discovery = names(resList), pi1 = c(pi_discovery_x, pi_discovery_y))
-  
-  
+  pi1 <- signif(pi1, 2)
   
   ## Plot
   plot <- ggplot(human_mouse_data, aes(x = t_mouse, y = t_human, color=DE, alpha=DE, label=label)) +
@@ -873,18 +864,19 @@ t_stat_plot_mouse_in_human <- function(age_mouse, expt_mouse, tissue_mouse, age_
       labs(x = paste("t-stats in", substr(age_mouse, 1, nchar(age_mouse)-1), "mouse", tissue_mouse), 
            y = paste("t-stats in", age_human, "human brain"),
            title = paste(capitalize(expt_mouse),"mouse vs Smoking human", sep=" "), 
-           subtitle = rho_anno, 
+           subtitle = as.expression(bquote(~ rho  == .(signif(res$rho, 2)) ~ ", " ~ italic(.("p")) == .(signif(res$rho_p, 2)))), 
            color='DE/Replication',
            parse = T) +
-    guides(alpha = 'none', color = guide_legend(override.aes = list(size=2))) + 
+    geom_text(x = Inf, y = -Inf, label = as.expression(bquote(~ pi[1]  == .(pi1))), hjust = 1.2, vjust = -1, size = 3.5, color = "black", 
+              show.legend = F) +
+    guides(alpha = 'none', label = "none", color = guide_legend(override.aes = list(size=2))) + 
     theme_bw() +
     theme(plot.margin = unit(c(1,1,1,1), "cm"),
           axis.title = element_text(size = 12),
           axis.text = element_text(size = 10),
           legend.text = element_text(size=11),
           legend.title = element_text(size=12))
-  
-  
+         
   plot
   ggsave(filename=paste("plots/04_DEA/02_Comparisons/Gene_analysis/t_stats_", age_human, "_Human_vs_Mouse_", age_mouse, "_", substr(expt_mouse,1,3), "_", 
                         tissue_mouse, ".pdf", sep=""), height = 12, width = width, units = "cm")
