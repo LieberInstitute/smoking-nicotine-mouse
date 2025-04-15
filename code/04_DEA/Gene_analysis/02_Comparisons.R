@@ -193,8 +193,12 @@ tstats_plots(top_genes_pairs,  "Nicotine pup brain", "Smoking adult blood", mode
 
 
 #######################  1.2 Search mouse brain genes/txs that replicate in mouse blood ####################### 
-## (With p<0.05 in blood, FDR<0.05 in pup brain/p<0.05 in adult brain, and the same logFC sign in both tissues)
 ## Use mouse genes and txs from fitted models only
+
+## Replication computed by:
+##  - Original approach: with p<0.05 in blood, FDR<0.05 in pup brain/p<0.05 in adult brain, and the same logFC sign in both tissues
+##  - Review 1 approach: Storey's pi stats, copied from Gabriel Hoffman in https://github.com/CommonMindConsortium/covarr-de/blob/9665ba4cab4b2b23f9411cbb735a41c24f8116f7/common_functions/common_functions.R#L113C1-L138C91
+
 
 t_stat_plot_brain_blood_replication <- function(age_mouse, expt_mouse, feature){
   
@@ -281,8 +285,6 @@ t_stat_plot_brain_blood_replication <- function(age_mouse, expt_mouse, feature){
     ## Spearman's correlation coeff between t-stats of blood vs brain genes 
     res = cor.test(t_stats$t_blood, t_stats$t_brain, method="spearman")
     res = data.frame(rho = res$estimate, rho_p = res$p.value)
-    rho_anno = paste0("rho = ", format(round(res$rho, 2), nsmall = 2), "\n", 
-                      "p = ", signif(res$rho_p, digits = 2))
     
     ## Add labels of interesting genes 
     
@@ -303,6 +305,30 @@ t_stat_plot_brain_blood_replication <- function(age_mouse, expt_mouse, feature){
     
     t_stats$label <- label
     
+    
+    ## Compute replication rate as π1 = 1 - π0 
+    ## with π0 = m0/m (see PMID: 12883005):
+    
+    ## Pvals in blood of brain DEGs/nominally signif genes 
+    if(age_mouse == "pups"){
+      p = t_stats[t_stats$FDR_brain < 0.05, "P.Val_blood"]
+    } else{
+      p = t_stats[t_stats$P.Val_brain < 0.05, "P.Val_blood"]
+    }
+    ## Total gene subset
+    m = length(p)
+    if(m > 0){
+      pi1 = tryCatch( 
+        1 - qvalue(p)$pi0, 
+        error = function(e){
+          # must have a p-value > 0.95 to work
+          1 - qvalue(c(1,p))$pi0
+        })
+    }else{
+      pi1 = 0
+    }
+    pi1 <- signif(pi1, 2)
+    
     ## Plot
     plot <- ggplot(t_stats, aes(x = t_brain, y = t_blood, color=DE, alpha=DE, label=label)) +
       geom_point(size = 1.5) +
@@ -310,10 +336,12 @@ t_stat_plot_brain_blood_replication <- function(age_mouse, expt_mouse, feature){
            y = "t-stats in Smoking adult blood",
            title = paste(capitalize(expt_mouse), "mouse brain vs Smoking mouse blood", sep=" "), 
            color = 'DE/Replication',
-           subtitle = rho_anno, 
+           subtitle = as.expression(bquote(~ rho  == .(signif(res$rho, 2)) ~ ", " ~ italic(.("p")) == .(signif(res$rho_p, 2)))),  
            parse = T) +
       scale_color_manual(values = cols, labels=names(cols), drop = FALSE) + 
       scale_alpha_manual(values = alphas, labels=names(alphas), drop=FALSE) +
+      geom_text(x = Inf, y = -Inf, label = as.expression(bquote(~ pi[1]  == .(pi1))), hjust = 1.2, vjust = -1, size = 3.5, 
+                color = "black", show.legend = F) +
       guides(alpha = 'none', color = guide_legend(override.aes = list(size=2))) + 
       geom_label_repel(aes(fontface = 'bold'), fill='white', color='black',
                        size=3.3,
@@ -350,19 +378,19 @@ t_stat_plot_brain_blood_replication <- function(age_mouse, expt_mouse, feature){
       ## Percentage 
       percentage=signif(rep_genes / total_pups_DEG *100, 3)
       print(paste(rep_genes, "out of", total_pups_DEG, "DEG in", expt_mouse, "pup brain (FDR<0.05) replicate in smoking adult blood (with p<0.05 and same logFC direction) -", 
-                  paste(percentage, "%", sep="")))
+                  paste(percentage, "% and π1 = ", pi1, ".", sep="")))
     }
     else {
       ## Percentage 
       percentage=signif(rep_genes / total_adults_P_val_genes *100, 3)
       print(paste(rep_genes, "out of", total_adults_P_val_genes, "genes in", expt_mouse, "adult brain (p<0.05) replicate in smoking adult blood (also p<0.05 and same logFC direction) -", 
-                  paste(percentage, "%", sep="")))
+                  paste(percentage, "% and π1 = ", pi1, ".", sep="")))
     }
 
   }
   
   # ----------------------------------------------------------------------------
-  ## Compare blood genes vs brain txs
+  ## Compare blood genes vs brain txs - Not rerun for Review round 1 corrections
   else {
     
     top_tx_brain <-eval(parse_expr(paste("top_tx", substr(expt_mouse, 1, 3), sep="_")))
@@ -501,7 +529,7 @@ t_stat_plot_brain_blood_replication <- function(age_mouse, expt_mouse, feature){
 
 ####### Smoking adult blood vs Smoking adult brain #######
 Blood_vs_SmoAdultBrain_data <- t_stat_plot_brain_blood_replication(age_mouse = "adults", expt_mouse = "smoking", feature = "genes")
-## "37 out of 772 genes in smoking adult brain (p<0.05) replicate in smoking adult blood (also p<0.05 and same logFC direction) - 4.79%"
+## "37 out of 772 genes in smoking adult brain (p<0.05) replicate in smoking adult blood (also p<0.05 and same logFC direction) - 4.79% and π1 = 0.24."
 save(Blood_vs_SmoAdultBrain_data, file="processed-data/04_DEA/Gene_analysis/Blood_vs_SmoAdultBrain_data.Rdata")
 ## Add replication info to top_table data
 top_genes_adults_smoking_fitted$replication_in_blood <- Blood_vs_SmoAdultBrain_data$DE
@@ -510,7 +538,7 @@ save(top_genes_adults_smoking_fitted, file="processed-data/04_DEA/Gene_analysis/
 
 ####### Smoking adult blood vs Nicotine adult brain #######
 Blood_vs_NicAdultBrain_data <- t_stat_plot_brain_blood_replication(age_mouse = "adults", expt_mouse = "nicotine", feature = "genes")
-## "33 out of 679 genes in nicotine adult brain (p<0.05) replicate in smoking adult blood (also p<0.05 and same logFC direction) - 4.86%"
+## "33 out of 679 genes in nicotine adult brain (p<0.05) replicate in smoking adult blood (also p<0.05 and same logFC direction) - 4.86% and π1 = 0.25."
 save(Blood_vs_NicAdultBrain_data, file="processed-data/04_DEA/Gene_analysis/Blood_vs_NicAdultBrain_data.Rdata")
 top_genes_adults_nicotine_fitted$replication_in_blood <- Blood_vs_NicAdultBrain_data$DE
 save(top_genes_adults_nicotine_fitted, file="processed-data/04_DEA/Gene_analysis/top_genes_adults_nicotine_fitted.Rdata")
@@ -518,7 +546,7 @@ save(top_genes_adults_nicotine_fitted, file="processed-data/04_DEA/Gene_analysis
 
 ####### Smoking adult blood vs Smoking pup brain #######
 Blood_vs_SmoPupBrain_data <- t_stat_plot_brain_blood_replication(age_mouse = "pups", expt_mouse = "smoking", feature = "genes")
-## "126 out of 4165 DEG in smoking pup brain (FDR<0.05) replicate in smoking adult blood (with p<0.05 and same logFC direction) - 3.03%"
+## "126 out of 4165 DEG in smoking pup brain (FDR<0.05) replicate in smoking adult blood (with p<0.05 and same logFC direction) - 3.03% and π1 = 0.29."
 save(Blood_vs_SmoPupBrain_data, file="processed-data/04_DEA/Gene_analysis/Blood_vs_SmoPupBrain_data.Rdata")
 top_genes_pups_smoking_fitted$replication_in_blood <- Blood_vs_SmoPupBrain_data$DE
 save(top_genes_pups_smoking_fitted, file="processed-data/04_DEA/Gene_analysis/top_genes_pups_smoking_fitted.Rdata")
@@ -526,14 +554,14 @@ save(top_genes_pups_smoking_fitted, file="processed-data/04_DEA/Gene_analysis/to
 
 ####### Smoking adult blood vs Nicotine pup brain #######
 Blood_vs_NicPupBrain_data <- t_stat_plot_brain_blood_replication(age_mouse = "pups", expt_mouse = "nicotine", feature = "genes")
-## "15 out of 1010 DEG in nicotine pup brain (FDR<0.05) replicate in smoking adult blood (with p<0.05 and same logFC direction) - 1.49%"
+## "15 out of 1010 DEG in nicotine pup brain (FDR<0.05) replicate in smoking adult blood (with p<0.05 and same logFC direction) - 1.49% and π1 = 0.14."
 save(Blood_vs_NicPupBrain_data, file="processed-data/04_DEA/Gene_analysis/Blood_vs_NicPupBrain_data.Rdata")
 top_genes_pups_nicotine_fitted$replication_in_blood <- Blood_vs_NicPupBrain_data$DE
 save(top_genes_pups_nicotine_fitted, file="processed-data/04_DEA/Gene_analysis/top_genes_pups_nicotine_fitted.Rdata")
 
 
 
-################### 1.2.2 Brain txs vs blood genes ################### (not rerun for Review 1 round - not pval added)
+################### 1.2.2 Brain txs vs blood genes ################### (not rerun for Review 1 round - not corr pval nor π1 added)
 
 ####### Smoking adult blood (genes) vs Smoking pup brain Txs #######
 Blood_vs_SmoPupBrainTx_data <- t_stat_plot_brain_blood_replication(age_mouse = 'pups', expt_mouse = "smoking", feature = "txs")
@@ -671,9 +699,9 @@ common_genes$human_ensembl_gene_id <- common_genes$ensembl_gene_id
 common_genes$ensembl_gene_id <- NULL
 
 
-## Create plots to check if mouse genes replicatein human:
+## Check if mouse genes replicate in human:
 ##  - Original approach: FDR<5% for pups and p-value<5% for adults, in human brain with p-value<5% and same logFC sign
-##  - Review 1 approach copied from Gabriel Hoffman in https://github.com/CommonMindConsortium/covarr-de/blob/9665ba4cab4b2b23f9411cbb735a41c24f8116f7/common_functions/common_functions.R#L113C1-L138C91
+##  - Review 1 approach as described earlier
  
 t_stat_plot_mouse_in_human <- function(age_mouse, expt_mouse, tissue_mouse, age_human){
   
@@ -796,8 +824,7 @@ t_stat_plot_mouse_in_human <- function(age_mouse, expt_mouse, tissue_mouse, age_
   res <- cor.test(human_mouse_data$t_human, human_mouse_data$t_mouse, method = "spearman")
   res = data.frame(rho = res$estimate, rho_p = res$p.value)
   res$rho_p  <- ifelse(res$rho_p == 0, 2.2e-16, res$rho_p)
-  rho_anno = paste0("rho = ", format(round(res$rho, 2), nsmall = 2), "\n", 
-                    "p = ", signif(res$rho_p, digits = 2))
+
   
   ## Add labels of interesting genes 
 
