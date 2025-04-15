@@ -93,9 +93,8 @@ t_stat_plot <- function(top_genes1, top_genes2, name_1, name_2, model_name){
   ## Spearman's correlation coeff and pval
   res = cor.test(top_genes1$t, top_genes2$t, method="spearman", exact = T)
   res = data.frame(rho = res$estimate, rho_p = res$p.value)
+  ## If p == 0, it's < 2.2e-16
   res$rho_p  <- ifelse(res$rho_p == 0, 2.2e-16, res$rho_p)
-  rho_anno = paste0("rho = ", format(round(res$rho, 2), nsmall = 2), "\n", 
-                    "p = ", signif(res$rho_p, digits = 2))
   
   ## Colors and transparency
   cols <- c("deeppink3", "thistle3","navajowhite2", "darkgrey") 
@@ -116,7 +115,7 @@ t_stat_plot <- function(top_genes1, top_genes2, name_1, name_2, model_name){
      labs(x = paste("t-stats", name_1), 
          y = paste("t-stats", name_2),
          title = model_name, 
-         subtitle = rho_anno, 
+         subtitle = as.expression(bquote(~ rho  == .(signif(res$rho, 2)) ~ ", " ~ italic(.("p")) == .(signif(res$rho_p, 2)))), 
          color = "Differential expression",
          parse = T) +
     guides(alpha = 'none', color = guide_legend(override.aes = list(size=2))) + 
