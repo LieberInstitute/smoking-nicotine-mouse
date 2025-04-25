@@ -1403,9 +1403,7 @@ save(human_genes_in_mouse, file="processed-data/04_DEA/Gene_analysis/human_genes
 
 
 
-
-
-### 1.2.3 Venn diagrams - not rerun under Review round 1 
+### 1.2.2 Venn diagrams - not rerun under Review 1 round
 
 ## Function to create multiple Venn diagrams
 venn_plot<-function(DEG_lists, colors, filename){
