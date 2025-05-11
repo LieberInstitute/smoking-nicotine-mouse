@@ -198,9 +198,12 @@ t_stat_tx_vs_genes<- function(expt, labels){
   t_stats$logFC_gene <- logFCs
   t_stats$P.Value_gene <- pvals
   
-  ## Correlation coeff between t-stats of genes and transcripts
-  rho <- cor(t_stats$t_tx, t_stats$t_gene, method = "spearman")
-  rho_anno = paste0("rho = ", format(round(rho, 2), nsmall = 2))
+  ## Spearman's correlation coeff between t-stats of genes and transcripts and pval
+  res = cor.test(t_stats$t_tx, t_stats$t_gene, method="spearman", exact = T)
+  res = data.frame(rho = res$estimate, rho_p = res$p.value)
+  ## If p == 0, it's < 2.2e-16
+  res$rho_p  <- ifelse(res$rho_p == 0, 2.2e-16, res$rho_p)
+  
   
   cols <- c("coral2","pink", "lightgoldenrod3", "grey") 
   names(cols) <- c("sig Both","sig Gene", "sig Tx", "None")
@@ -307,7 +310,7 @@ t_stat_tx_vs_genes<- function(expt, labels){
       labs(x = "t-stats genes", 
            y = "t-stats tx",
            title = paste(capitalize(expt),"genes vs tx", sep=" "), 
-           subtitle = rho_anno, 
+           subtitle = as.expression(bquote(~ rho  == .(signif(res$rho, 2)) ~ ", " ~ italic(.("p")) == .(signif(res$rho_p, 2)))), 
            parse = T) +
       theme_bw() +
       guides(alpha = 'none') + 
@@ -330,7 +333,7 @@ t_stat_tx_vs_genes<- function(expt, labels){
         labs(x = "t-stats genes", 
              y = "t-stats tx",
              title = paste(capitalize(expt),"genes vs tx", sep=" "), 
-             subtitle = rho_anno, 
+             subtitle = as.expression(bquote(~ rho  == .(signif(res$rho, 2)) ~ ", " ~ italic(.("p")) == .(signif(res$rho_p, 2)))), 
              parse = T) +
         geom_label_repel(data=subset(t_stats, !tx_symbols %in% c('Trpc4-ENSMUST00000199359.1', 'Dgcr8-ENSMUST00000115633.2')), 
                          aes(fontface = 'bold'), fill='white',
@@ -373,7 +376,7 @@ t_stat_tx_vs_genes<- function(expt, labels){
         labs(x = "t-stats genes", 
              y = "t-stats tx",
              title = paste(capitalize(expt),"genes vs tx", sep=" "), 
-             subtitle = rho_anno, 
+             subtitle = as.expression(bquote(~ rho  == .(signif(res$rho, 2)) ~ ", " ~ italic(.("p")) == .(signif(res$rho_p, 2)))), 
              parse = T) +
         ## Label only the most significant DE txs per gene
         geom_label_repel(data=subset(t_stats, tx_symbols %in% c('Btf3-ENSMUST00000022163.14', 'Cyhr1-ENSMUST00000176274.1')),
@@ -548,7 +551,7 @@ write.table(t_stats_txs_vs_genes_nic, file = "processed-data/04_DEA/Tx_analysis/
 #####################################
 expt<-"smoking"
 t_stat_tx_vs_genes(expt, labels = FALSE)
-t_stats_txs_vs_genes_smo <- t_stat_tx_vs_genes(expt)
+t_stats_txs_vs_genes_smo <- t_stat_tx_vs_genes(expt, labels = TRUE)
 save(t_stats_txs_vs_genes_smo, file="processed-data/04_DEA/Tx_analysis/t_stats_txs_vs_genes_smo.Rdata")
 write.table(t_stats_txs_vs_genes_smo, file = "processed-data/04_DEA/Tx_analysis/t_stats_txs_vs_genes_smo.csv", row.names = FALSE, col.names = TRUE, sep = '\t')
 
