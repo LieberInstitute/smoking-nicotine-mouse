@@ -59,9 +59,11 @@ add_DE_info <-function(top_exons1, top_exons2) {
 ## Compare t-stats of exons from different groups of samples
 t_stat_plot <- function(top_exons1, top_exons2, name_1, name_2, title){
   
-  ## Correlation coeff
-  rho <- cor(top_exons1$t, top_exons2$t, method = "spearman")
-  rho_anno = paste0("rho = ", format(round(rho, 2), nsmall = 2))
+  ## Spearman's correlation coeff and pval
+  res = cor.test(top_exons1$t, top_exons2$t, method="spearman", exact = T)
+  res = data.frame(rho = res$estimate, rho_p = res$p.value)
+  ## If p == 0, it's < 2.2e-16
+  res$rho_p  <- ifelse(res$rho_p == 0, 2.2e-16, res$rho_p)
   
   ## Colors and alphas
   cols <- c("deeppink3", "thistle3","navajowhite2", "darkgrey") 
@@ -82,7 +84,7 @@ t_stat_plot <- function(top_exons1, top_exons2, name_1, name_2, title){
     labs(x = paste("t-stats", name_1), 
          y = paste("t-stats", name_2),
          title = title, 
-         subtitle = rho_anno, 
+         subtitle = as.expression(bquote(~ rho  == .(signif(res$rho, 2)) ~ ", " ~ italic(.("p")) == .(signif(res$rho_p, 2)))), 
          color = "Differential expression",
          parse = T) +
     guides(alpha = 'none') + 
@@ -203,9 +205,11 @@ t_stat_exons_vs_genes<- function(expt){
   t_stats$P.Value_gene <- pvals
   t_stats$adj.P.Val_gene <- FDRs
   
-  ## Correlation coeff between t-stats of genes and exons
-  rho <- cor(t_stats$t_exon, t_stats$t_gene, method = "spearman")
-  rho_anno = paste0("rho = ", format(round(rho, 2), nsmall = 2))
+  ## Spearman's correlation coeff and pval
+  res = cor.test(t_stats$t_exon, t_stats$t_gene, method="spearman", exact = T)
+  res = data.frame(rho = res$estimate, rho_p = res$p.value)
+  ## If p == 0, it's < 2.2e-16
+  res$rho_p  <- ifelse(res$rho_p == 0, 2.2e-16, res$rho_p)
   
   ## Colors
   cols <- c("coral2","pink", "turquoise", "grey") 
@@ -262,7 +266,7 @@ t_stat_exons_vs_genes<- function(expt){
     labs(x = "t-stats genes", 
          y = "t-stats exons",
          title = paste(capitalize(expt),"genes vs exons", sep=" "), 
-         subtitle = rho_anno, 
+         subtitle = as.expression(bquote(~ rho  == .(signif(res$rho, 2)) ~ ", " ~ italic(.("p")) == .(signif(res$rho_p, 2)))), 
          parse = T) +
     ## Remove labels
     # geom_label_repel(fill="white", size=2, max.overlaps = Inf,  
@@ -278,10 +282,10 @@ t_stat_exons_vs_genes<- function(expt){
           legend.text = element_text(size=11),
           legend.title = element_text(size=12))
     
-  return(t_stats) 
   plot
   ggsave(filename=paste("plots/04_DEA/02_Comparisons/Exon_analysis/t_stats_global_", substr(expt,1,3), 
                         ".pdf", sep=""), height = 14.5, width = 18, units = "cm")
+  return(t_stats) 
 
 }
 
