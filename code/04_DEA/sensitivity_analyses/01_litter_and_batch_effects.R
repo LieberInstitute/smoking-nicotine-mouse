@@ -1,5 +1,4 @@
-# 5. Sensitivity analyses to assess the hidden litter effects
-
+# 5. Sensitivity analyses to assess hidden litter and batch-related effects
 
 library(here)
 library(tidyr)
@@ -15,7 +14,7 @@ library(sva)
 
 
 ## Load data at 4 expr levels including filtered pup samples 
-load(here("processed-data/03_EDA/04_Expl_Var_partition/rse_gene_brain_pups_nicotine.Rdata"))
+load(here("processed-data/03_EDA/04_Expl_Var_partition/rse_gene_brain_pups_nicotine.Rdata"), verbose = T)
 load(here("processed-data/03_EDA/04_Expl_Var_partition/rse_gene_brain_pups_smoking.Rdata"))
 
 load(here("processed-data/03_EDA/03_PCA/rse_gene_brain_pups_qc_afterPCA.Rdata"), verbose = T)
@@ -25,10 +24,24 @@ load(here("processed-data/03_EDA/03_PCA/rse_jx_brain_pups_qc_afterPCA.Rdata"), v
 
 
 ## Split by expt and group (independent litters)
-rse_nic_ctrl <- rse_gene_brain_pups_nicotine[, which(rse_gene_brain_pups_nicotine$Group == "Control")]
-rse_nic_expt <- rse_gene_brain_pups_nicotine[, which(rse_gene_brain_pups_nicotine$Group == "Experimental")]
-rse_smo_ctrl <- rse_gene_brain_pups_smoking[, which(rse_gene_brain_pups_smoking$Group == "Control")]
-rse_smo_expt <- rse_gene_brain_pups_smoking[, which(rse_gene_brain_pups_smoking$Group == "Experimental")]
+rse_gene_nic_ctrl <- rse_gene_brain_pups_qc_afterPCA[, which(rse_gene_brain_pups_qc_afterPCA$Expt == "Nicotine" &
+                                                             rse_gene_brain_pups_qc_afterPCA$Group == "Control")]
+rse_gene_nic_expt <- rse_gene_brain_pups_qc_afterPCA[, which(rse_gene_brain_pups_qc_afterPCA$Expt == "Nicotine" &
+                                                             rse_gene_brain_pups_qc_afterPCA$Group == "Experimental")]
+rse_gene_smo_ctrl <- rse_gene_brain_pups_qc_afterPCA[, which(rse_gene_brain_pups_qc_afterPCA$Expt == "Smoking" & 
+                                                             rse_gene_brain_pups_qc_afterPCA$Group == "Control")]
+rse_gene_smo_expt <- rse_gene_brain_pups_qc_afterPCA[, which(rse_gene_brain_pups_qc_afterPCA$Expt == "Smoking" &
+                                                             rse_gene_brain_pups_qc_afterPCA$Group == "Experimental")]
+
+## For DTE, DEE and DJE
+rse_tx_nic <- rse_tx_brain_pups_qc_afterPCA[, which(rse_tx_brain_pups_qc_afterPCA$Expt == "Nicotine")]
+rse_tx_smo <- rse_tx_brain_pups_qc_afterPCA[, which(rse_tx_brain_pups_qc_afterPCA$Expt == "Smoking")]
+
+rse_exon_nic <- rse_exon_brain_pups_qc_afterPCA[, which(rse_exon_brain_pups_qc_afterPCA$Expt == "Nicotine")]
+rse_exon_smo <- rse_exon_brain_pups_qc_afterPCA[, which(rse_exon_brain_pups_qc_afterPCA$Expt == "Smoking")]
+
+rse_jx_nic <- rse_jx_brain_pups_qc_afterPCA[, which(rse_jx_brain_pups_qc_afterPCA$Expt == "Nicotine")]
+rse_jx_smo <- rse_jx_brain_pups_qc_afterPCA[, which(rse_jx_brain_pups_qc_afterPCA$Expt == "Smoking")]
 
 
 
@@ -38,7 +51,7 @@ rse_smo_expt <- rse_gene_brain_pups_smoking[, which(rse_gene_brain_pups_smoking$
 
 plot_cor_heatmap <- function(expt, group){
   
-  rse <- get(paste0("rse_", expt, "_", group))
+  rse <- get(paste0("rse_gene_", expt, "_", group))
   cor_mat <- cor(assays(rse)$logcounts, method = "pearson")
   dist_mat <- as.dist(1 - abs(cor_mat))
   colnames(cor_mat) <- rownames(cor_mat) <- rse$SAMPLE_ID
@@ -73,7 +86,7 @@ plot_cor_heatmap <- function(expt, group){
     cellheight = 5,
     width = 5,
     height = 5,
-    filename = paste("plots/03_EDA/05_litter_sensitivity_analyses/Corr_heatmap_", expt, "_", group, ".pdf", sep="")
+    filename = paste("plots/04_DEA/sensitivity_analyses/Corr_heatmap_", expt, "_", group, ".pdf", sep="")
   )
   
 }
@@ -107,7 +120,7 @@ shapes = list("Group" = c("Experimental" = 16, "Control" = 1),
               "cluster" = c("1" = 15, "2" = 6, "3" = 8, 
                             "4" = 14, "5" = 11, "6" = 10, "7" = 16, "8" = 5))
 
-## Max number of litters (clusters) per group (ie number of mothers)
+## Max number of litters (clusters) per group (i.e. number of mothers)
 num_centers = c("nic_ctrl" = 3,
                 "nic_expt" = 3,
                 "smo_ctrl" = 7,
@@ -115,19 +128,18 @@ num_centers = c("nic_ctrl" = 3,
 
 pca_kmeans_clust_resid <- function(expt, group, PCx, PCy, color_var, shape_var){
   
-  rse <- get(paste0("rse_", expt, "_", group))
+  rse <- get(paste0("rse_gene_", expt, "_", group))
   
   ## Compute TMM factors
   rse_norm <- calcNormFactors(rse, method = "TMM")
   
-  ## Regress out cov (all as fixed effects)
-  
+  ## Regress out cov (all as fixed effects) -- no Group effect
   f <- ~ Sex + plate + flowcell + rRNA_rate + overallMapRate + totalAssignedGene + 
     ERCCsumLogErr + mitoRate
   ## Model matrix
   model = model.matrix(f, data = rse_norm$samples)
 
-  ## voom logCPM and variance weights for lm fit
+  ## voom log-cpm and variance weights for lm fit
   v = voom(rse_norm, design = model, plot = TRUE)
   
   ## Fit linear model for each gene
@@ -147,15 +159,14 @@ pca_kmeans_clust_resid <- function(expt, group, PCx, PCy, color_var, shape_var){
   pc_mat <- pca$x[,1:nPC]
   
   ## K mean clustering
-  set.seed(1)
-  km <- kmeans(pc_mat, centers = num_centers[paste0(expt, "_", group)])
+  set.seed(123)
+  km <- kmeans(pc_mat, centers = num_centers[paste0(expt, "_", group)], iter.max = 100)
   
   ## Add sample data and cluster
   pc_mat <- cbind(pc_mat, colData(rse))
   pc_mat$cluster = as.character(km$cluster)
   pc_mat <- as.data.frame(pc_mat)
   
-  ## Add cluster to rse
   clusters <- as.character(km$cluster)
   
   plot = ggplot(data = pc_mat, 
@@ -185,33 +196,33 @@ for(expt in c("nic", "smo")){
       p3 <- pca_kmeans_clust_resid(expt, group, "PC2", "PC3", cov, "Sex")[[1]]
       p4 <- pca_kmeans_clust_resid(expt, group, "PC4", "PC5", cov, "Sex")[[1]]
       plot_grid(p1, p2, p3, p4, ncol = 2)
-      ggsave(paste("plots/03_EDA/05_litter_sensitivity_analyses/Resid_PCs_clusters_", 
+      ggsave(paste("plots/04_DEA/sensitivity_analyses/Resid_PCs_clusters_", 
                    cov, "_", expt, "_", group,".pdf", sep=""), width = 8, height = 5.5)
     } 
   }
 }
 
 ## Add cluster info
-rse_nic_ctrl$cluster = paste0(pca_kmeans_clust_resid("nic", "ctrl", "PC1", "PC2", "cluster", "Sex")[[2]], "_nic_ctrl")
-rse_nic_expt$cluster = paste0(pca_kmeans_clust_resid("nic", "expt", "PC1", "PC2", "cluster", "Sex")[[2]], "_nic_expt")
-rse_smo_ctrl$cluster = paste0(pca_kmeans_clust_resid("smo", "ctrl", "PC1", "PC2", "cluster", "Sex")[[2]], "_smo_ctrl")
-rse_smo_expt$cluster = paste0(pca_kmeans_clust_resid("smo", "expt", "PC1", "PC2", "cluster", "Sex")[[2]], "_smo_expt")
+rse_gene_nic_ctrl$cluster = paste0(pca_kmeans_clust_resid("nic", "ctrl", "PC1", "PC2", "cluster", "Sex")[[2]], "_nic_ctrl")
+rse_gene_nic_expt$cluster = paste0(pca_kmeans_clust_resid("nic", "expt", "PC1", "PC2", "cluster", "Sex")[[2]], "_nic_expt")
+rse_gene_smo_ctrl$cluster = paste0(pca_kmeans_clust_resid("smo", "ctrl", "PC1", "PC2", "cluster", "Sex")[[2]], "_smo_ctrl")
+rse_gene_smo_expt$cluster = paste0(pca_kmeans_clust_resid("smo", "expt", "PC1", "PC2", "cluster", "Sex")[[2]], "_smo_expt")
 
 ## Bind ctrls and expt in each group
-identical(rownames(rse_nic_ctrl), rownames(rse_nic_expt))
-identical(colnames(rse_nic_ctrl), colnames(rse_nic_expt))
-rse_nic <- cbind(rse_nic_ctrl, rse_nic_expt)
+identical(rownames(rse_gene_nic_ctrl), rownames(rse_gene_nic_expt))
+identical(colnames(colData(rse_gene_nic_ctrl)), colnames(colData(rse_gene_nic_expt)))
+rse_gene_nic <- cbind(rse_gene_nic_ctrl, rse_gene_nic_expt)
 
-identical(rownames(rse_smo_ctrl), rownames(rse_smo_expt))
-identical(colnames(rse_smo_ctrl), colnames(rse_smo_expt))
-rse_smo <- cbind(rse_smo_ctrl, rse_smo_expt)
+identical(rownames(rse_gene_smo_ctrl), rownames(rse_gene_smo_expt))
+identical(colnames(rse_gene_smo_ctrl), colnames(rse_gene_smo_expt))
+rse_gene_smo <- cbind(rse_gene_smo_ctrl, rse_gene_smo_expt)
 
-all_clusters <- c(unique(rse_nic$cluster), unique(rse_smo$cluster))
+all_clusters <- c(unique(rse_gene_nic$cluster), unique(rse_gene_smo$cluster))
 cluster_letters <- LETTERS[1:length(all_clusters)]
 names(cluster_letters) <- all_clusters
 
-rse_nic$cluster <- cluster_letters[rse_nic$cluster]
-rse_smo$cluster <- cluster_letters[rse_smo$cluster]
+rse_gene_nic$cluster <- cluster_letters[rse_gene_nic$cluster]
+rse_gene_smo$cluster <- cluster_letters[rse_gene_smo$cluster]
 
 colors_clusters <- c("#FF4500", "#9AFF9A", "#9B30FF", "#87CEEB", "#EEEE00", 
                      "#FFBBFF", "#2E8B57", "#B3EE3A", "#EE00EE", "#EEAD0E", 
@@ -228,7 +239,7 @@ shapes$cluster <- cluster_letter_shapes
 ## Plot PCs on all expt pups
 plot_PCs_all_pups <- function(expt, PCx, PCy, color_var, shape_var){
   
-  rse <- get(paste0("rse_", expt))
+  rse <- get(paste0("rse_gene_", expt))
   expr <- assays(rse)$logcounts
     
   ## PCs on lognorm counts
@@ -280,7 +291,7 @@ for(cov in c("cluster", "Group", "Sex", "plate", "flowcell")){
   }
   
   plot_grid(plotlist = plots, ncol = 5, align = "vh")
-  ggsave(filename = paste0("plots/03_EDA/05_litter_sensitivity_analyses/PNE_PCs_cluster_and_",
+  ggsave(filename = paste0("plots/04_DEA/sensitivity_analyses/PNE_PCs_cluster_and_",
                            cov, ".pdf"), width = 21, height = 8)
 }
 
@@ -300,7 +311,7 @@ for(cov in c("cluster", "Group", "Sex", "plate", "flowcell")){
   }
   
   plot_grid(plotlist = plots, ncol = 5, align = "vh")
-  ggsave(filename = paste0("plots/03_EDA/05_litter_sensitivity_analyses/MSDP_PCs_cluster_and_",
+  ggsave(filename = paste0("plots/04_DEA/sensitivity_analyses/MSDP_PCs_cluster_and_",
                            cov, ".pdf"), width = 21, height = 8)
 }
 
@@ -308,7 +319,7 @@ for(cov in c("cluster", "Group", "Sex", "plate", "flowcell")){
 ## Fit random-effects model to assess DGE using clusters as proxy for litter
 fit_lmm <- function(expt){
   
-  rse <- get(paste0("rse_", expt))
+  rse <- get(paste0("rse_gene_", expt))
 
   ## TMM norm factors
   rse_norm <- calcNormFactors(rse, method = "TMM")
@@ -328,14 +339,12 @@ fit_lmm <- function(expt){
   v2 = voom(rse_norm, design = model, plot=TRUE, block = rse_norm$samples$cluster, 
             correlation = cor$consensus)
   
-  colnames(v2$E) <- colnames(assays(rse)$logcounts)
-  assays(rse)$logcounts <- v2$E
-  
   ## Corr based on corrected expression
   cor2 = duplicateCorrelation(v2, design = model, block = rse_norm$samples$cluster)
   
   ## Fit linear model
-  fit = lmFit(v2, design = model, block = rse$cluster, correlation = cor2$consensus)
+  fit = lmFit(v2, design = model, block = rse_norm$samples$cluster, 
+              correlation = cor2$consensus)
   eBGene = eBayes(fit)
   
   top_genes = topTable(eBGene, coef = "GroupExperimental", p.value = 1, 
@@ -354,9 +363,9 @@ fit_lmm <- function(expt){
 
 ## DEGs
 top_genes_nic_cluster_adjusted <- fit_lmm("nic")
-# [1] "93 DEGs: 77 up-regulated and 16 down-regulated"
+# [1] "424 DEGs: 303 up-regulated and 121 down-regulated"
 top_genes_smo_cluster_adjusted <- fit_lmm("smo")
-# [1] "768 DEGs: 298 up-regulated and 470 down-regulated"
+# [1] "1032 DEGs: 380 up-regulated and 652 down-regulated"
 
 de_genes_nic_cluster_adjusted <- subset(top_genes_nic_cluster_adjusted, adj.P.Val<0.05)
 de_genes_nic_cluster_adjusted <- de_genes_nic_cluster_adjusted[order(de_genes_nic_cluster_adjusted$adj.P.Val, decreasing = F), ]
@@ -370,6 +379,9 @@ top_genes_smo_unadjusted <- get(load("processed-data/04_DEA/Gene_analysis/top_ge
 
 de_genes_nic_unadjusted <- subset(top_genes_nic_unadjusted, adj.P.Val<0.05)
 de_genes_smo_unadjusted <- subset(top_genes_smo_unadjusted, adj.P.Val<0.05)
+nom_genes_nic_unadjusted <- subset(top_genes_nic_unadjusted, P.Value<0.05)
+nom_genes_smo_unadjusted <- subset(top_genes_smo_unadjusted, P.Value<0.05)
+
 
 DEG_nic<-list(
   "PNE adjusted DEGs" = de_genes_nic_cluster_adjusted$ensemblID,
@@ -439,7 +451,7 @@ p1 <- t_stat_plot("nic", "unadjusted", "cluster_adjusted")
 p2 <- t_stat_plot("smo", "unadjusted", "cluster_adjusted")
 
 plot_grid(p1, p2, ncol = 2)
-ggsave(filename = "plots/03_EDA/05_litter_sensitivity_analyses/t_stats_cluster_adjusted_vs_unadjusted.pdf", width = 9.5, height = 3.2)
+ggsave(filename = "plots/04_DEA/sensitivity_analyses/t_stats_cluster_adjusted_vs_unadjusted.pdf", width = 9.5, height = 3.2)
 
 
 ## Compare gene rankings
@@ -458,33 +470,67 @@ abline(0,1,col=2)
 # ------------------------------------------------------------------------------
 #                     5.3 Surrogate Variable Analysis (SVA)
 # ------------------------------------------------------------------------------
+## SVs computed based on gene expression residuals
 f <- ~ Group + Sex + plate + flowcell + rRNA_rate + overallMapRate + totalAssignedGene + ERCCsumLogErr + mitoRate
 
 ## SVs in PNE:
-model = model.matrix(f, data = colData(rse_nic))
+model = model.matrix(f, data = colData(rse_gene_nic))
 # 1. Compute number of latent factors to estimate according to signif eigengenes (PCs)
-n.sv = num.sv(assays(rse_nic)$logcounts, model, method = "be", B = 100, seed = 123)
+n.sv = num.sv(assays(rse_gene_nic)$logcounts, model, method = "be", B = 100, seed = 123)
 # 2. Estimate n.sv surrogate variables 
-svatwostep <- twostepsva.build(assays(rse_nic)$logcounts, model, n.sv)
+svatwostep <- twostepsva.build(assays(rse_gene_nic)$logcounts, model, n.sv)
 SVs <- svatwostep$sv %>% as.data.frame()
 colnames(SVs) <- paste0("SV", 1:svatwostep$n.sv)
 ## Add SVs to colData
-colData(rse_nic) <- cbind(colData(rse_nic) , SVs)
+colData(rse_gene_nic) <- cbind(colData(rse_gene_nic) , SVs)
 
+## For PNE
+## Add to tx, exon and jx rse objects
+## Make sure samples are in same order as in gene rse
+colnames(rse_tx_nic) <- rse_tx_nic$SAMPLE_ID
+rse_tx_nic <- rse_tx_nic[, rse_gene_nic$SAMPLE_ID]
+colnames(rse_exon_nic) <- rse_exon_nic$SAMPLE_ID
+rse_exon_nic <- rse_exon_nic[, rse_gene_nic$SAMPLE_ID]
+colnames(rse_jx_nic) <- rse_jx_nic$SAMPLE_ID
+rse_jx_nic <- rse_jx_nic[, rse_gene_nic$SAMPLE_ID]
+
+identical(rse_gene_nic$SAMPLE_ID, rse_tx_nic$SAMPLE_ID)
+identical(rse_gene_nic$SAMPLE_ID, rse_exon_nic$SAMPLE_ID)
+identical(rse_gene_nic$SAMPLE_ID, rse_jx_nic$SAMPLE_ID)
+# [1] TRUE
+
+## Add cluster and SVs
+rse_tx_nic$cluster <- rse_exon_nic$cluster <- rse_jx_nic$cluster <- rse_gene_nic$cluster
+colData(rse_tx_nic)[, paste0("SV", 1:4)] <- colData(rse_exon_nic)[, paste0("SV", 1:4)] <- colData(rse_jx_nic)[, paste0("SV", 1:4)] <- colData(rse_gene_nic)[, paste0("SV", 1:4)]
 
 ## SVs in MSDP:
-model = model.matrix(f, data = colData(rse_smo))
-n.sv = num.sv(assays(rse_smo)$logcounts, model, method = "be", B = 100, seed = 123)
-svatwostep <- twostepsva.build(assays(rse_smo)$logcounts, model, n.sv)
+model = model.matrix(f, data = colData(rse_gene_smo))
+n.sv = num.sv(assays(rse_gene_smo)$logcounts, model, method = "be", B = 100, seed = 123)
+svatwostep <- twostepsva.build(assays(rse_gene_smo)$logcounts, model, n.sv)
 SVs <- svatwostep$sv %>% as.data.frame()
 colnames(SVs) <- paste0("SV", 1:svatwostep$n.sv)
-colData(rse_smo) <- cbind(colData(rse_smo) , SVs)
+colData(rse_gene_smo) <- cbind(colData(rse_gene_smo) , SVs)
+
+## For MSDP
+colnames(rse_tx_smo) <- rse_tx_smo$SAMPLE_ID
+rse_tx_smo <- rse_tx_smo[, rse_gene_smo$SAMPLE_ID]
+colnames(rse_exon_smo) <- rse_exon_smo$SAMPLE_ID
+rse_exon_smo <- rse_exon_smo[, rse_gene_smo$SAMPLE_ID]
+colnames(rse_jx_smo) <- rse_jx_smo$SAMPLE_ID
+rse_jx_smo <- rse_jx_smo[, rse_gene_smo$SAMPLE_ID]
+
+identical(rse_gene_smo$SAMPLE_ID, rse_tx_smo$SAMPLE_ID)
+identical(rse_gene_smo$SAMPLE_ID, rse_exon_smo$SAMPLE_ID)
+identical(rse_gene_smo$SAMPLE_ID, rse_jx_smo$SAMPLE_ID)
+
+rse_tx_smo$cluster <- rse_exon_smo$cluster <- rse_jx_smo$cluster <- rse_gene_smo$cluster
+colData(rse_tx_smo)[, paste0("SV", 1:10)] <- colData(rse_exon_smo)[, paste0("SV", 1:10)] <- colData(rse_jx_smo)[, paste0("SV", 1:10)] <- colData(rse_gene_smo)[, paste0("SV", 1:10)]
 
 
 ## Compare SVs to clusters
 plot_SV_vs_clusters <- function(expt, SV, color_var){
   
-  rse <- get(paste0("rse_", expt))
+  rse <- get(paste0("rse_gene_", expt))
   data <- as.data.frame(colData(rse))
   
   shape_var = "Sex"
@@ -520,14 +566,15 @@ for(expt in c("nic", "smo")){
     }
   }
   plot_grid(plotlist = plots, ncol = 4, align = "vh")
-  ggsave(filename = paste0("plots/03_EDA/05_litter_sensitivity_analyses/SV_vs_cluster_", 
+  ggsave(filename = paste0("plots/04_DEA/sensitivity_analyses/SV_vs_cluster_", 
          expt, ".pdf"), width = 17, height = 8)
 }
 
-## Run DGE adjusting for SVs
+# ------------------------------------------------------------------------------
+## Run DGE adjusting for SVs HEREEEEEEEE
 dge_SV_adjusted <- function(expt){
   
-  rse <- get(paste0("rse_", expt))
+  rse <- get(paste0("rse_gene_", expt))
   rse_norm <- calcNormFactors(rse, method = "TMM")
   f <- paste0("~ Group + Sex + plate + flowcell + rRNA_rate + overallMapRate +
             totalAssignedGene + ERCCsumLogErr + mitoRate + ", 
@@ -544,10 +591,12 @@ dge_SV_adjusted <- function(expt){
 }
 
 top_genes_nic_SV_adjusted <- dge_SV_adjusted("nic")
+nom_genes_nic_SV_adjusted <- subset(top_genes_nic_SV_adjusted, P.Value<0.05)
 de_genes_nic_SV_adjusted <- subset(top_genes_nic_SV_adjusted, adj.P.Val<0.05)
 de_genes_nic_SV_adjusted <- de_genes_nic_SV_adjusted[order(de_genes_nic_SV_adjusted$adj.P.Val, decreasing = F), ]
 
 top_genes_smo_SV_adjusted <- dge_SV_adjusted("smo")
+nom_genes_smo_SV_adjusted <- subset(top_genes_smo_SV_adjusted, P.Value<0.05)
 de_genes_smo_SV_adjusted <- subset(top_genes_smo_SV_adjusted, adj.P.Val<0.05)
 de_genes_smo_SV_adjusted <- de_genes_smo_SV_adjusted[order(de_genes_smo_SV_adjusted$adj.P.Val, decreasing = F), ]
 
@@ -564,17 +613,33 @@ DEG_smo <- list(
   "MSDP unadjusted DEGs"= de_genes_smo_unadjusted$ensemblID)
 venn.diagram(DEG_smo, disable.logging = T, filename = NULL)
 
+## % of DEGs found after SV adjustment at FDR<0.05
+# PNE
+length(intersect(de_genes_nic_SV_adjusted$ensemblID, de_genes_nic_unadjusted$ensemblID))/dim(de_genes_nic_unadjusted)[1] *100
+# [1] 52.67327
+# MSDP
+length(intersect(de_genes_smo_SV_adjusted$ensemblID, de_genes_smo_unadjusted$ensemblID))/dim(de_genes_smo_unadjusted)[1] *100
+# [1] 23.62545
+
+## % of DEGs found after SV adjustment at p<0.05
+# PNE
+length(intersect(nom_genes_nic_SV_adjusted$ensemblID, de_genes_nic_unadjusted$ensemblID))/dim(de_genes_nic_unadjusted)[1] *100
+# [1] 99.10891
+# MSDP
+length(intersect(nom_genes_smo_SV_adjusted$ensemblID, de_genes_smo_unadjusted$ensemblID))/dim(de_genes_smo_unadjusted)[1] *100
+# [1] 52.26891
+
 
 ## Compare t-stats
 p1 <- t_stat_plot("nic", "unadjusted", "SV_adjusted")
 p2 <- t_stat_plot("smo", "unadjusted", "SV_adjusted")
 plot_grid(p1, p2, ncol = 2)
-ggsave(filename = "plots/03_EDA/05_litter_sensitivity_analyses/t_stats_SV_adjusted_vs_unadjusted.pdf", width = 9.5, height = 3.2)
+ggsave(filename = "plots/04_DEA/sensitivity_analyses/t_stats_SV_adjusted_vs_unadjusted.pdf", width = 9.5, height = 3.2)
 
 p3 <- t_stat_plot("nic", "cluster_adjusted", "SV_adjusted")
 p4 <- t_stat_plot("smo", "cluster_adjusted", "SV_adjusted")
-plot_grid(p1, p2, ncol = 2)
-ggsave(filename = "plots/03_EDA/05_litter_sensitivity_analyses/t_stats_SV_vs_cluster_adjusted.pdf", width = 9.5, height = 3.2)
+plot_grid(p3, p4, ncol = 2)
+ggsave(filename = "plots/04_DEA/sensitivity_analyses/t_stats_SV_vs_cluster_adjusted.pdf", width = 9.5, height = 3.2)
 
 ## Compare gene rankings for PNE DGE
 rank_nic_cluster_adjusted <- rank(top_genes_nic_cluster_adjusted$P.Value)
@@ -609,7 +674,7 @@ p3 <- ggplot(ranks_nic, aes(x = cluster_adjusted, y = SV_adjusted)) +
   coord_cartesian(xlim = c(1, nrow(ranks_nic)), expand = F)
 
 plot_grid(p1, p2 ,p3, ncol = 3)
-ggsave(filename = "plots/03_EDA/05_litter_sensitivity_analyses/Rankings_DGE_PNE.pdf", width = 9.5, height = 3)
+ggsave(filename = "plots/04_DEA/sensitivity_analyses/Rankings_DGE_PNE.pdf", width = 9.5, height = 3)
 
 
 ## Compare gene rankings for MSDP DGE
@@ -645,5 +710,52 @@ p3 <- ggplot(ranks_smo, aes(x = cluster_adjusted, y = SV_adjusted)) +
   coord_cartesian(xlim = c(1, nrow(ranks_nic)), expand = F)
 
 plot_grid(p1, p2 ,p3, ncol = 3)
-ggsave(filename = "plots/03_EDA/05_litter_sensitivity_analyses/Rankings_DGE_MSDP.pdf", width = 9.5, height = 3)
+ggsave(filename = "plots/04_DEA/sensitivity_analyses/Rankings_DGE_MSDP.pdf", width = 9.5, height = 3)
 
+
+# ------------------------------------------------------------------------------
+## Run DTE adjusting for SVs
+dge_SV_adjusted <- function(expt){
+  
+  rse <- get(paste0("rse_tx_", expt))
+  
+  ## Model matrix using formula for the fitted model
+  f <- ~ Group + Sex + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr + overallMapRate + mitoRate
+  model = model.matrix(f, data = colData(rse))
+  
+  ## Fit linear model for each transcript
+  fitTx = lmFit(assays(rse)$logcounts, design = model)
+  
+  ## Compute moderated F and t-statistics, and log-odds of DE
+  eBTx = eBayes(fitTx)
+  
+  ## Plot average log expression vs logFC
+  limma::plotMA(eBTx, coef = "GroupExperimental", xlab = "Mean of normalized counts", 
+                ylab="logFC")
+  
+  ## Plot -log(p-value) vs logFC
+  volcanoplot(eBTx, coef = "GroupExperimental")
+  
+  ## Select top-ranked transcripts for Group 
+  top_tx = topTable(eBTx, coef="GroupExperimental", p.value = 1, number=nrow(RSE), sort.by="none")
+  ## Histogram of adjusted p values
+  hist(top_tx$adj.P.Val, xlab="FDR", main="")
+  
+  
+  
+  
+  
+  rse_norm <- calcNormFactors(rse, method = "TMM")
+  f <- paste0("~ Group + Sex + plate + flowcell + rRNA_rate + overallMapRate +
+            totalAssignedGene + ERCCsumLogErr + mitoRate + ", 
+              paste(grep("SV", colnames(colData(rse)), value = T), collapse = " + "))
+  
+  model = model.matrix(as.formula(f), data = colData(rse))
+  vGene = voom(rse_norm, design = model)
+  fitGene = lmFit(vGene)
+  eBGene = eBayes(fitGene)
+  top_genes = topTable(eBGene, coef = "GroupExperimental", 
+                       p.value = 1, number = nrow(rse), sort.by="none")
+  
+  return(top_genes)
+}
