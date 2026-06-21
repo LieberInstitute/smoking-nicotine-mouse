@@ -11,6 +11,7 @@ library(cowplot)
 library(limma)
 library(edgeR)
 library(sva)
+library(sessioninfo)
 
 
 ## Load data at 4 expr levels including filtered pup samples 
@@ -373,6 +374,12 @@ de_genes_nic_cluster_adjusted <- de_genes_nic_cluster_adjusted[order(de_genes_ni
 de_genes_smo_cluster_adjusted <- subset(top_genes_smo_cluster_adjusted, adj.P.Val<0.05)
 de_genes_smo_cluster_adjusted <- de_genes_smo_cluster_adjusted[order(de_genes_smo_cluster_adjusted$adj.P.Val, decreasing = F), ]
 
+save(top_genes_nic_cluster_adjusted, file="processed-data/04_DEA/sensitivity_analyses/top_genes_nic_cluster_adjusted.Rdata")
+save(top_genes_smo_cluster_adjusted, file="processed-data/04_DEA/sensitivity_analyses/top_genes_smo_cluster_adjusted.Rdata")
+save(de_genes_nic_cluster_adjusted, file="processed-data/04_DEA/sensitivity_analyses/de_genes_nic_cluster_adjusted.Rdata")
+save(de_genes_smo_cluster_adjusted, file="processed-data/04_DEA/sensitivity_analyses/de_genes_smo_cluster_adjusted.Rdata")
+
+
 ## Check overlap with found DEGs
 top_genes_nic_unadjusted <- get(load("processed-data/04_DEA/Gene_analysis/top_genes_pups_nicotine_fitted.Rdata"))
 top_genes_smo_unadjusted <- get(load("processed-data/04_DEA/Gene_analysis/top_genes_pups_smoking_fitted.Rdata"))
@@ -381,7 +388,6 @@ de_genes_nic_unadjusted <- subset(top_genes_nic_unadjusted, adj.P.Val<0.05)
 de_genes_smo_unadjusted <- subset(top_genes_smo_unadjusted, adj.P.Val<0.05)
 nom_genes_nic_unadjusted <- subset(top_genes_nic_unadjusted, P.Value<0.05)
 nom_genes_smo_unadjusted <- subset(top_genes_smo_unadjusted, P.Value<0.05)
-
 
 DEG_nic<-list(
   "PNE adjusted DEGs" = de_genes_nic_cluster_adjusted$ensemblID,
@@ -395,10 +401,10 @@ venn.diagram(DEG_smo, disable.logging = T, filename = NULL)
 
 
 ## Compare t-stats
-t_stat_plot <- function(expt, model1, model2){
+t_stat_plot <- function(expt, features, model1, model2){
   
-  top_genes1 <- get(paste0("top_genes_", expt, "_", model1))
-  top_genes2 <- get(paste0("top_genes_", expt, "_", model2))
+  top_genes1 <- get(paste0("top_", features, "_", expt, "_", model1))
+  top_genes2 <- get(paste0("top_", features, "_", expt, "_", model2))
 
   top_genes1$de <- top_genes1$adj.P.Val<0.05
   top_genes2$de <- top_genes2$adj.P.Val<0.05
@@ -418,22 +424,22 @@ t_stat_plot <- function(expt, model1, model2){
   t_stats <- data.frame(t1 = top_genes1$t, t2 = top_genes2$t, 
                         de1 = top_genes1$de, de2 = top_genes2$de)
   t_stats$de <- case_when(t_stats$de1 == TRUE & t_stats$de2 == TRUE ~ "sig. both",
-                          t_stats$de1 == TRUE & t_stats$de2 == FALSE ~ "sig. unadj only",
-                          t_stats$de1 == FALSE & t_stats$de2 == TRUE ~ "sig. adj only",
+                          t_stats$de1 == TRUE & t_stats$de2 == FALSE ~ "sig. 1 only",
+                          t_stats$de1 == FALSE & t_stats$de2 == TRUE ~ "sig. 2 only",
                           t_stats$de1 == FALSE & t_stats$de2 == FALSE ~ "n.s.")
   
   ## Colors and transparency
   cols <- c("#8B8B00", "#CDCD00","#EED8AE", "gray80") 
   alphas <- c( 1, 1, 1,0.5)  
-  names(cols) <- names(alphas) <- c("sig. both", "sig. unadj only", "sig. adj only", "n.s.")
+  names(cols) <- names(alphas) <- c("sig. both", "sig. 1 only", "sig. 2 only", "n.s.")
   
   plot <- ggplot(t_stats, aes(x = t1, y = t2, color=de, alpha=de)) +
-    geom_point(size = 1.5) +
+    geom_point(size = 0.9) +
     scale_color_manual(values = cols, drop = T) + 
     scale_alpha_manual(values = alphas, drop=T) +
     labs(x = paste("t-stats", name[model1]), 
          y = paste("t-stats", name[model2]),
-         subtitle = as.expression(bquote(~ rho  == .(signif(res$rho, 2)) ~ ", " ~ italic(.("p")) == .(signif(res$rho_p, 2)))), 
+         subtitle = as.expression(bquote(~ rho  == .(signif(res$rho, 3)) ~ ", " ~ italic(.("p")) == .(signif(res$rho_p, 2)))), 
          color = "Differential expression",
          parse = T) +
     guides(alpha = 'none', color = guide_legend(override.aes = list(size=2))) + 
@@ -447,11 +453,11 @@ t_stat_plot <- function(expt, model1, model2){
 
 }
 
-p1 <- t_stat_plot("nic", "unadjusted", "cluster_adjusted")
-p2 <- t_stat_plot("smo", "unadjusted", "cluster_adjusted")
+p1 <- t_stat_plot("nic", "genes", "unadjusted", "cluster_adjusted")
+p2 <- t_stat_plot("smo", "genes", "unadjusted", "cluster_adjusted")
 
 plot_grid(p1, p2, ncol = 2)
-ggsave(filename = "plots/04_DEA/sensitivity_analyses/t_stats_cluster_adjusted_vs_unadjusted.pdf", width = 9.5, height = 3.2)
+ggsave(filename = "plots/04_DEA/sensitivity_analyses/t_stats_genes_cluster_adjusted_vs_unadjusted.pdf", width = 9.5, height = 3.2)
 
 
 ## Compare gene rankings
@@ -484,9 +490,7 @@ colnames(SVs) <- paste0("SV", 1:svatwostep$n.sv)
 ## Add SVs to colData
 colData(rse_gene_nic) <- cbind(colData(rse_gene_nic) , SVs)
 
-## For PNE
-## Add to tx, exon and jx rse objects
-## Make sure samples are in same order as in gene rse
+## Add to tx, exon and jx rse objects (make sure samples are in same order as in gene rse)
 colnames(rse_tx_nic) <- rse_tx_nic$SAMPLE_ID
 rse_tx_nic <- rse_tx_nic[, rse_gene_nic$SAMPLE_ID]
 colnames(rse_exon_nic) <- rse_exon_nic$SAMPLE_ID
@@ -499,9 +503,17 @@ identical(rse_gene_nic$SAMPLE_ID, rse_exon_nic$SAMPLE_ID)
 identical(rse_gene_nic$SAMPLE_ID, rse_jx_nic$SAMPLE_ID)
 # [1] TRUE
 
-## Add cluster and SVs
 rse_tx_nic$cluster <- rse_exon_nic$cluster <- rse_jx_nic$cluster <- rse_gene_nic$cluster
 colData(rse_tx_nic)[, paste0("SV", 1:4)] <- colData(rse_exon_nic)[, paste0("SV", 1:4)] <- colData(rse_jx_nic)[, paste0("SV", 1:4)] <- colData(rse_gene_nic)[, paste0("SV", 1:4)]
+
+save(rse_gene_nic, file = paste0("processed-data/04_DEA/sensitivity_analyses/", 
+                                 "rse_gene_brain_pups_nicotine_Kmeans_cluster_SV.Rdata"))
+save(rse_tx_nic, file = paste0("processed-data/04_DEA/sensitivity_analyses/", 
+                               "rse_tx_brain_pups_nicotine_Kmeans_cluster_SV.Rdata"))
+save(rse_exon_nic, file = paste0("processed-data/04_DEA/sensitivity_analyses/", 
+                                 "rse_exon_brain_pups_nicotine_Kmeans_cluster_SV.Rdata"))
+save(rse_jx_nic, file = paste0("processed-data/04_DEA/sensitivity_analyses/", 
+                                 "rse_jx_brain_pups_nicotine_Kmeans_cluster_SV.Rdata"))
 
 ## SVs in MSDP:
 model = model.matrix(f, data = colData(rse_gene_smo))
@@ -511,7 +523,6 @@ SVs <- svatwostep$sv %>% as.data.frame()
 colnames(SVs) <- paste0("SV", 1:svatwostep$n.sv)
 colData(rse_gene_smo) <- cbind(colData(rse_gene_smo) , SVs)
 
-## For MSDP
 colnames(rse_tx_smo) <- rse_tx_smo$SAMPLE_ID
 rse_tx_smo <- rse_tx_smo[, rse_gene_smo$SAMPLE_ID]
 colnames(rse_exon_smo) <- rse_exon_smo$SAMPLE_ID
@@ -525,6 +536,15 @@ identical(rse_gene_smo$SAMPLE_ID, rse_jx_smo$SAMPLE_ID)
 
 rse_tx_smo$cluster <- rse_exon_smo$cluster <- rse_jx_smo$cluster <- rse_gene_smo$cluster
 colData(rse_tx_smo)[, paste0("SV", 1:10)] <- colData(rse_exon_smo)[, paste0("SV", 1:10)] <- colData(rse_jx_smo)[, paste0("SV", 1:10)] <- colData(rse_gene_smo)[, paste0("SV", 1:10)]
+
+save(rse_gene_smo, file = paste0("processed-data/04_DEA/sensitivity_analyses/", 
+                                 "rse_gene_brain_pups_smoking_Kmeans_cluster_SV.Rdata"))
+save(rse_tx_smo, file = paste0("processed-data/04_DEA/sensitivity_analyses/", 
+                               "rse_tx_brain_pups_smoking_Kmeans_cluster_SV.Rdata"))
+save(rse_exon_smo, file = paste0("processed-data/04_DEA/sensitivity_analyses/", 
+                                 "rse_exon_brain_pups_smoking_Kmeans_cluster_SV.Rdata"))
+save(rse_jx_smo, file = paste0("processed-data/04_DEA/sensitivity_analyses/", 
+                               "rse_jx_brain_pups_smoking_Kmeans_cluster_SV.Rdata"))
 
 
 ## Compare SVs to clusters
@@ -571,31 +591,31 @@ for(expt in c("nic", "smo")){
 }
 
 # ------------------------------------------------------------------------------
-## Run DGE adjusting for SVs HEREEEEEEEE
-dge_SV_adjusted <- function(expt){
+## Run DGE adjusting for SVs 
+dea_SV_adjusted <- function(expt, features){
   
-  rse <- get(paste0("rse_gene_", expt))
+  rse <- get(paste0("rse_", features, "_", expt))
   rse_norm <- calcNormFactors(rse, method = "TMM")
   f <- paste0("~ Group + Sex + plate + flowcell + rRNA_rate + overallMapRate +
             totalAssignedGene + ERCCsumLogErr + mitoRate + ", 
               paste(grep("SV", colnames(colData(rse)), value = T), collapse = " + "))
   
   model = model.matrix(as.formula(f), data = colData(rse))
-  vGene = voom(rse_norm, design = model)
-  fitGene = lmFit(vGene)
-  eBGene = eBayes(fitGene)
-  top_genes = topTable(eBGene, coef = "GroupExperimental", 
-                       p.value = 1, number = nrow(rse), sort.by="none")
+  v = voom(rse_norm, design = model)
+  fit = lmFit(v)
+  eB = eBayes(fit)
+  top = topTable(eB, coef = "GroupExperimental", 
+                     p.value = 1, number = nrow(rse), sort.by="none")
 
-  return(top_genes)
+  return(top)
 }
 
-top_genes_nic_SV_adjusted <- dge_SV_adjusted("nic")
+top_genes_nic_SV_adjusted <- dea_SV_adjusted("nic", "gene")
 nom_genes_nic_SV_adjusted <- subset(top_genes_nic_SV_adjusted, P.Value<0.05)
 de_genes_nic_SV_adjusted <- subset(top_genes_nic_SV_adjusted, adj.P.Val<0.05)
 de_genes_nic_SV_adjusted <- de_genes_nic_SV_adjusted[order(de_genes_nic_SV_adjusted$adj.P.Val, decreasing = F), ]
 
-top_genes_smo_SV_adjusted <- dge_SV_adjusted("smo")
+top_genes_smo_SV_adjusted <- dea_SV_adjusted("smo")
 nom_genes_smo_SV_adjusted <- subset(top_genes_smo_SV_adjusted, P.Value<0.05)
 de_genes_smo_SV_adjusted <- subset(top_genes_smo_SV_adjusted, adj.P.Val<0.05)
 de_genes_smo_SV_adjusted <- de_genes_smo_SV_adjusted[order(de_genes_smo_SV_adjusted$adj.P.Val, decreasing = F), ]
@@ -631,15 +651,15 @@ length(intersect(nom_genes_smo_SV_adjusted$ensemblID, de_genes_smo_unadjusted$en
 
 
 ## Compare t-stats
-p1 <- t_stat_plot("nic", "unadjusted", "SV_adjusted")
-p2 <- t_stat_plot("smo", "unadjusted", "SV_adjusted")
+p1 <- t_stat_plot("nic", "genes", "unadjusted", "SV_adjusted")
+p2 <- t_stat_plot("smo", "genes", "unadjusted", "SV_adjusted")
 plot_grid(p1, p2, ncol = 2)
-ggsave(filename = "plots/04_DEA/sensitivity_analyses/t_stats_SV_adjusted_vs_unadjusted.pdf", width = 9.5, height = 3.2)
+ggsave(filename = "plots/04_DEA/sensitivity_analyses/t_stats_genes_SV_adjusted_vs_unadjusted.pdf", width = 9.5, height = 3.2)
 
-p3 <- t_stat_plot("nic", "cluster_adjusted", "SV_adjusted")
-p4 <- t_stat_plot("smo", "cluster_adjusted", "SV_adjusted")
+p3 <- t_stat_plot("nic", "genes", "cluster_adjusted", "SV_adjusted")
+p4 <- t_stat_plot("smo", "genes", "cluster_adjusted", "SV_adjusted")
 plot_grid(p3, p4, ncol = 2)
-ggsave(filename = "plots/04_DEA/sensitivity_analyses/t_stats_SV_vs_cluster_adjusted.pdf", width = 9.5, height = 3.2)
+ggsave(filename = "plots/04_DEA/sensitivity_analyses/t_stats_genes_SV_vs_cluster_adjusted.pdf", width = 9.5, height = 3.2)
 
 ## Compare gene rankings for PNE DGE
 rank_nic_cluster_adjusted <- rank(top_genes_nic_cluster_adjusted$P.Value)
@@ -713,15 +733,26 @@ plot_grid(p1, p2 ,p3, ncol = 3)
 ggsave(filename = "plots/04_DEA/sensitivity_analyses/Rankings_DGE_MSDP.pdf", width = 9.5, height = 3)
 
 
+## Supp tables with results 
+colnames(top_genes_nic_SV_adjusted)[1] <- "chr"
+write.table(top_genes_nic_SV_adjusted, file = "processed-data/04_DEA/Gene_analysis/top_genes_brain_pup_nicotine_SV_adjusted.csv", row.names = FALSE, col.names = TRUE, sep = '\t')
+
+colnames(top_genes_smo_SV_adjusted)[1] <- "chr"
+write.table(top_genes_smo_SV_adjusted, file = "processed-data/04_DEA/Gene_analysis/top_genes_brain_pup_smoking_SV_adjusted.csv", row.names = FALSE, col.names = TRUE, sep = '\t')
+
+
 # ------------------------------------------------------------------------------
 ## Run DTE adjusting for SVs
-dge_SV_adjusted <- function(expt){
+dte_SV_adjusted <- function(expt){
   
   rse <- get(paste0("rse_tx_", expt))
   
-  ## Model matrix using formula for the fitted model
-  f <- ~ Group + Sex + plate + flowcell + rRNA_rate + totalAssignedGene + ERCCsumLogErr + overallMapRate + mitoRate
-  model = model.matrix(f, data = colData(rse))
+  ## Model matrix 
+  f <- paste0("~ Group + Sex + plate + flowcell + rRNA_rate + overallMapRate +
+            totalAssignedGene + ERCCsumLogErr + mitoRate + ", 
+              paste(grep("SV", colnames(colData(rse)), value = T), collapse = " + "))
+  
+  model = model.matrix(as.formula(f), data = colData(rse))
   
   ## Fit linear model for each transcript
   fitTx = lmFit(assays(rse)$logcounts, design = model)
@@ -729,33 +760,308 @@ dge_SV_adjusted <- function(expt){
   ## Compute moderated F and t-statistics, and log-odds of DE
   eBTx = eBayes(fitTx)
   
-  ## Plot average log expression vs logFC
-  limma::plotMA(eBTx, coef = "GroupExperimental", xlab = "Mean of normalized counts", 
-                ylab="logFC")
-  
-  ## Plot -log(p-value) vs logFC
-  volcanoplot(eBTx, coef = "GroupExperimental")
-  
   ## Select top-ranked transcripts for Group 
-  top_tx = topTable(eBTx, coef="GroupExperimental", p.value = 1, number=nrow(RSE), sort.by="none")
-  ## Histogram of adjusted p values
-  hist(top_tx$adj.P.Val, xlab="FDR", main="")
+  top_tx = topTable(eBTx, coef = "GroupExperimental", p.value = 1, 
+                    number = nrow(rse), sort.by = "none")
   
-  
-  
-  
-  
-  rse_norm <- calcNormFactors(rse, method = "TMM")
-  f <- paste0("~ Group + Sex + plate + flowcell + rRNA_rate + overallMapRate +
-            totalAssignedGene + ERCCsumLogErr + mitoRate + ", 
-              paste(grep("SV", colnames(colData(rse)), value = T), collapse = " + "))
-  
-  model = model.matrix(as.formula(f), data = colData(rse))
-  vGene = voom(rse_norm, design = model)
-  fitGene = lmFit(vGene)
-  eBGene = eBayes(fitGene)
-  top_genes = topTable(eBGene, coef = "GroupExperimental", 
-                       p.value = 1, number = nrow(rse), sort.by="none")
-  
-  return(top_genes)
+  ## Add relevant info 
+  top_tx$Symbol <- rowData(rse)$gene_name
+  top_tx$ensembl_id <- rowData(rse)$gene_id
+  top_tx$transcript_id <- rowData(rse)$transcript_id
+  top_tx$transcript_name <- rowData(rse)$transcript_name
+
+  return(top_tx)
 }
+
+top_tx_nic_SV_adjusted <- dte_SV_adjusted("nic")
+nom_tx_nic_SV_adjusted <- subset(top_tx_nic_SV_adjusted, P.Value<0.05)
+de_tx_nic_SV_adjusted <- subset(top_tx_nic_SV_adjusted, adj.P.Val<0.05)
+de_tx_nic_SV_adjusted <- de_tx_nic_SV_adjusted[order(de_tx_nic_SV_adjusted$adj.P.Val, decreasing = F), ]
+
+top_tx_smo_SV_adjusted <- dte_SV_adjusted("smo")
+nom_tx_smo_SV_adjusted <- subset(top_tx_smo_SV_adjusted, P.Value<0.05)
+de_tx_smo_SV_adjusted <- subset(top_tx_smo_SV_adjusted, adj.P.Val<0.05)
+de_tx_smo_SV_adjusted <- de_tx_smo_SV_adjusted[order(de_tx_smo_SV_adjusted$adj.P.Val, decreasing = F), ]
+
+## Check overlap with unadjusted DETs
+top_tx_nic_unadjusted <- get(load("processed-data/04_DEA/Tx_analysis/top_tx_nic.Rdata"))
+top_tx_smo_unadjusted <- get(load("processed-data/04_DEA/Tx_analysis/top_tx_smo.Rdata"))
+de_tx_nic_unadjusted <- subset(top_tx_nic_unadjusted, adj.P.Val<0.05)
+de_tx_smo_unadjusted <- subset(top_tx_smo_unadjusted, adj.P.Val<0.05)
+nom_tx_nic_unadjusted <- subset(top_tx_nic_unadjusted, P.Value<0.05)
+nom_tx_smo_unadjusted <- subset(top_tx_smo_unadjusted, P.Value<0.05)
+
+DET_nic <- list(
+  "PNE SV adjusted DETs" = de_tx_nic_SV_adjusted$transcript_id,
+  "PNE unadjusted DETs"= de_tx_nic_unadjusted$transcript_id)
+venn.diagram(DET_nic, disable.logging = T, filename = NULL)
+
+DET_smo <- list(
+  "MSDP SV adjusted DETs" = de_tx_smo_SV_adjusted$transcript_id,
+  "MSDP unadjusted DETs"= de_tx_smo_unadjusted$transcript_id)
+venn.diagram(DET_smo, disable.logging = T, filename = NULL)
+
+## % of DETs found after SV adjustment at FDR<0.05
+# PNE
+length(intersect(de_tx_nic_SV_adjusted$transcript_id, de_tx_nic_unadjusted$transcript_id))/dim(de_tx_nic_unadjusted)[1] *100
+# [1] 59.05172
+# MSDP
+length(intersect(de_tx_smo_SV_adjusted$transcript_id, de_tx_smo_unadjusted$transcript_id))/dim(de_tx_smo_unadjusted)[1] *100
+# [1] 9.164819
+
+## % of DETs found after SV adjustment at p<0.05
+# PNE
+length(intersect(nom_tx_nic_SV_adjusted$transcript_id, de_tx_nic_unadjusted$transcript_id))/dim(de_tx_nic_unadjusted)[1] *100
+# [1] 100
+# MSDP
+length(intersect(nom_tx_smo_SV_adjusted$transcript_id, de_tx_smo_unadjusted$transcript_id))/dim(de_tx_smo_unadjusted)[1] *100
+# [1] 56.56566
+
+## Compare t-stats
+p1 <- t_stat_plot("nic", "tx", "unadjusted", "SV_adjusted")
+p2 <- t_stat_plot("smo", "tx", "unadjusted", "SV_adjusted")
+plot_grid(p1, p2, ncol = 2)
+ggsave(filename = "plots/04_DEA/sensitivity_analyses/t_stats_txs_SV_adjusted_vs_unadjusted.pdf", width = 9.5, height = 3.2)
+
+
+# ------------------------------------------------------------------------------
+## Run DEE adjusting for SVs
+top_exons_nic_SV_adjusted <- dea_SV_adjusted("nic", "exon")
+nom_exon_nic_SV_adjusted <- subset(top_exons_nic_SV_adjusted, P.Value<0.05 & abs(logFC)>0.25)
+de_exon_nic_SV_adjusted <- subset(top_exons_nic_SV_adjusted, adj.P.Val<0.05 & abs(logFC)>0.25)
+de_exon_nic_SV_adjusted <- de_exon_nic_SV_adjusted[order(de_exon_nic_SV_adjusted$adj.P.Val, decreasing = F), ]
+
+top_exons_smo_SV_adjusted <- dea_SV_adjusted("smo", "exon")
+nom_exon_smo_SV_adjusted <- subset(top_exons_smo_SV_adjusted, P.Value<0.05 & abs(logFC)>0.25)
+de_exon_smo_SV_adjusted <- subset(top_exons_smo_SV_adjusted, adj.P.Val<0.05 & abs(logFC)>0.25)
+de_exon_smo_SV_adjusted <- de_exon_smo_SV_adjusted[order(de_exon_smo_SV_adjusted$adj.P.Val, decreasing = F), ]
+
+## Check overlap with unadjusted DEEs
+top_exons_nic_unadjusted <- get(load("processed-data/04_DEA/Exon_analysis/top_exons_nic.Rdata"))
+top_exons_smo_unadjusted <- get(load("processed-data/04_DEA/Exon_analysis/top_exons_smo.Rdata"))
+de_exon_nic_unadjusted <- subset(top_exons_nic_unadjusted, adj.P.Val<0.05 & abs(logFC)>0.25)
+de_exon_smo_unadjusted <- subset(top_exons_smo_unadjusted, adj.P.Val<0.05 & abs(logFC)>0.25)
+nom_exon_nic_unadjusted <- subset(top_exons_nic_unadjusted, P.Value<0.05 & abs(logFC)>0.25)
+nom_exon_smo_unadjusted <- subset(top_exons_smo_unadjusted, P.Value<0.05 & abs(logFC)>0.25)
+
+DEE_nic <- list(
+  "PNE SV adjusted DEEs" = de_exon_nic_SV_adjusted$exon_gencodeID,
+  "PNE unadjusted DEEs"= de_exon_nic_unadjusted$exon_gencodeID)
+venn.diagram(DEE_nic, disable.logging = T, filename = NULL)
+
+DEE_smo <- list(
+  "MSDP SV adjusted DEEs" = de_exon_smo_SV_adjusted$exon_gencodeID,
+  "MSDP unadjusted DEEs"= de_exon_smo_unadjusted$exon_gencodeID)
+venn.diagram(DEE_smo, disable.logging = T, filename = NULL)
+
+## % of DEEs found after SV adjustment at FDR<0.05
+# PNE
+length(intersect(de_exon_nic_SV_adjusted$exon_gencodeID, de_exon_nic_unadjusted$exon_gencodeID))/dim(de_exon_nic_unadjusted)[1] *100
+# [1] 38.02691
+# MSDP
+length(intersect(de_exon_smo_SV_adjusted$exon_gencodeID, de_exon_smo_unadjusted$exon_gencodeID))/dim(de_exon_smo_unadjusted)[1] *100
+# [1] 5.448772
+
+## % of DEEs found after SV adjustment at p<0.05
+# PNE
+length(intersect(nom_exon_nic_SV_adjusted$exon_gencodeID, de_exon_nic_unadjusted$exon_gencodeID))/dim(de_exon_nic_unadjusted)[1] *100
+# [1] 76.23318
+# MSDP
+length(intersect(nom_exon_smo_SV_adjusted$exon_gencodeID, de_exon_smo_unadjusted$exon_gencodeID))/dim(de_exon_smo_unadjusted)[1] *100
+# [1] 28.26341
+
+## Compare t-stats
+p1 <- t_stat_plot("nic", "exons", "unadjusted", "SV_adjusted")
+p2 <- t_stat_plot("smo", "exons", "unadjusted", "SV_adjusted")
+plot_grid(p1, p2, ncol = 2)
+ggsave(filename = "plots/04_DEA/sensitivity_analyses/t_stats_exons_SV_adjusted_vs_unadjusted.pdf", width = 9.5, height = 3.2)
+
+
+# ------------------------------------------------------------------------------
+## Run DJE adjusting for SVs
+top_jxs_nic_SV_adjusted <- dea_SV_adjusted("nic", "jx")
+top_jxs_nic_SV_adjusted$jxn_ID <- rownames(top_jxs_nic_SV_adjusted)
+nom_jx_nic_SV_adjusted <- subset(top_jxs_nic_SV_adjusted, P.Value<0.05 & abs(logFC)>0.25)
+de_jx_nic_SV_adjusted <- subset(top_jxs_nic_SV_adjusted, adj.P.Val<0.05 & abs(logFC)>0.25)
+de_jx_nic_SV_adjusted <- de_jx_nic_SV_adjusted[order(de_jx_nic_SV_adjusted$adj.P.Val, decreasing = F), ]
+
+top_jxs_smo_SV_adjusted <- dea_SV_adjusted("smo", "jx")
+top_jxs_smo_SV_adjusted$jxn_ID <- rownames(top_jxs_smo_SV_adjusted)
+nom_jx_smo_SV_adjusted <- subset(top_jxs_smo_SV_adjusted, P.Value<0.05 & abs(logFC)>0.25)
+de_jx_smo_SV_adjusted <- subset(top_jxs_smo_SV_adjusted, adj.P.Val<0.05 & abs(logFC)>0.25)
+de_jx_smo_SV_adjusted <- de_jx_smo_SV_adjusted[order(de_jx_smo_SV_adjusted$adj.P.Val, decreasing = F), ]
+
+## Check overlap with unadjusted DEJs
+top_jxs_nic_unadjusted <- get(load("processed-data/04_DEA/Jx_analysis/top_jxns_nic.Rdata"))
+top_jxs_smo_unadjusted <- get(load("processed-data/04_DEA/Jx_analysis/top_jxns_smo.Rdata"))
+top_jxs_nic_unadjusted$jxn_ID <- rownames(top_jxs_nic_unadjusted)
+top_jxs_smo_unadjusted$jxn_ID <- rownames(top_jxs_smo_unadjusted)
+de_jx_nic_unadjusted <- subset(top_jxs_nic_unadjusted, adj.P.Val<0.05)
+de_jx_smo_unadjusted <- subset(top_jxs_smo_unadjusted, adj.P.Val<0.05)
+nom_jx_nic_unadjusted <- subset(top_jxs_nic_unadjusted, P.Value<0.05)
+nom_jx_smo_unadjusted <- subset(top_jxs_smo_unadjusted, P.Value<0.05)
+
+DEJ_nic <- list(
+  "PNE SV adjusted DEJs" = de_jx_nic_SV_adjusted$jxn_ID,
+  "PNE unadjusted DEJs"= de_jx_nic_unadjusted$jxn_ID)
+venn.diagram(DEJ_nic, disable.logging = T, filename = NULL)
+
+DEJ_smo <- list(
+  "MSDP SV adjusted DEJs" = de_jx_smo_SV_adjusted$jxn_ID,
+  "MSDP unadjusted DEJs"= de_jx_smo_unadjusted$jxn_ID)
+venn.diagram(DEJ_smo, disable.logging = T, filename = NULL)
+
+
+## % of DEJs found after SV adjustment at FDR<0.05
+# PNE
+length(intersect(de_jx_nic_SV_adjusted$jxn_ID, de_jx_nic_unadjusted$jxn_ID))/dim(de_jx_nic_unadjusted)[1] *100
+# [1] 34.03141
+# MSDP
+length(intersect(de_jx_smo_SV_adjusted$jxn_ID, de_jx_smo_unadjusted$jxn_ID))/dim(de_jx_smo_unadjusted)[1] *100
+# [1] 0.7020117
+
+## % of DEJs found after SV adjustment at p<0.05
+# PNE
+length(intersect(nom_jx_nic_SV_adjusted$jxn_ID, de_jx_nic_unadjusted$jxn_ID))/dim(de_jx_nic_unadjusted)[1] *100
+# [1] 61.7801
+# MSDP
+length(intersect(nom_jx_smo_SV_adjusted$jxn_ID, de_jx_smo_unadjusted$jxn_ID))/dim(de_jx_smo_unadjusted)[1] *100
+# [1] jxn_ID
+
+## Compare t-stats
+p1 <- t_stat_plot("nic", "jxs", "unadjusted", "SV_adjusted")
+p2 <- t_stat_plot("smo", "jxs", "unadjusted", "SV_adjusted")
+plot_grid(p1, p2, ncol = 2)
+ggsave(filename = "plots/04_DEA/sensitivity_analyses/t_stats_jxs_SV_adjusted_vs_unadjusted.pdf", width = 9.5, height = 3.2)
+
+
+
+
+
+
+
+session_info()
+# setting  value
+# version  R version 4.5.2 (2025-10-31)
+# os       macOS Sequoia 15.3.2
+# system   aarch64, darwin20
+# ui       RStudio
+# language (EN)
+# collate  en_US.UTF-8
+# ctype    en_US.UTF-8
+# tz       Europe/London
+# date     2026-06-21
+# rstudio  2026.01.0+392 Apple Blossom (desktop)
+# pandoc   NA
+# quarto   1.8.25 @ /Applications/RStudio.app/Contents/Resources/app/quarto/bin/quarto
+# 
+# ─ Packages ───────────────────────────────────────────────────────────────────────────────────────────────────────────
+# package              * version   date (UTC) lib source
+# abind                  1.4-8     2024-09-12 [1] CRAN (R 4.5.0)
+# annotate               1.88.0    2025-10-29 [1] Bioconductor 3.22 (R 4.5.1)
+# AnnotationDbi          1.72.0    2025-10-29 [1] Bioconductor 3.22 (R 4.5.1)
+# Biobase              * 2.70.0    2025-10-29 [1] Bioconductor 3.22 (R 4.5.1)
+# BiocFileCache          3.0.0     2025-10-29 [1] Bioconductor 3.22 (R 4.5.1)
+# BiocGenerics         * 0.56.0    2025-10-29 [1] Bioconductor 3.22 (R 4.5.1)
+# BiocManager            1.30.27   2025-11-14 [1] CRAN (R 4.5.2)
+# BiocParallel         * 1.44.0    2025-10-29 [1] Bioconductor 3.22 (R 4.5.1)
+# biomaRt                2.66.1    2026-02-12 [1] https://bioc-release.r-universe.dev (R 4.5.2)
+# biomartr             * 1.0.7     2023-12-02 [1] CRAN (R 4.5.0)
+# Biostrings             2.78.0    2025-10-29 [1] Bioconductor 3.22 (R 4.5.1)
+# bit                    4.6.0     2025-03-06 [1] CRAN (R 4.5.0)
+# bit64                  4.8.0     2026-04-21 [1] CRAN (R 4.5.2)
+# bitops                 1.0-9     2024-10-03 [1] CRAN (R 4.5.0)
+# blob                   1.3.0     2026-01-14 [1] CRAN (R 4.5.2)
+# cachem                 1.1.0     2024-05-16 [1] CRAN (R 4.5.0)
+# cli                    3.6.6     2026-04-09 [1] CRAN (R 4.5.2)
+# codetools              0.2-20    2024-03-31 [1] CRAN (R 4.5.2)
+# cowplot              * 1.2.0     2025-07-07 [1] CRAN (R 4.5.0)
+# crayon                 1.5.3     2024-06-20 [1] CRAN (R 4.5.0)
+# curl                   7.1.0     2026-04-22 [1] CRAN (R 4.5.2)
+# data.table             1.18.4    2026-05-06 [1] CRAN (R 4.5.2)
+# DBI                    1.3.0     2026-02-25 [1] CRAN (R 4.5.2)
+# dbplyr                 2.5.2     2026-02-13 [1] CRAN (R 4.5.2)
+# DelayedArray           0.36.1    2026-03-31 [1] https://bioc-release.r-universe.dev (R 4.5.3)
+# dplyr                * 1.2.1     2026-04-03 [1] CRAN (R 4.5.2)
+# edgeR                * 4.8.2     2025-12-23 [1] https://bioc-release.r-universe.dev (R 4.5.2)
+# farver                 2.1.2     2024-05-13 [1] CRAN (R 4.5.0)
+# fastmap                1.2.0     2024-05-15 [1] CRAN (R 4.5.0)
+# filelock               1.0.3     2023-12-11 [1] CRAN (R 4.5.0)
+# formatR                1.14      2023-01-17 [1] CRAN (R 4.5.0)
+# futile.logger        * 1.4.9     2025-12-29 [1] CRAN (R 4.5.2)
+# futile.options         1.0.1     2018-04-20 [1] CRAN (R 4.5.0)
+# genefilter           * 1.92.0    2025-10-29 [1] https://bioc-release.r-universe.dev (R 4.5.2)
+# generics             * 0.1.4     2025-05-09 [1] CRAN (R 4.5.0)
+# GenomicRanges        * 1.62.1    2025-12-08 [1] Bioconductor 3.22 (R 4.5.2)
+# ggplot2              * 4.0.3     2026-04-22 [1] CRAN (R 4.5.2)
+# ggrepel              * 0.9.8     2026-03-17 [1] CRAN (R 4.5.2)
+# glue                   1.8.1     2026-04-17 [1] CRAN (R 4.5.2)
+# gtable                 0.3.6     2024-10-25 [1] CRAN (R 4.5.0)
+# here                 * 1.0.2     2025-09-15 [1] CRAN (R 4.5.0)
+# hms                    1.1.4     2025-10-17 [1] CRAN (R 4.5.0)
+# httr                   1.4.8     2026-02-13 [1] CRAN (R 4.5.2)
+# httr2                  1.2.2     2025-12-08 [1] CRAN (R 4.5.2)
+# IRanges              * 2.44.0    2025-10-29 [1] Bioconductor 3.22 (R 4.5.1)
+# KEGGREST               1.50.0    2025-10-29 [1] Bioconductor 3.22 (R 4.5.1)
+# labeling               0.4.3     2023-08-29 [1] CRAN (R 4.5.0)
+# lambda.r               1.2.4     2019-09-18 [1] CRAN (R 4.5.0)
+# lattice                0.22-9    2026-02-09 [1] CRAN (R 4.5.2)
+# lifecycle              1.0.5     2026-01-08 [1] CRAN (R 4.5.2)
+# limma                * 3.66.0    2025-10-29 [1] Bioconductor 3.22 (R 4.5.1)
+# locfit                 1.5-9.12  2025-03-05 [1] CRAN (R 4.5.0)
+# magrittr               2.0.5     2026-04-04 [1] CRAN (R 4.5.2)
+# Matrix                 1.7-5     2026-03-21 [1] CRAN (R 4.5.2)
+# MatrixGenerics       * 1.22.0    2025-10-29 [1] Bioconductor 3.22 (R 4.5.1)
+# matrixStats          * 1.5.0     2025-01-07 [1] CRAN (R 4.5.0)
+# memoise                2.0.1     2021-11-26 [1] CRAN (R 4.5.0)
+# mgcv                 * 1.9-4     2025-11-07 [1] CRAN (R 4.5.0)
+# nlme                 * 3.1-169   2026-03-27 [1] CRAN (R 4.5.2)
+# otel                   0.2.0     2025-08-29 [1] CRAN (R 4.5.0)
+# pheatmap             * 1.0.13    2025-06-05 [1] CRAN (R 4.5.0)
+# pillar                 1.11.1    2025-09-17 [1] CRAN (R 4.5.0)
+# pkgconfig              2.0.3     2019-09-22 [1] CRAN (R 4.5.0)
+# png                    0.1-9     2026-03-15 [1] CRAN (R 4.5.2)
+# prettyunits            1.2.0     2023-09-24 [1] CRAN (R 4.5.0)
+# progress               1.2.3     2023-12-06 [1] CRAN (R 4.5.0)
+# purrr                  1.2.2     2026-04-10 [1] CRAN (R 4.5.2)
+# R6                     2.6.1     2025-02-15 [1] CRAN (R 4.5.0)
+# ragg                   1.5.2     2026-03-23 [1] CRAN (R 4.5.2)
+# rappdirs               0.3.4     2026-01-17 [1] CRAN (R 4.5.2)
+# RColorBrewer           1.1-3     2022-04-03 [1] CRAN (R 4.5.0)
+# Rcpp                   1.1.1-1.1 2026-04-24 [1] CRAN (R 4.5.2)
+# RCurl                  1.98-1.18 2026-03-21 [1] CRAN (R 4.5.2)
+# rlang                * 1.2.0     2026-04-06 [1] CRAN (R 4.5.2)
+# rprojroot              2.1.1     2025-08-26 [1] CRAN (R 4.5.0)
+# rsconnect              1.8.0     2026-04-10 [1] CRAN (R 4.5.2)
+# RSQLite                3.52.0    2026-05-10 [1] CRAN (R 4.5.2)
+# rstudioapi             0.18.0    2026-01-16 [1] CRAN (R 4.5.2)
+# S4Arrays               1.10.1    2025-12-08 [1] Bioconductor 3.22 (R 4.5.2)
+# S4Vectors            * 0.48.1    2026-04-04 [1] https://bioc-release.r-universe.dev (R 4.5.3)
+# S7                     0.2.2     2026-04-22 [1] CRAN (R 4.5.2)
+# scales                 1.4.0     2025-04-24 [1] CRAN (R 4.5.0)
+# Seqinfo              * 1.0.0     2025-10-29 [1] Bioconductor 3.22 (R 4.5.1)
+# sessioninfo          * 1.2.3     2025-02-05 [1] CRAN (R 4.5.0)
+# SparseArray            1.10.10   2026-03-30 [1] https://bioc-release.r-universe.dev (R 4.5.3)
+# statmod                1.5.1     2025-10-09 [1] CRAN (R 4.5.0)
+# stringi                1.8.7     2025-03-27 [1] CRAN (R 4.5.0)
+# stringr                1.6.0     2025-11-04 [1] CRAN (R 4.5.0)
+# SummarizedExperiment * 1.40.0    2025-10-29 [1] Bioconductor 3.22 (R 4.5.1)
+# survival               3.8-6     2026-01-16 [1] CRAN (R 4.5.2)
+# sva                  * 3.58.0    2025-10-29 [1] Bioconductor 3.22 (R 4.5.1)
+# systemfonts            1.3.2     2026-03-05 [1] CRAN (R 4.5.2)
+# textshaping            1.0.5     2026-03-06 [1] CRAN (R 4.5.2)
+# tibble                 3.3.1     2026-01-11 [1] CRAN (R 4.5.2)
+# tidyr                * 1.3.2     2025-12-19 [1] CRAN (R 4.5.2)
+# tidyselect             1.2.1     2024-03-11 [1] CRAN (R 4.5.0)
+# vctrs                  0.7.3     2026-04-11 [1] CRAN (R 4.5.2)
+# VennDiagram          * 1.8.2     2026-01-11 [1] CRAN (R 4.5.2)
+# withr                  3.0.2     2024-10-28 [1] CRAN (R 4.5.0)
+# XML                    3.99-0.23 2026-03-20 [1] CRAN (R 4.5.2)
+# xml2                   1.5.2     2026-01-17 [1] CRAN (R 4.5.2)
+# xtable                 1.8-8     2026-02-22 [1] CRAN (R 4.5.2)
+# XVector                0.50.0    2025-10-29 [1] Bioconductor 3.22 (R 4.5.1)
+# 
+# [1] /Library/Frameworks/R.framework/Versions/4.5-arm64/Resources/library
+# * ── Packages attached to the search path.
+# 
+# ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
