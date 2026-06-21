@@ -3,14 +3,14 @@
 ## [Supplementary Table 1](TableS1_study_design.tsv)
 **Study design.**
 
-Number of samples from each pair of sample-level variables. See [**Table S18**](TableS18_sample_variable_dict.tsv) for sample variable description.
+Number of samples from each pair of sample-level variables. See [**Table S19**](TableS19_sample_variable_dict.tsv) for sample variable description.
 
 
 
 ## [Supplementary Table 2](TableS2_study_design_afterSampleFilters.tsv)
 **Samples used for downstream analyses.** 
 
-Number of samples from each pair of sample-level variables after sample filtering based on QC metrics and PCA plots. See [**Table S18**](TableS18_sample_variable_dict.tsv) for sample variable description.
+Number of samples from each pair of sample-level variables after sample filtering based on QC metrics and PCA plots. See [**Table S19**](TableS19_sample_variable_dict.tsv) for sample variable description.
 
 
 
@@ -36,7 +36,7 @@ Created [here](https://github.com/LieberInstitute/smokingMouse_Indirects/blob/5b
 ## [Supplementary Table 5](TableS5_DEA_results_all_genes.tsv)
 **Differential gene expression results for the complete gene dataset.** 
 
-Gene-level metadata and the logFC, moderated *t*-stats, *p*-value, and adjusted *p*-value for DE of each gene in the 5 experimental groups: nicotine vs vehicle exposure in pup brain, smoking exposure vs control in pup brain, nicotine vs vehicle administration in adult brain, smoking exposure vs control in adult brain, and smoking exposure vs control in adult blood. Also included are the replication results of the genes in mouse blood. The statistics were computed with `topTable()` from [_limma_](https://bioconductor.org/packages/release/bioc/html/limma.html); see its documentation for the definition of the variable names. Scatter plots of *t*-stats in **Figure 2C**, **Figure 4** and **Figure 21A-B** can be reproduced with the data provided in this table.
+Gene-level metadata and the logFC, moderated *t*-stats, *p*-value, and adjusted *p*-value for DE of each gene in the 5 experimental groups: nicotine vs vehicle exposure in pup brain, smoking exposure vs control in pup brain, nicotine vs vehicle administration in adult brain, smoking exposure vs control in adult brain, and smoking exposure vs control in adult blood. Also included are the replication results of the genes in mouse blood. The statistics were computed with `topTable()` from [_limma_](https://bioconductor.org/packages/release/bioc/html/limma.html); see its documentation for the definition of the variable names. Scatter plots of *t*-stats in **Figure 2C**, **Figure 4** and **Figure S18A-B** can be reproduced with the data provided in this table.
 
 Created [here](https://github.com/LieberInstitute/smokingMouse_Indirects/blob/5bbf5b3e272f7bff90975f23446f281479608818/code/04_DEA/Gene_analysis/01_Modeling.R#L561).
 
@@ -136,6 +136,19 @@ Created [here](https://github.com/LieberInstitute/smokingMouse_Indirects/blob/5b
 Same as in [**Table S14**](TableS14_DE_jxns_brain_pup_nicotine.tsv) but for DE exon-exon junctions in the smoking pup brain.
 
 Created [here](https://github.com/LieberInstitute/smokingMouse_Indirects/blob/5bbf5b3e272f7bff90975f23446f281479608818/code/04_DEA/Jx_analysis/01_Modeling.R#L235).
+
+
+
+## [Supplementary Table 16](TableS16_DGE_PNE_SVadjusted.tsv)
+**Differential gene expression results for nicotine exposure after SV adjustment.**
+
+Gene-level metadata and the logFC, moderated *t*-stats, *p*-value, and adjusted *p*-value for DE of each gene comparing nicotine vs vehicle exposure in the pup brain, after adjusting DGE models for batch-related surrogate variables. The statistics were computed with `topTable()` from [_limma_](https://bioconductor.org/packages/release/bioc/html/limma.html); see its documentation for the definition of the variable names. 
+
+
+## [Supplementary Table 17](TableS17_DGE_MSDP_SVadjusted.tsv)
+**Differential gene expression results for smoking exposure after SV adjustment.**
+
+Same as in [**Table S16**](TableS16_DGE_PNE_SVadjusted.tsv) but for the smoking exposure.
 
 
 

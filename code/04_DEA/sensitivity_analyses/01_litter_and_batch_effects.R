@@ -735,10 +735,10 @@ ggsave(filename = "plots/04_DEA/sensitivity_analyses/Rankings_DGE_MSDP.pdf", wid
 
 ## Supp tables with results 
 colnames(top_genes_nic_SV_adjusted)[1] <- "chr"
-write.table(top_genes_nic_SV_adjusted, file = "processed-data/04_DEA/Gene_analysis/top_genes_brain_pup_nicotine_SV_adjusted.tsv", row.names = FALSE, col.names = TRUE, sep = '\t')
+write.table(top_genes_nic_SV_adjusted, file = "processed-data/04_DEA/sensitivity_analyses/top_genes_brain_pup_nicotine_SV_adjusted.tsv", row.names = FALSE, col.names = TRUE, sep = '\t')
 
 colnames(top_genes_smo_SV_adjusted)[1] <- "chr"
-write.table(top_genes_smo_SV_adjusted, file = "processed-data/04_DEA/Gene_analysis/top_genes_brain_pup_smoking_SV_adjusted.tsv", row.names = FALSE, col.names = TRUE, sep = '\t')
+write.table(top_genes_smo_SV_adjusted, file = "processed-data/04_DEA/sensitivity_analyses/top_genes_brain_pup_smoking_SV_adjusted.tsv", row.names = FALSE, col.names = TRUE, sep = '\t')
 
 
 # ------------------------------------------------------------------------------
