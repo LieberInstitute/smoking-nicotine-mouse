@@ -144,40 +144,36 @@ Created [here](https://github.com/LieberInstitute/smokingMouse_Indirects/blob/5b
 
 Gene-level metadata and the logFC, moderated *t*-stats, *p*-value, and adjusted *p*-value for DE of each gene comparing nicotine vs vehicle exposure in the pup brain, after adjusting DGE models for batch-related surrogate variables. The statistics were computed with `topTable()` from [_limma_](https://bioconductor.org/packages/release/bioc/html/limma.html); see its documentation for the definition of the variable names. 
 
+Created [here](https://github.com/LieberInstitute/smoking-nicotine-mouse/blob/9e6e93ce4ea03c1b7aeaa4ea6de73891975422ab/code/04_DEA/sensitivity_analyses/01_litter_and_batch_effects.R#L738).
+
+
 
 ## [Supplementary Table 17](TableS17_DGE_MSDP_SVadjusted.tsv)
 **Differential gene expression results for smoking exposure after SV adjustment.**
 
 Same as in [**Table S16**](TableS16_DGE_PNE_SVadjusted.tsv) but for the smoking exposure.
 
+Created [here](https://github.com/LieberInstitute/smoking-nicotine-mouse/blob/9e6e93ce4ea03c1b7aeaa4ea6de73891975422ab/code/04_DEA/sensitivity_analyses/01_litter_and_batch_effects.R#L741).
 
 
-## [Supplementary Table 16](TableS16_human_vs_mice_results.tsv)
+
+## [Supplementary Table 18](TableS18_human_vs_mice_results.tsv)
 **Differential gene expression results for gene pairs of mouse-human orthologs.**
 
-The logFC, moderated *t*-stats, *p*-value, and adjusted *p*-value of the human gene for smoking exposure in the prenatal and adult human brain, and for the corresponding mouse orthologous gene for the 5 experimental mice groups (as in [**Table S5**](TableS5_DEA_results_all_genes.tsv)), are presented. Only mouse genes with human ortholog(s) present in the human dataset from [Semick et al., 2020](https://www.nature.com/articles/s41380-018-0223-1) are considered. The DE statistics were computed with `topTable()` from [_limma_](https://bioconductor.org/packages/release/bioc/html/limma.html); see its documentation for the definition of the variable names. **Figure 5** and **Figure 21C** were created with the data this table provides. 
+The logFC, moderated *t*-stats, *p*-value, and adjusted *p*-value of the human gene for smoking exposure in the prenatal and adult human brain, and for the corresponding mouse orthologous gene for the 5 experimental mice groups (as in [**Table S5**](TableS5_DEA_results_all_genes.tsv)), are presented. Only mouse genes with human ortholog(s) present in the human dataset from [Semick et al., 2020](https://www.nature.com/articles/s41380-018-0223-1) are considered. The DE statistics were computed with `topTable()` from [_limma_](https://bioconductor.org/packages/release/bioc/html/limma.html); see its documentation for the definition of the variable names. **Figure 5** and **Figure 18C** were created with the data this table provides. 
 
 Created [here](https://github.com/LieberInstitute/smokingMouse_Indirects/blob/5bbf5b3e272f7bff90975f23446f281479608818/code/04_DEA/Gene_analysis/02_Comparisons.R#L937).
 
 
 
-## [Supplementary Table 17](TableS17_TUD_human_genes_vs_mouseDEGs.tsv)
-**Mouse DEGs in pup brain with human orthologs TUD-associated.**
-
-Pup brain DEGs for the nicotine and smoking exposure with human orthologs that were the nearest genes of genome-wide significant (GWS) lead SNPs in loci associated with Tobacco Use Disorder (TUD), obtained from a multi-ancestral GWAS meta-analysis of TUD cases and controls in individuals from 8 cohorts (including UKBB), with European (EUR), African American (AA), and Latin American (LA) ancestry (*TUD-multi+UKBB* dataset), and from a within-ancestry GWAS meta-analysis in EUR individuals from 5 cohorts, including UKBB data (*TUD-EUR+UKBB* dataset). As well as human genes significantly associated with TUD in EUR individuals (*TUD-EUR-MAGMA* dataset); neurobiologically relevant target human genes associated with TUD (*TUD-EUR-H-MAGMA* dataset), especially expressed in prenatal (*TUD-EUR-H-MAGMA-prenatal* dataset) and adult brain (*TUD-EUR-H-MAGMA-adult* dataset); TUD-associated human genes whose expression is predicted to be affected by EUR-SNPs across multiple brain regions (*TUD-EUR-S-MultiXcan* dataset) and in specific brain regions (*TUD-EUR-S-PrediXcan* dataset), including the frontal cortex (*TUD-EUR-S-PrediXcan-FC* dataset). See more details of these TUD-associated human genes in the original publication ([Toikumo et al., 2023](https://www.medrxiv.org/content/10.1101/2023.03.27.23287713v2)). 
-
-Created [here](https://github.com/LieberInstitute/smokingMouse_Indirects/blob/5bbf5b3e272f7bff90975f23446f281479608818/code/04_DEA/Gene_analysis/02_Comparisons.R#L1866).
-
-
-
-## [Supplementary Table 18](TableS18_sample_variable_dict.tsv)
+## [Supplementary Table 19](TableS19_sample_variable_dict.tsv)
 **Dictionary of sample variables.**
 
 Description of the sample variables used throughout this project. 
 
 
 
-## [Supplementary Table 19](TableS19_novel_DE_jxns_genes.tsv)
+## [Supplementary Table 20](TableS20_novel_DE_jxns_genes.tsv)
 **Associated genes of fully novel DE exon-exon junctions in pup brain.**
 
 Nearest, following, and preceding genes of the fully novel DE exon-exon junctions without assigned gene for the nicotine and smoking exposure in pup brain.
