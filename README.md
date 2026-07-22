@@ -24,14 +24,14 @@ We hope that this repository will be useful for your research. Please use the fo
 
 > Daianna Gonzalez-Padilla, Nicholas J. Eagles, Marisol Cano, Geo Pertea, Andrew E. Jaffe, Kristen R. Maynard, Dana B. Hancock, James T. Handa, Keri Martinowich, Leonardo Collado-Torres.
  
-> Addiction Neuroscience (2026); doi: [<https://doi.org/10.1101/2024.11.05.622149>](https://doi.org/10.1016/j.addicn.2026.100270).
+> Addiction Neuroscience (2026); doi: [https://doi.org/10.1016/j.addicn.2026.100270](https://www.sciencedirect.com/science/article/pii/S2772392526000222?via%3Dihub).
 
 ```
 @article {Gonzalez-Padilla2024.11.05.622149,
 	author = {Daianna Gonzalez-Padilla and Nicholas J. Eagles and Marisol Cano and Geo Pertea and Andrew E. Jaffe and Kristen R. Maynard and Dana B. Hancock and James T. Handa and Keri Martinowich and Leonardo Collado-Torres},
 	title = {Molecular impact of nicotine and smoking exposure on the developing and adult mouse brain},
 	year = {2026},
-	doi = {10.1101/2024.11.05.622149},
+	doi = {10.1016/j.addicn.2026.100270},
 	publisher = {Addiction Neuroscience},
 	journal = {Addiction Neuroscience}
 }
